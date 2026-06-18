@@ -1,529 +1,357 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>НормаПлюс — Премиальный корм из Сибири</title>
-
-<link rel="stylesheet" href="style.css">
+<title>НОРМАПЛЮС — Премиальный сибирский корм для собак</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Unbounded:wght@400;500;700;800&display=swap" rel="stylesheet">
 
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header class="header">
+    <div class="logo">
+        НОРМА<span>ПЛЮС</span>
+    </div>
 
-<div class="logo">
-НормаПлюс
-</div>
+    <nav>
+        <a href="#advantages">Преимущества</a>
+        <a href="#certificates">Документы</a>
+        <a href="#product">Корм</a>
+        <a href="#reviews">Отзывы</a>
+        <a href="#order">Заказать</a>
+    </nav>
 
-<nav>
-<a href="#products">Корма</a>
-<a href="#certs">Сертификаты</a>
-<a href="#reviews">Отзывы</a>
-<a href="#order">Заказать</a>
-</nav>
-
+    <a href="tel:+79999999999" class="header-call">
+        Позвонить
+    </a>
 </header>
 
 <section class="hero">
 
-<div class="hero-overlay"></div>
+    <div class="hero-bg">
+        <img src="images/hero.jpg" alt="">
+    </div>
 
-<div class="hero-content">
+    <div class="hero-inner">
 
-<div class="hero-left">
+        <div class="hero-left">
 
-<span class="premium-badge">
-Сделано в Сибири
+            <span class="eyebrow">
+                Сибирское производство
+            </span>
+
+            <h1>НОРМАПЛЮС</h1>
+
+            <h2>
+                Полнорационный сухой корм супер-премиум класса с говядиной
+            </h2>
+
+            <p>
+                Производится в Сибири. Контроль качества сырья,
+                документы соответствия и полноценный рацион
+                для собак всех пород.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="#order" class="btn btn-primary">
+                    Заказать корм
+                </a>
+
+                <a href="#certificates" class="btn btn-secondary">
+                    Смотреть документы
+                </a>
+            </div>
+
+        </div>
+
+        <div class="hero-right">
+            <img src="images/bag.png" class="floating-bag" alt="Корм">
+        </div>
+
+    </div>
+
+</section>
+
+<section id="advantages">
+
+    <div class="container">
+
+        <div class="section-head">
+            <span class="eyebrow">Преимущества</span>
+
+            <h2>Почему выбирают НОРМАПЛЮС</h2>
+
+            <p>
+                Сбалансированная формула, качественное сырье
+                и производство полного цикла.
+            </p>
+        </div>
+
+        <div class="adv-grid">
+
+            <div class="card adv-card">
+                <div class="adv-icon">✓</div>
+                <h3>Говядина</h3>
+                <p>Основной источник животного белка.</p>
+            </div>
+
+            <div class="card adv-card">
+                <div class="adv-icon">✓</div>
+                <h3>Полнорационный состав</h3>
+                <p>Все необходимые витамины и минералы.</p>
+            </div>
+
+            <div class="card adv-card">
+                <div class="adv-icon">✓</div>
+                <h3>Сибирское производство</h3>
+                <p>Контроль качества на каждом этапе.</p>
+            </div>
+
+            <div class="card adv-card">
+                <div class="adv-icon">✓</div>
+                <h3>Документы качества</h3>
+                <p>Сертификаты и декларации соответствия.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section id="certificates">
+
+    <div class="container">
+
+        <div class="section-head">
+            <span class="eyebrow green">Документы</span>
+            <h2>Сертификаты качества</h2>
+        </div>
+
+        <div class="cert-grid">
+
+            <div class="card cert-card">
+                <img src="images/cert1.jpg" alt="">
+                <div class="cert-caption">
+                    <span>Сертификат</span>
+                    <span>PDF</span>
+                </div>
+            </div>
+
+            <div class="card cert-card">
+                <img src="images/cert2.jpg" alt="">
+                <div class="cert-caption">
+                    <span>Декларация</span>
+                    <span>PDF</span>
+                </div>
+            </div>
+
+            <div class="card cert-card">
+                <img src="images/cert3.jpg" alt="">
+                <div class="cert-caption">
+                    <span>Протокол</span>
+                    <span>PDF</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section id="product">
+
+<div class="container">
+
+    <div class="section-head">
+        <span class="eyebrow">Корм</span>
+        <h2>Корм с говядиной</h2>
+    </div>
+
+    <div class="product-showcase">
+
+        <div class="product-image">
+            <img src="images/bag.png" alt="">
+        </div>
+
+        <div class="card product-info-box">
+
+            <div class="hit-badge">
+                Хит продаж
+            </div>
+
+            <h2>НОРМАПЛЮС Говядина</h2>
+
+            <p class="product-sub">
+                Полнорационный сухой корм супер-премиум класса.
+            </p>
+
+            <div class="spec-grid">
+
+                <div class="spec-row">
+                    <span>Белок</span>
+                    <strong>26%</strong>
+                </div>
+
+                <div class="spec-row">
+                    <span>Жир</span>
+                    <strong>14%</strong>
+                </div>
+
+                <div class="spec-row">
+                    <span>Клетчатка</span>
+                    <strong>4%</strong>
+                </div>
+
+                <div class="spec-row">
+                    <span>Зола</span>
+                    <strong>8%</strong>
+                </div>
+
+            </div>
+
+            <div class="composition">
+                <h3>Состав</h3>
+
+                <p>
+                    Говядина, рис, кукуруза,
+                    животный жир, витаминный комплекс.
+                </p>
+            </div>
+
+            <div class="packing">
+                <h3>Фасовка</h3>
+
+                <div class="pack-grid">
+
+                    <div class="pack-card active">
+                        <div class="pack-weight">3 кг</div>
+                        <div class="pack-price">1 490 ₽</div>
+                    </div>
+
+                    <div class="pack-card">
+                        <div class="pack-weight">10 кг</div>
+                        <div class="pack-price">3 990 ₽</div>
+                    </div>
+
+                    <div class="pack-card">
+                        <div class="pack-weight">20 кг</div>
+                        <div class="pack-price">6 990 ₽</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="price-box">
+                <span class="price-label">Цена</span>
+                <div class="price-value">1490 ₽</div>
+            </div>
+
+            <a href="#order" class="btn btn-primary btn-block">
+                Оформить заказ
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+<section id="reviews">
+
+<div class="container">
+
+    <div class="section-head">
+        <span class="eyebrow">Отзывы</span>
+        <h2>Что говорят владельцы собак</h2>
+    </div>
+
+    <div class="review-grid">
+
+        <div class="card review-card">
+            <p>
+                Собака ест с удовольствием.
+                Шерсть стала лучше.
+            </p>
+
+            <div class="review-foot">
+                <div class="review-avatar">А</div>
+                <div>
+                    <div class="review-name">Александр</div>
+                    <div class="review-role">Новосибирск</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+<section id="order">
+
+<div class="container">
+
+<div class="order-section">
+
+<div class="card phone-box">
+
+<span class="eyebrow">
+Консультация
 </span>
-
-<h1>
-НормаПлюс
-</h1>
-
-<h2>
-Премиальный экструдированный корм на основе говядины
-</h2>
-
-<p>
-Полнорационный корм для собак всех пород.
-Натуральное сырьё, современные технологии производства
-и контроль качества на каждом этапе.
-</p>
-
-<div class="hero-buttons">
-
-<a href="#products" class="btn btn-primary">
-Выбрать корм
-</a>
-
-<a href="#certs" class="btn btn-secondary">
-Документы
-</a>
-
-</div>
-
-</div>
-
-<div class="hero-right">
-
-<img src="assets/images/bag-main.png"
-alt="НормаПлюс"
-class="floating-bag">
-
-</div>
-
-</div>
-
-</section>
-
-<section class="advantages">
-
-<div class="section-title">
-Почему выбирают НормаПлюс
-</div>
-
-<div class="adv-grid">
-
-<div class="adv-card" data-aos="fade-up">
-<h3>🥩 Говядина</h3>
-<p>Источник качественного белка</p>
-</div>
-
-<div class="adv-card" data-aos="fade-up">
-<h3>🌲 Сибирское производство</h3>
-<p>Контроль качества сырья</p>
-</div>
-
-<div class="adv-card" data-aos="fade-up">
-<h3>✅ Сертифицировано</h3>
-<p>Все декларации соответствия</p>
-</div>
-
-<div class="adv-card" data-aos="fade-up">
-<h3>⚙ Экструдирование</h3>
-<p>Высокая усвояемость корма</p>
-</div>
-
-</div>
-
-</section>
-
-<section id="certs" class="certificates">
-
-<div class="section-title">
-Сертификаты и декларации
-</div>
-
-<div class="cert-grid">
-
-<div class="cert-card">
-<img src="assets/images/cert1.jpg">
-</div>
-
-<div class="cert-card">
-<img src="assets/images/cert2.jpg">
-</div>
-
-<div class="cert-card">
-<img src="assets/images/cert3.jpg">
-</div>
-
-</div>
-
-</section>
-
-<section id="products" class="products">
-
-<div class="section-title">
-Выберите корм
-</div>
-
-```html
-<section id="products" class="premium-products">
-
-<h2 class="section-title">
-Подберите корм для своего питомца
-</h2>
-
-<div class="breed-switch">
-
-<span id="largeLabel" class="active">
-Крупные и средние породы
-</span>
-
-<label class="switch">
-
-<input type="checkbox" id="breedToggle">
-
-<span class="slider"></span>
-
-</label>
-
-<span id="smallLabel">
-Средние и мелкие породы
-</span>
-
-</div>
-
-<div class="product-showcase">
-
-<div class="product-image">
-
-<img
-id="productImage"
-src="assets/images/bag-large.png"
-alt="НормаПлюс">
-
-</div>
-
-<div class="product-info-box">
-
-<div class="hit-badge">
-🔥 ХИТ ПРОДАЖ
-</div>
-
-<h2 id="productTitle">
-Для крупных и средних пород
-</h2>
-
-<div class="spec-grid">
-
-<div class="spec">
-<span>Гранула</span>
-<strong id="granuleSize">
-1.5 см
-</strong>
-</div>
-
-<div class="spec">
-<span>Вид корма</span>
-<strong>
-Сухой
-</strong>
-</div>
-
-<div class="spec">
-<span>Основа</span>
-<strong>
-Говядина
-</strong>
-</div>
-
-<div class="spec">
-<span>Технология</span>
-<strong>
-Экструдированный
-</strong>
-</div>
-
-</div>
-
-<div class="composition">
-
-<h3>Состав</h3>
-
-<p>
-Белки животного происхождения,
-говядина, зерновые культуры,
-витаминно-минеральный комплекс,
-жиры, клетчатка, натуральные добавки.
-</p>
-
-</div>
-
-<div class="packing">
-
-<h3>Выберите фасовку</h3>
-
-<select id="packageSelect">
-
-<option value="1">
-1 кг
-</option>
-
-<option value="2.5">
-2.5 кг
-</option>
-
-<option value="25">
-25 кг
-</option>
-
-</select>
-
-</div>
-
-<div class="price-box">
-
-<span>Стоимость</span>
-
-<div id="productPrice">
-550 ₽
-</div>
-
-</div>
-
-<div class="advantage-box">
-
-<div>
-✅ Сертификаты качества
-</div>
-
-<div>
-🚚 Доставка по России
-</div>
-
-<div>
-💰 От 15 кг — 500 ₽/кг
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-```
-
-
-<div id="large" class="product-content active">
-
-<div class="product-info">
-
-<h2>Для крупных и средних пород</h2>
-
-<p>
-Размер гранулы: 1.5 см
-</p>
-
-<p>
-Цена: 550 ₽ / кг
-</p>
-
-</div>
-
-<div class="pack-grid">
-
-<div class="pack-card">
-<h3>25 кг</h3>
-<p>Большой мешок</p>
-</div>
-
-<div class="pack-card">
-<h3>2.5 кг</h3>
-<p>Дой-пак ZIP</p>
-</div>
-
-<div class="pack-card">
-<h3>1 кг</h3>
-<p>Дой-пак ZIP</p>
-</div>
-
-</div>
-
-<div class="sale-box">
-От 15 кг — специальная цена
-<strong>500 ₽ / кг</strong>
-</div>
-
-</div>
-
-<div id="small" class="product-content">
-
-<div class="product-info">
-
-<h2>Для средних и мелких пород</h2>
-
-<p>
-Размер гранулы: 0.5 см
-</p>
-
-<p>
-Цена: 550 ₽ / кг
-</p>
-
-</div>
-
-<div class="pack-grid">
-
-<div class="pack-card">
-<h3>2.5 кг</h3>
-<p>Дой-пак ZIP</p>
-</div>
-
-<div class="pack-card">
-<h3>1 кг</h3>
-<p>Дой-пак ZIP</p>
-</div>
-
-</div>
-
-<div class="sale-box">
-От 15 кг — специальная цена
-<strong>500 ₽ / кг</strong>
-</div>
-
-</div>
-
-</section>
-
-<section class="calculator">
-
-<div class="section-title">
-Калькулятор заказа
-</div>
-
-<div class="calc-box">
-
-<select id="packaging">
-<option value="1">1 кг</option>
-<option value="2.5">2.5 кг</option>
-<option value="25">25 кг</option>
-</select>
-
-<input
-type="number"
-id="qty"
-value="1"
-min="1">
-
-<div class="result">
-
-Итого:
-
-<span id="totalPrice">
-550 ₽
-</span>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="reviews" class="reviews">
-
-<div class="section-title">
-Отзывы клиентов
-</div>
-
-<div class="review-grid">
-
-<div class="review-card">
-★★★★★
-<h4>Александр</h4>
-<p>Собака ест с удовольствием.</p>
-</div>
-
-<div class="review-card">
-★★★★★
-<h4>Марина</h4>
-<p>Отличный состав и качество.</p>
-</div>
-
-<div class="review-card">
-★★★★★
-<h4>Игорь</h4>
-<p>Удобная фасовка.</p>
-</div>
-
-<div class="review-card">
-★★★★★
-<h4>Елена</h4>
-<p>Заказываем повторно.</p>
-</div>
-
-<div class="review-card">
-★★★★★
-<h4>Сергей</h4>
-<p>Овчарке идеально подошёл.</p>
-</div>
-
-<div class="review-card">
-★★★★★
-<h4>Татьяна</h4>
-<p>Отличная цена и качество.</p>
-</div>
-
-</div>
-
-</section>
-
-<section id="order" class="order-section">
-
-<div class="phone-box">
 
 <h2>Позвоните нам</h2>
 
-<a href="tel:+79000000000">
-+7 (900) 000-00-00
+<a href="tel:+79999999999" class="phone-link">
+    <div class="phone-number">
+        +7 (999) 999-99-99
+    </div>
 </a>
 
 </div>
 
-<div class="order-form">
+<div class="card order-form-card">
+
+<h2>Заказать корм</h2>
+
+<p>Оставьте заявку и мы свяжемся с вами.</p>
 
 <form id="orderForm">
 
-<input
-type="text"
-placeholder="ФИО"
-required>
+<div class="form-row">
 
-<input
-type="tel"
-placeholder="Телефон"
-required>
+<div class="field">
+<label>Имя</label>
+<input type="text">
+</div>
 
-<select>
+<div class="field">
+<label>Телефон</label>
+<input type="tel">
+</div>
 
-<option>
-Мелкие собаки
-</option>
+</div>
 
-<option>
-Средние собаки
-</option>
-
-<option>
-Крупные собаки
-</option>
-
-</select>
-
-<select>
-
-<option>
-1 кг
-</option>
-
-<option>
-2.5 кг
-</option>
-
-<option>
-25 кг
-</option>
-
-</select>
-
-<button type="submit">
-Оформить заказ
+<button class="btn btn-primary btn-block">
+Отправить заявку
 </button>
 
 </form>
 
-<div id="successMessage">
-Спасибо за заказ! Мы свяжемся с вами.
+</div>
+
 </div>
 
 </div>
@@ -532,37 +360,36 @@ required>
 
 <footer>
 
-<div class="footer-content">
+<div class="footer-grid">
 
-<h3>НормаПлюс</h3>
+<div>
+<h3>НОРМАПЛЮС</h3>
+<p>Премиальный сибирский корм для собак.</p>
+</div>
 
-<p>
-ИП Производитель
-</p>
+<div>
+<h4>Навигация</h4>
+<a href="#advantages">Преимущества</a>
+<a href="#product">Корм</a>
+<a href="#order">Заказать</a>
+</div>
 
-<p>
-г. Новосибирск
-</p>
+<div>
+<h4>Контакты</h4>
+<p>+7 (999) 999-99-99</p>
+<p>info@example.ru</p>
+</div>
 
-<p>
-+7 (900) 000-00-00
-</p>
+</div>
 
-<p>
-© 2026 НормаПлюс
-</p>
-
+<div class="footer-bottom">
+<span>© 2026 НОРМАПЛЮС</span>
+<span>Все права защищены</span>
 </div>
 
 </footer>
 
-<button id="topBtn">
-↑
-</button>
-
-<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-<script src="script.js"></script>
+<button id="topBtn">↑</button>
 
 </body>
 </html>
-```
