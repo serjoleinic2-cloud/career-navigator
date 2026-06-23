@@ -1,84 +1,76 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { JourneyMap } from '@/components/JourneyMap/JourneyMap';
+import { WorldRenderer, mapCareerToLevels } from '@/world';
 import { GoalCard } from '@/components/GoalCard/GoalCard';
-import { useProgressStore } from '@/store/progressStore';
-import { developerNodes, getNodeById, getNextNode } from '@/data/developerPath';
+import { useWorldProgressStore } from '@/world/progressStore';
+import { CAREER_DATA } from '../../../engine/career_data';
 import type { JourneyNode } from '@/types';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
-  const [error, setError] = useState<string | null>(null);
-  const currentNodeId = useProgressStore((s) => s.currentNodeId);
-  const completedNodeIds = useProgressStore((s) => s.completedNodeIds);
-  const completeNode = useProgressStore((s) => s.completeNode);
-  const setCurrentNode = useProgressStore((s) => s.setCurrentNode);
-  const unlockNode = useProgressStore((s) => s.unlockNode);
+  const currentLevel = useWorldProgressStore((s) => s.currentLevel);
+  const completedLevels = useWorldProgressStore((s) => s.completedLevels);
+  const completeLevel = useWorldProgressStore((s) => s.completeLevel);
+  const setCurrentLevel = useWorldProgressStore((s) => s.setCurrentLevel);
 
-  const currentNode = getNodeById(currentNodeId || '') || null;
-  const completedCount = completedNodeIds.length;
-  const totalCount = developerNodes.length;
+  const levels = useMemo(() => mapCareerToLevels(CAREER_DATA[0].steps), []);
 
-  const handleNodePress = useCallback((node: JourneyNode) => {
-    console.log('Node pressed:', node.title);
-  }, []);
+  const handleLevelPress = useCallback((index: number) => {
+    setCurrentLevel(index);
+  }, [setCurrentLevel]);
 
-  const handleGoalAction = useCallback(() => {
-    if (!currentNode) return;
+  const handleCompleteLevel = useCallback(() => {
+    completeLevel(currentLevel);
+  }, [completeLevel, currentLevel]);
 
-    const nextNode = getNextNode(currentNode.id);
+  const currentLevelData = levels[currentLevel];
 
-    if (nextNode) {
-      completeNode(currentNode.id);
-      setCurrentNode(nextNode.id);
-      unlockNode(nextNode.id);
-    } else {
-      completeNode(currentNode.id);
-    }
-  }, [currentNode, completeNode, setCurrentNode, unlockNode]);
+  return (
+    <div className="journey-screen">
+      <div className="journey-screen__atmosphere-top" />
 
-  if (error) return <div style={{ color: 'red', padding: 20 }}>Render error: {error}</div>;
-
-  let content: JSX.Element | null;
-  try {
-    content = (
-      <div className="journey-screen">
-        <div className="journey-screen__atmosphere-top" />
-
-        <motion.header
-          className="journey-screen__header"
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-        >
-          <div className="journey-screen__header-inner">
-            <div>
-              <h1 className="journey-screen__title">Your Journey</h1>
-              <p className="journey-screen__subtitle">Software Developer Path</p>
-            </div>
-
-            <div className="journey-screen__badge">
-              <span className="journey-screen__badge-text">{completedCount}</span>
-            </div>
+      <motion.header
+        className="journey-screen__header"
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+      >
+        <div className="journey-screen__header-inner">
+          <div>
+            <h1 className="journey-screen__title">Your Journey</h1>
+            <p className="journey-screen__subtitle">Software Developer Path</p>
           </div>
-        </motion.header>
 
-        <div className="journey-screen__map">
-          <JourneyMap onNodePress={handleNodePress} />
+          <div className="journey-screen__badge">
+            <span className="journey-screen__badge-text">{completedLevels.length}</span>
+          </div>
         </div>
+      </motion.header>
 
-        <GoalCard
-          node={currentNode}
-          completedCount={completedCount}
-          totalCount={totalCount}
-          onAction={handleGoalAction}
+      <div className="journey-screen__map">
+        <WorldRenderer
+          levels={levels}
+          currentLevel={currentLevel}
+          onLevelPress={handleLevelPress}
         />
       </div>
-    );
-  } catch (e) {
-    setError(String(e));
-    content = null;
-  }
 
-  return content || <div style={{ color: 'red', padding: 20 }}>Render error: {error}</div>;
+      <GoalCard
+        node={
+          currentLevelData
+            ? ({
+                id: String(currentLevelData.index),
+                title: currentLevelData.title,
+                description: currentLevelData.outcome,
+                estimated_time: currentLevelData.estimatedHours * 60,
+                tasks: currentLevelData.skillsRequired,
+              } as unknown as JourneyNode)
+            : null
+        }
+        completedCount={completedLevels.length}
+        totalCount={levels.length}
+        onAction={handleCompleteLevel}
+      />
+    </div>
+  );
 }
