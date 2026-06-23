@@ -119,5 +119,22 @@ career-navigator/
 |-- docs/              # Документация
 |   +-- 1..9 CAREER_NAVIGATOR_*.md
 |
+|-- core/              # Ядро: истина, правила, контроль
+|   |-- TRUTH.md
+|   |-- TRUTH_v0.md
+|   |-- FRZ_RULES.md
+|   |-- FRZ_VERSION.json
+|   +-- SYSTEM_CONTROL.json
+|
+|-- engine/            # Career Engine (логика подбора)
+|   +-- career_engine_stub.ts
+|
+|-- flows/             # Пользовательские сценарии
+|   +-- flow_main.ts
+|
+|-- ui/                # Переиспользуемые UI-компоненты
+|
+|-- tools/             # Вспомогательные утилиты
+|
 +-- struktura.md       # Этот файл
 ```

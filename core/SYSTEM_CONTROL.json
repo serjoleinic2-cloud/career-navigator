@@ -1,0 +1,23 @@
+{
+  "version": "v0.2.1",
+  "mode": "FROZEN",
+  "freeze_status": true,
+  "engine_status": "stub",
+  "truth_file": "/core/TRUTH_v0.2.md",
+  "runtime_mode": "OFFLINE_DETERMINISTIC",
+  "ai_dependency": false,
+  "allowed_changes": [
+    "bugfix",
+    "ui adjustments",
+    "refactor without logic change"
+  ],
+  "blocked_changes": [
+    "architecture rewrite",
+    "engine logic modification",
+    "flow redesign",
+    "introduce ai logic",
+    "dynamic generation",
+    "external api calls",
+    "runtime intelligence"
+  ]
+}
