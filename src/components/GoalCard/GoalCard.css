@@ -1,0 +1,262 @@
+/* ─── GoalCard ────────────────────────────────────────── */
+
+.goal-card {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+
+  background: rgba(6, 12, 26, 0.96);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 24px 24px 0 0;
+
+  padding: 0 0 env(safe-area-inset-bottom, 16px);
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* default collapsed height handled by content */
+}
+
+.goal-card__handle {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+  cursor: pointer;
+}
+
+.goal-card__handle-bar {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ─── Header ── */
+
+.goal-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 8px 24px 16px;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.goal-card__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-card__chapter {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--card-color);
+  opacity: 0.85;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.goal-card__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.goal-card__subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ─── Stats ── */
+
+.goal-card__stats {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.goal-card__xp,
+.goal-card__days {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 8px 12px;
+  min-width: 48px;
+}
+
+.goal-card__xp-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--card-color);
+  line-height: 1;
+}
+
+.goal-card__xp-label,
+.goal-card__days-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+
+.goal-card__days-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1;
+}
+
+/* ─── Expanded body ── */
+
+.goal-card__body {
+  padding: 0 24px 20px;
+  animation: slideDown 0.25s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.goal-card__description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+/* ─── Task list ── */
+
+.goal-card__tasks {
+  margin-bottom: 20px;
+}
+
+.goal-card__tasks-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.goal-card__task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.goal-card__task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.goal-card__task-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--card-color);
+  flex-shrink: 0;
+  margin-top: 5px;
+  box-shadow: 0 0 6px var(--card-glow);
+}
+
+.goal-card__task-text {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
+}
+
+/* ─── CTA button ── */
+
+.goal-card__cta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--card-color);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 24px var(--card-glow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.goal-card__cta:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 12px var(--card-glow);
+}
+
+.goal-card__cta-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  letter-spacing: 0.02em;
+}
+
+.goal-card__cta-arrow {
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* ─── Final state ── */
+
+.goal-card__final {
+  text-align: center;
+  padding: 16px;
+  font-size: 15px;
+  color: rgba(255, 209, 102, 0.9);
+  background: rgba(255, 209, 102, 0.06);
+  border: 1px solid rgba(255, 209, 102, 0.2);
+  border-radius: 14px;
+}
+
+/* ─── Bottom glow ── */
+
+.goal-card__glow {
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--card-color),
+    transparent
+  );
+  opacity: 0.3;
+  pointer-events: none;
+}
