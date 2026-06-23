@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.carenavigator.app',
+  appId: 'com.careernavigator.app',
   appName: 'CareerNavigator',
   webDir: 'dist'
 };
