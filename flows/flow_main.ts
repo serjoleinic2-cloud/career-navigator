@@ -1,19 +1,22 @@
-// FRZ v0.2 - SINGLE FLOW LOCKED
+// FRZ v0.3 — MVP LINEAR FLOW
 
-import { getCareerOptions, getCareerSteps, type CareerStep } from '../engine/career_engine_stub';
+import { getCareerOptions, getCareerSteps } from '../engine/career_engine_stub';
 import type { CareerOption } from '../engine/career_engine_stub';
 
-export interface FlowResult {
+export interface FlowState {
   goal: string;
   options: CareerOption[];
-  steps: Record<string, CareerStep[]>;
+  selectedOption: CareerOption | null;
+  steps: string[];
 }
 
-export function runGoalFlow(goal: string): FlowResult {
+export function runGoalFlow(goal: string): FlowState {
   const options = getCareerOptions();
-  const steps: Record<string, CareerStep[]> = {};
-  for (const opt of options) {
-    steps[opt.id] = getCareerSteps(opt.id);
-  }
-  return { goal, options, steps };
+  return { goal, options, selectedOption: null, steps: [] };
+}
+
+export function selectCareer(state: FlowState, optionId: string): FlowState {
+  const option = state.options.find((o) => o.id === optionId) || null;
+  const steps = option ? getCareerSteps(optionId) : [];
+  return { ...state, selectedOption: option, steps };
 }

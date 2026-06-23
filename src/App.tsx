@@ -1,7 +1,7 @@
-import { JourneyScreen } from '@/screens/JourneyScreen/JourneyScreen';
+import { AppEntry } from '../ui/AppEntry';
 
 function App() {
-  return <JourneyScreen />;
+  return <AppEntry />;
 }
 
 export default App;

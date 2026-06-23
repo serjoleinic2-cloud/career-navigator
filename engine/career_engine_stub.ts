@@ -1,4 +1,5 @@
-import { CAREER_DATA, CareerOption } from './career_data';
+import { CAREER_DATA } from './career_data';
+import type { CareerOption } from './career_data';
 
 // FRZ v0.2.1 OFFLINE CORE
 // Deterministic engine only
@@ -7,6 +8,8 @@ import { CAREER_DATA, CareerOption } from './career_data';
 // RULE: getCareerOptions() returns only fixed data
 // RULE: getCareerSteps() returns only predefined steps
 // RULE: No logic generation, no dynamic content
+
+export type { CareerOption };
 
 export function getCareerOptions(): CareerOption[] {
   return CAREER_DATA.map(({ id, title }) => ({ id, title, steps: [] }));
