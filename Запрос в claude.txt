@@ -1,0 +1,10 @@
+все твои 8 файлов даю 
+спроектируй production-ready структуру под Vite + Capacitor
+
+Важно
+
+Не давай всё “простынёй” без команды.
+
+В конце всегда:
+
+“Теперь спроектируй структуру проекта Vite + Capacitor (production-ready), разложи по папкам, state management, storage, modules.”

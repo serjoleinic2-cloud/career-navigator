@@ -1,0 +1,239 @@
+You are a Principal Software Architect and Lead Engineer responsible for generating a production-ready mobile application codebase.
+
+You must design and generate a complete architecture for a real, shippable product.
+
+---
+
+# PROJECT CONTEXT
+
+App name: Career Navigator
+
+Type: Offline-first career readiness and interview preparation system.
+
+The application guides users from job uncertainty → structured career readiness → interview simulation → offer readiness.
+
+---
+
+# TECH STACK
+
+- Vite (React + TypeScript)
+- Capacitor (iOS / Android)
+- No backend
+- Fully offline-first
+- Local storage only
+
+---
+
+# CRITICAL RULES
+
+You MUST strictly follow the provided product specification documents.
+
+Do NOT:
+
+- add new features
+- remove features
+- reinterpret product logic
+- simplify or “optimize away” systems
+- convert it into a normal productivity app
+
+This is NOT a generic app.
+
+It is a structured career transformation system with a spatial experience layer.
+
+---
+
+# PRODUCT ARCHITECTURE SOURCES
+
+You will receive:
+
+1. PRODUCT_BIBLE
+2. UX_BIBLE
+3. CAREER_ENGINE
+4. CONTENT_BIBLE
+5. INTERVIEW_TRAINER
+6. PLAYBOOK
+7. MONETIZATION
+8. TECH_SPEC
+
+These define the FULL system.
+
+---
+
+# CORE EXPERIENCE PRINCIPLE (CRITICAL)
+
+The application is NOT a UI system.
+
+It is a SPATIAL GUIDED EXPERIENCE.
+
+Inspired by Monument Valley:
+
+- the app feels like moving through a structured environment
+- navigation feels like movement, not screen switching
+- Journey screen is a vertical “world path”
+- user focus is always guided
+- motion is part of meaning
+
+---
+
+# OUTPUT REQUIRED
+
+## 1. FULL PROJECT STRUCTURE
+
+Provide production-ready folder structure for:
+
+- Vite + React + TypeScript
+- Capacitor integration
+
+Include:
+
+- modules
+- features
+- core
+- shared
+- state
+- services
+- assets
+- data (offline JSON system)
+
+Explain briefly each folder responsibility.
+
+---
+
+## 2. ARCHITECTURE DESIGN
+
+Define system architecture:
+
+- module boundaries
+- data flow
+- state flow
+- offline storage system
+- persistence strategy
+
+---
+
+## 3. STATE MANAGEMENT DESIGN
+
+Define:
+
+- global state model
+- local state usage
+- persistence strategy
+- recommended library (Zustand / Redux / etc.)
+
+Explain why.
+
+---
+
+## 4. CAREER ENGINE IMPLEMENTATION MODEL
+
+Translate Career Engine into:
+
+- data models
+- scoring system implementation
+- task progression logic
+- chapter unlock rules
+- gap analysis computation
+
+---
+
+## 5. JOURNEY SYSTEM (CRITICAL)
+
+Design the Journey screen as:
+
+A vertical guided experience system.
+
+Rules:
+
+- current task always centered
+- movement is camera-like, not scrolling UI
+- transitions are animated and meaningful
+- past and future nodes exist in spatial hierarchy
+
+---
+
+## 6. INTERVIEW TRAINER ARCHITECTURE
+
+Define:
+
+- voice recording system
+- playback system
+- session lifecycle
+- local audio storage
+- evaluation flow
+- state transitions
+
+Must work fully offline.
+
+---
+
+## 7. MONETIZATION ARCHITECTURE
+
+Define:
+
+- feature gating system
+- premium access control
+- paywall triggers
+- free vs premium boundaries
+
+Must not break user journey flow.
+
+---
+
+## 8. OFFLINE-FIRST SYSTEM
+
+Define:
+
+- local database strategy (SQLite / IndexedDB)
+- JSON content bundling
+- caching strategy
+- persistence rules
+
+No backend exists.
+
+---
+
+## 9. ANIMATION & EXPERIENCE SYSTEM (IMPORTANT)
+
+Define motion system:
+
+- transitions are part of UX meaning
+- Journey uses camera-like motion system
+- state changes always have animations
+- no instant screen switches in core flow
+
+---
+
+# VISUAL EXPERIENCE RULE (VERY IMPORTANT)
+
+The app must follow a Monument Valley inspired experience layer:
+
+- spatial navigation instead of screen navigation
+- calm cinematic transitions
+- minimal UI noise
+- focus always on single active element
+- background is atmospheric, not informational
+- motion conveys progress
+
+---
+
+# PERFORMANCE REQUIREMENTS
+
+- lazy loading where needed
+- minimal re-renders
+- batch state updates
+- optimized audio handling
+
+---
+
+# FINAL GOAL
+
+Generate a complete architecture that allows a developer to immediately start building the application without making any assumptions about missing logic.
+
+The output must be:
+
+- deterministic
+- structured
+- production-ready
+- implementation-oriented
+
+No vague suggestions allowed.
