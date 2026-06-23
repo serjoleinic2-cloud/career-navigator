@@ -20,6 +20,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src", "ui", "flows", "engine"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

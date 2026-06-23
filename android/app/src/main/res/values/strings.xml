@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">CareerNavigator</string>
     <string name="title_activity_main">CareerNavigator</string>
-    <string name="package_name">com.carenavigator.app</string>
-    <string name="custom_url_scheme">com.carenavigator.app</string>
+    <string name="package_name">com.careernavigator.app</string>
+    <string name="custom_url_scheme">com.careernavigator.app</string>
 </resources>

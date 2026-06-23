@@ -10,20 +10,14 @@
   }
 
   body {
-    background: #0a0a0f;
-    margin: 0;
-    color: #e2e8f0;
+    @apply bg-void-950 text-white antialiased;
     font-family: 'Inter', system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
     overscroll-behavior: none;
   }
 
   #root {
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
+    @apply h-screen w-screen overflow-hidden;
   }
 }
 

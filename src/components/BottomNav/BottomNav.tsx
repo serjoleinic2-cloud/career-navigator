@@ -3,7 +3,7 @@ import { Map, ListTodo, BarChart3, User } from 'lucide-react';
 import { useProgressStore } from '@/store/progressStore';
 import type { TabId } from '@/types';
 
-const tabs: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const tabs: { id: TabId; label: string; icon: React.ComponentType<{ className?: string; size?: number | string }> }[] = [
   { id: 'journey', label: 'Journey', icon: Map },
   { id: 'tasks', label: 'Tasks', icon: ListTodo },
   { id: 'progress', label: 'Progress', icon: BarChart3 },
@@ -43,7 +43,8 @@ export function BottomNav() {
               >
                 <div className="relative">
                   <Icon
-                    className={`transition-colors duration-300 w-[22px] h-[22px] ${
+                    size={22}
+                    className={`transition-colors duration-300 ${
                       isActive ? 'text-glow-cyan' : 'text-white/30'
                     }`}
                   />

@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import type { JourneyNode } from '@/types';
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number | string }>> = {
   GitBranch, Github, Code, Layout, FileText, Linkedin,
   MessageCircle, Terminal, Send, Trophy,
 };
@@ -135,7 +135,7 @@ export function PathNode({ node, status, index, totalNodes, onPress }: PathNodeP
             {status === 'locked' ? (
               <Lock size={16} className="text-void-500" />
             ) : (
-              <IconComponent className={`w-[18px] h-[18px] ${config.iconColor}`} />
+              <IconComponent size={18} className={config.iconColor} />
             )}
           </div>
 

@@ -1,7 +1,5 @@
 export type LevelStatus = 'locked' | 'current' | 'completed';
 
-export type EnvironmentSide = 'left' | 'right';
-
 export type VisualTheme =
   | 'learning'
   | 'practice'
