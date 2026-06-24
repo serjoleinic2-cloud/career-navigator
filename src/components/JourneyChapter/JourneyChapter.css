@@ -1,0 +1,18 @@
+.journey-chapter {
+  margin-bottom: 8px;
+}
+
+.journey-chapter__title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #8e8e93;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+.journey-chapter__nodes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

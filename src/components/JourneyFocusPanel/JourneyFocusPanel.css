@@ -1,0 +1,91 @@
+.focus-panel {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 24px 20px 32px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+  position: absolute;
+  bottom: 56px;
+  left: 0;
+  right: 0;
+  z-index: 20;
+}
+
+.focus-panel__header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.focus-panel__chapter {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8e8e93;
+}
+
+.focus-panel__day {
+  font-size: 11px;
+  color: #c7c7cc;
+}
+
+.focus-panel__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c1c1e;
+  margin-bottom: 16px;
+}
+
+.focus-panel__tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.focus-panel__task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #3a3a3c;
+}
+
+.focus-panel__task-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #007aff;
+  flex-shrink: 0;
+}
+
+.focus-panel__notes {
+  padding: 12px;
+  background: #f2f2f7;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.focus-panel__notes-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8e8e93;
+  margin-bottom: 4px;
+}
+
+.focus-panel__notes-placeholder {
+  font-size: 14px;
+  color: #c7c7cc;
+}
+
+.focus-panel__action {
+  width: 100%;
+  padding: 14px;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}

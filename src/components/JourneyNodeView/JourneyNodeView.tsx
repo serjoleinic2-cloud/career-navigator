@@ -1,22 +1,23 @@
+import type { JourneyNode } from '@/core/career_journey_model';
 import './JourneyNodeView.css';
 
 interface JourneyNodeViewProps {
-  id: string;
-  chapter: string;
-  title: string;
-  status: 'done' | 'active' | 'locked';
-  tasks?: string[];
-  isFocused?: boolean;
+  node: JourneyNode;
 }
 
-export function JourneyNodeView({ chapter, title, status, tasks, isFocused }: JourneyNodeViewProps) {
+export function JourneyNodeView({ node }: JourneyNodeViewProps) {
   return (
-    <div className={`journey-node journey-node--${status} ${isFocused ? 'journey-node--focused' : ''}`}>
-      <div className="journey-node__chapter">{chapter}</div>
-      <div className="journey-node__title">{title}</div>
-      {status === 'active' && tasks && (
-        <div className="journey-node__tasks">
-          {tasks.map(t => <div key={t} className="journey-node__task">{t}</div>)}
+    <div className={`journey-node journey-node--${node.status}`}>
+      <div className="journey-node__header">
+        <span className="journey-node__chapter">{node.chapter}</span>
+        <span className="journey-node__day">Day {node.dayIndex}</span>
+      </div>
+
+      <div className="journey-node__title">{node.title}</div>
+
+      {node.status === 'active' && (
+        <div className="journey-node__actions">
+          <button className="journey-node__action-btn">Start Task</button>
         </div>
       )}
     </div>

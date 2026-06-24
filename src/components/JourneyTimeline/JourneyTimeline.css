@@ -1,0 +1,14 @@
+.journey-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.journey-timeline::-webkit-scrollbar {
+  display: none;
+}
