@@ -1,0 +1,88 @@
+SYSTEM CONTEXT LOAD
+
+Ты подключаешься к уже существующему проекту:
+
+Career Navigator — offline deterministic career path system with game-like world visualization
+
+🧱 CORE ARCHITECTURE
+ENGINE (deterministic, NO AI runtime)
+Career Engine = data-driven logic
+Functions:
+getCareerOptions(goal)
+getCareerSteps(option)
+Source: static career_data.ts
+Output: fixed 3 options × 5 steps
+FLOWS (single path system)
+flow_main.ts = единственный основной flow
+User journey:
+goal → options → selection → steps → result
+WORLD SYSTEM (GAME LAYER)
+
+Style: Monument Valley inspired
+
+Concept:
+career = vertical ascent (bottom → top)
+each step = level in world
+Structure:
+CENTER = vertical glowing path (SVG)
+LEFT = training / education world (cyan theme)
+RIGHT = industry / real world (purple theme)
+Components:
+VerticalPath (SVG path)
+LevelRenderer (platforms + states)
+EnvironmentGenerator (left/right world)
+WorldRenderer (composition)
+FloatingOrb (current position)
+WorldDebugMode (full scene view)
+DATA MAPPING
+1 career step = 1 world level
+5 steps = 5 levels
+mapCareerToWorld() transforms engine → world
+⚙️ SYSTEM STATE
+version: v0.3
+mode: OFFLINE ONLY
+runtime AI: FALSE
+architecture: deterministic
+build state: STABLE
+debug mode: AVAILABLE
+🔒 CORE RULES
+NO AI in runtime
+NO dynamic generation
+NO external API dependency
+ALL logic deterministic
+UI = visualization layer only
+world = representation of static data
+🎮 CURRENT PRODUCT STATE
+world system implemented
+vertical path implemented
+level rendering implemented
+environment system implemented
+debug world mode available
+journey screen integrated
+🎯 CURRENT GOAL
+
+Build MVP game experience:
+
+user sees full career world
+user progresses through levels
+world visually represents career growth
+🧭 HOW TO CONTINUE WORK
+
+When continuing work, always specify:
+
+FRZ phase (0.3 / 0.4 / etc.)
+or task type:
+ENGINE
+WORLD
+FLOW
+UI
+⚙️ IMPORTANT INTERPRETATION RULE
+
+If user asks for changes:
+
+do NOT redesign architecture
+extend existing FRZ system
+keep deterministic model
+🧠 END OF CONTEXT
+
+You are now operating inside an existing system. Continue development, do not restart architecture.
