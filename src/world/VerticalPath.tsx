@@ -4,6 +4,7 @@ import type { PathSegment } from './types';
 interface VerticalPathProps {
   segments: PathSegment[];
   currentLevel: number;
+  segmentStates?: ('completed' | 'active' | 'locked')[];
 }
 
 const SEGMENT_HEIGHT = 200;
@@ -20,7 +21,7 @@ function buildPath(from: number, to: number): string {
   return `M ${cx} ${y1} C ${cx + 30} ${(y1 + y2) / 2}, ${cx - 30} ${(y1 + y2) / 2}, ${cx} ${y2}`;
 }
 
-export function VerticalPath({ segments, currentLevel }: VerticalPathProps) {
+export function VerticalPath({ segments, currentLevel, segmentStates }: VerticalPathProps) {
   const height = segments.length * SEGMENT_HEIGHT + SVG_PADDING * 2;
 
   return (
@@ -39,29 +40,56 @@ export function VerticalPath({ segments, currentLevel }: VerticalPathProps) {
         </filter>
       </defs>
 
-      {segments.map((seg) => {
-        const color = seg.status === 'current'
-          ? COLOR_AMBER
-          : seg.status === 'completed'
-            ? COLOR_CYAN
-            : COLOR_DIM;
+      {segments.map((seg, i) => {
+        const state = segmentStates?.[i];
+        const color = state === 'completed'
+          ? COLOR_CYAN
+          : state === 'active'
+            ? COLOR_AMBER
+            : state === 'locked'
+              ? COLOR_DIM
+              : seg.status === 'current'
+                ? COLOR_AMBER
+                : seg.status === 'completed'
+                  ? COLOR_CYAN
+                  : COLOR_DIM;
+
+        const strokeWidth = state === 'completed'
+          ? 3
+          : state === 'active'
+            ? 4
+            : state === 'locked'
+              ? 2
+              : PATH_WIDTH;
 
         const d = buildPath(seg.from, seg.to);
-        const isCurrent = seg.status === 'current' && seg.to === currentLevel;
-        const filterId = isCurrent ? 'url(#glow-amber)' : seg.status === 'completed' ? 'url(#glow-cyan)' : undefined;
+        const isActive = state === 'active' || (seg.status === 'current' && seg.to === currentLevel);
+
+        const filterId = state === 'completed'
+          ? 'url(#glow-cyan)'
+          : isActive
+            ? 'url(#glow-amber)'
+            : undefined;
 
         return (
           <motion.path
             key={`${seg.from}-${seg.to}`}
             d={d}
             stroke={color}
-            strokeWidth={PATH_WIDTH}
+            strokeWidth={strokeWidth}
             fill="none"
             strokeLinecap="round"
             filter={filterId}
             initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1.2, ease: 'easeInOut' }}
+            animate={{
+              pathLength: 1,
+              ...(isActive ? { opacity: [0.7, 1, 0.7] } : {}),
+            }}
+            transition={{
+              duration: 1.2,
+              ease: 'easeInOut',
+              ...(isActive ? { opacity: { duration: 2, repeat: Infinity, ease: 'easeInOut' } } : {}),
+            }}
           />
         );
       })}

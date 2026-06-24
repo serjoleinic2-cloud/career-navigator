@@ -1,14 +1,38 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { WorldDebugMode } from '@/world/WorldDebugMode';
 import { mapCareerToLevels } from '@/world/careerToWorld';
 import { GoalCard } from '@/components/GoalCard/GoalCard';
+import { JourneyNodeView } from '@/components/JourneyNodeView/JourneyNodeView';
+import { buildJourney } from '@/core/career_engine_v2';
+import { getVisibleNodes } from '@/core/focus_controller';
 import { useProgressStore } from '@/store/progressStore';
-import { developerNodes, getNodeById, getNextNode } from '@/data/developerPath';
+import { developerNodes } from '@/data/developerPath';
+import type { JourneyNode as CoreJourneyNode } from '@/core/career_journey_model';
+import type { JourneyNode } from '@/types';
 import './JourneyScreen.css';
 
-// TODO: set to false before release
 const DEBUG_MODE = true;
+
+const profile = { profession: 'Software Engineer', experience: 'junior' as const };
+
+function toGoalCardNode(node: CoreJourneyNode | undefined): JourneyNode | null {
+  if (!node) return null;
+  return {
+    id: node.id,
+    chapter_id: node.chapter,
+    title: node.title,
+    description: `${node.chapter} — Day ${node.dayIndex}`,
+    type: 'action',
+    status: 'available',
+    estimated_time: (node.tasks?.length || 1) * 30,
+    position: { x: 0, y: 0 },
+    environment: 'code-tower',
+    tasks: node.tasks || [],
+    icon: 'target',
+    created_at: new Date().toISOString(),
+  };
+}
 
 export function JourneyScreen() {
   const currentNodeId = useProgressStore((s) => s.currentNodeId);
@@ -19,26 +43,31 @@ export function JourneyScreen() {
 
   const [showDebug, setShowDebug] = useState(DEBUG_MODE);
 
-  const currentNode = getNodeById(currentNodeId || '') || null;
+  const currentNode = developerNodes.find(n => n.id === currentNodeId) || null;
   const completedCount = completedNodeIds.length;
-  const totalCount = developerNodes.length;
 
   const worldLevels = useMemo(() => {
     const steps = developerNodes.map((n) => n.title);
     return mapCareerToLevels(steps);
   }, []);
 
-  const handleGoalAction = useCallback(() => {
+  const handleGoalAction = () => {
     if (!currentNode) return;
-    const nextNode = getNextNode(currentNode.id);
-    if (nextNode) {
+    const nextIndex = developerNodes.findIndex(n => n.id === currentNode.id) + 1;
+    if (nextIndex < developerNodes.length) {
       completeNode(currentNode.id);
-      setCurrentNode(nextNode.id);
-      unlockNode(nextNode.id);
+      setCurrentNode(developerNodes[nextIndex].id);
+      unlockNode(developerNodes[nextIndex].id);
     } else {
       completeNode(currentNode.id);
     }
-  }, [currentNode, completeNode, setCurrentNode, unlockNode]);
+  };
+
+  const journey = useMemo(() => buildJourney(profile), []);
+  const allNodes = useMemo(() => journey.chapters.flatMap(c => c.nodes), [journey]);
+  const { done, active, future } = useMemo(() => getVisibleNodes(allNodes, journey.currentDay), [allNodes, journey.currentDay]);
+
+  const goalCardNode = toGoalCardNode(active ?? undefined);
 
   return (
     <div className="journey-screen">
@@ -89,25 +118,30 @@ export function JourneyScreen() {
         />
       ) : (
         <>
-          <div className="journey-screen__map">
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                color: 'rgba(255,255,255,0.3)',
-                fontSize: 14,
-              }}
-            >
-              WorldRenderer (scroll mode) — toggle DEBUG to see full map
+          <div className="journey-timeline">
+            <div className="journey-timeline__done">
+              {done.map(node => (
+                <JourneyNodeView key={node.id} {...node} isFocused={false} />
+              ))}
+            </div>
+
+            <div className="journey-timeline__active">
+              {active && (
+                <JourneyNodeView {...active} isFocused={true} />
+              )}
+            </div>
+
+            <div className="journey-timeline__future">
+              {future.map(node => (
+                <JourneyNodeView key={node.id} {...node} isFocused={false} />
+              ))}
             </div>
           </div>
 
           <GoalCard
-            node={currentNode}
-            completedCount={completedCount}
-            totalCount={totalCount}
+            node={goalCardNode}
+            completedCount={done.length}
+            totalCount={allNodes.length}
             onAction={handleGoalAction}
           />
         </>

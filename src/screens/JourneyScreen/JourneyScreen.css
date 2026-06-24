@@ -81,3 +81,26 @@
   padding-top: 80px;
   padding-bottom: 4px;
 }
+
+/* Timeline layout */
+.journey-timeline {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  padding: 120px 20px 200px;
+  scroll-snap-type: y mandatory;
+}
+
+.journey-timeline__done {
+  opacity: 0.6;
+}
+
+.journey-timeline__active {
+  scroll-snap-align: center;
+  margin: 20px 0;
+}
+
+.journey-timeline__future {
+  opacity: 0.4;
+}

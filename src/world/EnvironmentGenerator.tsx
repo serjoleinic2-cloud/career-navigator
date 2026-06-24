@@ -4,6 +4,7 @@ interface EnvironmentGeneratorProps {
   side: 'left' | 'right';
   environmentType: string;
   levelIndex: number;
+  intensity?: number;
 }
 
 interface EnvConfig {
@@ -34,15 +35,17 @@ const envMap: Record<string, Record<string, EnvConfig>> = {
   right: rightEnvs,
 };
 
-export function EnvironmentGenerator({ side, environmentType, levelIndex }: EnvironmentGeneratorProps) {
+export function EnvironmentGenerator({ side, environmentType, levelIndex, intensity = 0.5 }: EnvironmentGeneratorProps) {
   const config = envMap[side]?.[environmentType];
-
   if (!config) return null;
 
-  const xOffset = side === 'left' ? -100 : 20;
-  const yOffset = levelIndex * 200 + 30;
   const isLeft = side === 'left';
+  const xOffset = isLeft ? -100 : 20;
+  const yOffset = levelIndex * 200 + 30;
   const animDelay = levelIndex * 0.3;
+
+  const scale = 0.5 + intensity * 1.0;
+  const opacity = 0.08 + intensity * 0.25;
 
   return (
     <motion.div
@@ -54,11 +57,12 @@ export function EnvironmentGenerator({ side, environmentType, levelIndex }: Envi
         borderRadius: config.borderRadius,
         left: xOffset,
         top: yOffset,
-        opacity: 0.2,
+        opacity,
+        scale,
       }}
       animate={
         isLeft
-          ? { scale: [0.98, 1.02, 0.98] }
+          ? { scale: [scale * 0.98, scale * 1.02, scale * 0.98] }
           : { y: [yOffset - 4, yOffset + 4, yOffset - 4] }
       }
       transition={{
