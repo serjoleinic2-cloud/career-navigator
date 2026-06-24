@@ -1,25 +1,29 @@
-import type { JourneyNode } from '@/core/career_journey_model';
+import type { SkillNode } from '@/core/skill_state';
+import { getStateDescription } from '@/core/advice_engine';
 import './JourneyNodeView.css';
 
 interface JourneyNodeViewProps {
-  node: JourneyNode;
+  node: SkillNode;
+  isActive?: boolean;
 }
 
-export function JourneyNodeView({ node }: JourneyNodeViewProps) {
+export function JourneyNodeView({ node, isActive }: JourneyNodeViewProps) {
   return (
-    <div className={`journey-node journey-node--${node.status}`}>
+    <div className={`journey-node ${isActive ? 'journey-node--active' : ''}`}>
       <div className="journey-node__header">
-        <span className="journey-node__chapter">{node.chapter}</span>
-        <span className="journey-node__day">Day {node.dayIndex}</span>
+        <span className="journey-node__skill">{node.skill}</span>
+        <span className="journey-node__state">{node.state.toUpperCase()}</span>
       </div>
 
-      <div className="journey-node__title">{node.title}</div>
+      <div className="journey-node__description">
+        {getStateDescription(node.state)}
+      </div>
 
-      {node.status === 'active' && (
-        <div className="journey-node__actions">
-          <button className="journey-node__action-btn">Start Task</button>
-        </div>
-      )}
+      <div className="journey-node__signals-preview">
+        {node.signals.slice(0, 1).map(s => (
+          <span key={s} className="journey-node__signal-tag">{s}</span>
+        ))}
+      </div>
     </div>
   );
 }

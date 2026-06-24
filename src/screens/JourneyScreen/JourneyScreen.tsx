@@ -1,33 +1,34 @@
-import { useState, useMemo, useCallback } from 'react';
-import { buildJourney } from '@/core/career_engine_v2';
-import { syncJourneyState, getFocusedNodeFromJourney } from '@/core/journey_state_controller';
+import { useState, useMemo } from 'react';
+import { RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES } from '@/core/skill_nodes';
 import { JourneyHeader } from '@/components/JourneyHeader/JourneyHeader';
 import { JourneyTimeline } from '@/components/JourneyTimeline/JourneyTimeline';
-import { JourneyChapter } from '@/components/JourneyChapter/JourneyChapter';
+import { JourneyNodeView } from '@/components/JourneyNodeView/JourneyNodeView';
 import { JourneyFocusPanel } from '@/components/JourneyFocusPanel/JourneyFocusPanel';
 import { JourneyBottomNav } from '@/components/JourneyBottomNav/JourneyBottomNav';
 import './JourneyScreen.css';
 
-const profile = { profession: 'Software Engineer', experience: 'junior' as const };
-
 export function JourneyScreen() {
-  const [currentDay, setCurrentDay] = useState(1);
+  const [activeNodeId, setActiveNodeId] = useState('positioning-clarity');
 
-  const journey = useMemo(() => buildJourney(profile), []);
-  const syncedJourney = useMemo(() => syncJourneyState(journey.chapters, currentDay), [journey, currentDay]);
+  const allNodes = useMemo(() => [
+    ...RESUME_SKILL_NODES,
+    ...LINKEDIN_SKILL_NODES,
+  ], []);
 
-  const focusedNode = useMemo(() => {
-    const node = getFocusedNodeFromJourney(syncedJourney, currentDay);
-    if (!node) {
-      console.warn('No focused node for day', currentDay);
-      return syncedJourney[0]?.nodes[0];
+  const activeNode = useMemo(() =>
+    allNodes.find(n => n.id === activeNodeId),
+    [allNodes, activeNodeId]
+  );
+
+  const handleStateAdvance = (nodeId: string, newState: string) => {
+    if (newState === 'confidence') {
+      const currentIndex = allNodes.findIndex(n => n.id === nodeId);
+      const nextNode = allNodes[currentIndex + 1];
+      if (nextNode) {
+        setActiveNodeId(nextNode.id);
+      }
     }
-    return node;
-  }, [syncedJourney, currentDay]);
-
-  const handleAllTasksComplete = useCallback(() => {
-    setCurrentDay(prev => prev + 1);
-  }, []);
+  };
 
   return (
     <div className="journey-screen">
@@ -35,15 +36,21 @@ export function JourneyScreen() {
 
       <div className="journey-viewport">
         <JourneyTimeline>
-          {syncedJourney.map((section) => (
-            <JourneyChapter key={section.chapter} section={section} />
+          {allNodes.map(node => (
+            <JourneyNodeView
+              key={node.id}
+              node={node}
+              isActive={node.id === activeNodeId}
+            />
           ))}
         </JourneyTimeline>
 
-        <JourneyFocusPanel
-          node={focusedNode}
-          onAllTasksComplete={handleAllTasksComplete}
-        />
+        {activeNode && (
+          <JourneyFocusPanel
+            node={activeNode}
+            onStateAdvance={handleStateAdvance}
+          />
+        )}
       </div>
 
       <JourneyBottomNav />

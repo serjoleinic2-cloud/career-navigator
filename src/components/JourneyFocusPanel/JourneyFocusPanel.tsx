@@ -1,86 +1,61 @@
-import { useState, useEffect } from 'react';
-import type { JourneyNode } from '@/core/career_journey_model';
+import { useState } from 'react';
+import type { SkillNode } from '@/core/skill_state';
+import { transition, getCurrentAdvice, canTransition } from '@/core/skill_engine';
 import './JourneyFocusPanel.css';
 
 interface JourneyFocusPanelProps {
-  node: JourneyNode | undefined;
-  onTaskComplete?: (taskIndex: number) => void;
-  onAllTasksComplete?: () => void;
+  node: SkillNode | undefined;
+  onStateAdvance?: (nodeId: string, newState: string) => void;
 }
 
-export function JourneyFocusPanel({ node, onTaskComplete, onAllTasksComplete }: JourneyFocusPanelProps) {
-  const [completedTasks, setCompletedTasks] = useState<number[]>([]);
-  const [notes, setNotes] = useState('');
+export function JourneyFocusPanel({ node, onStateAdvance }: JourneyFocusPanelProps) {
+  const [localNode, setLocalNode] = useState<SkillNode | undefined>(node);
 
-  useEffect(() => {
-    setCompletedTasks([]);
-    setNotes('');
-  }, [node?.id]);
+  if (node?.id !== localNode?.id) {
+    setLocalNode(node);
+  }
 
-  if (!node) return null;
+  if (!localNode) return null;
 
-  const progress = node ? (completedTasks.length / node.tasks.length) * 100 : 0;
+  const advice = getCurrentAdvice(localNode);
 
-  const handleCheck = (index: number) => {
-    const newCompleted = completedTasks.includes(index)
-      ? completedTasks.filter(i => i !== index)
-      : [...completedTasks, index];
-
-    setCompletedTasks(newCompleted);
-    onTaskComplete?.(index);
-
-    if (newCompleted.length === node.tasks.length) {
-      onAllTasksComplete?.();
-    }
+  const handleAdvance = () => {
+    if (!canTransition(localNode)) return;
+    const next = transition(localNode, 'tap_primary');
+    setLocalNode(next);
+    onStateAdvance?.(next.id, next.state);
   };
 
   return (
     <div className="focus-panel">
       <div className="focus-panel__header">
-        <span className="focus-panel__chapter">{node.chapter}</span>
-        <span className="focus-panel__day">Day {node.dayIndex}</span>
+        <span className="focus-panel__chapter">Skill Node</span>
+        <span className="focus-panel__state">{localNode.state.toUpperCase()}</span>
       </div>
 
-      <div className="focus-panel__progress">
-        <div className="focus-panel__progress-bar" style={{ width: `${progress}%` }} />
-      </div>
-      <div className="focus-panel__progress-text">
-        {completedTasks.length} of {node.tasks.length} completed
+      <h2 className="focus-panel__title">{localNode.skill}</h2>
+
+      <div className="focus-panel__advice">
+        <div className="focus-panel__advice-label">Current State</div>
+        <p className="focus-panel__advice-text">{advice}</p>
       </div>
 
-      <div className="focus-panel__title">{node.title}</div>
-
-      <div className="focus-panel__tasks">
-        {node.tasks.map((t, i) => (
-          <label key={t} className="focus-panel__task">
-            <input
-              type="checkbox"
-              className="focus-panel__task-check"
-              checked={completedTasks.includes(i)}
-              onChange={() => handleCheck(i)}
-            />
-            <span className="focus-panel__task-text">{t}</span>
-          </label>
+      <div className="focus-panel__signals">
+        <div className="focus-panel__signals-label">Signals</div>
+        {localNode.signals.map(s => (
+          <div key={s} className="focus-panel__signal">• {s}</div>
         ))}
       </div>
 
-      <div className="focus-panel__notes">
-        <div className="focus-panel__notes-label">Notes</div>
-        <textarea
-          className="focus-panel__notes-input"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Tap to add notes..."
-          rows={3}
-        />
-      </div>
+      {canTransition(localNode) && (
+        <button className="focus-panel__advance-btn" onClick={handleAdvance}>
+          Confirm State Advance → {localNode.nextState}
+        </button>
+      )}
 
-      <button
-        className="focus-panel__action"
-        onClick={() => console.log('Start task:', node.title)}
-      >
-        Start Task
-      </button>
+      {!canTransition(localNode) && (
+        <div className="focus-panel__complete">Skill Mastered ✓</div>
+      )}
     </div>
   );
 }

@@ -1,54 +1,57 @@
-CAREER NAVIGATOR — PROJECT SNAPSHOT v0.3
+CAREER NAVIGATOR — PROJECT SNAPSHOT v0.6
 🎯 PROJECT TYPE
 
-Offline deterministic career path system with game-like world visualization.
+Offline deterministic career readiness system with state-machine-driven skill progression.
 
 🧱 CORE ARCHITECTURE
-ENGINE
-Career Engine = deterministic data-driven system
-Functions:
-getCareerOptions()
-getCareerSteps()
-Source: static career_data.ts
-FLOWS
-flow_main.ts = single linear flow
-User journey:
-goal → options → selection → steps → result
-WORLD SYSTEM (GAME LAYER)
+SKILL STATE MACHINE
+Skill State Machine = deterministic skill progression through 6 states:
+awareness → understanding → application → readiness → execution → confidence
 
-Style: Monument Valley inspired world
+Source files:
+skill_state.ts (types: SkillState, SkillNode, STATE_FLOW)
+skill_engine.ts (transition, canTransition, getCurrentAdvice, getNextAdvice)
+advice_engine.ts (getAdvice, getStateDescription)
+skill_nodes.ts (RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES — 3 sample nodes)
+
+FLOWS
+JourneyScreen → linear skill progression
+User journey:
+positioning-clarity → achievement-framing → headline-authority
+Each skill node progresses through 6 states via "Confirm State Advance" button.
+Reaching 'confidence' auto-advances to next skill node.
+
+WORLD SYSTEM (UI LAYER)
+
+Style: iOS native-feel, light background (#f5f5f7), white cards
 
 Core concept:
-vertical path (bottom → top)
-each step = level in career progression
-world = interactive game scene, not UI
+vertical timeline (scroll-snap)
+each node = skill state card with advice + signals
+
 Components:
-VerticalPath (SVG glowing line)
-LevelRenderer (platforms + status)
-EnvironmentGenerator (left/right world)
-WorldRenderer (composition layer)
-FloatingOrb (current position)
-WorldDebugMode (full scene view)
-WORLD STRUCTURE
-LEFT SIDE = training / education world (cyan theme)
-RIGHT SIDE = industry / real world (purple theme)
-CENTER = career path
+JourneyHeader (sticky, blur)
+JourneyTimeline (scrollable, snap)
+JourneyNodeView (state: active + state badge + state description + signal tag)
+JourneyFocusPanel (state badge, advice card, signals list, advance button / "Skill Mastered")
+JourneyBottomNav (4-tab navigation)
+
+STRUCTURE
+HEADER → TIMELINE → FOCUS PANEL → BOTTOM NAV
+active node (blue border) → inactive nodes (default)
+
 DATA MAPPING
 
-careerToWorld.ts:
+skill_nodes.ts:
 
-5 career steps → 5 world levels
-each level contains:
-position index
-visual theme
-environment type
-🎮 DEBUG MODE
-WorldDebugMode enabled
-shows full map at once
-no camera movement
-used for testing composition
+SkillNode[] → displayed in timeline order
+node.id → determines focus via activeNodeId
+node.state → drives advice display and advance button visibility
+node.signals → shown as checklist in FocusPanel
+confidence reached → auto-advance to next node
+
 ⚙️ SYSTEM STATE (FRZ)
-version: v0.3
+version: v0.6
 mode: OFFLINE
 AI runtime: FALSE
 engine type: deterministic
@@ -57,12 +60,23 @@ status: STABLE BUILD
 no AI in runtime
 no dynamic generation
 all logic deterministic
-UI = visualization of static data
-world = representation layer
-🧭 CURRENT GOAL
+skill state advances via tap_primary action
+🔭 STATUS
+WORKING:
+state progression display (awareness → confidence)
+advice per state with advice card
+signals list per node
+"Confirm State Advance" button to progress state
+"Skill Mastered ✓" when confidence reached
+auto-advance to next skill node on confidence
 
-Build playable MVP:
+REMOVED:
+node_engine.ts, career_nodes.ts (old CareerNode model)
+career_engine_v2, career_journey_model, focus_controller, journey_state_controller (old journey model)
+skill pills / task checkboxes (replaced by state machine)
 
-user can see full career world
-user can move through levels
-system visually represents career progression
+NEXT TASKS
+Add end-of-journey screen for last node
+Animate state transitions
+Skill note-taking per skill
+Dynamic career path selection
