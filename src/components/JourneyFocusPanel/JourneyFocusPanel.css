@@ -28,6 +28,27 @@
   color: #c7c7cc;
 }
 
+.focus-panel__progress {
+  height: 4px;
+  background: #e5e5ea;
+  border-radius: 2px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.focus-panel__progress-bar {
+  height: 100%;
+  background: #007aff;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.focus-panel__progress-text {
+  font-size: 11px;
+  color: #8e8e93;
+  margin-bottom: 8px;
+}
+
 .focus-panel__title {
   font-size: 20px;
   font-weight: 700;
@@ -46,23 +67,51 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
-  color: #3a3a3c;
+  padding: 8px 0;
+  cursor: pointer;
 }
 
-.focus-panel__task-dot {
-  width: 8px;
-  height: 8px;
+.focus-panel__task-check {
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
+  border: 2px solid #c7c7cc;
+  appearance: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.focus-panel__task-check:checked {
   background: #007aff;
-  flex-shrink: 0;
+  border-color: #007aff;
+}
+
+.focus-panel__task-check:checked::after {
+  content: '✓';
+  color: white;
+  display: block;
+  text-align: center;
+  line-height: 18px;
+  font-size: 12px;
+}
+
+.focus-panel__task-text {
+  font-size: 14px;
+  color: #3a3a3c;
 }
 
 .focus-panel__notes {
   padding: 12px;
   background: #f2f2f7;
   border-radius: 10px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
   margin-bottom: 16px;
+}
+
+.focus-panel__notes:focus-within {
+  border-color: #007aff;
+  background: #ffffff;
 }
 
 .focus-panel__notes-label {
@@ -73,8 +122,20 @@
   margin-bottom: 4px;
 }
 
-.focus-panel__notes-placeholder {
+.focus-panel__notes-input {
+  width: 100%;
+  border: none;
+  background: transparent;
   font-size: 14px;
+  color: #3a3a3c;
+  resize: none;
+  outline: none;
+  padding: 0;
+  margin-top: 4px;
+  min-height: 60px;
+}
+
+.focus-panel__notes-input::placeholder {
   color: #c7c7cc;
 }
 
@@ -88,4 +149,25 @@
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.focus-panel__action:active {
+  transform: scale(0.97);
+  background: #0056b3;
+}
+
+.focus-panel__action::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.focus-panel__action:active::after {
+  opacity: 1;
 }
