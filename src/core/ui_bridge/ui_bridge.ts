@@ -1,9 +1,10 @@
 import { getRuntimeState } from '../runtime/runtime_controller';
 import { mapRuntimeToUI } from './ui_state_mapper';
 import { getNavigationState } from './ui_navigation';
+import type { PremiumState } from '../premium/premium_state';
 import type { UI_State, UI_NavigationState } from './ui_render_contract';
 
-export function getUIState(): UI_State {
+export function getUIState(premiumState?: PremiumState): UI_State {
   const runtime = getRuntimeState();
   if (!runtime) {
     return {
@@ -18,7 +19,7 @@ export function getUIState(): UI_State {
       isJourneyComplete: false,
     };
   }
-  return mapRuntimeToUI(runtime);
+  return mapRuntimeToUI(runtime, premiumState);
 }
 
 export function getVisibleNodes(): UI_State['nodes'] {

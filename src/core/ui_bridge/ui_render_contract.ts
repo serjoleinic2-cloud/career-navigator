@@ -15,6 +15,9 @@ export type UI_ChapterProgress = {
   percent: number;
   completed: boolean;
   active: boolean;
+  locked: boolean;
+  lockReason: string;
+  unlockHint: string;
 };
 
 export type UI_State = {

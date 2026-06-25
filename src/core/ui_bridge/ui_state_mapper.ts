@@ -2,9 +2,14 @@ import type { JourneyRuntimeState } from '../runtime/journey_runtime';
 import { getProfession } from '../profession_registry';
 import { getChapterById } from '../chapter_engine';
 import { toUINode } from './ui_node_adapter';
+import { checkAccess } from '../premium/premium_gate';
+import type { PremiumState } from '../premium/premium_state';
 import type { UI_State, UI_ChapterProgress } from './ui_render_contract';
 
-export function mapRuntimeToUI(runtimeState: JourneyRuntimeState): UI_State {
+export function mapRuntimeToUI(
+  runtimeState: JourneyRuntimeState,
+  premiumState?: PremiumState
+): UI_State {
   const profession = getProfession(runtimeState.professionId);
 
   if (!profession) {
@@ -29,12 +34,18 @@ export function mapRuntimeToUI(runtimeState: JourneyRuntimeState): UI_State {
 
   const chapterProgress: UI_ChapterProgress[] = profession.chapters.map(chapter => {
     const progress = runtimeState.chapterProgress[chapter.id] ?? 0;
+    const accessResult = premiumState
+      ? checkAccess(premiumState, profession.chapters, chapter.id)
+      : { allowed: true, reason: 'allowed' as const, unlockHint: '' };
     return {
       chapterId: chapter.id,
       title: chapter.title,
       percent: progress,
       completed: progress === 100,
       active: chapter.id === runtimeState.activeChapterId,
+      locked: !accessResult.allowed,
+      lockReason: accessResult.reason,
+      unlockHint: accessResult.unlockHint,
     };
   });
 

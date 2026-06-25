@@ -24,3 +24,21 @@ export {
 export type { RuntimeEventType, RuntimeEvent, RuntimeEventPayloads } from './runtime_events';
 
 export { bootstrapRuntime, validateRuntimeConsistency } from './runtime_initializer';
+
+export type { UnifiedRuntimeState, ChapterState } from './unified_runtime_state';
+export { createEmptyUnifiedState } from './unified_runtime_state';
+
+export { getState, setState, updateState, resetState, replaceState } from './runtime_store';
+
+export { processRuntimeEvent, dispatchEvent, getCurrentState } from './runtime_engine';
+
+export { reduce } from './runtime_reducer';
+
+export {
+  getCurrentNode,
+  getNextNode,
+  getProgressSnapshot,
+  getUnlockedNodes,
+  getActiveChapter,
+  getCompletedChapters,
+} from './runtime_selector';

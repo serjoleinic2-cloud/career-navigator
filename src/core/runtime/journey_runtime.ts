@@ -13,6 +13,7 @@ export type JourneyRuntimeState = {
   activeChapterId: string;
   readinessScore: number;
   confidenceScore: number;
+  nodeStates: Record<string, SkillNode>;
 };
 
 export function createEmptyRuntime(): JourneyRuntimeState {
@@ -33,10 +34,11 @@ export function createEmptyRuntime(): JourneyRuntimeState {
     activeChapterId: '',
     readinessScore: 0,
     confidenceScore: 0,
+    nodeStates: {},
   };
 }
 
-function buildNodeMap(nodes: SkillNode[]): Record<string, SkillNode> {
+export function buildNodeMap(nodes: SkillNode[]): Record<string, SkillNode> {
   const map: Record<string, SkillNode> = {};
   for (const n of nodes) {
     map[n.id] = n;
@@ -74,5 +76,6 @@ export function initializeJourneyRuntime(onboardingState: OnboardingState): Jour
     activeChapterId: currentChapter?.id ?? '',
     readinessScore: readiness.readinessScore,
     confidenceScore: readiness.confidenceScore,
+    nodeStates: nodeMap,
   };
 }
