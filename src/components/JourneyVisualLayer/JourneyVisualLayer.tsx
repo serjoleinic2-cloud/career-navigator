@@ -1,29 +1,25 @@
-import type { RenderNode } from '@/core/visual_node_renderer';
-import type { VisualNode } from '@/core/journey_adapter';
+import type { UI_Node } from '@/core/ui_bridge/ui_render_contract';
 import './JourneyVisualLayer.css';
 
 type Props = {
-  nodes: RenderNode[];
-  visualNodes?: VisualNode[];
+  nodes: UI_Node[];
 };
 
-export function JourneyVisualLayer({ nodes, visualNodes }: Props) {
-  const visualById = new Map(visualNodes?.map(v => [v.id, v]) ?? []);
-
+export function JourneyVisualLayer({ nodes }: Props) {
   return (
     <div className="journeyLayer">
       {nodes.map((n) => {
-        const visual = visualById.get(n.id);
-        const flowClass = visual?.flowPosition ?? '';
+        const stateClass = n.state === 'active' && n.glow ? 'node--active node--glow'
+          : n.state === 'completed' ? 'node--completed'
+          : 'node--locked';
         return (
           <div
             key={n.id}
             id={n.id}
-            className={`node ${n.uiState} ${flowClass}`}
+            className={`node ${stateClass}`}
             style={{
-              transform: `scale(${n.scale}) translateY(${n.depth * 40}px)`,
-              opacity: n.opacity,
-              zIndex: n.uiState === 'active' ? 10 : 1,
+              opacity: n.state === 'locked' ? 0.4 : 1,
+              zIndex: n.state === 'active' ? 10 : 1,
             }}
           >
             <span className="nodeTitle">{n.title}</span>

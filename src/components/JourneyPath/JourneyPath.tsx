@@ -1,8 +1,8 @@
-import type { VisualNode } from '@/core/journey_adapter';
+import type { UI_Node } from '@/core/ui_bridge/ui_render_contract';
 import './JourneyPath.css';
 
 type Props = {
-  nodes: VisualNode[];
+  nodes: UI_Node[];
 };
 
 export function JourneyPath({ nodes }: Props) {
@@ -11,7 +11,7 @@ export function JourneyPath({ nodes }: Props) {
       {nodes.map(node => (
         <div
           key={node.id}
-          className={`pathSegment ${node.flowPosition}`}
+          className={`pathSegment pathSegment--${node.state}`}
         />
       ))}
     </div>

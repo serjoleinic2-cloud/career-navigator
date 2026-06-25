@@ -1,9 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
-import { getActiveProfession, getActiveNodes } from '@/core/profession_loader';
-import { getActiveNode, moveToNextState, setActiveNode, canAdvance } from '@/core/orchestrator';
-import type { OrchestratorState } from '@/core/orchestrator';
-import { buildJourneyViewModel } from '@/core/journey_adapter';
-import { buildJourneyUI } from '@/core/journey_orchestrator';
+import { useState, useEffect } from 'react';
+import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
+import { setActiveNode, advanceNode } from '@/core/runtime/runtime_controller';
 import { snapToActiveNode } from '@/core/focus_snap_controller';
 import { JourneyVisualLayer } from '@/components/JourneyVisualLayer/JourneyVisualLayer';
 import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
@@ -12,50 +9,41 @@ import { JourneyBottomNav } from '@/components/JourneyBottomNav/JourneyBottomNav
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
-  const profession = getActiveProfession();
+  const [, forceUpdate] = useState({});
 
-  const [state, setState] = useState<OrchestratorState>({
-    activeNodeId: profession.skillNodes[0]?.id ?? '',
-    nodes: Object.fromEntries(profession.skillNodes.map(n => [n.id, n])),
-  });
-
-  const allNodes = useMemo(() => getActiveNodes(), []);
-
-  const visualNodes = useMemo(() => {
-    return buildJourneyViewModel(allNodes, state.activeNodeId);
-  }, [allNodes, state.activeNodeId]);
-
-  const renderNodes = useMemo(() => {
-    return buildJourneyUI(allNodes);
-  }, [allNodes]);
-
-  const activeNode = useMemo(() => getActiveNode(state), [state]);
+  const ui = getUIState();
+  const nav = getNavigation();
 
   useEffect(() => {
-    snapToActiveNode(state.activeNodeId);
-  }, [state.activeNodeId]);
+    snapToActiveNode(ui.activeNodeId);
+  }, [ui.activeNodeId]);
 
   const handleNodeSelect = (nodeId: string) => {
-    setState(prev => setActiveNode(prev, nodeId));
+    setActiveNode(nodeId);
+    forceUpdate({});
   };
 
   const handleAdvance = () => {
-    if (!canAdvance(activeNode)) return;
-    setState(prev => moveToNextState(prev, 'tap_primary'));
+    advanceNode('tap_primary');
+    forceUpdate({});
   };
 
   return (
     <div className="journey-screen">
-      <JourneyHeader />
-      <JourneyPath nodes={visualNodes} />
-      <JourneyVisualLayer nodes={renderNodes} visualNodes={visualNodes} />
-      <JourneyBottomNav
-        activeNodeId={state.activeNodeId}
-        onNodeSelect={handleNodeSelect}
+      <JourneyHeader
+        chapterTitle={ui.currentChapterTitle}
+        readiness={ui.readinessBadge}
+        confidence={ui.confidenceBadge}
       />
-      <button className="advance-btn" onClick={handleAdvance}>
-        Advance
-      </button>
+      <JourneyPath nodes={ui.nodes} />
+      <JourneyVisualLayer nodes={ui.nodes} />
+      <JourneyBottomNav
+        activeNodeId={ui.activeNodeId}
+        onNodeSelect={handleNodeSelect}
+        onAdvance={handleAdvance}
+        hasNext={nav.hasNext}
+        hasPrevious={nav.hasPrevious}
+      />
     </div>
   );
 }
