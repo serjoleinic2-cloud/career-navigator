@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES } from '@/core/skill_nodes';
+import { getActiveProfession, getActiveNodes } from '@/core/profession_loader';
 import { getActiveNode, moveToNextState, setActiveNode, canAdvance } from '@/core/orchestrator';
 import type { OrchestratorState } from '@/core/orchestrator';
 import { buildJourneyViewModel } from '@/core/journey_adapter';
@@ -12,17 +12,14 @@ import { JourneyBottomNav } from '@/components/JourneyBottomNav/JourneyBottomNav
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
+  const profession = getActiveProfession();
+
   const [state, setState] = useState<OrchestratorState>({
-    activeNodeId: 'positioning-clarity',
-    nodes: Object.fromEntries(
-      [...RESUME_SKILL_NODES, ...LINKEDIN_SKILL_NODES].map(n => [n.id, n])
-    ),
+    activeNodeId: profession.skillNodes[0]?.id ?? '',
+    nodes: Object.fromEntries(profession.skillNodes.map(n => [n.id, n])),
   });
 
-  const allNodes = useMemo(() => [
-    ...RESUME_SKILL_NODES,
-    ...LINKEDIN_SKILL_NODES,
-  ], []);
+  const allNodes = useMemo(() => getActiveNodes(), []);
 
   const visualNodes = useMemo(() => {
     return buildJourneyViewModel(allNodes, state.activeNodeId);

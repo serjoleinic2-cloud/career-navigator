@@ -1,0 +1,65 @@
+/* Core layout, spacing, cards, buttons, typography */
+/* No profession-specific styles here */
+
+.journey-screen {
+  min-height: 100vh;
+  background: #f5f5f7;
+}
+
+.journeyLayer {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 120px 24px;
+}
+
+.node {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.35s ease;
+  position: relative;
+}
+
+.node.active {
+  border-left: 4px solid #7c5cff;
+  box-shadow: 0 8px 28px rgba(124, 92, 255, 0.15);
+}
+
+.node.completed {
+  background: #f8f8f8;
+}
+
+.node.locked {
+  background: #fafafa;
+}
+
+.nodeTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1a2e;
+}
+
+.journeyPath {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pathSegment {
+  flex: 1;
+  background: linear-gradient(
+    to bottom,
+    rgba(124, 92, 255, 0.8),
+    rgba(124, 92, 255, 0.2)
+  );
+  transition: opacity 0.35s ease;
+}

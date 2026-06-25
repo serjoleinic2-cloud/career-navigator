@@ -1,1 +1,134 @@
-MASTER LOADER этот файл даю перед началом каждой новой сессии
+Если новая сессия и нужен просто контекст
+
+Дай Kimi команду:
+
+SESSION EXPORT
+
+Read:
+
+core/SESSION_START_v0.6.md
+
+Generate:
+
+1. FRZ version
+2. Current architecture summary
+3. Active core files
+4. Active runtime flow
+5. Current open tasks
+6. Known issues
+7. Legacy remaining in repo
+
+Output:
+FACTS ONLY
+
+И вставляй мне результат.
+
+Если были изменения в коде
+
+Сначала:
+
+PROJECT SNAPSHOT UPDATE
+
+Use:
+
+core/SNAPSHOT_GENERATOR.md
+
+Generate:
+
+PROJECT_SNAPSHOT_v0.7.md
+(or current version)
+
+Then run SESSION EXPORT.
+
+И только потом открывай новую сессию.
+
+Если нужна помощь по архитектуре
+
+Вставляй:
+
+FRZ VERSION
+PROJECT SNAPSHOT
+OPEN TASK
+
+Например:
+
+FRZ: v0.6
+
+OPEN TASK:
+Refactor JourneyTimeline
+
+PROJECT SNAPSHOT:
+...
+
+Этого достаточно.
+
+Если нужно писать задания для Kimi/OpenCode
+
+Вставляй только:
+
+FRZ VERSION
+TASK
+
+Пример:
+
+FRZ v0.6
+
+TASK:
+Replace remaining dayIndex logic in JourneyTimeline.
+
+Мне уже не нужен весь проект.
+
+Когда ОБЯЗАТЕЛЬНО нужен полный аудит
+
+Только в 4 случаях:
+
+1. Большой рефакторинг
+
+2. После удаления папок
+
+3. После смены архитектуры
+
+4. Если появились ошибки сборки,
+   которые непонятно откуда идут
+
+Тогда команда:
+
+REPO AUDIT
+
+Show:
+
+- src tree
+- core tree
+- dependency graph
+- legacy files
+- active runtime flow
+Что НЕ нужно больше присылать
+
+Не нужно каждый раз:
+
+❌ MASTER_LOADER
+❌ TRUTH_v0.6
+❌ FRZ_RULES
+❌ SYSTEM_CONTROL
+❌ весь src tree
+❌ весь core tree
+
+Они теперь считаются стабильными документами проекта.
+
+Минимальный пакет для новой сессии
+
+Достаточно буквально такого:
+
+Career Navigator
+
+FRZ VERSION: v0.6
+
+PROJECT SNAPSHOT: current
+
+OPEN TASK:
+<что сейчас делаем>
+
+KNOWN ISSUES:
+<если есть>
+
+И мы продолжим работу без повторного восстановления всей архитектуры.

@@ -1,15 +1,17 @@
 {
-  "version": "v0.2.1",
+  "version": "v0.6",
   "mode": "FROZEN",
   "freeze_status": true,
-  "engine_status": "stub",
-  "truth_file": "/core/TRUTH_v0.2.md",
+  "engine_status": "skill_state_machine",
+  "truth_file": "/core/TRUTH_v0.6.md",
+  "snapshot_file": "/core/PROJECT_SNAPSHOT_v0.6.md",
   "runtime_mode": "OFFLINE_DETERMINISTIC",
   "ai_dependency": false,
   "allowed_changes": [
     "bugfix",
     "ui adjustments",
-    "refactor without logic change"
+    "refactor without logic change",
+    "documentation update"
   ],
   "blocked_changes": [
     "architecture rewrite",
@@ -18,6 +20,8 @@
     "introduce ai logic",
     "dynamic generation",
     "external api calls",
-    "runtime intelligence"
+    "runtime intelligence",
+    "reintroduce dayIndex",
+    "reintroduce checklist tasks"
   ]
 }

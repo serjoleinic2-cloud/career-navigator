@@ -1,4 +1,4 @@
-import type { SkillNode } from './skill_state';
+import type { SkillNode } from '@/core/skill_state';
 
 export const RESUME_SKILL_NODES: SkillNode[] = [
   {
@@ -52,4 +52,9 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
       confidence: 'Your headline attracts the right opportunities.',
     },
   },
+];
+
+export const ALL_SKILL_NODES: SkillNode[] = [
+  ...RESUME_SKILL_NODES,
+  ...LINKEDIN_SKILL_NODES,
 ];

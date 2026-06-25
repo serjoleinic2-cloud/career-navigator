@@ -1,0 +1,51 @@
+SYSTEM CONTEXT LOAD v0.6
+
+Project: Career Navigator
+Type: Offline deterministic career readiness system
+Stack: React + TypeScript + Vite + Capacitor Android
+
+ACTIVE ARCHITECTURE
+Skill State Machine = single source of truth
+States: locked → awareness → understanding → application → readiness → execution → confidence
+
+ACTIVE CORE FILES
+src/core/skill_state.ts — types
+src/core/skill_nodes.ts — data
+src/core/skill_engine.ts — transitions
+src/core/advice_engine.ts — advice
+src/core/journey_adapter.ts — UI mapping
+src/core/visual_node_renderer.ts — render mapping
+src/core/focus_snap_controller.ts — scroll
+src/core/journey_orchestrator.ts — UI builder
+src/core/orchestrator.ts — runtime state
+src/core/visual_flow.ts — flow types
+src/core/flow_mapper.ts — flow mapping
+src/core/depth_mapper.ts — depth calc
+src/core/focus_gravity.ts — focus weight
+src/core/bootstrap/init.ts — init
+
+ACTIVE UI
+JourneyScreen → JourneyHeader → JourneyVisualLayer → JourneyPath → JourneyBottomNav
+
+RUNTIME RULES
+- No AI in runtime
+- No external API
+- No dynamic generation
+- Deterministic only
+- UI is stateless renderer
+- Only Orchestrator mutates state
+
+FRZ STATE
+version: v0.6
+mode: FROZEN
+freeze_status: true
+engine: skill_state_machine
+
+READ FIRST
+1. core/TRUTH_v0.6.md
+2. core/PROJECT_SNAPSHOT_v0.6.md
+3. core/FRZ_RULES.md
+4. core/FRZ_VERSION.json
+5. core/SYSTEM_CONTROL.json
+
+THEN CONTINUE DEVELOPMENT

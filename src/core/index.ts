@@ -1,7 +1,15 @@
 export type { SkillState, SkillNode } from './skill_state';
 export { STATE_FLOW } from './skill_state';
 
-export { RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES } from './skill_nodes';
+export type { ProfessionModule } from './profession_contract';
+export {
+  registerProfession,
+  getProfession,
+  getAllProfessions,
+  getDefaultProfession,
+  hasProfession,
+  unregisterProfession,
+} from './profession_registry';
 
 export { transition, canTransition, getCurrentAdvice, getNextAdvice } from './skill_engine';
 export type { UserAction } from './skill_engine';
@@ -43,6 +51,24 @@ export { initCareerNavigator, isAppReady } from './bootstrap/init';
 
 export { CORE_RULES, enforceRule } from './rules';
 export type { CoreRule } from './rules';
+
+export type { ActiveProfessionState } from './profession_loader';
+export {
+  setActiveProfession,
+  getActiveProfession,
+  getActiveNodes,
+  getActiveChapters,
+  getActiveProfessionId,
+} from './profession_loader';
+
+export type { ProfessionMeta } from './profession_metadata';
+export { getProfessionCatalog } from './profession_metadata';
+
+export type { ValidationResult, ValidationIssue, ValidationSeverity } from './profession_validation';
+export { validateProfession } from './profession_validation';
+
+export type { BootstrapResult } from './profession_bootstrap';
+export { bootstrapProfessions } from './profession_bootstrap';
 
 export type { FlowPosition } from './visual_flow';
 

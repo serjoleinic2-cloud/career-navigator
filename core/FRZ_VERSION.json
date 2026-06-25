@@ -1,7 +1,10 @@
 {
-  "version": "v0.1",
-  "mode": "RAW",
-  "freeze_status": false,
-  "engine_status": "stub",
-  "created": "2026-06-23"
+  "version": "v0.6",
+  "mode": "FROZEN",
+  "freeze_status": true,
+  "engine_status": "skill_state_machine",
+  "truth_file": "/core/TRUTH_v0.6.md",
+  "snapshot_file": "/core/PROJECT_SNAPSHOT_v0.6.md",
+  "runtime_mode": "OFFLINE_DETERMINISTIC",
+  "ai_dependency": false
 }

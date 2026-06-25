@@ -1,15 +1,20 @@
-import { RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES } from '../skill_nodes';
 import type { OrchestratorState } from '../orchestrator';
+import { SOFTWARE_ENGINEER_PROFESSION } from '@/professions/software_engineer';
+import { registerProfession, getDefaultProfession } from '../profession_registry';
+import { setActiveProfession } from '../profession_loader';
 
 export function initCareerNavigator(): OrchestratorState {
-  const allNodes = [
-    ...RESUME_SKILL_NODES,
-    ...LINKEDIN_SKILL_NODES,
-  ];
+  registerProfession(SOFTWARE_ENGINEER_PROFESSION);
+  setActiveProfession('software_engineer');
+
+  const profession = getDefaultProfession();
+  if (!profession) {
+    throw new Error('No profession registered');
+  }
 
   return {
-    activeNodeId: allNodes[0].id,
-    nodes: Object.fromEntries(allNodes.map(n => [n.id, n])),
+    activeNodeId: profession.skillNodes[0]?.id ?? '',
+    nodes: Object.fromEntries(profession.skillNodes.map(n => [n.id, n])),
   };
 }
 

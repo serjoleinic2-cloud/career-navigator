@@ -1,0 +1,10 @@
+/* Software Engineer profession-specific styles */
+/* Core layout, spacing, cards, buttons, typography in src/styles/core.css */
+
+.se-profession-header {
+  color: #7c5cff;
+}
+
+.se-skill-card {
+  border-left: 3px solid #7c5cff;
+}
