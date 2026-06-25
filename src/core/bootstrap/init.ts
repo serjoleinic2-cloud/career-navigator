@@ -4,6 +4,8 @@ import { setActiveProfession } from '@/professions/profession_service';
 import type { UnifiedRuntimeState } from '../runtime/unified_runtime_state';
 import { createEmptyUnifiedState } from '../runtime/unified_runtime_state';
 import type { SkillState } from '../skill_state';
+import { CareerState } from '../state_engine/career_state';
+import { createDefaultReadinessVector } from '../readiness_engine';
 
 export function initCareerNavigator(): UnifiedRuntimeState {
   registerProfession(SoftwareEngineerModule);
@@ -38,5 +40,10 @@ export function initCareerNavigator(): UnifiedRuntimeState {
     chapterState,
     currentNodeId: profession.entryNodeId,
     lockedNodes: profession.skillGraph.slice(profession.premiumConfig.freeChapters * 2).map(n => n.id),
+    careerState: CareerState.EXPLORING,
+    readinessVector: createDefaultReadinessVector(),
+    careerScore: 0,
+    selfScore: 0,
+    taskCycles: {},
   };
 }

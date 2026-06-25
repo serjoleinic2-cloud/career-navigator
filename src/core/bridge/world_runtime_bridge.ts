@@ -3,6 +3,7 @@ import type { WorldState } from '../../world/visual_world_contract';
 import type { UI_Node, UI_NodeState } from '../ui_bridge/ui_render_contract';
 import { buildWorldFromUI, getCameraFocusId, getFogIntensity } from '../../world/world_builder';
 import { createCamera, focusOnNode } from '../../world/camera/world_camera_controller';
+import { buildVisualWorld } from '../../world/visual_world_engine';
 
 export function syncWorldWithRuntime(runtimeState: UnifiedRuntimeState): WorldState {
   const uiNodes: UI_Node[] = Object.entries(runtimeState.skillState).map(([id, state]) => ({
@@ -15,7 +16,7 @@ export function syncWorldWithRuntime(runtimeState: UnifiedRuntimeState): WorldSt
 
   const worldNodes = buildWorldFromUI(uiNodes);
   const focusId = getCameraFocusId(uiNodes);
-  const fogIntensity = getFogIntensity(uiNodes);
+  getFogIntensity(uiNodes);
 
   const focusNode = worldNodes.find(n => n.id === focusId);
   let camera = createCamera();
@@ -23,11 +24,18 @@ export function syncWorldWithRuntime(runtimeState: UnifiedRuntimeState): WorldSt
     camera = focusOnNode(camera, focusNode);
   }
 
+  const careerVisual = buildVisualWorld({
+    careerState: runtimeState.careerState,
+    confidenceScore: runtimeState.confidenceScore,
+    readinessScore: runtimeState.readinessScore,
+    nodes: worldNodes,
+  });
+
   return {
     nodes: worldNodes,
     cameraFocusId: focusId,
-    fogIntensity,
-    timeOfDay: 'dawn',
+    fogIntensity: careerVisual.fogIntensity,
+    timeOfDay: careerVisual.timeOfDay,
   };
 }
 

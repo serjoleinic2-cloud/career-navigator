@@ -1,4 +1,5 @@
 import type { SkillNode, SkillState } from './skill_state';
+import { calculateConfidence } from './confidence_engine';
 
 export type ReadinessResult = {
   readinessScore: number;
@@ -6,6 +7,14 @@ export type ReadinessResult = {
   completedSkills: number;
   totalSkills: number;
   gaps: string[];
+};
+
+export type ReadinessVector = {
+  resume: number;
+  linkedin: number;
+  applications: number;
+  interview: number;
+  confidence: number;
 };
 
 const STATE_VALUES: Record<SkillState, number> = {
@@ -51,6 +60,36 @@ export function calculateReadiness(nodes: SkillNode[]): ReadinessResult {
     totalSkills,
     gaps,
   };
+}
+
+export function calculateReadinessConfidence(
+  interviewCount: number,
+  selfAssessment: number,
+  recentFailures: number
+): number {
+  return calculateConfidence({
+    successRate: 0,
+    interviewHistory: interviewCount,
+    selfAssessment,
+    stressEvents: recentFailures,
+  });
+}
+
+export function createDefaultReadinessVector(): ReadinessVector {
+  return {
+    resume: 0,
+    linkedin: 0,
+    applications: 0,
+    interview: 0,
+    confidence: 0,
+  };
+}
+
+export function updateReadinessVector(
+  prev: ReadinessVector,
+  updates: Partial<ReadinessVector>
+): ReadinessVector {
+  return { ...prev, ...updates };
 }
 
 export function getSkillValue(state: SkillState): number {

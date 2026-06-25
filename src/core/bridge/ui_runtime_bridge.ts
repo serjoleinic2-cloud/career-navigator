@@ -1,6 +1,7 @@
 import type { UnifiedRuntimeState } from '../runtime/unified_runtime_state';
 import { getCurrentView } from '../runtime/runtime_selector_final';
 import type { UI_State, UI_NodeState } from '../ui_bridge/ui_render_contract';
+import { mapCareerStateToZone } from '../../world/world_zone_mapper';
 
 export function syncUI(runtimeState: UnifiedRuntimeState): UI_State {
   const view = getCurrentView(runtimeState);
@@ -35,6 +36,8 @@ export function syncUI(runtimeState: UnifiedRuntimeState): UI_State {
     confidenceBadge: `${view.confidenceScore}%`,
     currentChapterTitle: view.activeChapterId,
     isJourneyComplete: view.completedNodes === view.totalNodes && view.totalNodes > 0,
+    careerState: runtimeState.careerState,
+    worldZone: mapCareerStateToZone(runtimeState.careerState).zone,
   };
 }
 

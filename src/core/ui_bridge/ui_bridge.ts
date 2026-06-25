@@ -17,6 +17,8 @@ export function getUIState(premiumState?: PremiumState): UI_State {
       confidenceBadge: '0%',
       currentChapterTitle: '',
       isJourneyComplete: false,
+      careerState: 'unknown',
+      worldZone: 'plains',
     };
   }
   return mapRuntimeToUI(runtime, premiumState);

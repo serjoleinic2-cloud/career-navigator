@@ -5,7 +5,14 @@ export type SystemEventType =
   | 'NODE_CHANGED'
   | 'CHAPTER_CHANGED'
   | 'WORLD_UPDATED'
-  | 'UI_REFRESH';
+  | 'UI_REFRESH'
+  | 'TASK_COMPLETED'
+  | 'TASK_FAILED'
+  | 'STATE_CHANGED'
+  | 'SCORE_UPDATED'
+  | 'CONFIDENCE_CHANGED'
+  | 'CHAPTER_UNLOCKED'
+  | 'GAP_UPDATED';
 
 export type SystemEvent = {
   type: SystemEventType;

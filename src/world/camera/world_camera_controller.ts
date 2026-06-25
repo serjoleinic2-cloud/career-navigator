@@ -37,13 +37,36 @@ export function focusOnNode(
 export function updateCamera(
   camera: CameraState,
   _deltaTime: number,
-  smoothness: number = 0.05
+  smoothness: number = 0.05,
+  noiseLevel: number = 0
 ): CameraState {
-  return {
+  let updated = {
     ...camera,
     currentX: camera.currentX + (camera.targetX - camera.currentX) * smoothness,
     currentY: camera.currentY + (camera.targetY - camera.currentY) * smoothness,
     currentZ: camera.currentZ + (camera.targetZ - camera.currentZ) * smoothness,
+  };
+
+  if (noiseLevel > 0) {
+    updated = applyCameraNoise(updated, noiseLevel);
+  }
+
+  return updated;
+}
+
+export function applyCameraNoise(
+  camera: CameraState,
+  noiseLevel: number
+): CameraState {
+  if (noiseLevel <= 0) return camera;
+
+  const jitterX = (Math.random() - 0.5) * 2 * noiseLevel;
+  const jitterY = (Math.random() - 0.5) * 2 * noiseLevel;
+
+  return {
+    ...camera,
+    currentX: camera.currentX + jitterX,
+    currentY: camera.currentY + jitterY,
   };
 }
 

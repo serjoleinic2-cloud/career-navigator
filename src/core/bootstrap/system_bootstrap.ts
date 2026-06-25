@@ -9,6 +9,8 @@ import { syncUI } from '../bridge/ui_runtime_bridge';
 import { syncWorldWithRuntime } from '../bridge/world_runtime_bridge';
 import { setSystemContext } from './system_context';
 import type { SystemContext } from './system_context';
+import { CareerState } from '../state_engine/career_state';
+import { createDefaultReadinessVector } from '../readiness_engine';
 
 export type UserProfile = {
   userId: string;
@@ -52,6 +54,11 @@ export function initializeSystem(
     lockedNodes: profession.skillGraph
       .slice(profession.premiumConfig.freeChapters * 2)
       .map(n => n.id),
+    careerState: CareerState.EXPLORING,
+    readinessVector: createDefaultReadinessVector(),
+    careerScore: 0,
+    selfScore: 0,
+    taskCycles: {},
   };
 
   replaceState(runtime);
@@ -70,6 +77,7 @@ export function initializeSystem(
 
   emit('SYSTEM_BOOTED', { userId: userProfile.userId });
   emit('PROFESSION_LOADED', { professionId: profession.id });
+  emit('STATE_CHANGED', { careerState: CareerState.EXPLORING });
   emit('UI_REFRESH', {});
 
   return context;

@@ -1,4 +1,8 @@
 import type { SkillState } from '../skill_state';
+import { CareerState } from '../state_engine/career_state';
+import type { ReadinessVector } from '../readiness_engine';
+import { createDefaultReadinessVector } from '../readiness_engine';
+import type { TaskCycle } from '../interaction/task_cycle';
 
 export type ChapterState = {
   id: string;
@@ -20,6 +24,11 @@ export type UnifiedRuntimeState = {
   currentNodeId: string;
   lockedNodes: string[];
   completedNodes: string[];
+  careerState: CareerState;
+  readinessVector: ReadinessVector;
+  careerScore: number;
+  selfScore: number;
+  taskCycles: Record<string, TaskCycle[]>;
 };
 
 export function createEmptyUnifiedState(userId: string = 'anonymous'): UnifiedRuntimeState {
@@ -36,5 +45,10 @@ export function createEmptyUnifiedState(userId: string = 'anonymous'): UnifiedRu
     currentNodeId: '',
     lockedNodes: [],
     completedNodes: [],
+    careerState: CareerState.UNKNOWN,
+    readinessVector: createDefaultReadinessVector(),
+    careerScore: 0,
+    selfScore: 0,
+    taskCycles: {},
   };
 }

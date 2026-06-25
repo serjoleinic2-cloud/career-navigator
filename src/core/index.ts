@@ -78,3 +78,30 @@ export { buildFlowMap } from './flow_mapper';
 export { getNodeDepth } from './depth_mapper';
 
 export { getFocusWeight } from './focus_gravity';
+
+export { CareerState, CAREER_STATE_ORDER } from './state_engine/career_state';
+export type { StateTrigger, StateTransitionRule } from './state_engine/state_transition_rules';
+export { STATE_TRANSITIONS, canTransition as canTransitionCareerState, applyTransition as applyCareerStateTransition } from './state_engine/state_transition_rules';
+
+export type { WeightedScoreInput } from './scoring/career_score';
+export { calculateCareerScore, calculateSystemScore } from './scoring/career_score';
+
+export type { ReadinessVector } from './readiness_engine';
+export { createDefaultReadinessVector, updateReadinessVector } from './readiness_engine';
+
+export type { ConfidenceInput } from './confidence_engine';
+export { calculateConfidence, buildConfidenceInput, getConfidenceLevel } from './confidence_engine';
+
+export type { AwarenessEvent, UserPerception, SystemReadiness, GapState } from './gap_engine';
+export { calculateSystemGap, calculateGap, checkGapThreshold } from './gap_engine';
+
+export type { TaskResult, LearningLoop, TaskState } from './learning/learning_loop_model';
+export { createTaskState } from './learning/learning_loop_model';
+export type { TaskInput } from './learning/loop_execution_engine';
+export { processTaskAttempt, calculateDelta } from './learning/loop_execution_engine';
+export { adaptDifficulty, shouldRetry } from './learning/difficulty_adapter';
+export type { UserConfidenceState } from './learning/reinforcement_engine';
+export { applyReinforcement, createConfidenceState } from './learning/reinforcement_engine';
+export { loopToGapUpdate, shouldUpdateGap } from './learning/loop_gap_connector';
+export type { PipelineResult } from './learning/learning_pipeline';
+export { runLearningPipeline } from './learning/learning_pipeline';

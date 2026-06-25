@@ -5,6 +5,7 @@ import { toUINode } from './ui_node_adapter';
 import { checkAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
 import type { UI_State, UI_ChapterProgress } from './ui_render_contract';
+import { mapCareerStateToZone } from '../../world/world_zone_mapper';
 
 export function mapRuntimeToUI(
   runtimeState: JourneyRuntimeState,
@@ -23,6 +24,8 @@ export function mapRuntimeToUI(
       confidenceBadge: '0%',
       currentChapterTitle: '',
       isJourneyComplete: false,
+      careerState: 'unknown',
+      worldZone: 'plains',
     };
   }
 
@@ -51,6 +54,8 @@ export function mapRuntimeToUI(
 
   const currentChapter = getChapterById(profession.chapters, runtimeState.activeChapterId);
 
+  const zone = mapCareerStateToZone('exploring' as any);
+
   return {
     nodes,
     activeNodeId: runtimeState.activeNodeId,
@@ -61,5 +66,7 @@ export function mapRuntimeToUI(
     confidenceBadge: `${runtimeState.confidenceScore}%`,
     currentChapterTitle: currentChapter?.title ?? '',
     isJourneyComplete: runtimeState.confidenceScore === 100,
+    careerState: 'exploring',
+    worldZone: zone.zone,
   };
 }

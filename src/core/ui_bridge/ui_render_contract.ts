@@ -30,6 +30,8 @@ export type UI_State = {
   confidenceBadge: string;
   currentChapterTitle: string;
   isJourneyComplete: boolean;
+  careerState: string;
+  worldZone: string;
 };
 
 export type UI_NavigationState = {

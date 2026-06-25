@@ -89,6 +89,46 @@ export function reduce(
       };
     }
 
+    case 'CAREER_STATE_CHANGED': {
+      return {
+        ...state,
+        careerState: event.newState,
+      };
+    }
+
+    case 'CAREER_SCORE_UPDATED': {
+      return {
+        ...state,
+        careerScore: event.careerScore,
+        selfScore: event.selfScore,
+      };
+    }
+
+    case 'READINESS_VECTOR_UPDATED': {
+      return {
+        ...state,
+        readinessVector: event.vector,
+      };
+    }
+
+    case 'TASK_CYCLE_RECORDED': {
+      const existing = state.taskCycles[event.nodeId] ?? [];
+      return {
+        ...state,
+        taskCycles: {
+          ...state.taskCycles,
+          [event.nodeId]: [...existing, event.cycle],
+        },
+      };
+    }
+
+    case 'CONFIDENCE_UPDATED': {
+      return {
+        ...state,
+        confidenceScore: event.newConfidence,
+      };
+    }
+
     default:
       return state;
   }

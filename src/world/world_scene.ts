@@ -4,15 +4,18 @@ import { createCamera, focusOnNode, updateCamera } from './camera/world_camera_c
 import { createFogLayers, animateFogLayers } from './effects/fog_system';
 import { renderWorld, type RenderFrame } from './world_renderer';
 import type { WorldState } from './visual_world_contract';
+import { buildGapVisualState, applyGapOverlay } from './gap/gap_visual_layer';
+import type { GapState } from './gap/gap_visual_layer';
 
 export type SceneState = {
   world: WorldState;
   camera: ReturnType<typeof createCamera>;
   fogLayers: ReturnType<typeof createFogLayers>;
   time: number;
+  effects: { blur: number };
 };
 
-export function createScene(uiState: UI_State): SceneState {
+export function createScene(uiState: UI_State, gapState?: GapState): SceneState {
   const worldNodes = buildWorldFromUI(uiState.nodes);
   const focusId = getCameraFocusId(uiState.nodes);
   const fogIntensity = getFogIntensity(uiState.nodes);
@@ -30,18 +33,27 @@ export function createScene(uiState: UI_State): SceneState {
     camera = focusOnNode(camera, focusNode);
   }
 
-  return {
+  const scene = {
     world,
     camera,
     fogLayers: createFogLayers(fogIntensity),
     time: 0,
+    effects: { blur: 0 },
   };
+
+  if (gapState) {
+    const gapVisual = buildGapVisualState(world, gapState);
+    return applyGapOverlay(scene as any, gapVisual) as unknown as SceneState;
+  }
+
+  return scene;
 }
 
 export function updateScene(
   scene: SceneState,
   uiState: UI_State,
-  deltaTime: number
+  deltaTime: number,
+  gapState?: GapState
 ): SceneState {
   const worldNodes = buildWorldFromUI(uiState.nodes);
   const focusId = getCameraFocusId(uiState.nodes);
@@ -54,7 +66,7 @@ export function updateScene(
   }
   camera = updateCamera(camera, deltaTime);
 
-  return {
+  const updatedScene = {
     world: {
       nodes: worldNodes,
       cameraFocusId: focusId,
@@ -64,7 +76,15 @@ export function updateScene(
     camera,
     fogLayers: animateFogLayers(scene.fogLayers, deltaTime),
     time: scene.time + deltaTime,
+    effects: scene.effects,
   };
+
+  if (gapState) {
+    const gapVisual = buildGapVisualState(updatedScene.world, gapState);
+    return applyGapOverlay(updatedScene as any, gapVisual) as unknown as SceneState;
+  }
+
+  return updatedScene;
 }
 
 export function renderScene(scene: SceneState): RenderFrame {
