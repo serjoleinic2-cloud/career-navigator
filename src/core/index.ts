@@ -105,3 +105,20 @@ export { applyReinforcement, createConfidenceState } from './learning/reinforcem
 export { loopToGapUpdate, shouldUpdateGap } from './learning/loop_gap_connector';
 export type { PipelineResult } from './learning/learning_pipeline';
 export { runLearningPipeline } from './learning/learning_pipeline';
+
+export type { VoiceSessionType, VoiceSessionStatus, VoiceSession } from './voice/voice_session_model';
+export { createVoiceSession } from './voice/voice_session_model';
+export type { TTSVoice, TTSRequest, TTSResult } from './voice/tts_engine';
+export { speak, estimateSpeechDuration } from './voice/tts_engine';
+export type { STTResult } from './voice/stt_engine';
+export { listen, parseTranscript } from './voice/stt_engine';
+export type { InterviewState, InterviewMode, InterviewSession, AnswerAnalysis } from './voice/interview_state_machine';
+export { createInterviewSession, advanceInterviewState, nextQuestion } from './voice/interview_state_machine';
+export { analyzeAnswer } from './voice/answer_analysis_engine';
+export { generateFeedback, generateScoreBreakdown } from './voice/feedback_generator';
+export type { UserConfidence } from './voice/confidence_impact_engine';
+export { updateConfidenceFromVoice } from './voice/confidence_impact_engine';
+export type { StressConfig } from './voice/stress_simulation';
+export { applyStressMode, getStressConfig } from './voice/stress_simulation';
+export type { InterviewResult } from './voice/interview_loop';
+export { runInterviewQuestion } from './voice/interview_loop';
