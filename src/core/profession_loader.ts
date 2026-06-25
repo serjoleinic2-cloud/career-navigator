@@ -1,5 +1,5 @@
 import type { ProfessionModule } from './profession_contract';
-import { getProfession } from './profession_registry';
+import { getProfession } from '@/professions/profession_registry';
 
 export type ActiveProfessionState = {
   professionId: string;
@@ -25,8 +25,8 @@ export function getActiveProfession(): ProfessionModule {
   return profession;
 }
 
-export function getActiveNodes(): ProfessionModule['skillNodes'] {
-  return getActiveProfession().skillNodes;
+export function getActiveNodes(): ProfessionModule['skillGraph'] {
+  return getActiveProfession().skillGraph;
 }
 
 export function getActiveChapters(): ProfessionModule['chapters'] {

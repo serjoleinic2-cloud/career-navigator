@@ -2,7 +2,7 @@ import type { JourneyRuntimeState } from './journey_runtime';
 import type { SkillNode } from '../skill_state';
 import type { Chapter } from '../chapter_model';
 import type { ProfessionModule } from '../profession_contract';
-import { getProfession } from '../profession_registry';
+import { getProfession } from '@/professions/profession_registry';
 import { getActiveNodes, getActiveChapters } from '../profession_loader';
 import { getCurrentChapter, getNextChapter } from '../chapter_engine';
 

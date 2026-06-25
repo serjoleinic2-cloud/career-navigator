@@ -9,7 +9,7 @@ export {
   getDefaultProfession,
   hasProfession,
   unregisterProfession,
-} from './profession_registry';
+} from '@/professions/profession_registry';
 
 export { transition, canTransition, getCurrentAdvice, getNextAdvice } from './skill_engine';
 export type { UserAction } from './skill_engine';
@@ -47,7 +47,7 @@ export {
   getAllNodes,
 } from './orchestrator';
 
-export { initCareerNavigator, isAppReady } from './bootstrap/init';
+export { initCareerNavigator } from './bootstrap/init';
 
 export { CORE_RULES, enforceRule } from './rules';
 export type { CoreRule } from './rules';

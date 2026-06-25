@@ -3,7 +3,7 @@ import { createEmptyOnboardingState, buildOnboardingState } from './onboarding_e
 import { selectProfession } from './profession_selector';
 import { mapOnboardingToJourney } from './onboarding_mapper';
 import { validateOnboardingState, isOnboardingValid } from './onboarding_validation';
-import { getAllProfessions } from '../profession_registry';
+import { getAllProfessions } from '@/professions/profession_registry';
 
 export type OnboardingStep =
   | 'situation'

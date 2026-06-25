@@ -1,5 +1,5 @@
 import type { OnboardingState } from './onboarding_state';
-import { getAllProfessions } from '../profession_registry';
+import { getAllProfessions } from '@/professions/profession_registry';
 
 export type ValidationError = {
   field: string;

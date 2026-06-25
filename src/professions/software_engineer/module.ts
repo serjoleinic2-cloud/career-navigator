@@ -1,0 +1,20 @@
+import type { ProfessionModule } from '../profession_registry';
+import { RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES } from './skill_nodes';
+import { SOFTWARE_ENGINEER_CHAPTERS } from './chapters';
+
+export const SoftwareEngineerModule: ProfessionModule = {
+  id: 'software_engineer',
+  title: 'Software Engineer',
+  chapters: SOFTWARE_ENGINEER_CHAPTERS,
+  skillGraph: [
+    ...RESUME_SKILL_NODES,
+    ...LINKEDIN_SKILL_NODES,
+  ],
+  entryNodeId: 'positioning-clarity',
+  premiumConfig: {
+    freeChapters: 3,
+    isLockedAfterFree: true,
+  },
+};
+
+export default SoftwareEngineerModule;

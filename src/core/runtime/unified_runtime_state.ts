@@ -9,6 +9,7 @@ export type ChapterState = {
 
 export type UnifiedRuntimeState = {
   userId: string;
+  activeProfessionId: string;
   professionId: string;
   skillState: Record<string, SkillState>;
   chapterState: Record<string, ChapterState>;
@@ -24,6 +25,7 @@ export type UnifiedRuntimeState = {
 export function createEmptyUnifiedState(userId: string = 'anonymous'): UnifiedRuntimeState {
   return {
     userId,
+    activeProfessionId: '',
     professionId: '',
     skillState: {},
     chapterState: {},

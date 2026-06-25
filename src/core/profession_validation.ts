@@ -23,8 +23,8 @@ export function validateProfession(module: ProfessionModule): ValidationResult {
     issues.push({ severity: 'error', message: 'Module title is missing' });
   }
 
-  if (!module.skillNodes || !Array.isArray(module.skillNodes)) {
-    issues.push({ severity: 'error', message: 'Module skillNodes is missing or not an array' });
+  if (!module.skillGraph || !Array.isArray(module.skillGraph)) {
+    issues.push({ severity: 'error', message: 'Module skillGraph is missing or not an array' });
   }
 
   if (!module.chapters || !Array.isArray(module.chapters)) {
@@ -32,17 +32,17 @@ export function validateProfession(module: ProfessionModule): ValidationResult {
   }
 
   // Check unique node ids
-  if (module.skillNodes && Array.isArray(module.skillNodes)) {
-    const ids = module.skillNodes.map(n => n.id);
+  if (module.skillGraph && Array.isArray(module.skillGraph)) {
+    const ids = module.skillGraph.map(n => n.id);
     const uniqueIds = new Set(ids);
     if (ids.length !== uniqueIds.size) {
-      issues.push({ severity: 'error', message: 'Duplicate node ids found in skillNodes' });
+      issues.push({ severity: 'error', message: 'Duplicate node ids found in skillGraph' });
     }
   }
 
   // Check chapter references valid nodes
-  if (module.chapters && Array.isArray(module.chapters) && module.skillNodes && Array.isArray(module.skillNodes)) {
-    const allNodeIds = new Set(module.skillNodes.map(n => n.id));
+  if (module.chapters && Array.isArray(module.chapters) && module.skillGraph && Array.isArray(module.skillGraph)) {
+    const allNodeIds = new Set(module.skillGraph.map(n => n.id));
     for (const chapter of module.chapters) {
       for (const nodeId of chapter.nodeIds) {
         if (!allNodeIds.has(nodeId)) {

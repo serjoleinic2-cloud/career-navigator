@@ -9,6 +9,7 @@ export type RuntimeEvent =
   | { type: 'SKILL_UPDATED'; nodeId: string; newState: string }
   | { type: 'READINESS_UPDATED'; score: number; confidence: number }
   | { type: 'PROFESSION_UNLOCKED'; professionId: string }
+  | { type: 'PROFESSION_CHANGED'; professionId: string }
   | { type: 'NODE_SELECTED'; nodeId: string }
   | { type: 'MEMORY_ADDED'; memoryId: string };
 

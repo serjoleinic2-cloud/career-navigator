@@ -1,5 +1,5 @@
 import type { CareerSnapshot } from './export_engine';
-import { getAllProfessions } from '../profession_registry';
+import { getAllProfessions } from '@/professions/profession_registry';
 
 export type ImportResult = {
   valid: boolean;

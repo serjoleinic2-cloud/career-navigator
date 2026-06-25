@@ -1,5 +1,5 @@
 import type { JourneyRuntimeState } from '../runtime/journey_runtime';
-import { getProfession } from '../profession_registry';
+import { getProfession } from '@/professions/profession_registry';
 import { getChapterById } from '../chapter_engine';
 import { toUINode } from './ui_node_adapter';
 import { checkAccess } from '../premium/premium_gate';
@@ -26,8 +26,8 @@ export function mapRuntimeToUI(
     };
   }
 
-  const total = profession.skillNodes.length;
-  const nodes = profession.skillNodes.map((n, i) => toUINode(n, i, total));
+  const total = profession.skillGraph.length;
+  const nodes = profession.skillGraph.map((n, i) => toUINode(n, i, total));
 
   const completedNodes = nodes.filter(n => n.state === 'completed').map(n => n.id);
   const lockedNodes = nodes.filter(n => n.state === 'locked').map(n => n.id);

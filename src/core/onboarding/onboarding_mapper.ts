@@ -13,7 +13,7 @@ export function mapOnboardingToJourney(
   state: OnboardingState,
   profession: ProfessionModule
 ): OnboardingJourneyMap | null {
-  if (!state.professionId || !profession.skillNodes.length) {
+  if (!state.professionId || !profession.skillGraph.length) {
     return null;
   }
 
@@ -30,7 +30,7 @@ export function mapOnboardingToJourney(
 
   return {
     activeProfessionId: profession.id,
-    startingNodeId: profession.skillNodes[0].id,
+    startingNodeId: profession.skillGraph[0].id,
     initialReadinessBias: readinessBias,
     initialConfidenceBias: confidenceBias,
     fearTags: state.fears,

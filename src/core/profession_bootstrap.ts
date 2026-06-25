@@ -1,7 +1,7 @@
 import type { ProfessionModule } from './profession_contract';
 import { validateProfession } from './profession_validation';
 import type { ValidationIssue } from './profession_validation';
-import { registerProfession } from './profession_registry';
+import { registerProfession } from '@/professions/profession_registry';
 import { setActiveProfession } from './profession_loader';
 
 export type BootstrapResult = {

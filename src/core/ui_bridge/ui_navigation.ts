@@ -1,5 +1,5 @@
 import type { JourneyRuntimeState } from '../runtime/journey_runtime';
-import { getProfession } from '../profession_registry';
+import { getProfession } from '@/professions/profession_registry';
 import type { UI_NavigationState } from './ui_render_contract';
 
 export function getNavigationState(
@@ -16,7 +16,7 @@ export function getNavigationState(
     };
   }
 
-  const nodeIds = profession.skillNodes.map(n => n.id);
+  const nodeIds = profession.skillGraph.map(n => n.id);
   const currentIndex = nodeIds.indexOf(runtimeState.activeNodeId);
 
   const hasNext = currentIndex >= 0 && currentIndex < nodeIds.length - 1;

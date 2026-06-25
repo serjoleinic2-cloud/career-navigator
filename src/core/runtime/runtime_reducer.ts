@@ -64,6 +64,14 @@ export function reduce(
       return {
         ...state,
         professionId: event.professionId,
+        activeProfessionId: event.professionId,
+      };
+    }
+
+    case 'PROFESSION_CHANGED': {
+      return {
+        ...state,
+        activeProfessionId: event.professionId,
       };
     }
 

@@ -5,11 +5,11 @@ import { initializeJourneyRuntime } from './journey_runtime';
 import { resetRuntime } from './runtime_controller';
 import { selectProfession } from '../onboarding/profession_selector';
 import { setActiveProfession, getActiveProfessionId } from '../profession_loader';
-import { getAllProfessions } from '../profession_registry';
+import { getAllProfessions } from '@/professions/profession_registry';
 import { bootstrapProfessions } from '../profession_bootstrap';
-import { SOFTWARE_ENGINEER_PROFESSION } from '../../professions/software_engineer';
+import { SoftwareEngineerModule } from '@/professions/software_engineer/module';
 
-const DEFAULT_PROFESSIONS: ProfessionModule[] = [SOFTWARE_ENGINEER_PROFESSION];
+const DEFAULT_PROFESSIONS: ProfessionModule[] = [SoftwareEngineerModule];
 
 export function validateRuntimeConsistency(runtimeState: JourneyRuntimeState): {
   valid: boolean;

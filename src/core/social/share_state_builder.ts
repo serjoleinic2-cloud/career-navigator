@@ -1,5 +1,5 @@
 import type { JourneyRuntimeState } from '../runtime/journey_runtime';
-import { getProfession } from '../profession_registry';
+import { getProfession } from '@/professions/profession_registry';
 import { getChapterById } from '../chapter_engine';
 import { getTopGap } from '../gap_engine';
 

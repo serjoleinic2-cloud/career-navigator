@@ -39,9 +39,9 @@ export function advanceNode(
 
   if (premiumState) {
     const profession = getActiveProfession();
-    const activeNode = profession.skillNodes.find(n => n.id === runtimeState!.activeNodeId);
+    const activeNode = profession.skillGraph.find(n => n.id === runtimeState!.activeNodeId);
     if (activeNode) {
-      const nodeIndex = profession.skillNodes.indexOf(activeNode);
+      const nodeIndex = profession.skillGraph.indexOf(activeNode);
       const chapterIndex = Math.floor(nodeIndex / 3);
       const access = checkNodeAccess(premiumState, chapterIndex);
       if (!access.allowed) {
