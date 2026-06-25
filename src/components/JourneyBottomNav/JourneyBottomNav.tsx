@@ -1,6 +1,11 @@
 import './JourneyBottomNav.css';
 
-export function JourneyBottomNav() {
+interface JourneyBottomNavProps {
+  activeNodeId: string;
+  onNodeSelect: (nodeId: string) => void;
+}
+
+export function JourneyBottomNav({ activeNodeId: _activeNodeId, onNodeSelect: _onNodeSelect }: JourneyBottomNavProps) {
   return (
     <nav className="journey-bottom-nav">
       <div className="journey-bottom-nav__item journey-bottom-nav__item--active">

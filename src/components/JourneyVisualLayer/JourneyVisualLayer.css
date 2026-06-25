@@ -1,0 +1,46 @@
+.journeyLayer {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 120px 24px;
+  min-height: 100vh;
+  position: relative;
+}
+
+.node {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.35s ease;
+  position: relative;
+}
+
+.node.active {
+  border-left: 4px solid #7c5cff;
+  box-shadow: 0 8px 28px rgba(124, 92, 255, 0.15);
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+.node.completed {
+  background: #f8f8f8;
+}
+
+.node.locked {
+  background: #fafafa;
+}
+
+.node.past {
+  opacity: 0.65;
+}
+
+.node.future {
+  opacity: 0.35;
+}
+
+.nodeTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1a2e;
+}

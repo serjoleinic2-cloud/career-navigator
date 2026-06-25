@@ -1,11 +1,12 @@
 import type { SkillNode, SkillState } from './skill_state';
 
-export function getAdvice(node: SkillNode): string {
+export function getAdvice(node: SkillNode): string | undefined {
   return node.advice[node.state];
 }
 
 export function getStateDescription(state: SkillState): string {
   const descriptions: Record<SkillState, string> = {
+    locked: 'This skill is not yet available.',
     awareness: 'You recognize what is required.',
     understanding: 'You understand the concept, but cannot yet produce output.',
     application: 'You are now expected to apply knowledge independently.',

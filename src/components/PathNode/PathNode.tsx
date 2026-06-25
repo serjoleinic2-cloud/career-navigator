@@ -3,7 +3,14 @@ import {
   GitBranch, Github, Code, Layout, FileText, Linkedin,
   MessageCircle, Terminal, Send, Trophy, Lock
 } from 'lucide-react';
-import type { JourneyNode } from '@/types';
+interface LegacyNode {
+  id: string;
+  title: string;
+  icon: string;
+  position: { x: number; y: number };
+  estimated_time: number;
+  tasks: string[];
+}
 
 const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number | string }>> = {
   GitBranch, Github, Code, Layout, FileText, Linkedin,
@@ -11,11 +18,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string; size?: n
 };
 
 interface PathNodeProps {
-  node: JourneyNode;
+  node: LegacyNode;
   status: 'completed' | 'current' | 'locked';
   index: number;
   totalNodes: number;
-  onPress?: (node: JourneyNode) => void;
+  onPress?: (node: LegacyNode) => void;
 }
 
 export function PathNode({ node, status, index, totalNodes, onPress }: PathNodeProps) {

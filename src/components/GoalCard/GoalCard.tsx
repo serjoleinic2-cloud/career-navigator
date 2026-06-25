@@ -1,9 +1,15 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Clock, CheckCircle2, Zap } from 'lucide-react';
-import type { JourneyNode } from '@/types';
+interface LegacyNode {
+  id: string;
+  title: string;
+  description: string;
+  estimated_time: number;
+  tasks: string[];
+}
 
 interface GoalCardProps {
-  node: JourneyNode | null;
+  node: LegacyNode | null;
   completedCount: number;
   totalCount: number;
   onAction?: () => void;

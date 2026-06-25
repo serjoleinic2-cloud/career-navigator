@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Map, ListTodo, BarChart3, User } from 'lucide-react';
-import { useProgressStore } from '@/store/progressStore';
-import type { TabId } from '@/types';
+
+type TabId = 'journey' | 'tasks' | 'progress' | 'profile';
 
 const tabs: { id: TabId; label: string; icon: React.ComponentType<{ className?: string; size?: number | string }> }[] = [
   { id: 'journey', label: 'Journey', icon: Map },
@@ -11,9 +11,6 @@ const tabs: { id: TabId; label: string; icon: React.ComponentType<{ className?: 
 ];
 
 export function BottomNav() {
-  const activeTab = useProgressStore((s) => s.activeTab);
-  const setActiveTab = useProgressStore((s) => s.setActiveTab);
-
   return (
     <motion.nav
       className="fixed bottom-0 left-0 right-0 z-50"
@@ -31,46 +28,23 @@ export function BottomNav() {
       <div className="glass-panel border-t border-white/[0.04] px-2 pb-6 pt-2">
         <div className="max-w-md mx-auto flex items-center justify-around">
           {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
             const Icon = tab.icon;
 
             return (
               <motion.button
                 key={tab.id}
                 className="relative flex flex-col items-center gap-1 py-1.5 px-4 min-w-[64px]"
-                onClick={() => setActiveTab(tab.id)}
                 whileTap={{ scale: 0.92 }}
               >
                 <div className="relative">
                   <Icon
                     size={22}
-                    className={`transition-colors duration-300 ${
-                      isActive ? 'text-glow-cyan' : 'text-white/30'
-                    }`}
+                    className="text-white/30 transition-colors duration-300"
                   />
-                  {isActive && (
-                    <motion.div
-                      className="absolute -inset-2 rounded-full bg-glow-cyan/10"
-                      layoutId="navGlow"
-                      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                    />
-                  )}
                 </div>
-                <span
-                  className={`text-[10px] font-medium transition-colors duration-300 ${
-                    isActive ? 'text-glow-cyan' : 'text-white/30'
-                  }`}
-                >
+                <span className="text-[10px] font-medium text-white/30 transition-colors duration-300">
                   {tab.label}
                 </span>
-
-                {isActive && (
-                  <motion.div
-                    className="absolute -bottom-1 w-1 h-1 rounded-full bg-glow-cyan"
-                    layoutId="navIndicator"
-                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                  />
-                )}
               </motion.button>
             );
           })}

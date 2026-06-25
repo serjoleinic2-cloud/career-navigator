@@ -4,6 +4,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
   {
     id: 'positioning-clarity',
     skill: 'Positioning Clarity',
+    domain: 'resume',
     state: 'awareness',
     nextState: 'understanding',
     signals: ['You can name your target role', 'You know 3 companies you want to work for'],
@@ -19,6 +20,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
   {
     id: 'achievement-framing',
     skill: 'Achievement Framing',
+    domain: 'resume',
     state: 'awareness',
     nextState: 'understanding',
     signals: ['You list responsibilities', 'You cannot quantify results'],
@@ -37,6 +39,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
   {
     id: 'headline-authority',
     skill: 'Headline Authority',
+    domain: 'linkedin',
     state: 'awareness',
     nextState: 'understanding',
     signals: ['Your headline is your job title only', 'Recruiters do not reach out'],

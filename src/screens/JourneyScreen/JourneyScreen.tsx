@@ -1,59 +1,64 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES } from '@/core/skill_nodes';
+import { getActiveNode, moveToNextState, setActiveNode, canAdvance } from '@/core/orchestrator';
+import type { OrchestratorState } from '@/core/orchestrator';
+import { buildJourneyViewModel } from '@/core/journey_adapter';
+import { buildJourneyUI } from '@/core/journey_orchestrator';
+import { snapToActiveNode } from '@/core/focus_snap_controller';
+import { JourneyVisualLayer } from '@/components/JourneyVisualLayer/JourneyVisualLayer';
+import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
 import { JourneyHeader } from '@/components/JourneyHeader/JourneyHeader';
-import { JourneyTimeline } from '@/components/JourneyTimeline/JourneyTimeline';
-import { JourneyNodeView } from '@/components/JourneyNodeView/JourneyNodeView';
-import { JourneyFocusPanel } from '@/components/JourneyFocusPanel/JourneyFocusPanel';
 import { JourneyBottomNav } from '@/components/JourneyBottomNav/JourneyBottomNav';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
-  const [activeNodeId, setActiveNodeId] = useState('positioning-clarity');
+  const [state, setState] = useState<OrchestratorState>({
+    activeNodeId: 'positioning-clarity',
+    nodes: Object.fromEntries(
+      [...RESUME_SKILL_NODES, ...LINKEDIN_SKILL_NODES].map(n => [n.id, n])
+    ),
+  });
 
   const allNodes = useMemo(() => [
     ...RESUME_SKILL_NODES,
     ...LINKEDIN_SKILL_NODES,
   ], []);
 
-  const activeNode = useMemo(() =>
-    allNodes.find(n => n.id === activeNodeId),
-    [allNodes, activeNodeId]
-  );
+  const visualNodes = useMemo(() => {
+    return buildJourneyViewModel(allNodes, state.activeNodeId);
+  }, [allNodes, state.activeNodeId]);
 
-  const handleStateAdvance = (nodeId: string, newState: string) => {
-    if (newState === 'confidence') {
-      const currentIndex = allNodes.findIndex(n => n.id === nodeId);
-      const nextNode = allNodes[currentIndex + 1];
-      if (nextNode) {
-        setActiveNodeId(nextNode.id);
-      }
-    }
+  const renderNodes = useMemo(() => {
+    return buildJourneyUI(allNodes);
+  }, [allNodes]);
+
+  const activeNode = useMemo(() => getActiveNode(state), [state]);
+
+  useEffect(() => {
+    snapToActiveNode(state.activeNodeId);
+  }, [state.activeNodeId]);
+
+  const handleNodeSelect = (nodeId: string) => {
+    setState(prev => setActiveNode(prev, nodeId));
+  };
+
+  const handleAdvance = () => {
+    if (!canAdvance(activeNode)) return;
+    setState(prev => moveToNextState(prev, 'tap_primary'));
   };
 
   return (
     <div className="journey-screen">
       <JourneyHeader />
-
-      <div className="journey-viewport">
-        <JourneyTimeline>
-          {allNodes.map(node => (
-            <JourneyNodeView
-              key={node.id}
-              node={node}
-              isActive={node.id === activeNodeId}
-            />
-          ))}
-        </JourneyTimeline>
-
-        {activeNode && (
-          <JourneyFocusPanel
-            node={activeNode}
-            onStateAdvance={handleStateAdvance}
-          />
-        )}
-      </div>
-
-      <JourneyBottomNav />
+      <JourneyPath nodes={visualNodes} />
+      <JourneyVisualLayer nodes={renderNodes} visualNodes={visualNodes} />
+      <JourneyBottomNav
+        activeNodeId={state.activeNodeId}
+        onNodeSelect={handleNodeSelect}
+      />
+      <button className="advance-btn" onClick={handleAdvance}>
+        Advance
+      </button>
     </div>
   );
 }

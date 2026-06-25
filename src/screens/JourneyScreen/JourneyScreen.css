@@ -40,3 +40,26 @@
   font-size: 16px;
   color: #8e8e93;
 }
+
+.advance-btn {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 32px;
+  background: #7c5cff;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 50;
+  box-shadow: 0 4px 16px rgba(124, 92, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.advance-btn:hover {
+  background: #6a4de6;
+  box-shadow: 0 6px 20px rgba(124, 92, 255, 0.4);
+}

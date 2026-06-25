@@ -18,11 +18,11 @@ export function canTransition(node: SkillNode): boolean {
   return node.nextState !== null;
 }
 
-export function getCurrentAdvice(node: SkillNode): string {
+export function getCurrentAdvice(node: SkillNode): string | undefined {
   return node.advice[node.state];
 }
 
-export function getNextAdvice(node: SkillNode): string | null {
+export function getNextAdvice(node: SkillNode): string | null | undefined {
   if (!node.nextState) return null;
   return node.advice[node.nextState];
 }

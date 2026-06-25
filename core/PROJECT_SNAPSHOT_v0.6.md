@@ -5,14 +5,17 @@ Offline deterministic career readiness system with state-machine-driven skill pr
 
 🧱 CORE ARCHITECTURE
 SKILL STATE MACHINE
-Skill State Machine = deterministic skill progression through 6 states:
-awareness → understanding → application → readiness → execution → confidence
+Skill State Machine = deterministic skill progression through 7 states:
+locked → awareness → understanding → application → readiness → execution → confidence
 
 Source files:
-skill_state.ts (types: SkillState, SkillNode, STATE_FLOW)
+skill_state.ts (types: SkillState, SkillNode, STATE_FLOW with domain + locked)
 skill_engine.ts (transition, canTransition, getCurrentAdvice, getNextAdvice)
 advice_engine.ts (getAdvice, getStateDescription)
-skill_nodes.ts (RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES — 3 sample nodes)
+skill_nodes.ts (RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES — 3 sample nodes with domain)
+core_state.ts (CoreState, createInitialState, getActiveNode, getProgressStats, getNodesByDomain)
+bootstrap/init.ts (initCareerNavigator, isReadyForOffline)
+index.ts (barrel exports)
 
 FLOWS
 JourneyScreen → linear skill progression
@@ -48,6 +51,7 @@ SkillNode[] → displayed in timeline order
 node.id → determines focus via activeNodeId
 node.state → drives advice display and advance button visibility
 node.signals → shown as checklist in FocusPanel
+node.domain → groups skills by category (resume, linkedin)
 confidence reached → auto-advance to next node
 
 ⚙️ SYSTEM STATE (FRZ)
@@ -63,17 +67,20 @@ all logic deterministic
 skill state advances via tap_primary action
 🔭 STATUS
 WORKING:
-state progression display (awareness → confidence)
+state progression display (locked → awareness → ... → confidence)
 advice per state with advice card
 signals list per node
 "Confirm State Advance" button to progress state
 "Skill Mastered ✓" when confidence reached
 auto-advance to next skill node on confidence
+CoreState management (getProgressStats, getNodesByDomain, getActiveNode)
+barrel exports from @/core
+initCareerNavigator bootstrap
 
-REMOVED:
-node_engine.ts, career_nodes.ts (old CareerNode model)
-career_engine_v2, career_journey_model, focus_controller, journey_state_controller (old journey model)
-skill pills / task checkboxes (replaced by state machine)
+DELETED (v0.1 cleanup):
+career_nodes.ts, node_engine.ts
+career_journey_model.ts, career_engine_v2.ts
+focus_controller.ts, journey_state_controller.ts
 
 NEXT TASKS
 Add end-of-journey screen for last node

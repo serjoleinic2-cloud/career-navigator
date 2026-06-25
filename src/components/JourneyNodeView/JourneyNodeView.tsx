@@ -1,29 +1,29 @@
-import type { SkillNode } from '@/core/skill_state';
-import { getStateDescription } from '@/core/advice_engine';
+import type { VisualNode } from '@/core/journey_adapter';
 import './JourneyNodeView.css';
 
 interface JourneyNodeViewProps {
-  node: SkillNode;
-  isActive?: boolean;
+  nodes: VisualNode[];
+  activeNodeId: string;
 }
 
-export function JourneyNodeView({ node, isActive }: JourneyNodeViewProps) {
+export function JourneyNodeView({ nodes, activeNodeId }: JourneyNodeViewProps) {
   return (
-    <div className={`journey-node ${isActive ? 'journey-node--active' : ''}`}>
-      <div className="journey-node__header">
-        <span className="journey-node__skill">{node.skill}</span>
-        <span className="journey-node__state">{node.state.toUpperCase()}</span>
-      </div>
-
-      <div className="journey-node__description">
-        {getStateDescription(node.state)}
-      </div>
-
-      <div className="journey-node__signals-preview">
-        {node.signals.slice(0, 1).map(s => (
-          <span key={s} className="journey-node__signal-tag">{s}</span>
-        ))}
-      </div>
+    <div className="journey-nodes">
+      {nodes.map(node => (
+        <div
+          key={node.id}
+          className={`journey-node ${node.id === activeNodeId ? 'journey-node--active' : ''} journey-node--${node.uiState}`}
+        >
+          <div className="journey-node__header">
+            <span className="journey-node__chapter">{node.chapter}</span>
+            <span className="journey-node__state">{node.uiState.toUpperCase()}</span>
+          </div>
+          <div className="journey-node__title">{node.title}</div>
+          <div className="journey-node__intensity" style={{ opacity: node.focusIntensity }}>
+            Focus: {Math.round(node.focusIntensity * 100)}%
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
