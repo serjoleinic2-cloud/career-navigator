@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, advanceNode } from '@/core/runtime/runtime_controller';
 import { snapToActiveNode } from '@/core/focus_snap_controller';
@@ -6,10 +6,12 @@ import { JourneyVisualLayer } from '@/components/JourneyVisualLayer/JourneyVisua
 import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
 import { JourneyHeader } from '@/components/JourneyHeader/JourneyHeader';
 import { JourneyBottomNav } from '@/components/JourneyBottomNav/JourneyBottomNav';
+import { subscribe } from '@/core/events/system_event_bus';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
-  const [, forceUpdate] = useState({});
+  const [, setTick] = useState(0);
+  const refresh = useCallback(() => setTick(t => t + 1), []);
 
   const ui = getUIState();
   const nav = getNavigation();
@@ -18,14 +20,23 @@ export function JourneyScreen() {
     snapToActiveNode(ui.activeNodeId);
   }, [ui.activeNodeId]);
 
+  useEffect(() => {
+    const unsubs = [
+      subscribe('TASK_COMPLETED', refresh),
+      subscribe('STATE_CHANGED', refresh),
+      subscribe('SCORE_UPDATED', refresh),
+      subscribe('CONFIDENCE_CHANGED', refresh),
+      subscribe('UI_REFRESH', refresh),
+    ];
+    return () => unsubs.forEach(u => u());
+  }, [refresh]);
+
   const handleNodeSelect = (nodeId: string) => {
     setActiveNode(nodeId);
-    forceUpdate({});
   };
 
   const handleAdvance = () => {
     advanceNode('tap_primary');
-    forceUpdate({});
   };
 
   return (

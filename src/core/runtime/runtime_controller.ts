@@ -9,11 +9,14 @@ import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { processUserAction } from '../interaction/interaction_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
+import { emit } from '../events/system_event_bus';
 
 let runtimeState: JourneyRuntimeState | null = null;
 
 export function startJourney(onboardingState: OnboardingState): JourneyRuntimeState {
   runtimeState = initializeJourneyRuntime(onboardingState);
+  emit('SYSTEM_BOOTED', { userId: onboardingState.professionId ?? 'anonymous' });
+  emit('UI_REFRESH', {});
   return runtimeState;
 }
 
@@ -26,6 +29,8 @@ export function setActiveNode(nodeId: string): JourneyRuntimeState {
     throw new Error('Runtime not initialized');
   }
   runtimeState = { ...runtimeState, activeNodeId: nodeId };
+  emit('NODE_CHANGED', { nodeId });
+  emit('UI_REFRESH', {});
   return runtimeState;
 }
 
@@ -64,6 +69,9 @@ export function advanceNode(
   const chapters = getActiveChapters();
   const currentChapter = getCurrentChapter(chapters, updatedNodeMap);
 
+  const prevChapterId = runtimeState.activeChapterId;
+  const newChapterId = currentChapter?.id ?? prevChapterId;
+
   runtimeState = {
     ...runtimeState,
     nodeStates: updatedNodeMap,
@@ -72,8 +80,23 @@ export function advanceNode(
     chapterProgress: Object.fromEntries(
       result.updatedChapterProgress.map(c => [c.chapterId, c.percent])
     ),
-    activeChapterId: currentChapter?.id ?? runtimeState.activeChapterId,
+    activeChapterId: newChapterId,
   };
+
+  emit('STATE_UPDATED', { nodeId: runtimeState.activeNodeId });
+  emit('SCORE_UPDATED', { readiness: runtimeState.readinessScore, confidence: runtimeState.confidenceScore });
+  emit('CONFIDENCE_CHANGED', { confidence: runtimeState.confidenceScore });
+  emit('TASK_COMPLETED', { nodeId: runtimeState.activeNodeId });
+
+  if (newChapterId !== prevChapterId) {
+    emit('CHAPTER_CHANGED', { chapterId: newChapterId });
+  }
+
+  if (result.updatedGaps.length > 0) {
+    emit('GAP_UPDATED', { gapCount: result.updatedGaps.length });
+  }
+
+  emit('UI_REFRESH', {});
 
   return runtimeState;
 }
@@ -98,9 +121,15 @@ export function advanceChapter(): JourneyRuntimeState {
     throw new Error('Next chapter has no nodes');
   }
   runtimeState = { ...runtimeState, activeNodeId: nextNodeId };
+
+  emit('CHAPTER_CHANGED', { chapterId: next.id });
+  emit('NODE_CHANGED', { nodeId: nextNodeId });
+  emit('UI_REFRESH', {});
+
   return runtimeState;
 }
 
 export function resetRuntime(): void {
   runtimeState = null;
+  emit('UI_REFRESH', {});
 }

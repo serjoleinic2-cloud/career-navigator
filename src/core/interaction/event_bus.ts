@@ -1,3 +1,6 @@
+import { emit as systemEmit, subscribe as systemSubscribe } from '../events/system_event_bus';
+import type { SystemEventType } from '../events/system_event_bus';
+
 export type InteractionEventType =
   | 'onTaskCompleted'
   | 'onSkillUpgraded'
@@ -5,35 +8,23 @@ export type InteractionEventType =
   | 'onReadinessChanged'
   | 'onConfidenceChanged';
 
+const typeMap: Record<InteractionEventType, SystemEventType> = {
+  onTaskCompleted: 'TASK_COMPLETED',
+  onSkillUpgraded: 'STATE_UPDATED',
+  onChapterCompleted: 'CHAPTER_CHANGED',
+  onReadinessChanged: 'SCORE_UPDATED',
+  onConfidenceChanged: 'CONFIDENCE_CHANGED',
+};
+
 type Handler = (payload: unknown) => void;
 
-const listeners = new Map<InteractionEventType, Set<Handler>>();
-
 export function subscribe(type: InteractionEventType, handler: Handler): () => void {
-  if (!listeners.has(type)) {
-    listeners.set(type, new Set());
-  }
-  listeners.get(type)!.add(handler);
-
-  return () => {
-    const set = listeners.get(type);
-    if (set) {
-      set.delete(handler);
-      if (set.size === 0) {
-        listeners.delete(type);
-      }
-    }
-  };
+  return systemSubscribe(typeMap[type], (event: any) => handler(event.payload));
 }
 
 export function emit(type: InteractionEventType, payload: unknown): void {
-  const set = listeners.get(type);
-  if (!set) return;
-  for (const handler of set) {
-    handler(payload);
-  }
+  systemEmit(typeMap[type], { data: payload });
 }
 
 export function clearAllListeners(): void {
-  listeners.clear();
 }
