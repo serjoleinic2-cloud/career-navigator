@@ -1,0 +1,130 @@
+{
+  id: 'resume-achievement-framing',
+  skill: 'Achievement Framing',
+  domain: 'Resume',
+  state: 'locked',
+  nextState: 'awareness',
+  signals: [
+    'You describe achievements using measurable results instead of responsibilities',
+    'Every major project includes evidence of your contribution',
+    'You can explain the impact of your work with concrete numbers or outcomes'
+  ],
+  advice: {
+    awareness:
+      'Recruiters are interested in outcomes, not task lists. "Built a feature" is less convincing than "Built a feature that reduced page load time by 35%."',
+    understanding:
+      'Strong resume bullets follow a simple pattern: Action → Context → Result. Even if you do not have business metrics, you can demonstrate technical impact, learning speed, code quality, or user value.',
+    application:
+      'Review every project and rewrite each bullet so it highlights what changed because of your work instead of what tools you used.',
+    readiness:
+      'You can explain every bullet point with supporting evidence, code examples, or project demonstrations.',
+    execution:
+      'Your resume contains achievement-focused bullets that clearly communicate value to recruiters and engineering managers.',
+    confidence:
+      'Mock interviews and peer reviews consistently identify your project descriptions as specific, credible, and impactful.'
+  },
+  tasks: [
+    {
+      id: 'task-resume-achievement-1',
+      title: 'Rewrite Responsibilities into Achievements',
+      objective:
+        'Transform generic resume bullets into achievement-focused statements.',
+      instructions: [
+        'Select 10 existing resume bullet points.',
+        'Highlight statements that only describe responsibilities.',
+        'Rewrite each using the format: Action + Context + Result.',
+        'Ensure every rewritten bullet demonstrates value created.'
+      ],
+      completionCriteria: [
+        '10 bullets rewritten.',
+        'Each bullet starts with a strong action verb.',
+        'Every bullet describes a measurable or observable outcome.'
+      ],
+      estimatedMinutes: 45,
+      difficulty: 1.5,
+      tips: [
+        'Use verbs like Built, Improved, Automated, Reduced, Designed, Optimized.',
+        'If exact numbers are unavailable, describe qualitative impact honestly.'
+      ],
+      expectedOutcome:
+        'A resume with achievement-oriented bullet points instead of task descriptions.'
+    },
+    {
+      id: 'task-resume-achievement-2',
+      title: 'Collect Evidence for Every Project',
+      objective:
+        'Gather proof that supports each achievement listed on your resume.',
+      instructions: [
+        'Open every portfolio or GitHub project mentioned in your resume.',
+        'Record commits, pull requests, screenshots, deployment links, or metrics.',
+        'Match each resume bullet with at least one supporting artifact.',
+        'Store all evidence in a single document for future interviews.'
+      ],
+      completionCriteria: [
+        'Every project has supporting evidence.',
+        'At least one artifact is linked for each achievement.',
+        'Evidence document is saved for interview preparation.'
+      ],
+      estimatedMinutes: 35,
+      difficulty: 1.5,
+      tips: [
+        'GitHub commit history is valid evidence of contribution.',
+        'Screenshots of deployed applications help demonstrate completed work.'
+      ],
+      expectedOutcome:
+        'A structured evidence document validating every important resume claim.'
+    },
+    {
+      id: 'task-resume-achievement-3',
+      title: 'Quantify Technical Impact',
+      objective:
+        'Add realistic technical metrics to your strongest resume achievements.',
+      instructions: [
+        'Review your three most important projects.',
+        'Identify measurable improvements such as performance, reliability, testing, or delivery speed.',
+        'Estimate only metrics you can reasonably justify.',
+        'Rewrite the corresponding resume bullets with those metrics.'
+      ],
+      completionCriteria: [
+        'At least three bullets include measurable results.',
+        'All metrics are realistic and defensible.',
+        'No exaggerated or unverifiable claims remain.'
+      ],
+      estimatedMinutes: 40,
+      difficulty: 2.0,
+      tips: [
+        'Examples include response time, bundle size, Lighthouse score, test coverage, deployment frequency, or issue resolution time.',
+        'When uncertain, use approximate wording such as "reduced", "improved", or "simplified" instead of inventing percentages.'
+      ],
+      expectedOutcome:
+        'Three high-impact resume bullets with credible technical outcomes.'
+    },
+    {
+      id: 'task-resume-achievement-4',
+      title: 'Validate Resume Stories',
+      objective:
+        'Verify that every achievement can be explained confidently during an interview.',
+      instructions: [
+        'Read each achievement aloud.',
+        'For every bullet, answer: What was the problem? What did I do? What was the result?',
+        'Remove or rewrite any bullet you cannot explain clearly.',
+        'Practice the final stories until each takes under one minute.'
+      ],
+      completionCriteria: [
+        'Every achievement has a matching verbal explanation.',
+        'No bullet remains unsupported.',
+        'Each explanation fits within one minute.'
+      ],
+      estimatedMinutes: 30,
+      difficulty: 1.5,
+      tips: [
+        'Interviewers often ask about the first project they see on your resume.',
+        'If you cannot defend a claim, remove it rather than risk losing credibility.'
+      ],
+      expectedOutcome:
+        'A resume where every achievement is backed by a clear, interview-ready story.'
+    }
+  ],
+  estimatedMinutes: 150,
+  difficulty: 1.6
+}
