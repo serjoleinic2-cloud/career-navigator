@@ -1,61 +1,37 @@
-```typescript
-headline-authority: {
-  awareness:
-    "Your headline is the first thing recruiters read after your name. A generic headline like 'Software Engineer' gives them no reason to click your profile, while a specific headline immediately communicates your direction and technical stack.",
+linkedin-optimization:
+awareness:
+LinkedIn search is driven by keywords from your headline, about section, and experience. If you don’t explicitly include React, Node.js, TypeScript, and related terms, recruiters simply won’t surface your profile. Most junior engineers lose visibility because their profile is written like a biography instead of a searchable technical entry.
 
-  understanding:
-    "A strong headline combines your target role, core technologies, and the value you bring. Recruiters search using keywords such as React, TypeScript, Node.js, REST APIs, and JavaScript, so including them improves discoverability without making the headline feel like a keyword list.",
+understanding:
+The LinkedIn algorithm matches recruiter queries like “Junior React Developer” or “Node.js Intern” against structured fields, not storytelling. Sections like Experience and Skills must repeat consistent technical terms so your profile forms a clear keyword cluster. If your stack is fragmented or inconsistent across sections, you rank lower in search results.
 
-  application:
-    "Review ten LinkedIn profiles of junior engineers working at companies where you would like to work. Identify the common structure of their headlines, then write three alternative versions for your own profile and compare which one is the clearest and easiest to understand in less than five seconds.",
+application:
+Rewrite your headline, about section, and experience so they all repeat the same core stack: React, TypeScript, Node.js, REST APIs, PostgreSQL. Add 3–5 pinned projects that clearly match job descriptions you are applying for. Review 10 job posts and copy exact terminology used in them into your profile sections.
 
-  readiness:
-    "Someone reading your headline should immediately know what position you are seeking, what technologies you specialize in, and whether your profile is relevant. If two different people describe your professional focus using nearly identical words after reading your headline, it is clear enough.",
+readiness:
+A recruiter searching your stack should land on your profile and immediately see the same technologies repeated in at least three sections. Your profile should match at least 70–80% of keywords from real junior job descriptions. If your profile feels “broad” instead of “focused,” it is not ready.
 
-  execution:
-    "Replace vague phrases like 'Passionate Developer' or 'Looking for Opportunities' with specific technical positioning. Keep the headline updated whenever your primary stack, portfolio, or target role changes so recruiters always see your current focus.",
+execution:
+Align every section so it supports one target role instead of multiple directions. Remove unrelated technologies that dilute your positioning, even if you have used them once. Keep updating keywords based on real job postings every time you refine your direction.
 
-  confidence:
-    "After updating your headline, monitor recruiter profile views and search appearances for several weeks. If more recruiters reach your profile and conversations begin with your actual technical stack instead of asking what you do, your headline is performing well."
-},
+confidence:
+When recruiters start messaging you for roles that exactly match your stack without manual outreach, your optimization is working. If your profile views increase from recruiter searches instead of connections, your keyword structure is effective. Consistent inbound interest is the signal that your LinkedIn SEO is correctly tuned.
 
-about-section: {
-  awareness:
-    "The About section should explain who you are, what you build, and where you are heading. It should not repeat your resume or list every technology you have ever touched.",
+profile-photo:
+awareness:
+Your profile photo is the first visual filter before anyone reads your headline or experience. Recruiters subconsciously decide trust and professionalism within seconds based on clarity, lighting, and framing. A low-quality or casual photo reduces perceived seriousness even if your technical skills are strong.
 
-  understanding:
-    "Recruiters want a short story that connects your motivation, technical interests, and practical experience. Mentioning projects built with React, TypeScript, Node.js, Express, PostgreSQL or similar technologies makes your profile more credible than describing yourself with generic personality traits.",
+understanding:
+A good profile photo for a junior software engineer communicates clarity, accessibility, and professional intent rather than corporate stiffness. Clean background, visible face, and neutral lighting create a sense of reliability that aligns with remote engineering roles. Overly edited or informal photos break trust before profile reading even starts.
 
-  application:
-    "Write your About section in three parts: your current focus, your strongest technical experience, and the type of opportunities you are seeking. Support every important statement with a concrete example such as a deployed application, GitHub repository, or measurable project outcome.",
+application:
+Use a neutral background such as a plain wall or blurred workspace with soft natural light facing your face. Frame the shot from shoulders up, keeping eyes centered and expression neutral but approachable. Avoid group photos, filters, screenshots, or cropped social media images.
 
-  readiness:
-    "Your About section is ready when someone can understand your background without opening your resume. Every sentence should either explain your technical direction or demonstrate experience that supports your target role.",
+readiness:
+Your photo is ready when it looks like something a recruiter could see on a company team page without hesitation. If your face is clearly visible even in small thumbnail size, it passes the first filter. It should still look professional when reduced to the LinkedIn circle icon.
 
-  execution:
-    "Remove unnecessary phrases about being a hardworking or passionate developer unless they are supported by evidence. Replace them with specific achievements, technologies, projects, and learning experiences that demonstrate continuous growth as an engineer.",
+execution:
+Take multiple shots in daylight and select the one with the sharpest focus and most natural expression. Ensure clothing is simple and non-distracting, ideally aligned with a “startup casual” engineering environment. Update the photo if your appearance changes significantly so it always reflects your current presence.
 
-  confidence:
-    "Review your About section every few months as your projects become stronger. As your experience grows, replace educational content with production-level work, open-source contributions, internships, or measurable engineering achievements."
-},
-
-network-connections: {
-  awareness:
-    "LinkedIn networking is not about collecting thousands of random connections. A focused network increases the quality of opportunities because recruiters, engineers, and hiring managers become part of your professional visibility.",
-
-  understanding:
-    "Connections influence both profile visibility and access to referrals. Building relationships with software engineers, engineering managers, recruiters, and alumni creates significantly more opportunities than connecting only with classmates or friends.",
-
-  application:
-    "Create a weekly networking routine. Send personalized connection requests to engineers from companies you admire, engage with technical posts, congratulate connections on career milestones, and participate in discussions about React, TypeScript, Node.js, frontend architecture, and software engineering.",
-
-  readiness:
-    "Your network becomes valuable when people recognize your name through meaningful interactions instead of random connection requests. A healthy network contains professionals from companies where you genuinely want to work and people whose content you actively follow.",
-
-  execution:
-    "Aim to build consistent habits instead of chasing large numbers. Five thoughtful conversations each week create more long-term opportunities than sending one hundred generic invitations that receive no response.",
-
-  confidence:
-    "As your network grows, monitor whether referrals, recruiter messages, interview invitations, or collaboration requests increase. When new opportunities begin arriving without active job applications, your networking strategy is producing measurable results."
-}
-```
+confidence:
+When recruiters visit your profile and spend more time reading instead of hesitating at the visual level, your photo is effective. If connection acceptance rates increase after updating your image, it is positively influencing first impressions. Strong photos reduce friction and increase profile engagement before any text is read.
