@@ -1,132 +1,182 @@
-featured-content:
+Хорошо. Делаем строго по твоему формату — только advice, 8 нод Applications.
+
+---
+
+### application-tracking:
+
 awareness:
-Featured content is the first proof of real engineering ability on your profile. Recruiters often click this section before reading your experience because it shows actual work instead of claims. If this section is empty or generic, your profile loses credibility instantly.
+Ты не можешь управлять тем, что не видно: если заявки разбросаны по email, LinkedIn и джоббордам, ты теряешь контроль над воронкой. Для Junior разработчика это критично, потому что отклики часто приходят с задержкой 1–3 недели и легко теряются.
 
 understanding:
-Pinned projects act as evidence of your stack, especially React, TypeScript, and Node.js skills. Deployed applications, GitHub repositories, and portfolio links create a technical narrative that supports your headline and About section. Without this, your profile becomes purely descriptive instead of demonstrative.
+Каждая заявка — это объект в pipeline со стадией: sent → viewed → interview → rejected/offer. Без структуры ты не видишь, какие компании реально отвечают на твой стек (React/Node/TypeScript), а какие просто игнорируют.
 
 application:
-Pin 3–5 items: one full-stack project, one frontend-focused React app, one backend API built with Node.js, and optionally one open-source contribution. Each item must include a live demo link, GitHub repository, and a short technical explanation of architecture or key decisions. Prioritize projects that reflect job descriptions you are targeting.
+Создай таблицу: company, role, date applied, stack match %, status, next action. Обновляй её каждый день после любых откликов или изменений статуса в LinkedIn/почте.
 
 readiness:
-Your featured section is ready when a recruiter can open your profile and immediately see working software. Each project should load without errors and clearly show your stack in action. If a project cannot be deployed or explained in under 30 seconds, it does not belong here.
+У тебя есть единый источник правды по всем заявкам, и ты можешь за 10 секунд сказать: сколько активных, сколько без ответа, где есть шанс на интервью.
 
 execution:
-Replace school or tutorial projects with original or significantly modified work. Keep descriptions short but technical, focusing on what problem the app solves and how it is built. Regularly rotate featured projects based on the roles you are applying for.
+Веди трекинг в Notion / Google Sheets с фильтрами по статусу. Каждый вечер обновляй 5–10 минут, не откладывая на “потом”.
 
 confidence:
-When recruiters mention your projects during outreach or interviews, your featured section is effective. If profile engagement increases after adding live projects, your visibility is improving. Strong featured content often becomes the reason you get contacted instead of being skipped.
+Ты начинаешь видеть закономерности: какие компании реагируют на твой уровень и какие формулировки резюме дают отклик. Это убирает хаос и снижает тревожность.
 
-recommendations:
+---
+
+### cover-letter:
+
 awareness:
-Recommendations act as external validation of your engineering ability. Recruiters trust peer-written feedback more than self-described skills. Without recommendations, your profile relies only on self-reporting.
+Кандидаты Junior уровня часто пишут одинаковые письма, которые не отличимы друг от друга. Рекрутеры читают их за 5–10 секунд, поэтому первый абзац решает всё.
 
 understanding:
-Strong recommendations from teammates, mentors, or internship supervisors create social proof that supports your technical claims. They confirm that you can collaborate in React/Node/TypeScript environments and deliver real work in teams. Even a few credible endorsements significantly increase profile trust.
+Хорошее cover letter — это не описание себя, а ответ на вопрос: почему именно ты подходишь под этот стек и эту задачу. Особенно важно связать React/Node/TypeScript опыт с конкретной вакансией.
 
 application:
-Request recommendations from people who worked directly with you on projects, not random connections. Ask them to describe specific contributions, such as features you built, bugs you solved, or systems you improved. Offer to write a recommendation in return to increase response rate.
+Структура: 1) технический хук (что ты уже делал похожее), 2) конкретный match с вакансией, 3) короткое подтверждение мотивации и ссылки на GitHub/портфолио.
 
 readiness:
-Your recommendations are ready when at least two of them mention concrete technologies and real outcomes. They should reference actual projects or collaboration contexts instead of generic praise. If they could apply to anyone, they are not useful.
+У тебя есть шаблон письма, который ты можешь адаптировать за 5–10 минут под любую вакансию без потери качества.
 
 execution:
-Send personalized requests after completing a project or collaboration, when your contribution is still fresh. Guide reviewers by reminding them of specific tasks you worked on together. Keep the process consistent instead of waiting until you urgently need them.
+Перед отправкой каждой заявки переписывай 2–3 строки под конкретную компанию и их стек, а не используешь копипаст без изменений.
 
 confidence:
-When recruiters reference your recommendations during interviews or outreach, your social proof is working. If multiple recommendations highlight similar strengths, your professional identity is clear. Strong endorsements often influence final hiring decisions in borderline cases.
+Ты начинаешь получать больше ответов не потому, что “повезло”, а потому что твои письма стали релевантными конкретным задачам команды.
 
-resume-structure:
+---
+
+### follow-up-strategy:
+
 awareness:
-Resume structure determines whether your experience is readable in under 20 seconds. Recruiters quickly discard resumes that feel cluttered, inconsistent, or overly decorative. For junior engineers, clarity matters more than content volume.
+Большинство Junior кандидатов теряются после отправки заявки и не делают follow-up, хотя часть офферов приходит именно после второго контакта.
 
 understanding:
-ATS systems parse resumes linearly, so single-column structure performs better than complex layouts. Sections like Experience, Projects, Skills, and Education must follow a predictable order. Any deviation reduces parsing accuracy and recruiter readability.
+Follow-up — это не давление, а сигнал вовлечённости. В tech компаниях нормой считается 1–2 аккуратных напоминания через определённые интервалы.
 
 application:
-Use a single-column layout with clear headings and consistent spacing. Place Experience and Projects near the top, followed by Skills and Education. Avoid tables, multi-column grids, or visual-heavy design elements that break parsing.
+Делай follow-up по схеме: 3 дня — мягкое уточнение, 5 дней — добавление ценности (например, проект или GitHub update), 7–10 дней — финальное короткое сообщение.
 
 readiness:
-Your resume is ready when it can be copied into a plain text file and still remain readable. Each section should be clearly separated and scannable within seconds. If structure requires explanation, it is too complex.
+У тебя есть готовые 2–3 шаблона сообщений, которые звучат профессионально и не выглядят навязчиво.
 
 execution:
-Standardize formatting across all entries: same date format, same bullet style, and consistent verb usage. Keep each job or project entry visually balanced with 3–5 bullet points. Remove decorative elements that do not add informational value.
+После каждой заявки сразу ставь напоминания на follow-up в календаре или трекере, чтобы не полагаться на память.
 
 confidence:
-When recruiters can quickly summarize your experience after a single glance, your structure is effective. If ATS systems consistently return your resume in search results, formatting is correct. Clean structure directly increases interview conversion rate.
+Ты перестаёшь зависеть от первого ответа компании и увеличиваешь шансы на диалог даже после “тихого” отклика.
 
-resume-review:
+---
+
+### application-volume:
+
 awareness:
-Resume review is the process of identifying gaps between your actual skills and how they are presented. Many junior engineers underestimate how unclear their resumes appear to external reviewers. Without feedback, weak framing stays unnoticed.
+Одна-две заявки в неделю не дают статистики, особенно на Junior уровне, где конверсия низкая и сильно зависит от рынка.
 
 understanding:
-Peer review reveals issues like unclear impact, missing keywords, or weak technical framing. A structured review process helps align your resume with real job descriptions for React, Node.js, and TypeScript roles. External feedback is essential because self-assessment is usually biased.
+Важно не просто “много отправлять”, а создавать поток заявок, чтобы тестировать разные формулировки резюме и cover letter.
 
 application:
-Ask at least two engineers or mentors to review your resume against real job descriptions. Provide them with a checklist: clarity, technical accuracy, and impact strength. Compare their feedback and identify repeated issues.
+Цель: 10–15 качественных заявок в неделю с обязательным соответствием хотя бы 70–80% требованиям вакансии.
 
 readiness:
-Your resume is ready when independent reviewers consistently understand your experience without explanation. If different people highlight the same strengths and weaknesses, your positioning is stable. A single confusing section indicates a structural problem.
+У тебя есть стабильный ритм: 2–3 дня в неделю ты делаешь batch отправок вместо хаотичных единичных действий.
 
 execution:
-Iterate your resume after every review cycle instead of waiting for full rewrites. Focus on improving clarity of impact statements first, then technical keywords. Keep a version history so you can track improvements over time.
+Разбей процесс: 1 день — поиск вакансий, 1 день — кастомизация, 1 день — отправка заявок пачкой.
 
 confidence:
-When reviewers start suggesting only minor edits instead of structural changes, your resume is strong. If feedback becomes consistent across different reviewers, your narrative is aligned. Stable feedback signals readiness for active job applications.
+Ты перестаёшь воспринимать отказ как событие, потому что у тебя всегда есть активный pipeline.
 
-resume-ats:
+---
+
+### company-research:
+
 awareness:
-ATS systems decide whether your resume reaches a human recruiter. If keywords like React, Node.js, TypeScript, and REST APIs are missing or inconsistent, your resume may never be seen. Formatting mistakes can break parsing entirely.
+Без понимания компании ты отправляешь “слепые” заявки, которые не учитывают их стек, стадию и реальную задачу команды.
 
 understanding:
-ATS tools scan for keyword density, job title alignment, and structured formatting. Complex layouts, images, or inconsistent headings reduce parsing accuracy. Matching language from real job descriptions increases visibility in automated filtering systems.
+React/Node вакансии сильно отличаются между стартапом и продуктовой компанией: одни ищут скорость, другие — стабильность и масштабируемость.
 
 application:
-Extract keywords directly from 5–10 job postings and integrate them into your resume naturally. Use standard section names like Experience, Projects, Skills, and Education. Avoid tables, icons, or embedded graphics.
+Для каждой компании фиксируй: tech stack, продукт, размер команды, stage (startup/mid/enterprise), и одну причину “why them”.
 
 readiness:
-Your resume is ATS-ready when it passes keyword alignment with at least 70% of target job descriptions. It should be readable when converted to plain text without losing structure. If parsing fails in any online ATS checker, it needs revision.
+У тебя есть короткий research-шаблон, который заполняется за 10–15 минут на компанию.
 
 execution:
-Continuously update keywords as job requirements change. Prioritize technical relevance over stylistic design. Keep your resume optimized for machines first, then for humans.
+Перед отправкой заявки всегда добавляй 1 персонализированную строку в cover letter, основанную на исследовании.
 
 confidence:
-When your resume consistently appears in recruiter searches and ATS screenings, optimization is effective. Increased interview invitations without major content changes confirm proper keyword alignment. ATS performance is measurable through response rate improvements.
+Ты начинаешь писать не “в никуда”, а конкретно в команду с понятным контекстом, что повышает отклик.
 
-resume-summary:
+---
+
+### application-tailoring:
+
 awareness:
-The resume summary is the first narrative signal about your professional identity. If it is vague or generic, recruiters assume the rest of the resume will also lack focus. For junior engineers, clarity is more important than storytelling.
+Одинаковое резюме для всех вакансий почти всегда снижает шанс, особенно на Junior уровне, где конкуренция высокая.
 
 understanding:
-A strong summary connects your stack (React, Node.js, TypeScript) with the type of systems you build and your current career stage. It should immediately position you within a specific engineering direction instead of listing personality traits.
+Рекрутер сканирует совпадение ключевых слов (React, Node.js, TypeScript, REST, Git, CI/CD) за секунды через ATS.
 
 application:
-Write 2–3 sentences: your role, your main stack, and one concrete type of work you focus on such as building web applications or APIs. Include one example project or achievement if possible. Avoid phrases without technical meaning.
+Делай правило 80% match: подавайся только туда, где ты закрываешь большую часть требований, и подстраивай резюме под ключевые слова вакансии.
 
 readiness:
-Your summary is ready when it can replace your headline without losing clarity. A recruiter should understand your technical direction within five seconds. If it requires rereading, it is too complex.
+У тебя есть несколько версий резюме под разные типы вакансий (frontend, fullstack, backend light).
 
 execution:
-Update your summary whenever your target role changes. Keep it aligned with your featured projects and experience section. Ensure consistency between summary, headline, and skills.
+Перед отправкой копируй 5–10 ключевых слов из вакансии в skills и experience, если они честно отражают твой опыт.
 
 confidence:
-When recruiters describe your profile in the same terms you used in your summary, it is effective. If interviewers reference your summary language during conversations, your positioning is aligned. Strong summaries reduce ambiguity in early screening.
+Ты перестаёшь “спамить рынок” и начинаешь получать более релевантные интервью.
 
-resume-skills:
+---
+
+### portfolio-submission:
+
 awareness:
-The skills section acts as a keyword map for recruiters and ATS systems. If it is incomplete or overly broad, your profile becomes harder to categorize. For junior engineers, relevance matters more than quantity.
+Junior кандидатов часто оценивают не по резюме, а по тому, что они могут показать в GitHub и live demo.
 
 understanding:
-Skills should reflect real job requirements for React, Node.js, and TypeScript roles. Grouping skills into categories like Frontend, Backend, Tools, and Databases improves readability and searchability. Random or inflated lists reduce credibility.
+Проекты без README, деплоя и описания задач воспринимаются как незавершённые, даже если код хороший.
 
 application:
-List core technologies first: React, TypeScript, Node.js, Express, REST APIs. Then add supporting tools like Git, Docker, CI/CD, and testing frameworks. Ensure every skill listed appears in at least one project or job description.
+Каждый проект должен иметь: live demo, GitHub repo, README с задачей, стеком и 2–3 скриншотами или GIF.
 
 readiness:
-Your skills section is ready when it matches at least 70% of skills found in target job postings. Each skill should be verifiable through experience or project evidence. If a skill cannot be explained in an interview, remove it.
+У тебя есть 2–3 проекта, которые можно показать рекрутеру без дополнительных объяснений.
 
 execution:
-Regularly update skills based on actual usage in projects. Remove outdated or unused technologies to keep focus sharp. Align skills with both resume and LinkedIn for consistency.
+Перед каждой заявкой проверяй: все ссылки работают, проект деплоится, README читается за 30 секунд.
 
 confidence:
-When recruiters reference your listed skills during interviews and you can confidently demonstrate them, alignment is strong. If your skills section leads directly to technical screening questions, it is correctly optimized. High relevance increases interview conversion rates.
+Ты можешь доказать свои навыки через реальные проекты, а не только через текст резюме.
+
+---
+
+### referral-strategy:
+
+awareness:
+На Junior уровне рефералы дают кратно больше шансов попасть на интервью, чем холодные заявки.
+
+understanding:
+Реферал — это не “попросить работу”, а войти через доверие: кто-то внутри компании подтверждает твой уровень.
+
+application:
+Ищи 2–3 контакта на компанию через LinkedIn, alumni, open source или знакомых и сначала устанавливай контакт, а не просишь сразу referral.
+
+readiness:
+У тебя есть список компаний и потенциальных точек входа для каждой.
+
+execution:
+Пиши короткое сообщение: кто ты, чем занимаешься (React/Node/TS), и что ты уже сделал — без прямой просьбы о работе в первом сообщении.
+
+confidence:
+Ты начинаешь получать доступ к “скрытому рынку” вакансий, где конкуренция значительно ниже.
+
+---
+
+Если хочешь — дальше можно собрать это в единый **Applications Engine (state + tasks + scoring)** и встроить прямо в runtime как систему прогресса.
+Если хочешь — дальше можно собрать это в единый Applications Engine (state + tasks + scoring) и встроить прямо в runtime как систему прогресса.
