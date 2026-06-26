@@ -63,3 +63,87 @@
   background: #6a4de6;
   box-shadow: 0 6px 20px rgba(124, 92, 255, 0.4);
 }
+
+.feedback-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+
+.feedback-card {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 360px;
+  width: 90%;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: feedbackIn 0.3s ease;
+}
+
+@keyframes feedbackIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.feedback-card__header {
+  padding: 20px 24px 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c1c1e;
+}
+
+.feedback-card__header--positive { background: #e8f5e9; color: #2e7d32; }
+.feedback-card__header--neutral { background: #e3f2fd; color: #1565c0; }
+.feedback-card__header--warning { background: #fff3e0; color: #e65100; }
+
+.feedback-card__body {
+  padding: 0 24px 20px;
+  font-size: 14px;
+  color: #3a3a3c;
+  line-height: 1.5;
+}
+
+.feedback-card__stats {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.feedback-card__stats .positive { color: #2e7d32; }
+.feedback-card__stats .negative { color: #c62828; }
+
+.feedback-card__next {
+  margin: 8px 0 0;
+  font-style: italic;
+  color: #8e8e93;
+}
+
+.feedback-card__recommendation {
+  margin: 8px 0 0;
+  font-weight: 600;
+  color: #7c5cff;
+}
+
+.feedback-card__close {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: #7c5cff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.feedback-card__close:hover {
+  background: #6a4de6;
+}

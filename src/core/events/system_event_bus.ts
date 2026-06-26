@@ -12,7 +12,8 @@ export type SystemEventType =
   | 'SCORE_UPDATED'
   | 'CONFIDENCE_CHANGED'
   | 'CHAPTER_UNLOCKED'
-  | 'GAP_UPDATED';
+  | 'GAP_UPDATED'
+  | 'LEARNING_FEEDBACK';
 
 export type SystemEvent = {
   type: SystemEventType;

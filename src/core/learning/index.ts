@@ -13,3 +13,13 @@ export { loopToGapUpdate, shouldUpdateGap } from './loop_gap_connector';
 
 export type { PipelineResult } from './learning_pipeline';
 export { runLearningPipeline } from './learning_pipeline';
+
+export type { AttemptResult, FeedbackCard, NextRecommendation, LearningCycleResult } from './learning_engine';
+export {
+  evaluateAttempt,
+  updateConfidence,
+  updateReadiness,
+  buildFeedback,
+  recommendNextAction,
+  runLearningCycle,
+} from './learning_engine';

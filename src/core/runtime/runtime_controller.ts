@@ -9,13 +9,17 @@ import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { processUserAction } from '../interaction/interaction_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
+import { runLearningCycle } from '../learning/learning_engine';
+import type { SkillState } from '../skill_state';
 import { emit } from '../events/system_event_bus';
 
 let runtimeState: JourneyRuntimeState | null = null;
 
 export function startJourney(onboardingState: OnboardingState): JourneyRuntimeState {
   runtimeState = initializeJourneyRuntime(onboardingState);
-  emit('SYSTEM_BOOTED', { userId: onboardingState.professionId ?? 'anonymous' });
+  emit('SYSTEM_BOOTED', {
+    professionId: runtimeState.professionId,
+  });
   emit('UI_REFRESH', {});
   return runtimeState;
 }
@@ -28,8 +32,9 @@ export function setActiveNode(nodeId: string): JourneyRuntimeState {
   if (!runtimeState) {
     throw new Error('Runtime not initialized');
   }
+  const previousNodeId = runtimeState.activeNodeId;
   runtimeState = { ...runtimeState, activeNodeId: nodeId };
-  emit('NODE_CHANGED', { nodeId });
+  emit('NODE_CHANGED', { nodeId, previousNodeId });
   emit('UI_REFRESH', {});
   return runtimeState;
 }
@@ -50,10 +55,17 @@ export function advanceNode(
       const chapterIndex = Math.floor(nodeIndex / 3);
       const access = checkNodeAccess(premiumState, chapterIndex);
       if (!access.allowed) {
+        emit('TASK_FAILED', {
+          nodeId: runtimeState.activeNodeId,
+          reason: 'premium_locked',
+        });
         return runtimeState;
       }
     }
   }
+
+  const activeNode = runtimeState.nodeStates[runtimeState.activeNodeId];
+  const previousState: SkillState = activeNode?.state ?? 'locked';
 
   const result = processUserAction(
     'complete_task',
@@ -66,35 +78,79 @@ export function advanceNode(
     updatedNodeMap[n.id] = n;
   }
 
+  const newNode = updatedNodeMap[runtimeState.activeNodeId];
+  const newState: SkillState = newNode?.state ?? previousState;
+
   const chapters = getActiveChapters();
   const currentChapter = getCurrentChapter(chapters, updatedNodeMap);
+  const previousChapterId = runtimeState.activeChapterId;
 
-  const prevChapterId = runtimeState.activeChapterId;
-  const newChapterId = currentChapter?.id ?? prevChapterId;
+  const streak = 0;
+  const totalNodes = Object.keys(updatedNodeMap).length;
+  const completedNodes = Object.values(updatedNodeMap).filter(
+    n => n.state === 'confidence'
+  ).length;
+
+  const learningResult = runLearningCycle(
+    activeNode ?? newNode,
+    previousState,
+    newState,
+    runtimeState.confidenceScore,
+    runtimeState.readinessScore,
+    streak,
+    totalNodes,
+    completedNodes,
+    updatedNodeMap
+  );
 
   runtimeState = {
     ...runtimeState,
     nodeStates: updatedNodeMap,
-    readinessScore: result.updatedReadiness.readinessScore,
-    confidenceScore: result.updatedReadiness.confidenceScore,
+    readinessScore: learningResult.updatedReadiness,
+    confidenceScore: learningResult.updatedConfidence,
     chapterProgress: Object.fromEntries(
       result.updatedChapterProgress.map(c => [c.chapterId, c.percent])
     ),
-    activeChapterId: newChapterId,
+    activeChapterId: currentChapter?.id ?? runtimeState.activeChapterId,
   };
 
-  emit('STATE_UPDATED', { nodeId: runtimeState.activeNodeId });
-  emit('SCORE_UPDATED', { readiness: runtimeState.readinessScore, confidence: runtimeState.confidenceScore });
-  emit('CONFIDENCE_CHANGED', { confidence: runtimeState.confidenceScore });
-  emit('TASK_COMPLETED', { nodeId: runtimeState.activeNodeId });
+  emit('STATE_UPDATED', {
+    readinessScore: runtimeState.readinessScore,
+    confidenceScore: runtimeState.confidenceScore,
+    chapterProgress: runtimeState.chapterProgress,
+  });
+  emit('SCORE_UPDATED', {
+    readinessScore: runtimeState.readinessScore,
+    confidenceScore: runtimeState.confidenceScore,
+  });
+  emit('CONFIDENCE_CHANGED', {
+    confidenceScore: runtimeState.confidenceScore,
+  });
 
-  if (newChapterId !== prevChapterId) {
-    emit('CHAPTER_CHANGED', { chapterId: newChapterId });
+  if (result.rewards.chapterCompleted) {
+    emit('CHAPTER_CHANGED', {
+      chapterId: currentChapter?.id ?? '',
+      previousChapterId,
+    });
+    emit('CHAPTER_UNLOCKED', {
+      chapterId: currentChapter?.id ?? '',
+    });
   }
+
+  emit('TASK_COMPLETED', {
+    nodeId: runtimeState.activeNodeId,
+    action: 'complete_task',
+    newState: updatedNodeMap[runtimeState.activeNodeId]?.state,
+  });
 
   if (result.updatedGaps.length > 0) {
-    emit('GAP_UPDATED', { gapCount: result.updatedGaps.length });
+    emit('GAP_UPDATED', { gaps: result.updatedGaps });
   }
+
+  emit('LEARNING_FEEDBACK', {
+    feedback: learningResult.feedback,
+    recommendation: learningResult.recommendation,
+  });
 
   emit('UI_REFRESH', {});
 
@@ -120,12 +176,17 @@ export function advanceChapter(): JourneyRuntimeState {
   if (!nextNodeId) {
     throw new Error('Next chapter has no nodes');
   }
+  const previousChapterId = runtimeState.activeChapterId;
   runtimeState = { ...runtimeState, activeNodeId: nextNodeId };
-
-  emit('CHAPTER_CHANGED', { chapterId: next.id });
-  emit('NODE_CHANGED', { nodeId: nextNodeId });
+  emit('CHAPTER_CHANGED', {
+    chapterId: next.id,
+    previousChapterId,
+  });
+  emit('NODE_CHANGED', {
+    nodeId: nextNodeId,
+    previousNodeId: runtimeState.activeNodeId,
+  });
   emit('UI_REFRESH', {});
-
   return runtimeState;
 }
 
