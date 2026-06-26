@@ -1,130 +1,61 @@
-{
-  id: 'resume-achievement-framing',
-  skill: 'Achievement Framing',
-  domain: 'Resume',
-  state: 'locked',
-  nextState: 'awareness',
-  signals: [
-    'You describe achievements using measurable results instead of responsibilities',
-    'Every major project includes evidence of your contribution',
-    'You can explain the impact of your work with concrete numbers or outcomes'
-  ],
-  advice: {
-    awareness:
-      'Recruiters are interested in outcomes, not task lists. "Built a feature" is less convincing than "Built a feature that reduced page load time by 35%."',
-    understanding:
-      'Strong resume bullets follow a simple pattern: Action → Context → Result. Even if you do not have business metrics, you can demonstrate technical impact, learning speed, code quality, or user value.',
-    application:
-      'Review every project and rewrite each bullet so it highlights what changed because of your work instead of what tools you used.',
-    readiness:
-      'You can explain every bullet point with supporting evidence, code examples, or project demonstrations.',
-    execution:
-      'Your resume contains achievement-focused bullets that clearly communicate value to recruiters and engineering managers.',
-    confidence:
-      'Mock interviews and peer reviews consistently identify your project descriptions as specific, credible, and impactful.'
-  },
-  tasks: [
-    {
-      id: 'task-resume-achievement-1',
-      title: 'Rewrite Responsibilities into Achievements',
-      objective:
-        'Transform generic resume bullets into achievement-focused statements.',
-      instructions: [
-        'Select 10 existing resume bullet points.',
-        'Highlight statements that only describe responsibilities.',
-        'Rewrite each using the format: Action + Context + Result.',
-        'Ensure every rewritten bullet demonstrates value created.'
-      ],
-      completionCriteria: [
-        '10 bullets rewritten.',
-        'Each bullet starts with a strong action verb.',
-        'Every bullet describes a measurable or observable outcome.'
-      ],
-      estimatedMinutes: 45,
-      difficulty: 1.5,
-      tips: [
-        'Use verbs like Built, Improved, Automated, Reduced, Designed, Optimized.',
-        'If exact numbers are unavailable, describe qualitative impact honestly.'
-      ],
-      expectedOutcome:
-        'A resume with achievement-oriented bullet points instead of task descriptions.'
-    },
-    {
-      id: 'task-resume-achievement-2',
-      title: 'Collect Evidence for Every Project',
-      objective:
-        'Gather proof that supports each achievement listed on your resume.',
-      instructions: [
-        'Open every portfolio or GitHub project mentioned in your resume.',
-        'Record commits, pull requests, screenshots, deployment links, or metrics.',
-        'Match each resume bullet with at least one supporting artifact.',
-        'Store all evidence in a single document for future interviews.'
-      ],
-      completionCriteria: [
-        'Every project has supporting evidence.',
-        'At least one artifact is linked for each achievement.',
-        'Evidence document is saved for interview preparation.'
-      ],
-      estimatedMinutes: 35,
-      difficulty: 1.5,
-      tips: [
-        'GitHub commit history is valid evidence of contribution.',
-        'Screenshots of deployed applications help demonstrate completed work.'
-      ],
-      expectedOutcome:
-        'A structured evidence document validating every important resume claim.'
-    },
-    {
-      id: 'task-resume-achievement-3',
-      title: 'Quantify Technical Impact',
-      objective:
-        'Add realistic technical metrics to your strongest resume achievements.',
-      instructions: [
-        'Review your three most important projects.',
-        'Identify measurable improvements such as performance, reliability, testing, or delivery speed.',
-        'Estimate only metrics you can reasonably justify.',
-        'Rewrite the corresponding resume bullets with those metrics.'
-      ],
-      completionCriteria: [
-        'At least three bullets include measurable results.',
-        'All metrics are realistic and defensible.',
-        'No exaggerated or unverifiable claims remain.'
-      ],
-      estimatedMinutes: 40,
-      difficulty: 2.0,
-      tips: [
-        'Examples include response time, bundle size, Lighthouse score, test coverage, deployment frequency, or issue resolution time.',
-        'When uncertain, use approximate wording such as "reduced", "improved", or "simplified" instead of inventing percentages.'
-      ],
-      expectedOutcome:
-        'Three high-impact resume bullets with credible technical outcomes.'
-    },
-    {
-      id: 'task-resume-achievement-4',
-      title: 'Validate Resume Stories',
-      objective:
-        'Verify that every achievement can be explained confidently during an interview.',
-      instructions: [
-        'Read each achievement aloud.',
-        'For every bullet, answer: What was the problem? What did I do? What was the result?',
-        'Remove or rewrite any bullet you cannot explain clearly.',
-        'Practice the final stories until each takes under one minute.'
-      ],
-      completionCriteria: [
-        'Every achievement has a matching verbal explanation.',
-        'No bullet remains unsupported.',
-        'Each explanation fits within one minute.'
-      ],
-      estimatedMinutes: 30,
-      difficulty: 1.5,
-      tips: [
-        'Interviewers often ask about the first project they see on your resume.',
-        'If you cannot defend a claim, remove it rather than risk losing credibility.'
-      ],
-      expectedOutcome:
-        'A resume where every achievement is backed by a clear, interview-ready story.'
-    }
-  ],
-  estimatedMinutes: 150,
-  difficulty: 1.6
+```typescript
+headline-authority: {
+  awareness:
+    "Your headline is the first thing recruiters read after your name. A generic headline like 'Software Engineer' gives them no reason to click your profile, while a specific headline immediately communicates your direction and technical stack.",
+
+  understanding:
+    "A strong headline combines your target role, core technologies, and the value you bring. Recruiters search using keywords such as React, TypeScript, Node.js, REST APIs, and JavaScript, so including them improves discoverability without making the headline feel like a keyword list.",
+
+  application:
+    "Review ten LinkedIn profiles of junior engineers working at companies where you would like to work. Identify the common structure of their headlines, then write three alternative versions for your own profile and compare which one is the clearest and easiest to understand in less than five seconds.",
+
+  readiness:
+    "Someone reading your headline should immediately know what position you are seeking, what technologies you specialize in, and whether your profile is relevant. If two different people describe your professional focus using nearly identical words after reading your headline, it is clear enough.",
+
+  execution:
+    "Replace vague phrases like 'Passionate Developer' or 'Looking for Opportunities' with specific technical positioning. Keep the headline updated whenever your primary stack, portfolio, or target role changes so recruiters always see your current focus.",
+
+  confidence:
+    "After updating your headline, monitor recruiter profile views and search appearances for several weeks. If more recruiters reach your profile and conversations begin with your actual technical stack instead of asking what you do, your headline is performing well."
+},
+
+about-section: {
+  awareness:
+    "The About section should explain who you are, what you build, and where you are heading. It should not repeat your resume or list every technology you have ever touched.",
+
+  understanding:
+    "Recruiters want a short story that connects your motivation, technical interests, and practical experience. Mentioning projects built with React, TypeScript, Node.js, Express, PostgreSQL or similar technologies makes your profile more credible than describing yourself with generic personality traits.",
+
+  application:
+    "Write your About section in three parts: your current focus, your strongest technical experience, and the type of opportunities you are seeking. Support every important statement with a concrete example such as a deployed application, GitHub repository, or measurable project outcome.",
+
+  readiness:
+    "Your About section is ready when someone can understand your background without opening your resume. Every sentence should either explain your technical direction or demonstrate experience that supports your target role.",
+
+  execution:
+    "Remove unnecessary phrases about being a hardworking or passionate developer unless they are supported by evidence. Replace them with specific achievements, technologies, projects, and learning experiences that demonstrate continuous growth as an engineer.",
+
+  confidence:
+    "Review your About section every few months as your projects become stronger. As your experience grows, replace educational content with production-level work, open-source contributions, internships, or measurable engineering achievements."
+},
+
+network-connections: {
+  awareness:
+    "LinkedIn networking is not about collecting thousands of random connections. A focused network increases the quality of opportunities because recruiters, engineers, and hiring managers become part of your professional visibility.",
+
+  understanding:
+    "Connections influence both profile visibility and access to referrals. Building relationships with software engineers, engineering managers, recruiters, and alumni creates significantly more opportunities than connecting only with classmates or friends.",
+
+  application:
+    "Create a weekly networking routine. Send personalized connection requests to engineers from companies you admire, engage with technical posts, congratulate connections on career milestones, and participate in discussions about React, TypeScript, Node.js, frontend architecture, and software engineering.",
+
+  readiness:
+    "Your network becomes valuable when people recognize your name through meaningful interactions instead of random connection requests. A healthy network contains professionals from companies where you genuinely want to work and people whose content you actively follow.",
+
+  execution:
+    "Aim to build consistent habits instead of chasing large numbers. Five thoughtful conversations each week create more long-term opportunities than sending one hundred generic invitations that receive no response.",
+
+  confidence:
+    "As your network grows, monitor whether referrals, recruiter messages, interview invitations, or collaboration requests increase. When new opportunities begin arriving without active job applications, your networking strategy is producing measurable results."
 }
+```
