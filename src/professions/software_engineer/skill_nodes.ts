@@ -358,12 +358,18 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
     nextState: 'understanding',
     signals: ['Your headline is your job title only', 'Recruiters do not reach out'],
     advice: {
-      awareness: 'Read 10 headlines of people in your target role.',
-      understanding: 'Identify what makes those headlines compelling.',
-      application: 'Draft 3 headline options for yourself.',
-      readiness: 'A/B test your headline with peers.',
-      execution: 'Update your headline and track recruiter views.',
-      confidence: 'Your headline attracts the right opportunities.',
+      awareness:
+        "Your headline is the first thing recruiters read after your name. A generic headline like 'Software Engineer' gives them no reason to click your profile, while a specific headline immediately communicates your direction and technical stack.",
+      understanding:
+        "A strong headline combines your target role, core technologies, and the value you bring. Recruiters search using keywords such as React, TypeScript, Node.js, REST APIs, and JavaScript, so including them improves discoverability without making the headline feel like a keyword list.",
+      application:
+        "Review ten LinkedIn profiles of junior engineers working at companies where you would like to work. Identify the common structure of their headlines, then write three alternative versions for your own profile and compare which one is the clearest and easiest to understand in less than five seconds.",
+      readiness:
+        "Someone reading your headline should immediately know what position you are seeking, what technologies you specialize in, and whether your profile is relevant. If two different people describe your professional focus using nearly identical words after reading your headline, it is clear enough.",
+      execution:
+        "Replace vague phrases like 'Passionate Developer' or 'Looking for Opportunities' with specific technical positioning. Keep the headline updated whenever your primary stack, portfolio, or target role changes so recruiters always see your current focus.",
+      confidence:
+        "After updating your headline, monitor recruiter profile views and search appearances for several weeks. If more recruiters reach your profile and conversations begin with your actual technical stack instead of asking what you do, your headline is performing well."
     },
     tasks: LINKEDIN_TASKS['headline-authority'],
     estimatedMinutes: 30,
@@ -377,12 +383,18 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
     nextState: 'awareness',
     signals: ['Your About section is empty or generic', 'You do not tell your story'],
     advice: {
-      awareness: 'Study compelling About sections.',
-      understanding: 'Identify the 3-paragraph structure.',
-      application: 'Write your About section in 3 paragraphs.',
-      readiness: 'Get feedback on tone and clarity.',
-      execution: 'Publish your optimized About section.',
-      confidence: 'Your About section tells a compelling story.',
+      awareness:
+        "The About section should explain who you are, what you build, and where you are heading. It should not repeat your resume or list every technology you have ever touched.",
+      understanding:
+        "Recruiters want a short story that connects your motivation, technical interests, and practical experience. Mentioning projects built with React, TypeScript, Node.js, Express, PostgreSQL or similar technologies makes your profile more credible than describing yourself with generic personality traits.",
+      application:
+        "Write your About section in three parts: your current focus, your strongest technical experience, and the type of opportunities you are seeking. Support every important statement with a concrete example such as a deployed application, GitHub repository, or measurable project outcome.",
+      readiness:
+        "Your About section is ready when someone can understand your background without opening your resume. Every sentence should either explain your technical direction or demonstrate experience that supports your target role.",
+      execution:
+        "Remove unnecessary phrases about being a hardworking or passionate developer unless they are supported by evidence. Replace them with specific achievements, technologies, projects, and learning experiences that demonstrate continuous growth as an engineer.",
+      confidence:
+        "Review your About section every few months as your projects become stronger. As your experience grows, replace educational content with production-level work, open-source contributions, internships, or measurable engineering achievements."
     },
     tasks: LINKEDIN_TASKS['about-section'],
     estimatedMinutes: 40,
@@ -396,12 +408,18 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
     nextState: 'awareness',
     signals: ['Your network is smaller than 100', 'You do not engage with content'],
     advice: {
-      awareness: 'Understand the power of strategic networking.',
-      understanding: 'Identify your target network personas.',
-      application: 'Send personalized connection requests.',
-      readiness: 'Build a daily networking habit.',
-      execution: 'Grow and engage your network consistently.',
-      confidence: 'Your network opens doors to opportunities.',
+      awareness:
+        "LinkedIn networking is not about collecting thousands of random connections. A focused network increases the quality of opportunities because recruiters, engineers, and hiring managers become part of your professional visibility.",
+      understanding:
+        "Connections influence both profile visibility and access to referrals. Building relationships with software engineers, engineering managers, recruiters, and alumni creates significantly more opportunities than connecting only with classmates or friends.",
+      application:
+        "Create a weekly networking routine. Send personalized connection requests to engineers from companies you admire, engage with technical posts, congratulate connections on career milestones, and participate in discussions about React, TypeScript, Node.js, frontend architecture, and software engineering.",
+      readiness:
+        "Your network becomes valuable when people recognize your name through meaningful interactions instead of random connection requests. A healthy network contains professionals from companies where you genuinely want to work and people whose content you actively follow.",
+      execution:
+        "Aim to build consistent habits instead of chasing large numbers. Five thoughtful conversations each week create more long-term opportunities than sending one hundred generic invitations that receive no response.",
+      confidence:
+        "As your network grows, monitor whether referrals, recruiter messages, interview invitations, or collaboration requests increase. When new opportunities begin arriving without active job applications, your networking strategy is producing measurable results."
     },
     tasks: LINKEDIN_TASKS['network-connections'],
     estimatedMinutes: 40,
