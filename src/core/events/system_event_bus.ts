@@ -13,7 +13,10 @@ export type SystemEventType =
   | 'CONFIDENCE_CHANGED'
   | 'CHAPTER_UNLOCKED'
   | 'GAP_UPDATED'
-  | 'LEARNING_FEEDBACK';
+  | 'LEARNING_FEEDBACK'
+  | 'ATTEMPT_STARTED'
+  | 'ATTEMPT_COMPLETED'
+  | 'SKILL_PROGRESS';
 
 export type SystemEvent = {
   type: SystemEventType;

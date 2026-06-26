@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
-import { setActiveNode, advanceNode } from '@/core/runtime/runtime_controller';
+import { setActiveNode, beginTaskAttempt, finishTaskAttempt } from '@/core/runtime/runtime_controller';
 import { snapToActiveNode } from '@/core/focus_snap_controller';
 import { subscribe } from '@/core/events/system_event_bus';
 import type { SystemEvent } from '@/core/events/system_event_bus';
@@ -8,16 +8,17 @@ import { JourneyVisualLayer } from '@/components/JourneyVisualLayer/JourneyVisua
 import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
 import { JourneyHeader } from '@/components/JourneyHeader/JourneyHeader';
 import { JourneyBottomNav } from '@/components/JourneyBottomNav/JourneyBottomNav';
-import type { FeedbackCard, NextRecommendation } from '@/core/learning/learning_engine';
+import type { AttemptOutcome } from '@/core/attempt/attempt_engine';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
   const [, setTick] = useState(0);
-  const [feedback, setFeedback] = useState<FeedbackCard | null>(null);
-  const [recommendation, setRecommendation] = useState<NextRecommendation | null>(null);
-  const refresh = useCallback(() => setTick(t => t + 1), []);
-  const ui = getUIState();
-  const nav = getNavigation();
+  const [outcome, setOutcome] = useState<AttemptOutcome | null>(null);
+  const [isAttempting, setIsAttempting] = useState(false);
+
+  const refresh = useCallback(() => {
+    setTick(t => t + 1);
+  }, []);
 
   useEffect(() => {
     const unsubNode = subscribe('NODE_CHANGED', refresh);
@@ -25,23 +26,22 @@ export function JourneyScreen() {
     const unsubChapter = subscribe('CHAPTER_CHANGED', refresh);
     const unsubScore = subscribe('SCORE_UPDATED', refresh);
     const unsubUI = subscribe('UI_REFRESH', refresh);
-    const unsubLearn = subscribe('LEARNING_FEEDBACK', (event: SystemEvent) => {
-      const { feedback: fb, recommendation: rec } = event.payload as {
-        feedback: FeedbackCard;
-        recommendation: NextRecommendation;
-      };
-      setFeedback(fb);
-      setRecommendation(rec);
+    const unsubAttempt = subscribe('ATTEMPT_COMPLETED', (_event: SystemEvent) => {
+      refresh();
     });
+
     return () => {
       unsubNode();
       unsubState();
       unsubChapter();
       unsubScore();
       unsubUI();
-      unsubLearn();
+      unsubAttempt();
     };
   }, [refresh]);
+
+  const ui = getUIState();
+  const nav = getNavigation();
 
   useEffect(() => {
     snapToActiveNode(ui.activeNodeId);
@@ -51,16 +51,28 @@ export function JourneyScreen() {
     setActiveNode(nodeId);
   };
 
-  const handleAdvance = () => {
-    advanceNode('tap_primary');
+  const handleStartTask = () => {
+    const taskId = `task_${ui.activeNodeId}_${Date.now()}`;
+    beginTaskAttempt(taskId);
+    setIsAttempting(true);
+    setOutcome(null);
   };
 
-  const handleCloseFeedback = () => {
-    setFeedback(null);
-    if (recommendation?.targetNodeId && recommendation.action === 'next_node') {
-      setActiveNode(recommendation.targetNodeId);
+  const handleCompleteTask = (result: 'success' | 'partial' | 'fail') => {
+    const attemptOutcome = finishTaskAttempt(result);
+    setOutcome(attemptOutcome);
+    setIsAttempting(false);
+  };
+
+  const handleCloseOutcome = () => {
+    setOutcome(null);
+    if (outcome?.nextAction === 'next_node' && outcome.evaluation.attempt.nodeId) {
+      const nodes = ui.nodes;
+      const currentIndex = nodes.findIndex(n => n.id === ui.activeNodeId);
+      if (currentIndex >= 0 && currentIndex < nodes.length - 1) {
+        setActiveNode(nodes[currentIndex + 1].id);
+      }
     }
-    setRecommendation(null);
   };
 
   return (
@@ -77,34 +89,82 @@ export function JourneyScreen() {
       <JourneyBottomNav
         activeNodeId={ui.activeNodeId}
         onNodeSelect={handleNodeSelect}
-        onAdvance={handleAdvance}
+        onAdvance={isAttempting ? () => {} : handleStartTask}
         hasNext={nav.hasNext}
         hasPrevious={nav.hasPrevious}
       />
-      {feedback && (
-        <div className="feedback-overlay" onClick={handleCloseFeedback}>
-          <div className="feedback-card" onClick={e => e.stopPropagation()}>
-            <div className={`feedback-card__header feedback-card__header--${feedback.type}`}>
-              {feedback.title}
+
+      {isAttempting && (
+        <div className="attempt-overlay">
+          <div className="attempt-panel">
+            <h3>Task in Progress</h3>
+            <p>Complete the task and select your result:</p>
+            <div className="attempt-buttons">
+              <button className="attempt-success" onClick={() => handleCompleteTask('success')}>
+                ✓ Success
+              </button>
+              <button className="attempt-partial" onClick={() => handleCompleteTask('partial')}>
+                ~ Partial
+              </button>
+              <button className="attempt-fail" onClick={() => handleCompleteTask('fail')}>
+                ✗ Fail
+              </button>
             </div>
-            <div className="feedback-card__body">
-              <p>{feedback.body}</p>
-              <div className="feedback-card__stats">
-                <span className={feedback.confidenceChange >= 0 ? 'positive' : 'negative'}>
-                  Confidence: {feedback.confidenceChange >= 0 ? '+' : ''}{feedback.confidenceChange}%
-                </span>
-                <span className={feedback.readinessChange >= 0 ? 'positive' : 'negative'}>
-                  Readiness: {feedback.readinessChange >= 0 ? '+' : ''}{feedback.readinessChange}
+          </div>
+        </div>
+      )}
+
+      {outcome && (
+        <div className="outcome-overlay" onClick={handleCloseOutcome}>
+          <div className="outcome-card" onClick={e => e.stopPropagation()}>
+            <h3>
+              {outcome.evaluation.attempt.result === 'success' ? '✓ Task Completed' :
+               outcome.evaluation.attempt.result === 'partial' ? '~ Partial Progress' :
+               '✗ Task Incomplete'}
+            </h3>
+
+            <div className="outcome-score">
+              <span className="score-label">Score</span>
+              <span className="score-value">{outcome.evaluation.attempt.score}</span>
+            </div>
+
+            <div className="outcome-deltas">
+              <div className="delta-row">
+                <span>Confidence</span>
+                <span className={outcome.evaluation.attempt.confidenceDelta >= 0 ? 'positive' : 'negative'}>
+                  {outcome.evaluation.attempt.confidenceDelta >= 0 ? '+' : ''}
+                  {Math.round(outcome.evaluation.attempt.confidenceDelta * 100)}%
                 </span>
               </div>
-              <p className="feedback-card__next">{feedback.nextSuggestion}</p>
-              {recommendation && (
-                <p className="feedback-card__recommendation">
-                  Next: {recommendation.label}
-                </p>
-              )}
+              <div className="delta-row">
+                <span>Readiness</span>
+                <span className={outcome.evaluation.attempt.readinessDelta >= 0 ? 'positive' : 'negative'}>
+                  {outcome.evaluation.attempt.readinessDelta >= 0 ? '+' : ''}
+                  {outcome.evaluation.attempt.readinessDelta}
+                </span>
+              </div>
             </div>
-            <button className="feedback-card__close" onClick={handleCloseFeedback}>
+
+            {outcome.evaluation.stateChanged && (
+              <div className="outcome-skill">
+                <strong>Skill State:</strong>{' '}
+                {outcome.evaluation.previousState} → {outcome.evaluation.newState}
+              </div>
+            )}
+
+            <div className="outcome-feedback">
+              <p>{outcome.feedback}</p>
+            </div>
+
+            <div className="outcome-next">
+              <strong>Next:</strong>{' '}
+              {outcome.nextAction === 'next_node' ? 'Proceed to next task' :
+               outcome.nextAction === 'retry' ? 'Retry this task' :
+               outcome.nextAction === 'review' ? 'Review before continuing' :
+               'Continue'}
+            </div>
+
+            <button className="outcome-close" onClick={handleCloseOutcome}>
               Continue
             </button>
           </div>
