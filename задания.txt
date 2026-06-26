@@ -1,182 +1,199 @@
-Хорошо. Делаем строго по твоему формату — только advice, 8 нод Applications.
-
----
-
-### application-tracking:
+interview-prep:
 
 awareness:
-Ты не можешь управлять тем, что не видно: если заявки разбросаны по email, LinkedIn и джоббордам, ты теряешь контроль над воронкой. Для Junior разработчика это критично, потому что отклики часто приходят с задержкой 1–3 недели и легко теряются.
+Most junior candidates walk into interviews without structured stories and end up improvising under pressure. In the US market, interviewers expect clear, repeatable narratives about your projects and decisions, not vague descriptions of “what you built.”
 
 understanding:
-Каждая заявка — это объект в pipeline со стадией: sent → viewed → interview → rejected/offer. Без структуры ты не видишь, какие компании реально отвечают на твой стек (React/Node/TypeScript), а какие просто игнорируют.
+The STAR method (Situation, Task, Action, Result) is how your experience gets evaluated, even for junior roles. You need a small story bank covering React apps, Node APIs, debugging problems, and teamwork situations.
 
 application:
-Создай таблицу: company, role, date applied, stack match %, status, next action. Обновляй её каждый день после любых откликов или изменений статуса в LinkedIn/почте.
+Build 6–8 reusable stories from your projects: performance optimization, API design, UI bug fixing, collaboration, and a failure you recovered from. Write them out in STAR format and rehearse them until they sound natural, not memorized.
 
 readiness:
-У тебя есть единый источник правды по всем заявкам, и ты можешь за 10 секунд сказать: сколько активных, сколько без ответа, где есть шанс на интервью.
+You can answer “Tell me about a project” or “Tell me about a challenge” without thinking from scratch. Each answer follows a clear structure and stays under 2–3 minutes.
 
 execution:
-Веди трекинг в Notion / Google Sheets с фильтрами по статусу. Каждый вечер обновляй 5–10 минут, не откладывая на “потом”.
+Spend 30–45 minutes daily rehearsing 2–3 stories out loud, ideally recording yourself. Refine weak transitions and remove unnecessary technical jargon.
 
 confidence:
-Ты начинаешь видеть закономерности: какие компании реагируют на твой уровень и какие формулировки резюме дают отклик. Это убирает хаос и снижает тревожность.
+You stop freezing during open-ended questions because you always fall back on prepared narratives. This creates consistency across every interview stage.
 
----
-
-### cover-letter:
+mock-interview:
 
 awareness:
-Кандидаты Junior уровня часто пишут одинаковые письма, которые не отличимы друг от друга. Рекрутеры читают их за 5–10 секунд, поэтому первый абзац решает всё.
+Most juniors underestimate how unnatural it feels to solve problems while speaking out loud. Without simulation, real interviews feel like a completely different skill than studying.
 
 understanding:
-Хорошее cover letter — это не описание себя, а ответ на вопрос: почему именно ты подходишь под этот стек и эту задачу. Особенно важно связать React/Node/TypeScript опыт с конкретной вакансией.
+Mock interviews expose gaps between what you think you know and what you can clearly explain under pressure. Feedback from peers or engineers is more valuable than passive studying.
 
 application:
-Структура: 1) технический хук (что ты уже делал похожее), 2) конкретный match с вакансией, 3) короткое подтверждение мотивации и ссылки на GitHub/портфолио.
+Run 2–3 mock interviews per week with peers or platforms like Pramp or interviewing.io. Record sessions and focus on clarity of explanation, not just correctness.
 
 readiness:
-У тебя есть шаблон письма, который ты можешь адаптировать за 5–10 минут под любую вакансию без потери качества.
+You can handle being interrupted, corrected, or asked to re-explain without losing structure. You’re comfortable thinking out loud in front of another developer.
 
 execution:
-Перед отправкой каждой заявки переписывай 2–3 строки под конкретную компанию и их стек, а не используешь копипаст без изменений.
+After every mock interview, write down 3 mistakes: one technical, one communication, one structure issue. Re-run the same problem 48 hours later to confirm improvement.
 
 confidence:
-Ты начинаешь получать больше ответов не потому, что “повезло”, а потому что твои письма стали релевантными конкретным задачам команды.
+You start seeing interviews as a familiar environment instead of an unknown event. Anxiety drops because you’ve already been “in this situation” multiple times.
 
----
-
-### follow-up-strategy:
+technical-prep:
 
 awareness:
-Большинство Junior кандидатов теряются после отправки заявки и не делают follow-up, хотя часть офферов приходит именно после второго контакта.
+Many junior candidates focus only on LeetCode and ignore real-world React and Node patterns. In US interviews, both algorithmic thinking and practical web development are tested.
 
 understanding:
-Follow-up — это не давление, а сигнал вовлечённости. В tech компаниях нормой считается 1–2 аккуратных напоминания через определённые интервалы.
+You are expected to understand arrays, hash maps, recursion basics, and also React state flow, hooks, and API integration. Node.js interviews often focus on REST APIs, async behavior, and database interactions.
 
 application:
-Делай follow-up по схеме: 3 дня — мягкое уточнение, 5 дней — добавление ценности (например, проект или GitHub update), 7–10 дней — финальное короткое сообщение.
+Practice 3–5 LeetCode problems per week focused on arrays, strings, and hash maps. In parallel, build small features in React like forms, authentication flows, and API fetching with error handling.
 
 readiness:
-У тебя есть готовые 2–3 шаблона сообщений, которые звучат профессионально и не выглядят навязчиво.
+You can explain both how a solution works algorithmically and how it would be implemented in a real React/Node app. You are not switching between “theory mode” and “real code mode.”
 
 execution:
-После каждой заявки сразу ставь напоминания на follow-up в календаре или трекере, чтобы не полагаться на память.
+Alternate days: one day algorithms, one day React/Node practical coding. Always explain your solution out loud before writing code.
 
 confidence:
-Ты перестаёшь зависеть от первого ответа компании и увеличиваешь шансы на диалог даже после “тихого” отклика.
+You stop feeling split between “DSA knowledge” and “frontend/backend skills.” Everything becomes part of one coherent engineering toolkit.
 
----
-
-### application-volume:
+interview-mindset:
 
 awareness:
-Одна-две заявки в неделю не дают статистики, особенно на Junior уровне, где конверсия низкая и сильно зависит от рынка.
+Most interview failures at junior level are not technical but psychological. Candidates know the answer but lose clarity under stress.
 
 understanding:
-Важно не просто “много отправлять”, а создавать поток заявок, чтобы тестировать разные формулировки резюме и cover letter.
+Interviewers evaluate how you think under uncertainty, not just perfect correctness. Calm reasoning often scores higher than rushed perfect answers.
 
 application:
-Цель: 10–15 качественных заявок в неделю с обязательным соответствием хотя бы 70–80% требованиям вакансии.
+Use short grounding routines before interviews: slow breathing, reviewing 2–3 key stories, and scanning your cheat sheet of patterns. Reframe questions as collaboration, not examination.
 
 readiness:
-У тебя есть стабильный ритм: 2–3 дня в неделю ты делаешь batch отправок вместо хаотичных единичных действий.
+You can stay composed even when you don’t immediately know the answer. You default to structured thinking instead of panic.
 
 execution:
-Разбей процесс: 1 день — поиск вакансий, 1 день — кастомизация, 1 день — отправка заявок пачкой.
+If stuck, verbalize your thought process step by step instead of staying silent. Ask clarifying questions instead of guessing silently.
 
 confidence:
-Ты перестаёшь воспринимать отказ как событие, потому что у тебя всегда есть активный pipeline.
+You start treating interviews as technical conversations with peers rather than judgment scenarios. This significantly improves clarity and flow.
 
----
-
-### company-research:
+behavioral-prep:
 
 awareness:
-Без понимания компании ты отправляешь “слепые” заявки, которые не учитывают их стек, стадию и реальную задачу команды.
+US tech interviews heavily evaluate behavior through structured questions. Even strong technical candidates get rejected due to weak communication or unclear teamwork stories.
 
 understanding:
-React/Node вакансии сильно отличаются между стартапом и продуктовой компанией: одни ищут скорость, другие — стабильность и масштабируемость.
+Amazon Leadership Principles and similar frameworks are often indirectly used to evaluate ownership, conflict handling, and decision-making. Your past projects must demonstrate these behaviors clearly.
 
 application:
-Для каждой компании фиксируй: tech stack, продукт, размер команды, stage (startup/mid/enterprise), и одну причину “why them”.
+Prepare 5–7 behavioral stories: conflict in a team, tight deadline, bug under pressure, disagreement on approach, and a successful collaboration. Map each story to a clear outcome and your specific action.
 
 readiness:
-У тебя есть короткий research-шаблон, который заполняется за 10–15 минут на компанию.
+You can answer “Tell me about a time you disagreed with a teammate” without hesitation and with a structured, calm narrative. Your answers always include your reasoning, not just actions.
 
 execution:
-Перед отправкой заявки всегда добавляй 1 персонализированную строку в cover letter, основанную на исследовании.
+Rewrite each story to emphasize your decision-making process and trade-offs. Practice delivering them in under 2 minutes.
 
 confidence:
-Ты начинаешь писать не “в никуда”, а конкретно в команду с понятным контекстом, что повышает отклик.
+You stop feeling that behavioral questions are “soft” or secondary. You understand they directly influence hiring decisions at every US tech company.
 
----
-
-### application-tailoring:
+system-design-prep:
 
 awareness:
-Одинаковое резюме для всех вакансий почти всегда снижает шанс, особенно на Junior уровне, где конкуренция высокая.
+Junior candidates are not expected to design large-scale systems, but they are still asked to think about architecture at a basic level. Many struggle because they jump straight into implementation details.
 
 understanding:
-Рекрутер сканирует совпадение ключевых слов (React, Node.js, TypeScript, REST, Git, CI/CD) за секунды через ATS.
+You are expected to understand basic concepts like client-server flow, REST APIs, simple database schema design, and trade-offs between simplicity and scalability. Clarity of reasoning matters more than complexity.
 
 application:
-Делай правило 80% match: подавайся только туда, где ты закрываешь большую часть требований, и подстраивай резюме под ключевые слова вакансии.
+Practice designing small systems like a todo app, URL shortener, or simple chat app. Focus on API endpoints, data models, and how React frontend communicates with Node backend.
 
 readiness:
-У тебя есть несколько версий резюме под разные типы вакансий (frontend, fullstack, backend light).
+You can sketch a basic system on paper and explain how data flows end-to-end. You can justify why you chose a simple design over an over-engineered one.
 
 execution:
-Перед отправкой копируй 5–10 ключевых слов из вакансии в skills и experience, если они честно отражают твой опыт.
+For each system design question, start with requirements → API → data model → flow → edge cases. Keep explanations simple and structured.
 
 confidence:
-Ты перестаёшь “спамить рынок” и начинаешь получать более релевантные интервью.
+You no longer panic when hearing “system design” in junior interviews. You recognize it as structured thinking, not senior-level architecture design.
 
----
-
-### portfolio-submission:
+on-site-prep:
 
 awareness:
-Junior кандидатов часто оценивают не по резюме, а по тому, что они могут показать в GitHub и live demo.
+On-site interviews in US companies are long and mentally exhausting, often involving multiple back-to-back rounds. Many candidates underestimate the impact of fatigue on performance.
 
 understanding:
-Проекты без README, деплоя и описания задач воспринимаются как незавершённые, даже если код хороший.
+Each round tests a different dimension: coding, behavior, communication, and collaboration. Consistency across the whole day matters more than performing perfectly in one round.
 
 application:
-Каждый проект должен иметь: live demo, GitHub repo, README с задачей, стеком и 2–3 скриншотами или GIF.
+Simulate full interview days with 2–3 mock sessions back-to-back. Practice maintaining clarity and energy from the first to the last session.
 
 readiness:
-У тебя есть 2–3 проекта, которые можно показать рекрутеру без дополнительных объяснений.
+You can stay focused and articulate even in the final interview round after hours of problem-solving. Your performance does not degrade significantly under fatigue.
 
 execution:
-Перед каждой заявкой проверяй: все ссылки работают, проект деплоится, README читается за 30 секунд.
+Plan breaks, hydration, and mental resets between sessions. Avoid cramming during gaps and instead review light notes or key patterns.
 
 confidence:
-Ты можешь доказать свои навыки через реальные проекты, а не только через текст резюме.
+You stop fearing “long interview days” because you’ve trained your cognitive endurance like a skill, not a trait.
 
----
-
-### referral-strategy:
+phone-screen:
 
 awareness:
-На Junior уровне рефералы дают кратно больше шансов попасть на интервью, чем холодные заявки.
+Phone screens are often underestimated, but they are the first real filter in US hiring pipelines. Many candidates fail here due to unclear communication rather than technical gaps.
 
 understanding:
-Реферал — это не “попросить работу”, а войти через доверие: кто-то внутри компании подтверждает твой уровень.
+Recruiters evaluate clarity, confidence, and alignment with the role, not deep technical expertise. You are expected to summarize experience, answer basic technical questions, and communicate salary expectations.
 
 application:
-Ищи 2–3 контакта на компанию через LinkedIn, alumni, open source или знакомых и сначала устанавливай контакт, а не просишь сразу referral.
+Prepare a 60–90 second introduction: who you are, what stack you use (React/Node/TypeScript), and what kind of role you want. Practice explaining 2–3 projects clearly without jargon.
 
 readiness:
-У тебя есть список компаний и потенциальных точек входа для каждой.
+You can handle recruiter questions about availability, salary range, and relocation without hesitation. Your answers are consistent and calm.
 
 execution:
-Пиши короткое сообщение: кто ты, чем занимаешься (React/Node/TS), и что ты уже сделал — без прямой просьбы о работе в первом сообщении.
+Keep a simple cheat sheet next to you during calls with key points: projects, numbers, tech stack, and questions to ask. Avoid over-explaining.
 
 confidence:
-Ты начинаешь получать доступ к “скрытому рынку” вакансий, где конкуренция значительно ниже.
+You treat phone screens as low-pressure filtering steps instead of high-stakes interviews. This improves your natural communication.
 
----
+interview-followup:
 
-Если хочешь — дальше можно собрать это в единый **Applications Engine (state + tasks + scoring)** и встроить прямо в runtime как систему прогресса.
-Если хочешь — дальше можно собрать это в единый Applications Engine (state + tasks + scoring) и встроить прямо в runtime как систему прогресса.
+awareness:
+Many candidates assume the interview ends when the call ends, but follow-up is part of the evaluation process. In competitive US markets, small signals matter.
+
+understanding:
+A well-written thank-you email reinforces interest and clarifies any missed points. It also keeps you top-of-mind during hiring discussions.
+
+application:
+Send a short thank-you email within 12–24 hours referencing one specific topic from the interview. If appropriate, add a small clarification or improvement to one answer.
+
+readiness:
+You have a reusable email structure that you can personalize in under 5 minutes. You never miss follow-up timing.
+
+execution:
+Track every interview outcome in a pipeline and schedule follow-ups if no response comes within 5–7 business days. Keep tone professional but concise.
+
+confidence:
+You maintain visibility even after the interview ends, increasing your chances without extra technical effort.
+
+presentation-prep:
+
+awareness:
+Take-home assignments and presentations are common for junior roles, especially in US startups. Many candidates lose points not on code quality, but on how they explain it.
+
+understanding:
+Interviewers care about your decision-making: why you chose certain architecture, trade-offs you made, and how you structured your solution.
+
+application:
+Prepare a 5–10 minute walkthrough structure: problem → approach → architecture → key decisions → trade-offs → future improvements. Always include reasoning behind choices.
+
+readiness:
+You can confidently present a React/Node project and answer questions about edge cases, scalability, and code structure. You don’t rely on reading code line by line.
+
+execution:
+Rehearse presentation out loud with timing constraints. Use diagrams (even simple ones) to explain flow between frontend, backend, and database.
+
+confidence:
+You stop feeling nervous about presenting code because you treat it as storytelling about engineering decisions, not defense of your work.
