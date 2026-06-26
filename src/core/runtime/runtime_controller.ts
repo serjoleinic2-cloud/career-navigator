@@ -2,7 +2,7 @@ import type { JourneyRuntimeState } from './journey_runtime';
 import { initializeJourneyRuntime } from './journey_runtime';
 import type { OnboardingState } from '../onboarding/onboarding_state';
 import type { UserAction } from '../skill_engine';
-import type { SkillNode } from '../skill_state';
+import type { SkillNode, SkillState } from '../skill_state';
 import { getActiveChapters, getActiveProfession } from '../profession_loader';
 import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
@@ -10,15 +10,17 @@ import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
 import { emit } from '../events/system_event_bus';
 import {
-  startAttempt,
-  completeAttempt,
-  evaluateAttempt,
-  applyAttemptResult,
-} from '../attempt/attempt_engine';
-import type { Attempt, AttemptResult, AttemptOutcome } from '../attempt/attempt_engine';
+  beginTask,
+  runTaskPipeline,
+  abortTask,
+} from '../task/task_execution_engine';
+import type { Task, TaskResult } from '../task/task_execution_engine';
+import { getTaskByNodeId } from '../task/task_content_engine';
+import type { TaskDefinition } from '../task/task_content_engine';
 
 let runtimeState: JourneyRuntimeState | null = null;
-let currentAttempt: Attempt | null = null;
+let activeTask: Task | null = null;
+let activeTaskDefinition: TaskDefinition | null = null;
 
 export function startJourney(onboardingState: OnboardingState): JourneyRuntimeState {
   runtimeState = initializeJourneyRuntime(onboardingState);
@@ -31,8 +33,12 @@ export function getRuntimeState(): JourneyRuntimeState | null {
   return runtimeState;
 }
 
-export function getCurrentAttempt(): Attempt | null {
-  return currentAttempt;
+export function getActiveTask(): Task | null {
+  return activeTask;
+}
+
+export function getActiveTaskDefinition(): TaskDefinition | null {
+  return activeTaskDefinition;
 }
 
 export function setActiveNode(nodeId: string): JourneyRuntimeState {
@@ -45,104 +51,220 @@ export function setActiveNode(nodeId: string): JourneyRuntimeState {
   return runtimeState;
 }
 
-export function beginTaskAttempt(taskId: string): Attempt {
+// ─── TASK LIFECYCLE WITH CONTENT ENGINE ─────────────────────
+
+export function loadTaskForNode(nodeId: string): TaskDefinition | null {
+  const definition = getTaskByNodeId(nodeId);
+  if (!definition) {
+    return null;
+  }
+  activeTaskDefinition = definition;
+  return definition;
+}
+
+export function createTaskFromDefinition(
+  definition: TaskDefinition,
+  payload: unknown = null
+): Task {
   if (!runtimeState) {
     throw new Error('Runtime not initialized');
   }
-  const nodeId = runtimeState.activeNodeId;
-  const chapterId = runtimeState.activeChapterId;
-
-  currentAttempt = startAttempt(taskId, nodeId, chapterId);
-  emit('ATTEMPT_STARTED', { attemptId: currentAttempt.id, nodeId, taskId });
-  return currentAttempt;
+  activeTask = beginTask(
+    definition.id,
+    definition.type,
+    definition.nodeId,
+    definition.chapterId,
+    definition.title,
+    definition.description,
+    payload
+  );
+  emit('TASK_STARTED', {
+    taskId: definition.id,
+    type: definition.type,
+    nodeId: definition.nodeId,
+    title: definition.title,
+  });
+  return activeTask;
 }
 
-export function finishTaskAttempt(result: AttemptResult): AttemptOutcome {
-  if (!runtimeState || !currentAttempt) {
-    throw new Error('No active attempt');
+// ─── Legacy compatibility ──────────────────────────────
+
+export function createTask(
+  taskType: 'CHECKBOX_TASK' | 'TEXT_TASK' | 'SELF_ASSESSMENT' | 'MULTIPLE_CHOICE',
+  title: string,
+  description: string,
+  payload: unknown = null
+): Task {
+  if (!runtimeState) {
+    throw new Error('Runtime not initialized');
   }
-
-  const completedAttempt = completeAttempt(currentAttempt, result);
-
-  const nodeBefore = runtimeState.nodeStates[completedAttempt.nodeId];
-  if (!nodeBefore) {
-    throw new Error(`Node ${completedAttempt.nodeId} not found`);
+  const definition = getTaskByNodeId(runtimeState.activeNodeId);
+  if (definition) {
+    return createTaskFromDefinition(definition, payload);
   }
-
-  const evaluation = evaluateAttempt(completedAttempt, nodeBefore);
-
-  const outcome = applyAttemptResult(
-    evaluation,
-    nodeBefore,
-    runtimeState.confidenceScore,
-    runtimeState.readinessScore
+  const taskId = `task_${runtimeState.activeNodeId}_${Date.now()}`;
+  activeTask = beginTask(
+    taskId,
+    taskType,
+    runtimeState.activeNodeId,
+    runtimeState.activeChapterId,
+    title,
+    description,
+    payload
   );
+  emit('TASK_STARTED', { taskId, type: taskType, nodeId: runtimeState.activeNodeId });
+  return activeTask;
+}
 
-  const updatedNodeMap: Record<string, SkillNode> = {
-    ...runtimeState.nodeStates,
-    [outcome.updatedNode.id]: outcome.updatedNode,
+export function submitTask(userPayload: unknown): TaskResult {
+  if (!runtimeState || !activeTask || !activeTaskDefinition) {
+    throw new Error('No active task');
+  }
+
+  const node = runtimeState.nodeStates[activeTask.nodeId];
+  if (!node) {
+    throw new Error(`Node ${activeTask.nodeId} not found`);
+  }
+
+  const completedNodes = Object.values(runtimeState.nodeStates).filter(
+    n => n.state === 'confidence' || n.state === 'execution'
+  ).length;
+
+  const context = {
+    task: activeTask,
+    node,
+    currentConfidence: runtimeState.confidenceScore,
+    currentReadiness: runtimeState.readinessScore,
+    chapterProgress: runtimeState.chapterProgress[activeTask.chapterId] ?? 0,
+    totalNodes: Object.keys(runtimeState.nodeStates).length,
+    completedNodes,
   };
 
+  // Run unified pipeline
+  const { task: completedTask, result } = runTaskPipeline(activeTask, userPayload, context);
+
+  // Override result with content engine rewards and feedback
+  const enrichedResult: TaskResult = {
+    ...result,
+    confidenceDelta: activeTaskDefinition.rewards.confidenceBonus,
+    readinessDelta: activeTaskDefinition.rewards.readinessBonus,
+    chapterProgressDelta: activeTaskDefinition.rewards.chapterProgress,
+    feedback: result.success
+      ? activeTaskDefinition.feedback.success
+      : result.score > 0
+      ? activeTaskDefinition.feedback.partial
+      : activeTaskDefinition.feedback.fail,
+    recommendation: result.success
+      ? activeTaskDefinition.recommendation.success
+      : result.score > 0
+      ? activeTaskDefinition.recommendation.partial
+      : activeTaskDefinition.recommendation.fail,
+  };
+
+  activeTask = completedTask;
+
+  // Apply to runtime
+  applyTaskResultToRuntime(enrichedResult, node);
+
+  // Emit events
+  for (const event of enrichedResult.events) {
+    emit(event.type as any, event.payload);
+  }
+
+  emit('CONFIDENCE_CHANGED', { confidence: runtimeState.confidenceScore });
+  emit('READINESS_CHANGED', { readiness: runtimeState.readinessScore });
+
   const chapters = getActiveChapters();
-  const currentChapter = getCurrentChapter(chapters, updatedNodeMap);
+  const currentChapter = getCurrentChapter(chapters, runtimeState.nodeStates);
   const prevChapterId = runtimeState.activeChapterId;
   const newChapterId = currentChapter?.id ?? prevChapterId;
 
+  if (newChapterId !== prevChapterId) {
+    runtimeState = { ...runtimeState, activeChapterId: newChapterId };
+    emit('CHAPTER_CHANGED', { chapterId: newChapterId, prevChapterId });
+    emit('CHAPTER_UNLOCKED', { chapterId: newChapterId });
+  }
+
+  const newProgress = Math.min(
+    100,
+    (runtimeState.chapterProgress[activeTask.chapterId] ?? 0) + enrichedResult.chapterProgressDelta
+  );
   runtimeState = {
     ...runtimeState,
-    nodeStates: updatedNodeMap,
-    confidenceScore: outcome.updatedConfidence,
-    readinessScore: outcome.updatedReadiness,
-    activeChapterId: newChapterId,
+    chapterProgress: {
+      ...runtimeState.chapterProgress,
+      [activeTask.chapterId]: newProgress,
+    },
   };
-
-  emit('ATTEMPT_COMPLETED', {
-    attemptId: completedAttempt.id,
-    result: completedAttempt.result,
-    score: completedAttempt.score,
-  });
-
-  emit('STATE_UPDATED', {
-    nodeId: completedAttempt.nodeId,
-    previousState: evaluation.previousState,
-    newState: evaluation.newState,
-    stateChanged: evaluation.stateChanged,
-  });
-
-  emit('SCORE_UPDATED', {
-    confidence: runtimeState.confidenceScore,
-    readiness: runtimeState.readinessScore,
-  });
-
-  emit('CONFIDENCE_CHANGED', {
-    confidence: runtimeState.confidenceScore,
-    delta: completedAttempt.confidenceDelta,
-  });
-
-  if (evaluation.stateChanged) {
-    emit('SKILL_PROGRESS', {
-      nodeId: completedAttempt.nodeId,
-      previousState: evaluation.previousState,
-      newState: evaluation.newState,
-    });
-  }
-
-  if (newChapterId !== prevChapterId) {
-    emit('CHAPTER_CHANGED', { chapterId: newChapterId, prevChapterId });
-  }
-
-  emit('TASK_COMPLETED', {
-    nodeId: completedAttempt.nodeId,
-    result: completedAttempt.result,
-    nextAction: outcome.nextAction,
-  });
 
   emit('UI_REFRESH', {});
 
-  currentAttempt = null;
+  // Check journey completion
+  const allNodesCompleted = Object.values(runtimeState.nodeStates).every(
+    n => n.state === 'confidence'
+  );
+  if (allNodesCompleted) {
+    emit('JOURNEY_COMPLETED', { professionId: runtimeState.professionId });
+  }
 
-  return outcome;
+  return enrichedResult;
 }
+
+export function abortActiveTask(reason: string): Task {
+  if (!activeTask) {
+    throw new Error('No active task');
+  }
+  activeTask = abortTask(activeTask, reason);
+  emit('TASK_ABORTED', { taskId: activeTask.id, reason });
+  emit('UI_REFRESH', {});
+  return activeTask;
+}
+
+// ─── Internal ───────────────────────────────────────────────
+
+function applyTaskResultToRuntime(result: TaskResult, originalNode: SkillNode): void {
+  if (!runtimeState) return;
+
+  if (result.skillTransition?.changed) {
+    const updatedNode: SkillNode = {
+      ...originalNode,
+      state: result.skillTransition.current,
+      nextState: getNextState(result.skillTransition.current),
+    };
+    runtimeState = {
+      ...runtimeState,
+      nodeStates: {
+        ...runtimeState.nodeStates,
+        [result.nodeId]: updatedNode,
+      },
+    };
+  }
+
+  runtimeState = {
+    ...runtimeState,
+    confidenceScore: clamp(runtimeState.confidenceScore + result.confidenceDelta, 0, 1),
+    readinessScore: clamp(runtimeState.readinessScore + result.readinessDelta, 0, 100),
+  };
+}
+
+function getNextState(state: SkillState): SkillState | null {
+  const flow: Record<SkillState, SkillState | null> = {
+    locked: 'awareness',
+    awareness: 'understanding',
+    understanding: 'application',
+    application: 'readiness',
+    readiness: 'execution',
+    execution: 'confidence',
+    confidence: null,
+  };
+  return flow[state] ?? null;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+// ─── Legacy ─────────────────────────────────────────────────
 
 export function advanceNode(
   _action: UserAction,
@@ -151,7 +273,6 @@ export function advanceNode(
   if (!runtimeState) {
     throw new Error('Runtime not initialized');
   }
-
   if (premiumState) {
     const profession = getActiveProfession();
     const activeNode = profession.skillGraph.find(n => n.id === runtimeState!.activeNodeId);
@@ -164,12 +285,12 @@ export function advanceNode(
       }
     }
   }
-
-  const taskId = `task_${runtimeState.activeNodeId}_${Date.now()}`;
-  beginTaskAttempt(taskId);
-  finishTaskAttempt('success');
-
-  return runtimeState!;
+  const definition = loadTaskForNode(runtimeState.activeNodeId);
+  if (definition) {
+    createTaskFromDefinition(definition);
+    submitTask(true);
+  }
+  return runtimeState;
 }
 
 export function advanceChapter(): JourneyRuntimeState {
@@ -192,16 +313,15 @@ export function advanceChapter(): JourneyRuntimeState {
     throw new Error('Next chapter has no nodes');
   }
   runtimeState = { ...runtimeState, activeNodeId: nextNodeId };
-
   emit('CHAPTER_CHANGED', { chapterId: next.id });
   emit('NODE_CHANGED', { nodeId: nextNodeId });
   emit('UI_REFRESH', {});
-
   return runtimeState;
 }
 
 export function resetRuntime(): void {
   runtimeState = null;
-  currentAttempt = null;
+  activeTask = null;
+  activeTaskDefinition = null;
   emit('UI_REFRESH', {});
 }

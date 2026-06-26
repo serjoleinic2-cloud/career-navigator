@@ -1,3 +1,5 @@
+import type { TaskContent } from './task_content';
+
 export type SkillState =
   | 'locked'
   | 'awareness'
@@ -15,6 +17,9 @@ export interface SkillNode {
   nextState: SkillState | null;
   signals: string[];
   advice: Partial<Record<SkillState, string>>;
+  tasks: TaskContent[];
+  estimatedMinutes: number;
+  difficulty: number;
 }
 
 export const STATE_FLOW: Record<SkillState, SkillState | null> = {

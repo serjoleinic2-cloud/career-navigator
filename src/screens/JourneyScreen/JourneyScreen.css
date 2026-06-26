@@ -306,3 +306,252 @@
 .outcome-close:hover {
   background: #6a4de6;
 }
+
+.task-selector {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.task-selector button {
+  padding: 8px 16px;
+  border: 1px solid #e5e5ea;
+  border-radius: 20px;
+  background: #fff;
+  color: #1c1c1e;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.task-selector button:hover {
+  border-color: #7c5cff;
+  color: #7c5cff;
+}
+
+.task-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+
+.task-panel {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.task-panel h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c1c1e;
+}
+
+.task-panel p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #8e8e93;
+}
+
+.checkbox-task label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #3a3a3c;
+  cursor: pointer;
+}
+
+.checkbox-task button,
+.text-task button,
+.self-assessment button,
+.multiple-choice button {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #7c5cff;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.checkbox-task button:hover,
+.text-task button:hover,
+.self-assessment button:hover,
+.multiple-choice button:hover {
+  background: #6a4de6;
+}
+
+.checkbox-task button:disabled,
+.text-task button:disabled,
+.self-assessment button:disabled,
+.multiple-choice button:disabled {
+  background: #c7c7cc;
+  cursor: not-allowed;
+}
+
+.text-task textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.text-task textarea:focus {
+  outline: none;
+  border-color: #7c5cff;
+}
+
+.rating-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.rating-buttons button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e5e5ea;
+  border-radius: 50%;
+  background: #fff;
+  color: #1c1c1e;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rating-buttons button.selected {
+  background: #7c5cff;
+  color: #fff;
+  border-color: #7c5cff;
+}
+
+.multiple-choice label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  font-size: 14px;
+  color: #3a3a3c;
+  cursor: pointer;
+}
+
+.result-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+
+.result-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: resultIn 0.3s ease;
+}
+
+@keyframes resultIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.result-card h3 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c1c1e;
+  text-align: center;
+}
+
+.result-score {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e5ea;
+  font-size: 16px;
+}
+
+.result-deltas {
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.result-skill {
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e5ea;
+  font-size: 14px;
+  color: #3a3a3c;
+}
+
+.result-chapter {
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e5ea;
+  font-size: 14px;
+  color: #3a3a3c;
+}
+
+.result-feedback {
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e5ea;
+  font-size: 14px;
+  color: #3a3a3c;
+  font-style: italic;
+}
+
+.result-feedback p { margin: 0; }
+
+.result-recommendation {
+  padding: 12px 0;
+  font-size: 14px;
+  color: #7c5cff;
+}
+
+.result-close {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #7c5cff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.result-close:hover {
+  background: #6a4de6;
+}

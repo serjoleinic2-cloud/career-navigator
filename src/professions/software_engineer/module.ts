@@ -1,5 +1,11 @@
 import type { ProfessionModule } from '../profession_registry';
-import { RESUME_SKILL_NODES, LINKEDIN_SKILL_NODES } from './skill_nodes';
+import {
+  RESUME_SKILL_NODES,
+  LINKEDIN_SKILL_NODES,
+  APPLICATION_SKILL_NODES,
+  INTERVIEW_SKILL_NODES,
+  OFFER_SKILL_NODES,
+} from './skill_nodes';
 import { SOFTWARE_ENGINEER_CHAPTERS } from './chapters';
 
 export const SoftwareEngineerModule: ProfessionModule = {
@@ -9,6 +15,9 @@ export const SoftwareEngineerModule: ProfessionModule = {
   skillGraph: [
     ...RESUME_SKILL_NODES,
     ...LINKEDIN_SKILL_NODES,
+    ...APPLICATION_SKILL_NODES,
+    ...INTERVIEW_SKILL_NODES,
+    ...OFFER_SKILL_NODES,
   ],
   entryNodeId: 'positioning-clarity',
   premiumConfig: {

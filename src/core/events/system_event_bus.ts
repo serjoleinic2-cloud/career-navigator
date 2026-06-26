@@ -16,7 +16,11 @@ export type SystemEventType =
   | 'LEARNING_FEEDBACK'
   | 'ATTEMPT_STARTED'
   | 'ATTEMPT_COMPLETED'
-  | 'SKILL_PROGRESS';
+  | 'SKILL_PROGRESS'
+  | 'TASK_STARTED'
+  | 'TASK_ABORTED'
+  | 'READINESS_CHANGED'
+  | 'JOURNEY_COMPLETED';
 
 export type SystemEvent = {
   type: SystemEventType;
