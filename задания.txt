@@ -1,167 +1,324 @@
-Ок, это уже нормальный шаг — ты наконец добавляешь knowledge layer, а не ещё один runtime/engine.
+Это хороший следующий модуль. Я бы только немного изменил архитектуру, чтобы через полгода Notes не превратились в часть runtime.
 
-Но тут важно сразу зафиксировать структуру, иначе Playbook начнёт дублировать SkillNode advice (и снова разъедется архитектура).
+Правильный принцип
 
-📘 Как правильно структурировать Playbook (без дублирования)
-🧠 Базовый принцип
+Notes — это пользовательские данные (User Data), а не Runtime.
 
-У тебя теперь 3 уровня знаний:
+Поэтому они должны жить отдельно.
 
-1. SkillNode advice      → "что делать сейчас" (операционный уровень)
-2. TaskContent           → "как выполнить задачу" (пошагово)
-3. PlaybookEntry         → "почему и как это работает глубоко" (теория + шаблоны + стратегия)
-✅ КЛЮЧЕВОЕ ПРАВИЛО
+Runtime
+    │
+    ├── JourneyRuntimeState
+    ├── Learning Engine
+    └── Event Bus
 
-Playbook НЕ должен отвечать на:
+User Data
+    ├── Notes
+    ├── Bookmarks (будущее)
+    ├── Favorites (будущее)
+    ├── Journal (будущее)
+    └── Interview Recordings
 
-"что мне делать сейчас"
+Не смешивать эти два слоя.
 
-Playbook отвечает на:
+Рекомендуемая структура
+src/core/user_data/
 
-"как это устроено в индустрии"
-"какие есть паттерны"
-"какие шаблоны используют реальные кандидаты"
-"как думают интервьюеры / рекрутеры"
-🧩 1. STRUCTURE (как сделать правильно)
-📦 PlaybookEntry (канонический формат)
-export type PlaybookEntry = {
+    notes/
+        note.ts
+        notes_store.ts
+        notes_persistence.ts
+        notes_controller.ts
+
+    persistence/
+        storage.ts        // общий helper (если его ещё нет)
+
+Так позже сюда же можно добавить bookmarks, journal, achievements.
+
+Тип Note
+export interface Note {
   id: string;
-  title: string;
-  category: 'resume' | 'linkedin' | 'interview' | 'salary' | 'networking';
 
-  content: string; // deep explanation (1–3 pages equivalent)
+  nodeId: string;
 
-  templates: string[]; // reusable structures (NOT advice)
-  examples: string[];   // real-world examples
-  checklist: string[];  // self-check system
+  taskId?: string;
 
-  tags: string[]; // optional but IMPORTANT for filtering
-};
-🧱 2. КАК ИЗБЕЖАТЬ ДУБЛИРОВАНИЯ
-❌ НЕ ДЕЛАТЬ
+  chapterId: string;
 
-Playbook НЕ должен содержать:
+  professionId: string;
 
-"Write your resume summary like this…" → ❌ (это TaskContent)
-"Improve your LinkedIn headline…" → ❌ (это SkillNode advice)
-✅ ДЕЛАТЬ
+  content: string;
 
-Playbook должен содержать:
+  createdAt: number;
 
-🔹 Resume Summary Formula
+  updatedAt: number;
+}
 
-формулы типа:
+Не хранить ссылку на SkillNode.
 
-[Role] with [X years] experience in [stack]...
-🔹 STAR breakdown system
-S/T/A/R explanation
-what recruiters look for in each part
-🔹 Salary negotiation psychology
-anchoring effects
-BATNA logic
-why recruiters ask ranges
-🧠 3. ARCHITECTURE ЛОГИКА
-📊 Layer separation
-UI (JourneyScreen)
-    ↓
-SkillNode (direction)
-    ↓
-TaskContent (execution)
-    ↓
-Playbook (knowledge base)
-📚 4. PLAYBOOK SCREEN (правильная структура)
-UI structure:
-[Categories Sidebar]
-  Resume
-  LinkedIn
-  Interview
-  Salary
-  Networking
+Только id.
 
-[Search Bar]
+Хранилище
 
-[Entry List]
+Не использовать RuntimeStore.
 
-→ Selected Entry:
+Лучше сделать отдельный NotesStore.
 
-TITLE
-CONTENT
+runtime_store
+        │
 
-TEMPLATES
-- ...
+notes_store
 
-EXAMPLES
-- ...
+Они независимы.
 
-CHECKLIST
-- ...
+Persistence
 
-[Apply to Task]
-🔗 5. КАК СВЯЗАТЬ С TASKS (ВАЖНО)
-TaskContent расширение:
-playbookReference?: string;
-Пример:
-playbookReference: "resume/star-method-guide"
-В Task UI:
-📖 Open Playbook
-→ fetch(playbookReference)
-🧭 6. CATEGORY MAPPING (чтобы не превратилось в мусор)
-Category	Use case
-resume	structure, bullets, ATS
-linkedin	headline, profile, SEO
-interview	STAR, behavioral, technical
-salary	negotiation, offers
-networking	referrals, messages
-🧠 7. КРИТИЧЕСКАЯ АРХИТЕКТУРНАЯ ЗАЩИТА
-🚫 Запрещено:
-Playbook → не вызывает runtime
-Playbook → не знает о SkillNode state
-Playbook → не содержит "steps of journey"
-Playbook → не содержит UI logic
-✅ Разрешено:
-TaskContent → ссылается на Playbook
-Playbook → полностью статический
-Playbook → offline-only (TS constants)
-📦 8. OFFLINE-FIRST РЕАЛИЗАЦИЯ
-export const PLAYBOOK: PlaybookEntry[] = [
-  {
-    id: "interview/star-method-guide",
-    title: "STAR Method Mastery",
-    category: "interview",
-    content: "...",
-    templates: [...],
-    examples: [...],
-    checklist: [...]
-  }
-];
-🚀 9. ВАЖНЫЙ ВЫВОД
+Не копировать runtime_persistence.
 
-Ты сейчас фактически строишь 4-й слой системы:
+Сделать общий Storage Helper.
 
-Engine Layer (runtime)
-Task Layer (execution)
-Skill Layer (direction)
-Knowledge Layer (Playbook) ← ты сейчас здесь
-⚠️ ГЛАВНЫЙ РИСК (который тебе сейчас нужно избежать)
+storage.ts
 
-Если не зафиксировать правило:
+load<T>()
 
-Playbook = "deep knowledge only"
+save<T>()
 
-ты получишь:
+remove()
 
-дубли advice из SkillNode
-дубли TaskContent instructions
-разъезд логики между слоями
-✔️ ИТОГ
-Правильная структура уже сейчас:
-SkillNode → направляет
-TaskContent → выполняет
-Playbook → объясняет глубоко
+exists()
 
-Если хочешь, следующим шагом я могу:
+После этого
 
-👉 разложить тебе 15 PlaybookEntry сразу под Software Engineer
-👉 или дать Opencode задание на реализацию PlaybookScreen + data layer
+runtime_persistence.ts
 
-Сейчас ты впервые дошёл до стадии knowledge architecture, это уже не "аудит проекта", это продуктовая система.
+notes_persistence.ts
+
+interview_persistence.ts
+
+будут пользоваться одним API.
+
+NotesController
+
+Именно он должен быть публичным API.
+
+addNote()
+
+updateNote()
+
+deleteNote()
+
+getNote()
+
+getNotesByNode()
+
+getNotesByTask()
+
+getAllNotes()
+
+UI никогда не читает localStorage напрямую.
+
+Индексация
+
+Не искать каждый раз.
+
+Держать индекс.
+
+notes
+
+nodeId
+
+↓
+
+Note[]
+
+Например
+
+Map<
+    nodeId,
+    Note[]
+>
+
+Поиск будет O(1).
+
+JourneyScreen
+
+В Task Detail
+
+📝 Add Note
+
+↓
+
+Bottom Sheet
+
+Textarea
+
+Save
+
+После Save
+
+NotesController.addNote(...)
+
+↓
+
+persist
+
+↓
+
+emit
+
+NOTE_CHANGED
+
+↓
+
+UI обновляется.
+
+Event Bus
+
+Не менять Runtime.
+
+Добавить новые события.
+
+NOTE_CREATED
+
+NOTE_UPDATED
+
+NOTE_DELETED
+
+JourneyScreen уже подписан.
+
+Никаких forceUpdate.
+
+NotesScreen
+
+Не через Runtime.
+
+Получает данные так
+
+NotesController
+
+↓
+
+getAllNotes()
+
+Фильтры
+
+Profession
+
+↓
+
+Chapter
+
+↓
+
+Node
+
+Поиск
+
+title/content
+
+или просто content.
+
+Offline
+
+Все хранится
+
+localStorage
+
+notes_v1
+
+или
+
+career_notes_v1
+
+Отдельный ключ.
+
+Не внутри runtime snapshot.
+
+Что НЕ делать
+
+❌ Не добавлять notes в JourneyRuntimeState.
+
+❌ Не добавлять notes в SkillNode.
+
+❌ Не сохранять notes вместе с runtime snapshot.
+
+❌ Не хранить ссылки на объекты.
+
+Только id.
+
+Что дать Opencode
+
+Я бы дал ему именно такое техническое задание:
+
+Реализовать систему Notes как отдельный User Data модуль.
+
+Требования:
+
+1. Не изменять JourneyRuntimeState и runtime_store.
+2. Не добавлять Notes в SkillNode.
+3. Создать новый модуль:
+   src/core/user_data/notes/
+
+   note.ts
+   notes_store.ts
+   notes_persistence.ts
+   notes_controller.ts
+
+4. Note:
+   id
+   professionId
+   chapterId
+   nodeId
+   taskId?
+   content
+   createdAt
+   updatedAt
+
+5. Создать NotesController API:
+
+   addNote()
+   updateNote()
+   deleteNote()
+   getNote()
+   getNotesByNode()
+   getNotesByTask()
+   getAllNotes()
+
+6. Persistence:
+
+   использовать отдельный localStorage key
+
+   career_notes_v1
+
+   Не использовать runtime snapshot.
+
+7. Использовать общий storage helper, если он существует. Не дублировать runtime_persistence.
+
+8. JourneyScreen:
+
+   добавить кнопку "📝 Add Note" в Task Detail.
+
+   После сохранения вызвать NotesController.addNote().
+
+9. Создать NotesScreen:
+
+   - список заметок
+   - фильтр по главе
+   - фильтр по SkillNode
+   - поиск по содержимому
+   - редактирование
+   - удаление
+
+10. Добавить события Event Bus:
+
+   NOTE_CREATED
+   NOTE_UPDATED
+   NOTE_DELETED
+
+   JourneyScreen и NotesScreen должны обновляться через Event Bus.
+
+11. Полностью offline-first.
+
+12. Не менять Learning Engine, Runtime Controller, Runtime State и Event Pipeline.
+
+Такое решение масштабируется: позже ты сможешь добавить закладки, журнал обучения, записи интервью и другие пользовательские данные, не засоряя runtime и не ломая существующую архитектуру.
