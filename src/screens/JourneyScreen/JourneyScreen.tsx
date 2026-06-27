@@ -6,6 +6,7 @@ import type { SkillNode } from '@/core/skill_state';
 import { getActiveProfession } from '@/core/profession_loader';
 import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
 import type { TaskContent } from '@/core/task_content';
+import { InterviewTrainerScreen } from '@/screens/InterviewTrainer/InterviewTrainerScreen';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
@@ -13,6 +14,7 @@ export function JourneyScreen() {
   const [selectedTask, setSelectedTask] = useState<TaskContent | null>(null);
   const [taskResult, setTaskResult] = useState<any>(null);
   const [expandedAdvice, setExpandedAdvice] = useState<string>('awareness');
+  const [trainerTask, setTrainerTask] = useState<TaskContent | null>(null);
 
   const refresh = useCallback(() => {
     setTick(t => t + 1);
@@ -83,6 +85,16 @@ export function JourneyScreen() {
   const toggleAdvice = (key: string) => {
     setExpandedAdvice(expandedAdvice === key ? '' : key);
   };
+
+  if (trainerTask) {
+    return (
+      <InterviewTrainerScreen
+        task={trainerTask}
+        onComplete={() => { setTrainerTask(null); refresh(); }}
+        onClose={() => setTrainerTask(null)}
+      />
+    );
+  }
 
   if (!node) {
     return <div className="journey-screen"><h1>No active node</h1></div>;
@@ -204,7 +216,8 @@ export function JourneyScreen() {
 
             <div className="task-actions">
               <button onClick={() => setSelectedTask(null)}>Back</button>
-              <button onClick={handleCompleteTask} className="primary">Complete Task</button>
+              <button onClick={() => setTrainerTask(selectedTask)} className="primary">Practice with Trainer</button>
+              <button onClick={handleCompleteTask}>Complete Task</button>
             </div>
           </div>
         )}
