@@ -1,324 +1,407 @@
-Это хороший следующий модуль. Я бы только немного изменил архитектуру, чтобы через полгода Notes не превратились в часть runtime.
+Это хороший модуль, но я бы не делал один Share System. Я бы сразу разделил его на две независимые подсистемы:
 
-Правильный принцип
+Export (получение данных)
+Share (передача пользователю)
 
-Notes — это пользовательские данные (User Data), а не Runtime.
+Это разные ответственности.
 
-Поэтому они должны жить отдельно.
-
+Правильная архитектура
 Runtime
-    │
-    ├── JourneyRuntimeState
-    ├── Learning Engine
-    └── Event Bus
+      │
+      ▼
+Share Mapper
+      │
+      ▼
+Share Model
+      │
+ ┌────┴────────────┐
+ │                 │
+ ▼                 ▼
+Export System   Share System
+(JSON/CSV/PDF)  (PNG/Text/Web Share)
 
-User Data
-    ├── Notes
-    ├── Bookmarks (будущее)
-    ├── Favorites (будущее)
-    ├── Journal (будущее)
-    └── Interview Recordings
+Таким образом Runtime вообще не знает, что существует шаринг.
 
-Не смешивать эти два слоя.
+1. ShareModel
 
-Рекомендуемая структура
-src/core/user_data/
+Сначала создаётся единая модель.
 
-    notes/
-        note.ts
-        notes_store.ts
-        notes_persistence.ts
-        notes_controller.ts
+export interface ShareModel {
 
-    persistence/
-        storage.ts        // общий helper (если его ещё нет)
+    profession: string;
 
-Так позже сюда же можно добавить bookmarks, journal, achievements.
+    completedSkills: number;
 
-Тип Note
-export interface Note {
-  id: string;
+    totalSkills: number;
 
-  nodeId: string;
+    readinessScore: number;
 
-  taskId?: string;
+    confidenceScore: number;
 
-  chapterId: string;
+    currentChapter: string;
 
-  professionId: string;
+    quote: string;
 
-  content: string;
+    themeColor: string;
 
-  createdAt: number;
-
-  updatedAt: number;
 }
 
-Не хранить ссылку на SkillNode.
+UI, PNG, PDF, JSON используют одну модель.
 
-Только id.
+2. Share Mapper
 
-Хранилище
+Создать
 
-Не использовать RuntimeStore.
+share_mapper.ts
 
-Лучше сделать отдельный NotesStore.
+Единственная задача:
 
-runtime_store
-        │
+RuntimeState
+        ↓
+ShareModel
 
-notes_store
+Никакой логики UI.
 
-Они независимы.
+3. Export System
 
-Persistence
+Отдельная папка.
 
-Не копировать runtime_persistence.
+src/core/export/
 
-Сделать общий Storage Helper.
+    export_json.ts
 
-storage.ts
+    export_csv.ts
 
-load<T>()
+    export_pdf.ts (будущее)
 
-save<T>()
+    export_service.ts
 
-remove()
+Экспорт не должен знать про Share Card.
 
-exists()
+JSON
 
-После этого
+Экспортирует
 
-runtime_persistence.ts
+Career Runtime
 
-notes_persistence.ts
+Onboarding
 
-interview_persistence.ts
+Scores
 
-будут пользоваться одним API.
+Completed Nodes
 
-NotesController
+Completed Tasks
+CSV
 
-Именно он должен быть публичным API.
+Каждая строка
 
-addNote()
-
-updateNote()
-
-deleteNote()
-
-getNote()
-
-getNotesByNode()
-
-getNotesByTask()
-
-getAllNotes()
-
-UI никогда не читает localStorage напрямую.
-
-Индексация
-
-Не искать каждый раз.
-
-Держать индекс.
-
-notes
-
-nodeId
-
-↓
-
-Note[]
-
-Например
-
-Map<
-    nodeId,
-    Note[]
->
-
-Поиск будет O(1).
-
-JourneyScreen
-
-В Task Detail
-
-📝 Add Note
-
-↓
-
-Bottom Sheet
-
-Textarea
-
-Save
-
-После Save
-
-NotesController.addNote(...)
-
-↓
-
-persist
-
-↓
-
-emit
-
-NOTE_CHANGED
-
-↓
-
-UI обновляется.
-
-Event Bus
-
-Не менять Runtime.
-
-Добавить новые события.
-
-NOTE_CREATED
-
-NOTE_UPDATED
-
-NOTE_DELETED
-
-JourneyScreen уже подписан.
-
-Никаких forceUpdate.
-
-NotesScreen
-
-Не через Runtime.
-
-Получает данные так
-
-NotesController
-
-↓
-
-getAllNotes()
-
-Фильтры
-
-Profession
-
-↓
+Date
 
 Chapter
 
+Skill
+
+Task
+
+Result
+
+Duration
+
+Status
+
+То есть журнал прохождения.
+
+PDF
+
+Потом просто добавится новый exporter.
+
+Ничего менять не придётся.
+
+4. Share System
+
+Совершенно отдельно.
+
+src/core/share/
+
+    share_service.ts
+
+    share_card_mapper.ts
+
+    share_image.ts
+
+    native_share.ts
+5. Share Card
+
+Вообще не зависит от Runtime.
+
+Получает
+
+ShareModel
+
 ↓
 
-Node
+рисует карточку.
 
-Поиск
+Карточка должна использовать
 
-title/content
+Profession
 
-или просто content.
+Progress
 
-Offline
+Readiness
 
-Все хранится
+Confidence
 
-localStorage
+Current Chapter
 
-notes_v1
+Quote
 
-или
+Theme
 
-career_notes_v1
+Больше ничего.
 
-Отдельный ключ.
+6. Генерация PNG
 
-Не внутри runtime snapshot.
+Я бы не делал Canvas.
 
-Что НЕ делать
+Лучше
 
-❌ Не добавлять notes в JourneyRuntimeState.
+HTML
 
-❌ Не добавлять notes в SkillNode.
+↓
 
-❌ Не сохранять notes вместе с runtime snapshot.
+DOM
 
-❌ Не хранить ссылки на объекты.
+↓
 
-Только id.
+html-to-image
+
+↓
+
+PNG
+
+Работает значительно проще.
+
+7. ShareService
+
+Единая точка входа.
+
+shareText()
+
+shareImage()
+
+copyText()
+
+copyImage()
+
+nativeShare()
+
+Именно сюда позже можно добавить Telegram, WhatsApp, Discord и т.д.
+
+8. Privacy
+
+Очень важно.
+
+ShareService должен получать
+
+ShareOptions
+{
+
+hideScores,
+
+hideProfession,
+
+hideQuote,
+
+hideProgress
+
+}
+
+Чтобы пользователь сам решал.
+
+9. Никакой сети
+
+Запретить любую отправку.
+
+Share
+
+↓
+
+Clipboard
+
+↓
+
+File
+
+↓
+
+Navigator.share()
+
+↓
+
+END
+
+Никаких POST.
+
+10. Offline
+
+Работает полностью.
+
+JSON
+
+↓
+
+Blob
+
+↓
+
+download
+
+CSV
+
+↓
+
+Blob
+
+↓
+
+download
+
+PNG
+
+↓
+
+Blob
+
+↓
+
+download
+
+11. Не использовать Runtime напрямую
+
+Нельзя
+
+ShareCard
+
+↓
+
+runtime_store
+
+Должно быть
+
+Runtime
+
+↓
+
+Share Mapper
+
+↓
+
+ShareModel
+
+↓
+
+ShareCard
+12. Масштабируемость
+
+Когда появится
+
+Achievements
+
+Certificates
+
+Learning Statistics
+
+Study Heatmap
+
+Weekly Report
+
+они просто попадут в
+
+ShareModel
+
+И автоматически смогут экспортироваться во все форматы.
 
 Что дать Opencode
 
-Я бы дал ему именно такое техническое задание:
+Я бы дал именно такое техническое задание:
 
-Реализовать систему Notes как отдельный User Data модуль.
+Реализовать Share/Export System с разделением ответственности.
 
 Требования:
 
-1. Не изменять JourneyRuntimeState и runtime_store.
-2. Не добавлять Notes в SkillNode.
-3. Создать новый модуль:
-   src/core/user_data/notes/
+1. Не изменять Runtime.
 
-   note.ts
-   notes_store.ts
-   notes_persistence.ts
-   notes_controller.ts
+2. Создать папку:
 
-4. Note:
-   id
-   professionId
-   chapterId
-   nodeId
-   taskId?
-   content
-   createdAt
-   updatedAt
+src/core/share/
 
-5. Создать NotesController API:
+    share_mapper.ts
+    share_service.ts
+    share_image.ts
+    native_share.ts
 
-   addNote()
-   updateNote()
-   deleteNote()
-   getNote()
-   getNotesByNode()
-   getNotesByTask()
-   getAllNotes()
+3. Создать папку:
 
-6. Persistence:
+src/core/export/
 
-   использовать отдельный localStorage key
+    export_service.ts
+    export_json.ts
+    export_csv.ts
 
-   career_notes_v1
+4. Создать ShareModel:
 
-   Не использовать runtime snapshot.
+profession
+completedSkills
+totalSkills
+readinessScore
+confidenceScore
+currentChapter
+quote
+themeColor
 
-7. Использовать общий storage helper, если он существует. Не дублировать runtime_persistence.
+5. Создать share_mapper.ts:
 
-8. JourneyScreen:
+JourneyRuntimeState + UIState
+↓
 
-   добавить кнопку "📝 Add Note" в Task Detail.
+ShareModel
 
-   После сохранения вызвать NotesController.addNote().
+6. Share Card должна использовать только ShareModel.
 
-9. Создать NotesScreen:
+7. ShareService:
 
-   - список заметок
-   - фильтр по главе
-   - фильтр по SkillNode
-   - поиск по содержимому
-   - редактирование
-   - удаление
+copyText()
 
-10. Добавить события Event Bus:
+copyImage()
 
-   NOTE_CREATED
-   NOTE_UPDATED
-   NOTE_DELETED
+shareText()
 
-   JourneyScreen и NotesScreen должны обновляться через Event Bus.
+shareImage()
 
-11. Полностью offline-first.
+nativeShare()
 
-12. Не менять Learning Engine, Runtime Controller, Runtime State и Event Pipeline.
+8. ExportService:
 
-Такое решение масштабируется: позже ты сможешь добавить закладки, журнал обучения, записи интервью и другие пользовательские данные, не засоряя runtime и не ломая существующую архитектуру.
+exportJSON()
+
+exportCSV()
+
+Подготовить архитектуру для exportPDF() без реализации.
+
+9. Все экспорты должны работать полностью offline через Blob/File.
+
+10. Не выполнять никаких сетевых запросов.
+
+11. Добавить ShareOptions:
+
+hideScores
+hideProfession
+hideProgress
+hideQuote
+
+12. Runtime, Event Bus, Learning Engine и Persistence не изменять.
+
+13. Архитектура должна позволять легко добавить PDF, Markdown и другие форматы экспорта без изменения существующего API.
+
+Это решение соответствует уже выбранной вами архитектуре: Runtime остаётся источником данных, Mapper преобразует их в модель представления, а Export и Share становятся независимыми сервисами, которые легко расширять новыми форматами и способами обмена без затрагивания ядра приложения.
