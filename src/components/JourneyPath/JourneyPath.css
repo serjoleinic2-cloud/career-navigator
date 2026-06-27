@@ -1,3 +1,14 @@
+:root {
+  --bg-0: #071320;
+  --bg-1: #10142B;
+  --bg-2: #18132F;
+  --bg-3: #090D19;
+  --glass: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+}
+
 .journey-scroll {
   height: 100%;
   overflow-y: auto;
