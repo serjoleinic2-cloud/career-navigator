@@ -9,6 +9,7 @@ import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
 import { emit } from '../events/system_event_bus';
+import { saveRuntime, clearRuntime } from '../persistence/runtime_persistence';
 import {
   beginTask,
   runTaskPipeline,
@@ -24,6 +25,7 @@ let activeTaskDefinition: TaskDefinition | null = null;
 
 export function startJourney(onboardingState: OnboardingState): JourneyRuntimeState {
   runtimeState = initializeJourneyRuntime(onboardingState);
+  saveRuntime(runtimeState);
   emit('SYSTEM_BOOTED', { professionId: runtimeState.professionId });
   emit('UI_REFRESH', {});
   return runtimeState;
@@ -46,6 +48,7 @@ export function setActiveNode(nodeId: string): JourneyRuntimeState {
     throw new Error('Runtime not initialized');
   }
   runtimeState = { ...runtimeState, activeNodeId: nodeId };
+  saveRuntime(runtimeState);
   emit('NODE_CHANGED', { nodeId });
   emit('UI_REFRESH', {});
   return runtimeState;
@@ -290,6 +293,7 @@ export function advanceNode(
     createTaskFromDefinition(definition);
     submitTask(true);
   }
+  if (runtimeState) saveRuntime(runtimeState);
   return runtimeState;
 }
 
@@ -313,6 +317,7 @@ export function advanceChapter(): JourneyRuntimeState {
     throw new Error('Next chapter has no nodes');
   }
   runtimeState = { ...runtimeState, activeNodeId: nextNodeId };
+  saveRuntime(runtimeState);
   emit('CHAPTER_CHANGED', { chapterId: next.id });
   emit('NODE_CHANGED', { nodeId: nextNodeId });
   emit('UI_REFRESH', {});
@@ -323,5 +328,10 @@ export function resetRuntime(): void {
   runtimeState = null;
   activeTask = null;
   activeTaskDefinition = null;
+  clearRuntime();
   emit('UI_REFRESH', {});
+}
+
+export function initializeRuntime(saved: JourneyRuntimeState): void {
+  runtimeState = saved;
 }
