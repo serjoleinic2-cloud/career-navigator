@@ -1,424 +1,462 @@
-Да. Здесь тоже есть место, где можно случайно испортить архитектуру. Я бы не позволил World знать про runtime_controller и React одновременно. После ваших предыдущих рефакторингов правильнее сделать UI Bridge единственным адаптером между Runtime и World.
+Я бы изменил постановку задачи. Сейчас она слишком сосредоточена на CSS, а не на архитектуре. Если Opencode просто "нарисует" путь, потом будет сложно добавлять анимации, новые профессии и мир.
 
-Вот задание для Opencode.
+Я бы дал ему сразу архитектурно правильное ТЗ.
 
-IMPLEMENTATION PATCH — World Layer Integration
+IMPLEMENTATION PATCH — JourneyPath Visual Redesign (CSS-only)
 
 ЦЕЛЬ
 
-Подключить существующий World Layer к JourneyScreen.
+Полностью переработать JourneyPath в стиль вертикальной карты прогресса.
 
-НЕ переписывать World.
+НЕ менять Runtime.
 
-НЕ переписывать Runtime.
+НЕ менять Event Bus.
 
-НЕ добавлять второй источник данных.
+НЕ менять UI Bridge.
 
-World должен получать только ViewModel.
+Работать только на Presentation Layer.
 
 ────────────────────────────────────────
 
-КАНОНИЧЕСКАЯ АРХИТЕКТУРА
+АРХИТЕКТУРА
 
-JourneyRuntimeState
+JourneyRuntime
         │
 runtime_controller
         │
-        ▼
 ui_bridge
         │
-        ▼
 JourneyViewModel
         │
-        ├──────────────► JourneyScreen
-        │
-        └──────────────► World Mapper
-                           │
-                           ▼
-                     WorldViewModel
-                           │
-                           ▼
-                  JourneyVisualLayer
-                           │
-                           ▼
-LevelRenderer
-VerticalPath
-EnvironmentGenerator
-
-ВАЖНО
-
-World Layer
-
-НЕ знает
-
-React
-
-НЕ знает
-
-JourneyRuntimeState
-
-НЕ знает
-
-runtime_controller
-
-НЕ знает
-
-Он получает только WorldViewModel.
-
-────────────────────────────────────────
-
-ШАГ 1
-
-НЕ использовать careerToWorld напрямую из JourneyScreen.
-
-Создать единственную функцию
-
-mapJourneyUIToWorld()
-
-или
-
-mapJourneyViewModelToWorld()
-
-которая принимает
-
-JourneyViewModel
-
-и возвращает
-
-WorldViewModel.
-
-────────────────────────────────────────
-
-ШАГ 2
-
-JourneyScreen
-
-НЕ вычисляет состояние мира.
-
-Он делает
-
-const ui = getUIState()
-
-const world = mapJourneyViewModelToWorld(ui)
-
-<JourneyVisualLayer world={world} />
-
-Только это.
-
-────────────────────────────────────────
-
-ШАГ 3
-
-JourneyVisualLayer
-
-Остается полностью presentation.
-
-Получает
-
-WorldViewModel
-
-Никаких вызовов runtime_controller.
-
-Никаких событий.
-
-Никаких bridge.
-
-────────────────────────────────────────
-
-ШАГ 4
-
-WorldViewModel
-
-Должен содержать только данные визуализации.
-
-Например
-
-zones
-
-currentZone
-
-currentNode
-
-completedNodes
-
-lockedNodes
-
-path
-
-backgroundTheme
-
-cameraTarget
-
-Никаких SkillNode.
-
-Никаких RuntimeState.
-
-Никаких Engine объектов.
-
-────────────────────────────────────────
-
-ШАГ 5
-
-VerticalPath
-
-Получает
-
-nodes
-
-currentNode
-
-completed
-
-locked
-
-onNodeClick
-
-НЕ знает
-
-что такое Runtime.
-
-────────────────────────────────────────
-
-ШАГ 6
-
-Node Click
-
 JourneyPath
+        │
+───────────────
+CSS
+───────────────
 
-не вызывает Runtime напрямую.
+JourneyPath ничего не вычисляет.
 
-Он вызывает
-
-onNodeSelected(nodeId)
-
-JourneyScreen
-
-↓
-
-runtime_controller.setActiveNode(nodeId)
-
-↓
-
-Runtime
-
-↓
-
-emit NODE_CHANGED
-
-↓
-
-JourneyScreen rerender
-
-↓
-
-новый UIState
-
-↓
-
-новый WorldViewModel
-
-↓
-
-JourneyVisualLayer rerender
-
-Полный цикл.
+Он только отображает ViewModel.
 
 ────────────────────────────────────────
 
-ШАГ 7
+СТРУКТУРА
 
-Background
+JourneyScreen
 
-EnvironmentGenerator
+┌────────────────────────────┐
+│ Header                     │
+├────────────────────────────┤
+│ Scroll Container           │
+│                            │
+│ Background Layers          │
+│                            │
+│ Journey Path              │
+│                            │
+│ Node Cards                │
+│                            │
+├────────────────────────────┤
+│ Bottom Navigation         │
+└────────────────────────────┘
 
-НЕ читает главу самостоятельно.
+────────────────────────────────────────
 
-Получает
+BACKGROUND
 
-backgroundTheme
+Фон состоит из нескольких слоев.
 
-из WorldViewModel.
+Layer 1
 
-Например
+Большой gradient.
+
+Layer 2
+
+Большие blurred circles.
+
+Layer 3
+
+Очень слабые particles.
+
+Layer 4
+
+Vignette.
+
+Все через CSS.
+
+Никакого Canvas.
+
+────────────────────────────────────────
+
+CHAPTER THEMES
+
+Каждая глава имеет собственную тему.
 
 Resume
 
-↓
-
-Blue
+blue
 
 LinkedIn
 
-↓
-
-Purple
+violet
 
 Applications
 
-↓
-
-Orange
+orange
 
 Interview
 
-↓
-
-Dark
+dark navy
 
 Offer
 
-↓
+green
 
-Green
+Theme хранится отдельно
 
-────────────────────────────────────────
+theme.ts
 
-ШАГ 8
-
-Автоцентрирование
-
-JourneyVisualLayer
-
-следит за
-
-world.cameraTarget
-
-При изменении
-
-cameraTarget
-
-плавно скроллит
-
-к текущей ноде.
-
-НЕ использовать Runtime.
-
-Только WorldViewModel.
+НЕ внутри компонентов.
 
 ────────────────────────────────────────
 
-ШАГ 9
+BACKGROUND TRANSITION
 
-Event Bus
+НЕ менять background резко.
 
-JourneyVisualLayer
+Использовать
 
-не подписывается.
+opacity transition
 
-JourneyScreen
+или
 
-единственный подписчик
+crossfade двух background layers.
 
-NODE_CHANGED
+При смене главы
 
-STATE_UPDATED
+theme меняется плавно
 
-CHAPTER_CHANGED
-
-После rerender
-
-World получает новый ViewModel.
-
-Это исключает двойные подписки.
+за 500–700 ms.
 
 ────────────────────────────────────────
 
-ШАГ 10
+PATH
 
-Запрещено
+Путь —
 
-НЕ подписывать
+один псевдоэлемент
 
-LevelRenderer
+::before
 
-VerticalPath
+который проходит через весь контейнер.
 
-EnvironmentGenerator
+Никаких отдельных div между нодами.
+
+Линия
+
+gradient
+
+box-shadow
+
+border-radius
+
+────────────────────────────────────────
+
+PERSPECTIVE
+
+Добавить легкое ощущение глубины.
+
+Использовать только CSS.
+
+Например
+
+perspective()
+
+rotateX()
+
+scale()
+
+translateZ()
+
+Никаких сильных углов.
+
+Путь должен казаться слегка уходящим вверх.
+
+────────────────────────────────────────
+
+NODE
+
+Каждая нода —
+
+отдельный компонент.
+
+Содержит
+
+circle
+
+icon
+
+label
+
+subtitle
+
+status
+
+────────────────────────────────────────
+
+NODE STATES
+
+Locked
+
+gray
+
+lock icon
+
+Completed
+
+green
+
+check icon
+
+Current
+
+animated glow
+
+slow pulse
+
+Available
+
+blue
+
+hover
+
+────────────────────────────────────────
+
+CURRENT NODE
+
+Текущая нода
+
+имеет
+
+glow
+
+ring
+
+pulse
+
+scale 1.05
+
+Без тяжелых animation.
+
+────────────────────────────────────────
+
+CONNECTORS
+
+Соединители
+
+не отдельные компоненты.
+
+Использовать
+
+path::before
+
+или
+
+CSS background.
+
+────────────────────────────────────────
+
+LAYOUT
+
+Ноды
+
+не строго по центру.
+
+Использовать небольшой zig-zag.
+
+left
+
+center
+
+right
+
+center
+
+left
+
+Это создаёт ощущение путешествия.
+
+Смещение только CSS.
+
+Без вычислений Runtime.
+
+────────────────────────────────────────
+
+AUTO SCROLL
 
 JourneyPath
 
-на Event Bus.
+хранит refs
 
-НЕ импортировать
+для каждой ноды.
 
-runtime_controller
+После изменения
 
-в World.
+activeNodeId
 
-НЕ импортировать
+выполняется
 
-JourneyRuntimeState
+scrollIntoView()
 
-в World.
+block: center
 
-НЕ создавать
+behavior: smooth
 
-World Runtime.
-
-────────────────────────────────────────
-
-ИТОГОВЫЙ ПОТОК
-
-Runtime
-
-↓
-
-runtime_controller
-
-↓
-
-UI Bridge
-
-↓
-
-JourneyViewModel
-
-↓
-
-World Mapper
-
-↓
-
-WorldViewModel
-
-↓
-
-JourneyVisualLayer
-
-↓
-
-LevelRenderer
-
-↓
-
-VerticalPath
-
-↓
-
-Environment
+НЕ использовать вычисление координат.
 
 ────────────────────────────────────────
 
-ПОЛУЧАЕМ
+CLICK
 
-✓ Runtime остается единственным Source of Truth
+При нажатии
 
-✓ UI остается единственным подписчиком Event Bus
+JourneyPath
 
-✓ World полностью независим
+вызывает
 
-✓ World можно использовать отдельно
+onNodeSelected(nodeId)
 
-✓ Нет циклических зависимостей
+Никаких вызовов Runtime внутри компонента.
 
-✓ Нет двойных подписчиков
+────────────────────────────────────────
 
-✓ Нет знания Runtime внутри World
+RESPONSIVE
 
-✓ Все обновления идут через существующий event-driven pipeline
+Минимальная зона касания
 
-Я бы еще добавил один архитектурный принцип для всего проекта:
+48x48
 
-Runtime → UI ViewModel → World ViewModel → React Components
+На мобильных
 
-То есть мир никогда не строится из Runtime напрямую. Он строится только из UI-модели. Это даст вам возможность в будущем полностью заменить визуальный слой (например, перейти с React Native на Unity, Godot или Three.js) без единого изменения в runtime или learning engine. Это именно тот уровень развязки, который обычно используют в крупных игровых и обучающих проектах.
+контент не выходит за экран.
+
+────────────────────────────────────────
+
+АНИМАЦИИ
+
+Разрешены
+
+opacity
+
+transform
+
+box-shadow
+
+filter blur
+
+scale
+
+translate
+
+Запрещены
+
+layout thrashing
+
+left/top animation
+
+Canvas
+
+WebGL
+
+────────────────────────────────────────
+
+CSS СТРУКТУРА
+
+journey-screen
+
+journey-scroll
+
+journey-background
+
+journey-background-layer
+
+journey-theme
+
+journey-path
+
+journey-line
+
+journey-node
+
+journey-node-current
+
+journey-node-completed
+
+journey-node-locked
+
+journey-node-label
+
+journey-node-icon
+
+────────────────────────────────────────
+
+НЕ ДОПУСКАЕТСЯ
+
+Не вычислять UI внутри CSS.
+
+Не хранить состояние в JourneyPath.
+
+Не импортировать runtime_controller.
+
+Не импортировать event_bus.
+
+Не импортировать World Layer.
+
+JourneyPath —
+полностью dumb component.
+
+────────────────────────────────────────
+
+РЕЗУЛЬТАТ
+
+Получаем карту,
+
+визуально похожую на Duolingo / Royal Match / Candy Crush,
+
+но построенную полностью на существующей архитектуре проекта.
+
+Runtime отвечает за состояние.
+
+UI Bridge отвечает за ViewModel.
+
+JourneyPath отвечает только за визуализацию.
+
+Все анимации реализованы через CSS без Canvas/WebGL.
+Я бы добавил еще одну идею
+
+Судя по тому, что вы хотите получить (и по тому скриншоту), не делайте непрерывную линию через все главы. Сделайте структуру уровня игры:
+
+Resume
+═══════════════
+●
+│
+●
+│
+●
+
+        Portal
+
+═══════════════
+LinkedIn
+●
+│
+●
+│
+●
+
+        Portal
+
+═══════════════
+Applications
+...
+
+То есть каждая глава — это отдельная "зона" со своим фоном и своей дорожкой, а между зонами — небольшой переход ("портал", "лифт", "мост", "ворота"). Тогда позже можно будет добавлять новые главы, профессии и даже целые карьерные миры без переработки CSS или логики пути. Это гораздо лучше масштабируется, чем одна длинная непрерывная линия на весь путь.
