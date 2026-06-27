@@ -1,367 +1,424 @@
-Я бы не интегрировал TaskContent через runtime_controller. Наоборот — runtime вообще не должен знать, как отображаются задачи. Runtime отвечает за состояние прогресса, а UI читает контент из уже существующего SkillNode.tasks.
+Да. Здесь тоже есть место, где можно случайно испортить архитектуру. Я бы не позволил World знать про runtime_controller и React одновременно. После ваших предыдущих рефакторингов правильнее сделать UI Bridge единственным адаптером между Runtime и World.
 
-Вот задание, которое я бы дал Opencode.
+Вот задание для Opencode.
 
-IMPLEMENTATION PATCH — JourneyScreen TaskContent Integration
+IMPLEMENTATION PATCH — World Layer Integration
 
 ЦЕЛЬ
 
-Переписать JourneyScreen так, чтобы он отображал реальные TaskContent из SkillNode.
+Подключить существующий World Layer к JourneyScreen.
 
-НЕ МЕНЯТЬ:
+НЕ переписывать World.
 
-- runtime_controller.ts
-- learning_engine.ts
-- attempt_engine.ts
-- progression_loop.ts
-- task_execution_engine.ts
+НЕ переписывать Runtime.
 
-TaskContent — это presentation/content layer.
-Runtime продолжает работать как раньше.
+НЕ добавлять второй источник данных.
 
-──────────────────────────────────────
+World должен получать только ViewModel.
 
-АРХИТЕКТУРА
+────────────────────────────────────────
 
-Оставить существующую цепочку:
+КАНОНИЧЕСКАЯ АРХИТЕКТУРА
 
-JourneyRuntime
-        ↓
+JourneyRuntimeState
+        │
 runtime_controller
-        ↓
-active SkillNode
-        ↓
-JourneyScreen
-
-TaskContent не становится частью Runtime Engine.
-
-Runtime знает только:
-
-activeNodeId
-task progress
-scores
-
-Контент берет UI.
-
-──────────────────────────────────────
-
-ШАГ 1
-
-Получить текущую SkillNode
-
-Использовать существующий API.
-
-Например
-
-const node = getActiveNode()
-
-или
-
-const runtime = getRuntimeState()
-
-НЕ создавать новые runtime модели.
-
-──────────────────────────────────────
-
-ШАГ 2
-
-Получить список задач
-
-Использовать
-
-node.tasks
-
-НЕ генерировать generic checklist.
-
-НЕ создавать fake tasks.
-
-НЕ использовать hardcoded cards.
-
-Если tasks пустой
-
-показать
-
-"No tasks available"
-
-──────────────────────────────────────
-
-ШАГ 3
-
-Task List
-
-Для каждой задачи вывести
-
-title
-
-objective
-
-estimatedMinutes
-
-difficulty
-
-Карточка должна быть компактной.
-
-Никаких instructions сразу.
-
-──────────────────────────────────────
-
-ШАГ 4
-
-Task Detail
-
-После выбора карточки
-
-открывается detail panel
-
-Отобразить
-
-title
-
-objective
-
-instructions[]
-
-completionCriteria[]
-
-tips[]
-
-expectedOutcome
-
-estimatedMinutes
-
-difficulty
-
-Никакой новой логики.
-
-Только отображение данных.
-
-──────────────────────────────────────
-
-ШАГ 5
-
-Advice
-
-Использовать
-
-node.advice
-
-Создать collapsible секции
-
-Awareness
-
-Understanding
-
-Application
-
-Readiness
-
-Execution
-
-Confidence
-
-По умолчанию открыть только Awareness.
-
-Остальные свернуты.
-
-Никаких новых моделей.
-
-──────────────────────────────────────
-
-ШАГ 6
-
-Signals
-
-Использовать
-
-node.signals
-
-Показать checklist
-
-Без runtime логики.
-
-Это informational блок.
-
-──────────────────────────────────────
-
-ШАГ 7
-
-Complete Task
-
-При нажатии
-
-Complete Task
-
-НЕ изменять существующий execution pipeline.
-
-Использовать существующий API
-
-submitTask()
-
-или
-
-completeTask()
-
-или
-
-processUserAction()
-
-(что уже существует в проекте)
-
-НЕ создавать новый execution engine.
-
-НЕ менять learning_engine.
-
-──────────────────────────────────────
-
-ШАГ 8
-
-После выполнения
-
-Использовать существующий результат runtime.
-
-Показать
-
-Result
-
-Recommendation
-
-Readiness delta
-
-Confidence delta
-
-Next Task
-
-или
-
-Next SkillNode
-
-Никаких самостоятельных вычислений UI.
-
-──────────────────────────────────────
-
-ШАГ 9
-
-Навигация
-
-Bottom Navigation остается.
-
-Previous Skill
-
-Next Skill
-
-Использовать существующий runtime_controller.
-
-──────────────────────────────────────
-
-ШАГ 10
-
-Удалить
-
-Удалить весь generic UI
-
-Checklist Card
-
-Text Task
-
-Practice Task
-
-Exercise Card
-
-Hardcoded buttons
-
-Placeholder tasks
-
-Оставить только реальные TaskContent.
-
-──────────────────────────────────────
+        │
+        ▼
+ui_bridge
+        │
+        ▼
+JourneyViewModel
+        │
+        ├──────────────► JourneyScreen
+        │
+        └──────────────► World Mapper
+                           │
+                           ▼
+                     WorldViewModel
+                           │
+                           ▼
+                  JourneyVisualLayer
+                           │
+                           ▼
+LevelRenderer
+VerticalPath
+EnvironmentGenerator
 
 ВАЖНО
 
-TaskContent — immutable content.
+World Layer
 
-Runtime не хранит TaskContent.
+НЕ знает
 
-Runtime хранит только
+React
 
-active node
+НЕ знает
 
-progress
+JourneyRuntimeState
 
-scores
+НЕ знает
 
-completed state
+runtime_controller
 
-UI получает
+НЕ знает
 
-SkillNode
+Он получает только WorldViewModel.
+
+────────────────────────────────────────
+
+ШАГ 1
+
+НЕ использовать careerToWorld напрямую из JourneyScreen.
+
+Создать единственную функцию
+
+mapJourneyUIToWorld()
+
+или
+
+mapJourneyViewModelToWorld()
+
+которая принимает
+
+JourneyViewModel
+
+и возвращает
+
+WorldViewModel.
+
+────────────────────────────────────────
+
+ШАГ 2
+
+JourneyScreen
+
+НЕ вычисляет состояние мира.
+
+Он делает
+
+const ui = getUIState()
+
+const world = mapJourneyViewModelToWorld(ui)
+
+<JourneyVisualLayer world={world} />
+
+Только это.
+
+────────────────────────────────────────
+
+ШАГ 3
+
+JourneyVisualLayer
+
+Остается полностью presentation.
+
+Получает
+
+WorldViewModel
+
+Никаких вызовов runtime_controller.
+
+Никаких событий.
+
+Никаких bridge.
+
+────────────────────────────────────────
+
+ШАГ 4
+
+WorldViewModel
+
+Должен содержать только данные визуализации.
+
+Например
+
+zones
+
+currentZone
+
+currentNode
+
+completedNodes
+
+lockedNodes
+
+path
+
+backgroundTheme
+
+cameraTarget
+
+Никаких SkillNode.
+
+Никаких RuntimeState.
+
+Никаких Engine объектов.
+
+────────────────────────────────────────
+
+ШАГ 5
+
+VerticalPath
+
+Получает
+
+nodes
+
+currentNode
+
+completed
+
+locked
+
+onNodeClick
+
+НЕ знает
+
+что такое Runtime.
+
+────────────────────────────────────────
+
+ШАГ 6
+
+Node Click
+
+JourneyPath
+
+не вызывает Runtime напрямую.
+
+Он вызывает
+
+onNodeSelected(nodeId)
+
+JourneyScreen
 
 ↓
 
-TaskContent
+runtime_controller.setActiveNode(nodeId)
 
 ↓
 
-Render
-
-Таким образом сохраняется разделение:
-
-Runtime Layer
-отвечает за состояние
-
-Content Layer
-отвечает за содержание задач
-
-Presentation Layer
-отвечает за отображение
-
-──────────────────────────────────────
-
-ОЖИДАЕМЫЙ РЕЗУЛЬТАТ
-
-JourneyHeader
+Runtime
 
 ↓
 
-Skill Information
+emit NODE_CHANGED
 
 ↓
 
-Advice (collapsible)
+JourneyScreen rerender
 
 ↓
 
-Signals
+новый UIState
 
 ↓
 
-Task List
+новый WorldViewModel
 
 ↓
 
-Task Detail
+JourneyVisualLayer rerender
+
+Полный цикл.
+
+────────────────────────────────────────
+
+ШАГ 7
+
+Background
+
+EnvironmentGenerator
+
+НЕ читает главу самостоятельно.
+
+Получает
+
+backgroundTheme
+
+из WorldViewModel.
+
+Например
+
+Resume
 
 ↓
 
-Complete Task
+Blue
+
+LinkedIn
 
 ↓
 
-Runtime Result
+Purple
+
+Applications
 
 ↓
 
-Bottom Navigation
+Orange
 
-Никаких изменений в Runtime Architecture.
+Interview
 
-Никакого дублирования Task Engine.
+↓
 
-Только замена presentation layer с generic задач на реальные TaskContent.
+Dark
 
-Это решение соответствует архитектуре, которую вы выстраивали после консолидации:
+Offer
 
-Runtime Layer — состояние (прогресс, активная нода, оценки).
-Content Layer — SkillNode + TaskContent (неизменяемые данные).
-Presentation Layer — JourneyScreen (рендер и взаимодействие).
+↓
 
-Такое разделение позволит в будущем легко добавлять новые профессии: достаточно будет создать новые ProfessionModule с SkillNode.tasks, а JourneyScreen останется универсальным и не потребует изменений.
+Green
+
+────────────────────────────────────────
+
+ШАГ 8
+
+Автоцентрирование
+
+JourneyVisualLayer
+
+следит за
+
+world.cameraTarget
+
+При изменении
+
+cameraTarget
+
+плавно скроллит
+
+к текущей ноде.
+
+НЕ использовать Runtime.
+
+Только WorldViewModel.
+
+────────────────────────────────────────
+
+ШАГ 9
+
+Event Bus
+
+JourneyVisualLayer
+
+не подписывается.
+
+JourneyScreen
+
+единственный подписчик
+
+NODE_CHANGED
+
+STATE_UPDATED
+
+CHAPTER_CHANGED
+
+После rerender
+
+World получает новый ViewModel.
+
+Это исключает двойные подписки.
+
+────────────────────────────────────────
+
+ШАГ 10
+
+Запрещено
+
+НЕ подписывать
+
+LevelRenderer
+
+VerticalPath
+
+EnvironmentGenerator
+
+JourneyPath
+
+на Event Bus.
+
+НЕ импортировать
+
+runtime_controller
+
+в World.
+
+НЕ импортировать
+
+JourneyRuntimeState
+
+в World.
+
+НЕ создавать
+
+World Runtime.
+
+────────────────────────────────────────
+
+ИТОГОВЫЙ ПОТОК
+
+Runtime
+
+↓
+
+runtime_controller
+
+↓
+
+UI Bridge
+
+↓
+
+JourneyViewModel
+
+↓
+
+World Mapper
+
+↓
+
+WorldViewModel
+
+↓
+
+JourneyVisualLayer
+
+↓
+
+LevelRenderer
+
+↓
+
+VerticalPath
+
+↓
+
+Environment
+
+────────────────────────────────────────
+
+ПОЛУЧАЕМ
+
+✓ Runtime остается единственным Source of Truth
+
+✓ UI остается единственным подписчиком Event Bus
+
+✓ World полностью независим
+
+✓ World можно использовать отдельно
+
+✓ Нет циклических зависимостей
+
+✓ Нет двойных подписчиков
+
+✓ Нет знания Runtime внутри World
+
+✓ Все обновления идут через существующий event-driven pipeline
+
+Я бы еще добавил один архитектурный принцип для всего проекта:
+
+Runtime → UI ViewModel → World ViewModel → React Components
+
+То есть мир никогда не строится из Runtime напрямую. Он строится только из UI-модели. Это даст вам возможность в будущем полностью заменить визуальный слой (например, перейти с React Native на Unity, Godot или Three.js) без единого изменения в runtime или learning engine. Это именно тот уровень развязки, который обычно используют в крупных игровых и обучающих проектах.
