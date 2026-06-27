@@ -9,7 +9,7 @@ import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
-import { emit } from '../events/system_event_bus';
+import { emit, clearAll } from '../events/system_event_bus';
 import { saveRuntime, clearRuntime } from '../persistence/runtime_persistence';
 import {
   beginTask,
@@ -340,6 +340,7 @@ export function resetRuntime(): void {
   activeTask = null;
   activeTaskDefinition = null;
   clearRuntime();
+  clearAll();
   emit('UI_REFRESH', {});
 }
 

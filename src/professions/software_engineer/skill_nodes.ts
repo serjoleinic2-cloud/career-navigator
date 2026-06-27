@@ -255,7 +255,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
   {
     id: 'resume-structure',
     skill: 'Resume Structure',
-    domain: 'resume',
+    domain: 'Resume',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your resume lacks clear sections', 'Formatting is inconsistent'],
@@ -274,7 +274,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
   {
     id: 'resume-review',
     skill: 'Resume Self-Review',
-    domain: 'resume',
+    domain: 'Resume',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You have not reviewed your resume recently', 'You are unsure about quality'],
@@ -293,7 +293,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
   {
     id: 'resume-ats',
     skill: 'ATS Optimization',
-    domain: 'resume',
+    domain: 'Resume',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your resume gets no responses', 'You do not know about ATS systems'],
@@ -312,7 +312,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
   {
     id: 'resume-summary',
     skill: 'Professional Summary',
-    domain: 'resume',
+    domain: 'Resume',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your resume has no summary', 'Your summary is generic'],
@@ -331,7 +331,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
   {
     id: 'resume-skills',
     skill: 'Skills Inventory',
-    domain: 'resume',
+    domain: 'Resume',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your skills section is incomplete', 'You are unsure which skills to list'],
@@ -353,7 +353,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
   {
     id: 'headline-authority',
     skill: 'Headline Authority',
-    domain: 'linkedin',
+    domain: 'Linkedin',
     state: 'awareness',
     nextState: 'understanding',
     signals: ['Your headline is your job title only', 'Recruiters do not reach out'],
@@ -378,7 +378,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
   {
     id: 'about-section',
     skill: 'About Section',
-    domain: 'linkedin',
+    domain: 'Linkedin',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your About section is empty or generic', 'You do not tell your story'],
@@ -403,7 +403,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
   {
     id: 'network-connections',
     skill: 'Strategic Networking',
-    domain: 'linkedin',
+    domain: 'Linkedin',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your network is smaller than 100', 'You do not engage with content'],
@@ -428,7 +428,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
   {
     id: 'linkedin-optimization',
     skill: 'LinkedIn Optimization',
-    domain: 'linkedin',
+    domain: 'Linkedin',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your profile is incomplete', 'Recruiters cannot find you'],
@@ -447,7 +447,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
   {
     id: 'profile-photo',
     skill: 'Profile Photo',
-    domain: 'linkedin',
+    domain: 'Linkedin',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your photo is outdated or unprofessional', 'You have no profile photo'],
@@ -466,7 +466,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
   {
     id: 'featured-content',
     skill: 'Featured Content',
-    domain: 'linkedin',
+    domain: 'Linkedin',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your featured section is empty', 'You have not shared your work'],
@@ -485,7 +485,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
   {
     id: 'recommendations',
     skill: 'LinkedIn Recommendations',
-    domain: 'linkedin',
+    domain: 'Linkedin',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You have no recommendations', 'Your recommendations are outdated'],
@@ -507,7 +507,7 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
   {
     id: 'application-tracking',
     skill: 'Application Tracking',
-    domain: 'applications',
+    domain: 'Applications',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You lose track of applications', 'You miss follow-up deadlines'],
@@ -526,7 +526,7 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
   {
     id: 'cover-letter',
     skill: 'Cover Letter Writing',
-    domain: 'applications',
+    domain: 'Applications',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You use the same cover letter for every role', 'You struggle to customize'],
@@ -545,7 +545,7 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
   {
     id: 'follow-up-strategy',
     skill: 'Follow-Up Strategy',
-    domain: 'applications',
+    domain: 'Applications',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You never follow up', 'You miss opportunities due to silence'],
@@ -564,7 +564,7 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
   {
     id: 'application-volume',
     skill: 'Application Volume',
-    domain: 'applications',
+    domain: 'Applications',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You apply to fewer than 3 roles per week', 'You have no application rhythm'],
@@ -583,7 +583,7 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
   {
     id: 'company-research',
     skill: 'Company Research',
-    domain: 'applications',
+    domain: 'Applications',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You apply without researching the company', 'You cannot answer "Why this company?"'],
@@ -602,7 +602,7 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
   {
     id: 'application-tailoring',
     skill: 'Application Tailoring',
-    domain: 'applications',
+    domain: 'Applications',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You send the same application to every role', 'Your match rate is low'],
@@ -621,7 +621,7 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
   {
     id: 'portfolio-submission',
     skill: 'Portfolio Submission',
-    domain: 'applications',
+    domain: 'Applications',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your portfolio is outdated', 'You have no work samples ready'],
@@ -640,7 +640,7 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
   {
     id: 'referral-strategy',
     skill: 'Referral Strategy',
-    domain: 'applications',
+    domain: 'Applications',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You never get referrals', 'You do not ask for introductions'],
@@ -662,7 +662,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'interview-prep',
     skill: 'Interview Preparation',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You do not have STAR stories ready', 'You ramble in interviews'],
@@ -681,7 +681,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'mock-interview',
     skill: 'Mock Interview Practice',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['Your first interview is your first practice', 'You are nervous about interviewing'],
@@ -700,7 +700,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'technical-prep',
     skill: 'Technical Question Prep',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You struggle with technical questions', 'You cannot explain your approach clearly'],
@@ -719,7 +719,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'interview-mindset',
     skill: 'Interview Mindset',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You feel anxious before interviews', 'You doubt your preparation'],
@@ -738,7 +738,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'behavioral-prep',
     skill: 'Behavioral Preparation',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You are unprepared for behavioral questions', 'Your answers lack structure'],
@@ -757,7 +757,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'system-design-prep',
     skill: 'System Design Preparation',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You have not practiced system design', 'You cannot explain architectural trade-offs'],
@@ -776,7 +776,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'on-site-prep',
     skill: 'On-Site Interview Preparation',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You are unprepared for full-day interviews', 'Logistics stress you out'],
@@ -795,7 +795,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'phone-screen',
     skill: 'Phone Screen',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You are unprepared for recruiter calls', 'You stumble on introduction'],
@@ -814,7 +814,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'interview-followup',
     skill: 'Interview Follow-Up',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You forget to send thank-you notes', 'You do not track interview outcomes'],
@@ -833,7 +833,7 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
   {
     id: 'presentation-prep',
     skill: 'Presentation Preparation',
-    domain: 'interviews',
+    domain: 'Interviews',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You have a presentation interview coming up', 'You are unsure how to structure it'],
@@ -855,7 +855,7 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
   {
     id: 'offer-evaluation',
     skill: 'Offer Evaluation',
-    domain: 'offer',
+    domain: 'Offer',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You do not know what your offer is worth', 'You focus only on salary'],
@@ -874,7 +874,7 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
   {
     id: 'salary-negotiation',
     skill: 'Salary Negotiation',
-    domain: 'offer',
+    domain: 'Offer',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You accept the first number offered', 'You are afraid to negotiate'],
@@ -893,7 +893,7 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
   {
     id: 'decision-framework',
     skill: 'Decision Framework',
-    domain: 'offer',
+    domain: 'Offer',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You agonize over decisions', 'You cannot compare offers objectively'],
@@ -912,7 +912,7 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
   {
     id: 'offer-acceptance',
     skill: 'Offer Acceptance',
-    domain: 'offer',
+    domain: 'Offer',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You do not know how to accept professionally', 'You forget important steps'],
@@ -931,7 +931,7 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
   {
     id: 'equity-evaluation',
     skill: 'Equity Evaluation',
-    domain: 'offer',
+    domain: 'Offer',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You do not understand equity', 'You ignore equity in your evaluation'],
@@ -950,7 +950,7 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
   {
     id: 'start-transition',
     skill: 'Start Transition',
-    domain: 'offer',
+    domain: 'Offer',
     state: 'locked',
     nextState: 'awareness',
     signals: ['You are starting a new role soon', 'You want to make a strong start'],

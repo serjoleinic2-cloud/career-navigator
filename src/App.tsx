@@ -29,6 +29,7 @@ function App() {
       setShowNotes(window.location.hash === '#notes');
     };
     window.addEventListener('hashchange', onHashChange);
+    onHashChange();
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
@@ -56,7 +57,15 @@ function App() {
     );
   }
 
-  return showOnboarding ? <OnboardingScreen /> : <JourneyScreen />;
+  if (showOnboarding) {
+    return (
+      <OnboardingScreen
+        onComplete={() => setShowOnboarding(false)}
+      />
+    );
+  }
+
+  return <JourneyScreen />;
 }
 
 export default App;

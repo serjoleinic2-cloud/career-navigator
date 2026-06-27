@@ -2,7 +2,7 @@ import type { SkillNode } from '../skill_state';
 import { applyStateTransition } from './state_transition_engine';
 import { generateFeedback } from './feedback_engine';
 import { calculateRewards } from './reward_system';
-import { emit } from './event_bus';
+import { emit } from '../events/system_event_bus';
 import { calculateReadiness } from '../readiness_engine';
 import { analyzeGaps } from '../gap_engine';
 import { getActiveChapters } from '../profession_loader';
@@ -59,16 +59,16 @@ export function runProgressionCycle(
   const rewards: RewardResult = calculateRewards(action, previousState, updatedNode.state);
 
   if (action === 'complete_task' || action === 'submit_answer') {
-    emit('onTaskCompleted', { nodeId: activeNodeId });
+    emit('TASK_COMPLETED', { nodeId: activeNodeId });
   }
   if (updatedNode.state !== previousState) {
-    emit('onSkillUpgraded', { nodeId: updatedNode.id, newState: updatedNode.state });
+    emit('SKILL_PROGRESS', { nodeId: updatedNode.id, newState: updatedNode.state });
   }
   if (rewards.chapterCompleted) {
     const currentChapter = getCurrentChapter(chapters, nodeMap);
-    emit('onChapterCompleted', { chapterId: currentChapter?.id ?? '' });
+    emit('CHAPTER_CHANGED', { chapterId: currentChapter?.id ?? '' });
   }
-  emit('onReadinessChanged', { readinessScore: readiness.readinessScore });
+  emit('READINESS_CHANGED', { readiness: readiness.readinessScore });
 
   return {
     updatedSkillNodes: updatedNodes,

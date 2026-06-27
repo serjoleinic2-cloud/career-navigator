@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   startOnboarding,
   getOnboardingState,
@@ -13,11 +13,23 @@ import {
 } from '@/core/onboarding/onboarding_engine';
 import { startJourney } from '@/core/runtime/runtime_controller';
 
-startOnboarding();
+interface Props {
+  onComplete: () => void;
+}
 
-export default function OnboardingScreen() {
+export default function OnboardingScreen({ onComplete }: Props) {
+  const [initialized, setInitialized] = useState(false);
   const [, setTick] = useState(0);
-  const state = getOnboardingState()!;
+
+  useEffect(() => {
+    if (!initialized) {
+      startOnboarding();
+      setInitialized(true);
+    }
+  }, [initialized]);
+
+  const state = getOnboardingState();
+  if (!state) return null;
 
   const rerender = () => setTick(v => v + 1);
 
@@ -39,7 +51,7 @@ export default function OnboardingScreen() {
     const finalState = finishOnboarding();
     if (finalState) {
       startJourney(finalState);
-      window.location.reload();
+      onComplete();
     } else {
       alert('Please complete all steps');
     }

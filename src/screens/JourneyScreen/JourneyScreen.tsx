@@ -9,12 +9,14 @@ import type { TaskContent } from '@/core/task_content';
 import { InterviewTrainerScreen } from '@/screens/InterviewTrainer/InterviewTrainerScreen';
 import { getPlaybookEntry } from '@/core/playbook/playbook_data';
 import { addNote } from '@/core/user_data/notes/notes_controller';
+import { loadTaskForNode, createTaskFromDefinition } from '@/core/runtime/runtime_controller';
+import type { TaskResult } from '@/core/task/task_execution_engine';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
   const [, setTick] = useState(0);
   const [selectedTask, setSelectedTask] = useState<TaskContent | null>(null);
-  const [taskResult, setTaskResult] = useState<any>(null);
+  const [taskResult, setTaskResult] = useState<TaskResult | null>(null);
   const [expandedAdvice, setExpandedAdvice] = useState<string>('awareness');
   const [trainerTask, setTrainerTask] = useState<TaskContent | null>(null);
   const [noteContent, setNoteContent] = useState('');
@@ -75,7 +77,13 @@ export function JourneyScreen() {
   };
 
   const handleCompleteTask = () => {
-    if (!selectedTask) return;
+    if (!selectedTask || !node) return;
+    const definition = loadTaskForNode(node.id);
+    if (!definition) {
+      console.warn('No task definition for node', node.id);
+      return;
+    }
+    createTaskFromDefinition(definition);
     const result = submitTask({ taskId: selectedTask.id, completed: true });
     setTaskResult(result);
     setSelectedTask(null);
