@@ -4,84 +4,34 @@ import { submitTask, createTask } from '@/core/runtime/runtime_controller';
 import { speak, stop } from '@/voice/tts';
 import './InterviewTrainer.css';
 
-type Phase = 'idle' | 'active' | 'feedback' | 'completed';
+type Phase = 'idle' | 'countdown' | 'recording' | 'review' | 'feedback' | 'completed';
 
-type EvaluationResult = {
-  score: number;
-  matched: string[];
-  missing: string[];
-  passed: boolean;
-};
-
-type InterviewTrainerProps = {
+type TrainerProps = {
   task: TaskContent;
   onComplete: () => void;
   onClose: () => void;
 };
 
-const STOP_WORDS = new Set([
-  'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had',
-  'her', 'was', 'one', 'our', 'out', 'has', 'have', 'been', 'some', 'them',
-  'than', 'that', 'this', 'with', 'your', 'each', 'make', 'from', 'they',
-  'said', 'what', 'were', 'when', 'will', 'more', 'also', 'its', 'over',
-  'such', 'into', 'than', 'then', 'them', 'their', 'there', 'these',
-  'about', 'would', 'other', 'which', 'after', 'should', 'where', 'while',
-  'three', 'list', 'plan', 'tell', 'meet', 'need', 'step', 'next', 'must',
-  'told', 'took', 'done', 'well', 'very', 'just', 'come', 'came', 'give',
-  'know', 'like', 'look', 'make', 'take', 'time', 'good', 'best', 'many',
-  'some', 'than', 'then', 'thing', 'things', 'much', 'before', 'being',
-  'both', 'does', 'done', 'each', 'else', 'ever', 'every', 'five', 'four',
-  'give', 'goes', 'going', 'half', 'help', 'here', 'high', 'hold', 'home',
-  'keep', 'kind', 'last', 'left', 'life', 'long', 'made', 'many', 'more',
-  'most', 'move', 'name', 'need', 'next', 'once', 'only', 'open', 'over',
-  'part', 'pick', 'play', 'read', 'real', 'rest', 'said', 'same', 'seen',
-  'self', 'show', 'side', 'sign', 'size', 'some', 'sort', 'step', 'sure',
-  'take', 'tell', 'than', 'that', 'them', 'then', 'they', 'this', 'time',
-  'told', 'took', 'turn', 'upon', 'very', 'want', 'ways', 'well', 'went',
-  'what', 'when', 'whom', 'will', 'wish', 'with', 'work', 'year', 'your',
-]);
+const CHECKLIST_ITEMS = [
+  'Were there any filler words (um, uh, like)?',
+  'Were there long pauses (3+ seconds)?',
+  'Was the answer structured (STAR method)?',
+  'Did you use weak phrases (I think, maybe, sort of)?',
+  'Did you sound confident and clear?',
+];
+
+const CHECKLIST_RECOMMENDATIONS: Record<number, string> = {
+  0: 'Practice pausing instead of using filler words',
+  1: 'Prepare key points before speaking',
+  2: 'Use STAR method: Situation, Task, Action, Result',
+  3: "Replace 'I think' with direct statements",
+  4: 'Practice speaking louder and slower',
+};
 
 function getTimerSeconds(difficulty: number): number {
   if (difficulty <= 1.2) return 60;
   if (difficulty <= 2.0) return 45;
   return 30;
-}
-
-function extractKeywords(criteria: string[]): string[] {
-  const keywords = new Set<string>();
-  for (const criterion of criteria) {
-    const words = criterion.toLowerCase().split(/[^a-z]+/).filter(Boolean);
-    for (const word of words) {
-      if (word.length > 2 && !STOP_WORDS.has(word)) {
-        keywords.add(word);
-      }
-    }
-  }
-  return Array.from(keywords);
-}
-
-function evaluateAnswer(answer: string, criteria: string[]): EvaluationResult {
-  const answerLower = answer.toLowerCase().trim();
-
-  if (!answerLower) {
-    return { score: 0, matched: [], missing: extractKeywords(criteria), passed: false };
-  }
-
-  const keywords = extractKeywords(criteria);
-  if (keywords.length === 0) {
-    return { score: 1, matched: [], missing: [], passed: true };
-  }
-
-  const matched = keywords.filter(kw => answerLower.includes(kw));
-  const missing = keywords.filter(kw => !matched.includes(kw));
-  const score = matched.length / keywords.length;
-
-  return {
-    score,
-    matched,
-    missing,
-    passed: score >= 0.7,
-  };
 }
 
 function getDifficultyLabel(difficulty: number): string {
@@ -90,24 +40,26 @@ function getDifficultyLabel(difficulty: number): string {
   return 'Hard';
 }
 
-export function InterviewTrainerScreen({ task, onComplete, onClose }: InterviewTrainerProps) {
+export function InterviewTrainerScreen({ task, onComplete, onClose }: TrainerProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [timerValue, setTimerValue] = useState(1);
   const [repeatCount, setRepeatCount] = useState(0);
   const [repeatDisabled, setRepeatDisabled] = useState(false);
-  const [answer, setAnswer] = useState('');
-  const [showHints, setShowHints] = useState(false);
-  const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
-  const [timeExpired, setTimeExpired] = useState(false);
+  const [countdownValue, setCountdownValue] = useState(5);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [checklist, setChecklist] = useState([false, false, false, false, false]);
+  const [checkedCount, setCheckedCount] = useState(0);
 
   const intervalRef = useRef<number | null>(null);
   const cooldownRef = useRef<number | null>(null);
+  const countdownRef = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const phaseRef = useRef(phase);
   const startTimeRef = useRef(0);
   const durationRef = useRef(60);
-  const answerRef = useRef(answer);
-  const phaseRef = useRef(phase);
 
-  useEffect(() => { answerRef.current = answer; }, [answer]);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
 
   const clearTimer = useCallback(() => {
@@ -124,54 +76,98 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: InterviewT
       clearTimeout(cooldownRef.current);
       cooldownRef.current = null;
     }
-  }, [clearTimer]);
+    if (countdownRef.current !== null) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+  }, [clearTimer, audioUrl]);
 
   useEffect(() => {
     return cleanup;
   }, [cleanup]);
 
-  const handleTimeout = useCallback(() => {
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
     clearTimer();
-    setTimeExpired(true);
-    const currentAnswer = answerRef.current;
-    const result = evaluateAnswer(currentAnswer, task.completionCriteria);
-    setEvaluation(result);
-    setPhase('feedback');
-  }, [clearTimer, task.completionCriteria]);
+  }, [clearTimer]);
 
-  const startTimer = useCallback((duration: number) => {
-    clearTimer();
+  const beginRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e: BlobEvent) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        setAudioUrl(url);
+      };
+
+      recorder.start();
+      setPhase('recording');
+      setTimerValue(1);
+      startTimeRef.current = Date.now();
+
+      intervalRef.current = window.setInterval(() => {
+        const elapsed = Date.now() - startTimeRef.current;
+        const remaining = Math.max(0, 1 - elapsed / (durationRef.current * 1000));
+        setTimerValue(remaining);
+
+        if (remaining <= 0 && phaseRef.current === 'recording') {
+          clearTimer();
+          stopRecording();
+          setPhase('review');
+        }
+      }, 100);
+    } catch {
+      setPhase('idle');
+    }
+  }, [clearTimer, stopRecording]);
+
+  const startCountdown = useCallback(() => {
+    setPhase('countdown');
+    setCountdownValue(5);
+    const duration = getTimerSeconds(task.difficulty);
     durationRef.current = duration;
-    startTimeRef.current = Date.now();
-    setTimerValue(1);
 
-    const tick = () => {
-      const elapsed = Date.now() - startTimeRef.current;
-      const remaining = Math.max(0, 1 - elapsed / (durationRef.current * 1000));
-      setTimerValue(remaining);
-
-      if (remaining <= 0 && phaseRef.current === 'active') {
-        clearTimer();
-        handleTimeout();
-      }
-    };
-
-    tick();
-    intervalRef.current = window.setInterval(tick, 100);
-  }, [clearTimer, handleTimeout]);
+    countdownRef.current = window.setInterval(() => {
+      setCountdownValue(prev => {
+        if (prev <= 1) {
+          if (countdownRef.current !== null) {
+            clearInterval(countdownRef.current);
+            countdownRef.current = null;
+          }
+          beginRecording();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [task.difficulty, beginRecording]);
 
   const handleListen = useCallback(() => {
     speak(task.objective, { rate: 0.9 });
-    const duration = getTimerSeconds(task.difficulty);
-    startTimer(duration);
-    setPhase('active');
-  }, [task.objective, task.difficulty, startTimer]);
-
-  const handleStart = useCallback(() => {
-    const duration = getTimerSeconds(task.difficulty);
-    startTimer(duration);
-    setPhase('active');
-  }, [task.difficulty, startTimer]);
+  }, [task.objective]);
 
   const handleRepeat = useCallback(() => {
     speak(task.objective, { rate: 0.9 });
@@ -188,31 +184,52 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: InterviewT
     }
   }, [task.objective, repeatCount]);
 
-  const handleSubmit = useCallback(() => {
+  const handleStopRecording = useCallback(() => {
+    stopRecording();
+    setPhase('review');
+  }, [stopRecording]);
+
+  const toggleChecklist = useCallback((index: number) => {
+    setChecklist(prev => {
+      const next = [...prev];
+      next[index] = !next[index];
+      setCheckedCount(next.filter(Boolean).length);
+      return next;
+    });
+  }, []);
+
+  const handleSubmitReview = useCallback(() => {
     clearTimer();
-    const result = evaluateAnswer(answer, task.completionCriteria);
-    setEvaluation(result);
     setPhase('feedback');
-  }, [answer, task.completionCriteria, clearTimer]);
+  }, [clearTimer]);
 
   const handleTryAgain = useCallback(() => {
-    setAnswer('');
-    setEvaluation(null);
-    setTimeExpired(false);
-    setPhase('active');
-    const duration = getTimerSeconds(task.difficulty);
-    startTimer(duration);
-  }, [task.difficulty, startTimer]);
+    stop();
+    clearTimer();
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
+    setChecklist([false, false, false, false, false]);
+    setCheckedCount(0);
+    setRepeatCount(0);
+    setRepeatDisabled(false);
+    setTimerValue(1);
+    setPhase('idle');
+  }, [clearTimer, audioUrl]);
 
   const handleComplete = useCallback(() => {
     createTask('TEXT_TASK', task.title, task.objective);
+    const score = checkedCount / 5;
+    const unchecked = checklist
+      .map((v, i) => (!v ? i : -1))
+      .filter(i => i !== -1);
     const payload = {
       taskId: task.id,
       completed: true,
-      answer,
-      score: evaluation?.score ?? 0,
-      matched: evaluation?.matched ?? [],
-      missing: evaluation?.missing ?? [],
+      score,
+      checkedCount,
+      unchecked,
     };
     try {
       submitTask(payload);
@@ -222,7 +239,7 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: InterviewT
     stop();
     clearTimer();
     setPhase('completed');
-  }, [task, answer, evaluation, clearTimer]);
+  }, [task, checkedCount, checklist, clearTimer]);
 
   const handleBackToJourney = useCallback(() => {
     cleanup();
@@ -230,12 +247,14 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: InterviewT
   }, [cleanup, onComplete]);
 
   const difficultyLabel = getDifficultyLabel(task.difficulty);
+  const score = checkedCount / 5;
+  const passed = score >= 0.6;
   const timerClass = timerValue < 0.15 ? 'critical' : timerValue < 0.3 ? 'warning' : '';
 
   return (
     <div className="interview-trainer">
-      {/* Timer bar */}
-      {phase === 'active' && (
+      {/* Timer bar (during recording) */}
+      {phase === 'recording' && (
         <div className="trainer-timer-bar">
           <div
             className={`trainer-timer-fill ${timerClass}`}
@@ -246,7 +265,11 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: InterviewT
 
       {/* Header */}
       <div className="trainer-header">
-        <button className="trainer-back-btn" onClick={phase === 'completed' ? handleBackToJourney : onClose} aria-label="Back to journey">
+        <button
+          className="trainer-back-btn"
+          onClick={phase === 'completed' ? handleBackToJourney : onClose}
+          aria-label="Back to journey"
+        >
           ← Back
         </button>
         <span className="trainer-task-label">{difficultyLabel} · {task.estimatedMinutes} min</span>
@@ -271,120 +294,109 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: InterviewT
           >
             🔁 Repeat
           </button>
-          <button className="trainer-btn primary" onClick={handleStart} aria-label="Start answering">
-            ▶ Start
+          <button className="trainer-btn primary" onClick={startCountdown} aria-label="Start recording">
+            ▶ Start Recording
           </button>
         </div>
       )}
 
-      {/* Phase: active */}
-      {phase === 'active' && (
+      {/* Phase: countdown */}
+      {phase === 'countdown' && (
+        <div className="trainer-countdown">
+          <div className="trainer-countdown-number" key={countdownValue}>
+            {countdownValue}
+          </div>
+          <p className="trainer-countdown-label">Prepare your answer...</p>
+        </div>
+      )}
+
+      {/* Phase: recording */}
+      {phase === 'recording' && (
         <>
           <div className="trainer-buttons">
-            <button
-              className="trainer-btn"
-              onClick={handleRepeat}
-              disabled={repeatDisabled}
-              aria-label="Repeat question"
-            >
-              🔁 Repeat {repeatCount > 0 && `(${repeatCount}/2)`}
-            </button>
-            <button className="trainer-btn submit" onClick={handleSubmit} aria-label="Submit answer">
-              Submit Answer
+            <button className="trainer-btn primary" onClick={handleStopRecording} aria-label="Stop recording">
+              ⏹ Stop Recording
             </button>
           </div>
+          <div className="trainer-recording">
+            <div className="trainer-recording-indicator">
+              <span className="trainer-recording-dot" />
+              <span className="trainer-recording-text">Recording...</span>
+            </div>
+            <p className="trainer-recording-hint">Speak clearly into your microphone</p>
+          </div>
+        </>
+      )}
 
-          <div className="trainer-answer-area">
-            <textarea
-              className="trainer-textarea"
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              placeholder="Type your answer here..."
-              disabled={false}
-              autoFocus
-              aria-label="Your answer"
-            />
+      {/* Phase: review */}
+      {phase === 'review' && (
+        <>
+          {audioUrl && (
+            <div className="trainer-playback">
+              <p className="trainer-feedback-label">Your recording</p>
+              <audio controls src={audioUrl} />
+            </div>
+          )}
+
+          <div className="trainer-checklist">
+            <p className="trainer-checklist-title">Self-assessment</p>
+            {CHECKLIST_ITEMS.map((item, i) => (
+              <label key={i} className="trainer-checklist-item">
+                <input
+                  type="checkbox"
+                  checked={checklist[i]}
+                  onChange={() => toggleChecklist(i)}
+                />
+                <span className="trainer-checklist-label">{item}</span>
+              </label>
+            ))}
           </div>
 
-          <div className="trainer-hints">
-            <button
-              className="trainer-hints-toggle"
-              onClick={() => setShowHints(h => !h)}
-              aria-expanded={showHints}
-              aria-label="Toggle hints"
-            >
-              {showHints ? '▼' : '▶'} Need a hint?
+          <div className="trainer-buttons">
+            <button className="trainer-btn" onClick={handleTryAgain} aria-label="Record again">
+              🔄 Record Again
             </button>
-            {showHints && (
-              <div className="trainer-hints-content">
-                <ol>
-                  {task.instructions.map((inst, i) => (
-                    <li key={i}>{inst}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
+            <button className="trainer-btn primary" onClick={handleSubmitReview} aria-label="Submit self-assessment">
+              Submit Assessment
+            </button>
           </div>
         </>
       )}
 
       {/* Phase: feedback */}
-      {phase === 'feedback' && evaluation && (
+      {phase === 'feedback' && (
         <div className="trainer-feedback">
-          <h3 className={`trainer-feedback-title ${evaluation.passed ? 'pass' : 'fail'}`}>
-            {timeExpired ? "Time's up" : evaluation.passed ? '✓ Great answer!' : 'Needs improvement'}
+          <h3 className={`trainer-feedback-title ${passed ? 'pass' : 'fail'}`}>
+            {passed ? '✓ Good self-awareness!' : 'Keep practicing'}
           </h3>
 
-          {evaluation.matched.length > 0 && (
-            <div className="trainer-feedback-section">
-              <p className="trainer-feedback-label">What you did well</p>
-              <div className="trainer-feedback-tags">
-                {evaluation.matched.map((m, i) => (
-                  <span key={i} className="trainer-feedback-tag matched">{m}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {evaluation.missing.length > 0 && (
-            <div className="trainer-feedback-section">
-              <p className="trainer-feedback-label">What to improve</p>
-              <div className="trainer-feedback-tags">
-                {evaluation.missing.map((m, i) => (
-                  <span key={i} className="trainer-feedback-tag missing">{m}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {task.tips.length > 0 && (
-            <div className="trainer-feedback-section">
-              <p className="trainer-feedback-label">Quick advice</p>
-              <ul style={{ margin: 0, paddingLeft: 20 }}>
-                {task.tips.map((tip, i) => (
-                  <li key={i} className="trainer-feedback-text">{tip}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           <div className="trainer-feedback-section">
-            <p className="trainer-feedback-label">Reference answer</p>
-            <p className="trainer-feedback-reference">{task.expectedOutcome}</p>
+            <p className="trainer-feedback-label">Score</p>
+            <p className="trainer-feedback-score" style={{ margin: 0, fontSize: 32, color: passed ? 'var(--offer)' : 'var(--applications)' }}>
+              {Math.round(score * 100)}%
+            </p>
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+              {checkedCount} of 5 checked
+            </p>
           </div>
 
-          <p className="trainer-feedback-score">
-            Score: {Math.round(evaluation.score * 100)}% · {evaluation.matched.length} of {evaluation.matched.length + evaluation.missing.length} keywords
-          </p>
+          {checklist.map((v, i) => !v && (
+            <div key={i} className="trainer-feedback-section">
+              <p className="trainer-feedback-label">{CHECKLIST_ITEMS[i]}</p>
+              <p className="trainer-feedback-recommendation">
+                {CHECKLIST_RECOMMENDATIONS[i]}
+              </p>
+            </div>
+          ))}
 
           <div className="trainer-feedback-actions">
-            {!evaluation.passed && (
+            {!passed && (
               <button className="trainer-btn" onClick={handleTryAgain} aria-label="Try again">
                 Try Again
               </button>
             )}
             <button className="trainer-btn primary" onClick={handleComplete} aria-label="Complete task">
-              {evaluation.passed ? 'Complete Task' : 'Continue Anyway'}
+              {passed ? 'Complete Task' : 'Continue Anyway'}
             </button>
           </div>
         </div>
@@ -395,8 +407,13 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: InterviewT
         <div className="trainer-completed">
           <div className="trainer-completed-icon">🎉</div>
           <h2>Task Completed</h2>
-          <p>Your answer has been submitted and your progress has been saved.</p>
-          <button className="trainer-btn primary" onClick={handleBackToJourney} aria-label="Back to journey" style={{ maxWidth: 240, margin: '0 auto' }}>
+          <p>Your recording and self-assessment have been submitted.</p>
+          <button
+            className="trainer-btn primary"
+            onClick={handleBackToJourney}
+            aria-label="Back to journey"
+            style={{ maxWidth: 240, margin: '0 auto' }}
+          >
             Back to Journey
           </button>
         </div>
