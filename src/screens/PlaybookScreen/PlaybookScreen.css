@@ -1,0 +1,235 @@
+.playbook-screen {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  color: #fff;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #071320 0%, #090D19 100%);
+}
+
+.playbook-screen h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 24px 0;
+  font-size: 14px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 15px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.categories {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.category-button {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+}
+
+.category-button.active {
+  background: #4A90D9;
+  border-color: #4A90D9;
+}
+
+.entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry-card {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.entry-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.entry-category-tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #4A90D9;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.entry-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.entry-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.entry-tags-preview {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.tag-small {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.back-button {
+  margin-bottom: 20px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  min-height: 44px;
+}
+
+.entry-detail {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 28px;
+}
+
+.entry-category {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #4A90D9;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.entry-detail h2 {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+}
+
+.entry-section {
+  margin-bottom: 28px;
+}
+
+.entry-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #4A90D9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.entry-content p {
+  margin: 0 0 12px 0;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.template-card,
+.example-card {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.template-card pre {
+  margin: 0 0 12px 0;
+  white-space: pre-wrap;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.template-card button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.entry-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.entry-checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.entry-checklist input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: #48BB78;
+}
+
+.entry-checklist label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.entry-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.tag {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(74, 144, 217, 0.15);
+  color: #7BB3E8;
+  font-size: 13px;
+}

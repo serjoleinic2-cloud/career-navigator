@@ -7,6 +7,7 @@ import { getActiveProfession } from '@/core/profession_loader';
 import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
 import type { TaskContent } from '@/core/task_content';
 import { InterviewTrainerScreen } from '@/screens/InterviewTrainer/InterviewTrainerScreen';
+import { getPlaybookEntry } from '@/core/playbook/playbook_data';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
@@ -213,6 +214,25 @@ export function JourneyScreen() {
 
             <p className="expected-outcome"><strong>Expected Outcome:</strong> {selectedTask.expectedOutcome}</p>
             <p className="meta">{selectedTask.estimatedMinutes} minutes • Difficulty {selectedTask.difficulty}</p>
+
+            {(selectedTask as { playbookReference?: string }).playbookReference && (
+              <div className="playbook-link" style={{ marginBottom: 12 }}>
+                <button
+                  onClick={() => {
+                    const ref = (selectedTask as { playbookReference?: string }).playbookReference!;
+                    const entry = getPlaybookEntry(ref);
+                    if (entry) {
+                      localStorage.setItem('playbook_selected_entry', JSON.stringify(entry));
+                      window.location.hash = '#playbook';
+                    }
+                  }}
+                  className="trainer-btn primary"
+                  style={{ width: '100%', display: 'block' }}
+                >
+                  📖 Open Playbook
+                </button>
+              </div>
+            )}
 
             <div className="task-actions">
               <button onClick={() => setSelectedTask(null)}>Back</button>
