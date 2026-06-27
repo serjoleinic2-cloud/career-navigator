@@ -1,195 +1,241 @@
-Я бы изменил одно: не привязывать persistence к runtime_store.ts.
+Правильная интеграция — не создавать второй state внутри React. React должен быть только представлением (view), а onboarding_engine.ts — единственным владельцем состояния (state authority). Это соответствует той архитектуре, которую вы уже приводили в порядок.
 
-По вашим предыдущим аудитам видно, что после консолидации источником истины стал JourneyRuntimeState в runtime_controller.ts, а runtime_store оставлен как слой совместимости. Если сейчас сделать persistence вокруг runtime_store, вы снова сделаете его архитектурно важным.
+Я бы дал Opencode такое задание.
 
-Лучше построить слой так:
+IMPLEMENTATION PATCH — OnboardingScreen Integration (Single State Authority)
 
-App.tsx
-    │
-    ▼
-runtime_persistence.ts
-    │
-    ├── loadRuntime()
-    ├── saveRuntime()
-    ├── clearRuntime()
-    └── hasRuntime()
-    │
-    ▼
-runtime_controller.ts
-    │
-    └── JourneyRuntimeState   ← единственный Source of Truth
-runtime_persistence.ts
+Цель:
+Создать рабочий OnboardingScreen без дублирования state management.
 
-Это должен быть полностью тупой storage-слой.
+ВАЖНО:
+Не создавать useReducer/useState для хранения onboardingState.
+Единственный source of truth — существующий onboarding_engine.ts.
 
-Он не знает:
+Архитектура
 
-runtime_controller
-event bus
-onboarding
-UI
-learning engine
+onboarding_engine.ts
+        │
+        │ owns OnboardingState
+        ▼
+OnboardingScreen
+        │
+        ▼
+React UI
 
-Он знает только:
+React хранит только render tick.
 
-load(): JourneyRuntimeState | null
+──────────────────────────────────
 
-save(state: JourneyRuntimeState): void
+1. OnboardingScreen
 
-clear(): void
+Создать:
 
-exists(): boolean
+src/screens/OnboardingScreen/OnboardingScreen.tsx
 
-И всё.
+Экран не хранит onboardingState.
 
-Никакой бизнес-логики.
+Допустимо хранить только:
 
-runtime_controller.ts
-
-Именно здесь persistence должен вызываться.
-
-После каждой мутации:
-
-advanceNode()
-
-↓
-
-runtimeState обновился
-
-↓
-
-save(runtimeState)
-
-То же самое:
-
-startJourney()
-setActiveNode()
-advanceChapter()
-resetRuntime()
-
-То есть persistence становится обычным побочным эффектом после изменения state.
-
-Не наоборот.
-
-App.tsx
-
-Логика запуска должна быть максимально простой.
-
-App Start
-     │
-     ▼
-loadRuntime()
-     │
-     ├── null
-     │       │
-     │       ▼
-     │  Onboarding
-     │
-     └── state
-             │
-             ▼
-initializeRuntime(state)
-             │
-             ▼
-Journey
-
-То есть:
-
-if (!savedRuntime)
-    <Onboarding/>
-
-else
-    <Journey/>
-Что НЕ должно делать persistence
-
-Не должно:
-
-❌ вызывать startJourney()
-
-❌ создавать runtime
-
-❌ эмитить события
-
-❌ обновлять UI
-
-❌ запускать onboarding
-
-Это всё ответственность App и runtime_controller.
-
-Где хранить localStorage key
-
-Лучше отдельной константой.
-
-runtime_persistence.ts
-
-const STORAGE_KEY =
-    "career-navigator.runtime.v1";
-
-При изменении схемы:
-
-career-navigator.runtime.v2
+const [, rerender] = useState(0);
 
 или
 
-{
-    version: 2,
-    runtime: ...
-}
+const [tick, setTick] = useState(0);
 
-Второй вариант лучше.
+для перерисовки.
 
-Формат хранения
+──────────────────────────────────
 
-Не сохранять голый state.
+2. Получение состояния
 
-Лучше
+НЕ делать:
 
-{
-    version: 1,
-    savedAt: 17891239123,
-    runtime: JourneyRuntimeState
-}
+const [state, setState] = useState(...)
 
-Это позволит:
+НЕ копировать onboardingState в React.
 
-делать миграции
-понимать устаревшие сохранения
-показывать "Last session"
-Восстановление
-const snapshot = load();
+Использовать существующий engine:
 
-if (!snapshot)
-    return null;
+getOnboardingState()
 
-if (snapshot.version !== CURRENT_VERSION)
-    migrate(snapshot);
+или аналогичный accessor.
 
-return snapshot.runtime;
+Каждый render читает состояние напрямую из engine.
 
-Не смешивать миграцию с runtime.
+──────────────────────────────────
 
-resetRuntime()
+3. Изменение состояния
 
-После
+Все действия пользователя идут ТОЛЬКО через engine.
 
-runtimeState = createEmptyRuntime();
+Например:
 
-нужно
+selectProfession(...)
 
-clear();
+setExperience(...)
 
-а не сохранять пустой state.
+toggleGoal(...)
 
-Иначе приложение будет думать, что пользователь уже проходил onboarding.
+setTimeline(...)
 
-Я бы изменил ещё один пункт задания
+togglePreference(...)
 
-Вместо:
+nextStep()
 
-Сохранять весь UnifiedRuntimeState
+previousStep()
 
-сделал бы:
+finishOnboarding()
 
-Сохранять весь JourneyRuntimeState (current runtime authority) через runtime_persistence.ts. runtime_store не использовать как источник данных.
+Если подобных функций нет —
+добавить их В onboarding_engine.ts.
 
-Это соответствует тому состоянию проекта, которое вы описывали ранее: после консолидации именно JourneyRuntimeState является живым состоянием, а UnifiedRuntimeState и runtime_store остались в роли слоя совместимости. Так вы не создадите новый конфликт между двумя источниками истины и не откатите часть уже выполненной работы.
+НЕ создавать такую логику внутри компонента.
+
+──────────────────────────────────
+
+4. Обновление UI
+
+После любого вызова engine:
+
+setTick(v => v + 1)
+
+или
+
+rerender(v => v + 1)
+
+React ничего не вычисляет.
+
+Он просто перечитывает состояние из engine.
+
+──────────────────────────────────
+
+5. Validation
+
+НЕ писать validation в компоненте.
+
+Перед next:
+
+const result = nextStep();
+
+или
+
+const result = validateCurrentStep();
+
+Если validation не прошла:
+
+показать сообщение.
+
+Вся логика остается внутри:
+
+onboarding_validation.ts
+
+onboarding_flow.ts
+
+──────────────────────────────────
+
+6. Завершение onboarding
+
+После Step 7:
+
+finishOnboarding()
+
+↓
+
+startJourney(onboardingSnapshot)
+
+↓
+
+runtime initialized
+
+↓
+
+App переключается на JourneyScreen
+
+OnboardingScreen не знает,
+как создается runtime.
+
+Он только вызывает engine.
+
+──────────────────────────────────
+
+7. App.tsx
+
+App является только роутером.
+
+При запуске:
+
+if (runtimePersistence.hasRuntime())
+
+    render JourneyScreen
+
+else
+
+    render OnboardingScreen
+
+После finishOnboarding:
+
+App автоматически начинает отображать JourneyScreen.
+
+──────────────────────────────────
+
+8. Запрещено
+
+НЕЛЬЗЯ:
+
+копировать onboardingState в React
+
+использовать useReducer
+
+создавать второй state manager
+
+дублировать validation
+
+дублировать onboarding flow
+
+создавать отдельный wizard engine
+
+──────────────────────────────────
+
+9. Разрешено
+
+Разрешается:
+
+render tick
+
+локальные состояния UI
+(например открытый dropdown)
+
+анимации
+
+focus
+
+scroll
+
+НО не бизнес-состояние.
+
+──────────────────────────────────
+
+Результат
+
+После патча:
+
+onboarding_engine.ts
+    ↓
+единственный владелец состояния
+
+OnboardingScreen
+    ↓
+тонкий UI
+
+onboarding_flow.ts
+    ↓
+единственная логика переходов
+
+onboarding_validation.ts
+    ↓
+единственная логика проверки
+
+Без дублирования state management.
+Без второй копии OnboardingState.
+
+Именно такой подход хорошо сочетается с тем, что вы уже сделали ранее: сначала убрали дублирование runtime, затем сделали единый event bus. Следующий логичный шаг — сохранить тот же принцип и для onboarding: один движок владеет состоянием, UI только отображает его и вызывает команды. Это позволит избежать появления ещё одного "двойного источника истины", с которым вы уже боролись в runtime.
