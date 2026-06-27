@@ -20,7 +20,8 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathPr
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const chapters = nodes.reduce((acc, node) => {
-    const key = node.domain || 'Unknown';
+    const raw = node.domain || 'Unknown';
+    const key = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
     if (!acc[key]) acc[key] = [];
     acc[key].push(node);
     return acc;

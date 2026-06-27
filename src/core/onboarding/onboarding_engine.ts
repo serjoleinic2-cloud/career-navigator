@@ -60,6 +60,39 @@ export function togglePreference(pref: string): void {
   onboardingState = { ...onboardingState, preferences };
 }
 
+export function setSituation(situation: CurrentSituation): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, situation };
+}
+
+export function setEmotion(emotion: EmotionalState): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, emotion };
+}
+
+export function setApplicationsCount(count: number): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, applicationsCount: count };
+}
+
+export function setInterviewsCount(count: number): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, interviewsCount: count };
+}
+
+export function setConfidenceLevel(level: number): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, confidenceLevel: level };
+}
+
+export function toggleFear(fear: string): void {
+  if (!onboardingState) return;
+  const fears = onboardingState.fears.includes(fear)
+    ? onboardingState.fears.filter(f => f !== fear)
+    : [...onboardingState.fears, fear];
+  onboardingState = { ...onboardingState, fears };
+}
+
 export function nextStep(): { success: boolean; error?: string } {
   if (!onboardingState) return { success: false, error: 'Not started' };
 
@@ -68,7 +101,7 @@ export function nextStep(): { success: boolean; error?: string } {
     return { success: false, error: validation.error };
   }
 
-  if (onboardingState.step >= 6) {
+  if (onboardingState.step >= 7) {
     return { success: false, error: 'Already at last step' };
   }
 
@@ -94,18 +127,15 @@ export function finishOnboarding(): OnboardingState | null {
 function validateOnboardingStep(state: OnboardingState): { valid: boolean; error?: string } {
   switch (state.step) {
     case 1:
-      if (!state.professionId) return { valid: false, error: 'Please select a profession' };
+      if (!state.situation) return { valid: false, error: 'Please select your situation' };
       return { valid: true };
     case 2:
-      if (!state.experienceLevel) return { valid: false, error: 'Please select your experience level' };
+      if (!state.emotion) return { valid: false, error: 'Please select your emotional state' };
       return { valid: true };
     case 3:
-      if (state.goals.length === 0) return { valid: false, error: 'Please select at least one goal' };
+      if (!state.professionId) return { valid: false, error: 'Please select a profession' };
       return { valid: true };
-    case 4:
-      if (!state.timeline) return { valid: false, error: 'Please select a timeline' };
-      return { valid: true };
-    case 6:
+    case 7:
       if (!state.professionId) return { valid: false, error: 'Missing profession' };
       return { valid: true };
     default:

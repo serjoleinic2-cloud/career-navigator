@@ -1,4 +1,15 @@
-export type PlaybookCategory = 'resume' | 'linkedin' | 'interview' | 'salary' | 'networking';
+export type PlaybookCategory =
+  | 'resume'
+  | 'interview'
+  | 'salary'
+  | 'linkedin'
+  | 'networking'
+  | 'communication'
+  | 'body_language'
+  | 'confidence'
+  | 'remote'
+  | 'appearance'
+  | 'mistakes';
 
 export interface PlaybookEntry {
   id: string;

@@ -64,6 +64,14 @@ export function initializeJourneyRuntime(onboardingState: OnboardingState): Jour
 
   const nodeMap = buildNodeMap(nodes);
 
+  if (profession.entryNodeId && nodeMap[profession.entryNodeId]) {
+    nodeMap[profession.entryNodeId] = {
+      ...nodeMap[profession.entryNodeId],
+      state: 'awareness',
+      nextState: 'understanding',
+    };
+  }
+
   const chapterProgress: Record<string, number> = {};
   for (const ch of chapters) {
     const progress = getChapterProgress(ch, nodeMap);

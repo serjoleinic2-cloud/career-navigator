@@ -224,7 +224,116 @@ export const PLAYBOOK: PlaybookEntry[] = [
       'Prioritized base salary for immediate needs'
     ],
     tags: ['salary', 'equity', 'compensation', 'rsu', 'benefits']
-  }
+  },
+  {
+    id: 'communication/strong-weak-phrases',
+    title: 'Strong vs Weak Phrases',
+    category: 'communication',
+    content: 'The words you choose in an interview signal confidence, clarity, and competence. Weak phrases introduce doubt. Strong phrases demonstrate ownership and directness.\n\nWEAK PHRASES TO AVOID:\n- "I think I can..." → signals uncertainty\n- "Maybe I could..." → signals hesitation\n- "I\'m not sure but..." → signals lack of preparation\n- "I just did..." → minimizes your contribution\n- "I kind of worked on..." → vague and uncommitted\n- "Hopefully I\'ll be able to..." → future uncertainty\n\nSTRONG PHRASES TO USE:\n- "I led..." / "I built..." / "I designed..."\n- "I\'m confident that..."\n- "Based on my experience with X..."\n- "I would approach this by..."\n- "The result was..." / "I measured success by..."\n\nFOR TECHNICAL QUESTIONS:\n- Weak: "I\'ve heard of that, I think I used it once"\n- Strong: "I\'ve worked with X in [project]. The key tradeoff I noticed was..."\n\nFOR GAPS IN KNOWLEDGE:\n- Weak: "I don\'t know that"\n- Strong: "I haven\'t used that specific tool, but I\'ve solved similar problems with X. I\'d approach it by..."',
+    templates: [
+      'Weak: "I think I might be able to handle that kind of project."\nStrong: "I\'ve delivered similar projects. I\'d start by breaking it into milestones and validating the approach early."',
+      'Weak: "I just kind of helped with the backend stuff."\nStrong: "I designed and implemented the authentication service, including JWT handling and role-based access control."',
+    ],
+    examples: [
+      'Question: "Do you know Kubernetes?"\nWeak: "Not really, but I\'ve maybe heard of it."\nStrong: "I haven\'t used Kubernetes in production, but I\'ve worked with Docker Compose and understand container orchestration concepts. I\'d be comfortable learning it on the job."',
+    ],
+    checklist: [
+      'Removed "I think" and "maybe" from prepared answers',
+      'Every answer starts with "I" + strong action verb',
+      'Knowledge gaps addressed with adjacent experience',
+      'Practiced answers out loud to catch weak phrases',
+      'Recorded a mock answer and listened for filler language',
+    ],
+    tags: ['communication', 'phrases', 'confidence', 'language', 'interview'],
+  },
+  {
+    id: 'body_language/interview-presence',
+    title: 'Body Language in Interviews',
+    category: 'body_language',
+    content: 'Body language communicates confidence before you say a word. Research shows interviewers form first impressions in under 7 seconds — mostly from non-verbal signals.\n\nPOSTURE:\n- Sit upright with back against the chair\n- Lean slightly forward (5–10°) to show engagement\n- Keep both feet flat on the floor\n- Avoid crossing arms — it signals defensiveness\n\nEYE CONTACT:\n- Maintain eye contact 60–70% of the time\n- Look away naturally when thinking — not down\n- For video calls: look at the camera, not your own face\n- Avoid staring — break contact every 5–7 seconds\n\nHANDS:\n- Keep hands visible on the table or in your lap\n- Use open gestures when emphasizing a point\n- Avoid touching your face (signals anxiety)\n- No fidgeting with pens, phones, or clothing\n\nFACIAL EXPRESSION:\n- Smile genuinely when introduced — hold for 2 seconds\n- Nod slowly to show you\'re listening\n- Avoid blank face when the interviewer is speaking\n\nZOOM-SPECIFIC:\n- Camera at eye level — not looking up or down\n- Background is clean and professional\n- Lighting is in front of you, not behind\n- Join 5 minutes early to test audio/video',
+    templates: [
+      'Pre-interview routine: 5 minutes before, stand up, take 3 slow breaths, roll shoulders back. This activates confident posture and reduces cortisol.',
+      'Power pose for 2 minutes before the call: stand with feet wide, hands on hips. Research shows this increases testosterone and reduces stress hormones.',
+    ],
+    examples: [
+      'Common mistake: nodding too fast signals nervousness. Slow deliberate nods signal active listening and calm confidence.',
+      'Zoom mistake: looking at your own video window means the interviewer sees you looking slightly down-left, not at them. Cover your own face tile with a sticky note.',
+    ],
+    checklist: [
+      'Camera is at eye level for video interviews',
+      'Background is neutral and professional',
+      'Practiced maintaining eye contact in a mirror or on camera',
+      'Removed fidget objects from desk',
+      'Lighting source is in front of me, not behind',
+    ],
+    tags: ['body_language', 'interview', 'zoom', 'presence', 'confidence'],
+  },
+  {
+    id: 'confidence/anxiety-management',
+    title: 'Managing Interview Anxiety',
+    category: 'confidence',
+    content: 'Interview anxiety is normal. The goal is not to eliminate it but to use it. Adrenaline improves focus and performance when channeled correctly.\n\nBEFORE THE INTERVIEW:\n\nPhysical reset (30 minutes before):\n- Walk for 10 minutes — movement burns cortisol\n- Box breathing: inhale 4s → hold 4s → exhale 4s → hold 4s → repeat 4 times\n- Cold water on wrists — reduces pulse rate\n\nMental reset:\n- Write down 3 things you\'re genuinely good at\n- Remind yourself: they invited you — you already passed initial screening\n- Replace "I must not fail" with "I am here to see if this is a good fit for both sides"\n\nDURING THE INTERVIEW:\n\nSlowing down:\n- Pause 2–3 seconds before answering — signals thoughtfulness, not nervousness\n- Drink water — gives you a natural pause and slows speech\n- Speak slower than you think you need to\n\nHandling blank moments:\n- "That\'s a great question. Let me think for a moment."\n- "I want to give you a complete answer — can I take 30 seconds?"\n- Interviewers prefer a 5-second pause over a rushed wrong answer\n\nAFTER REJECTION:\n- Rejection is data, not verdict\n- Every interview is a training session\n- Ask for feedback — most companies will share it',
+    templates: [
+      '4-7-8 breathing: inhale for 4, hold for 7, exhale for 8. Use this in the waiting room or before joining the video call.',
+      'Reframe script: "I am not being judged. I am exploring whether this team and I are a match. They need someone — I am here to find out if that is me."',
+    ],
+    examples: [
+      'Candidate froze during a system design question. Said: "Let me think about this for a moment." Took 10 seconds, then gave a structured answer. Received offer. Interviewers noted "composed under pressure" in feedback.',
+      'Candidate asked at end: "Do you have any concerns about my background I could address?" Interviewer mentioned React experience. Candidate explained relevant project. Turned a potential rejection into an offer.',
+    ],
+    checklist: [
+      'Practiced box breathing at least once before the interview day',
+      'Written down 3 genuine strengths to review before the call',
+      'Prepared 2 phrases for handling blank moments',
+      'Scheduled 10-minute walk within 30 minutes of interview time',
+      'Reframed the interview as a conversation, not an exam',
+    ],
+    tags: ['confidence', 'anxiety', 'psychology', 'mindset', 'breathing'],
+  },
+  {
+    id: 'remote/remote-interview-guide',
+    title: 'Remote Interview Guide',
+    category: 'remote',
+    content: 'Remote interviews have unique failure modes that in-person interviews do not. Technical problems are the #1 avoidable reason candidates lose remote offers.\n\nTECHNICAL SETUP (test 24 hours before):\n- Internet: use ethernet cable if possible; test speed at fast.com (minimum 10 Mbps up)\n- Backup: have phone hotspot ready\n- Audio: external microphone or headset — laptop mic picks up room echo\n- Camera: 1080p preferred; clean lens\n- Platform: install Zoom, Teams, Meet — whichever they use. Test login and audio\n\nENVIRONMENT:\n- Quiet room with door closed\n- Notify household members of interview time\n- Turn off phone notifications, desktop notifications, Slack\n- Close all browser tabs except what you need\n- Have water nearby\n\nDURING THE INTERVIEW:\n- If audio drops: "I think the connection cut out — could you repeat the last part?"\n- If video freezes: turn off video temporarily to save bandwidth\n- If major technical failure: call or email the interviewer immediately\n\nASYNCHRONOUS INTERVIEWS (one-way video):\n- Record in a quiet place with good lighting\n- Dress as for in-person interview\n- Look at camera, not the question on screen\n- Re-record if needed — most platforms allow multiple attempts',
+    templates: [
+      'Pre-interview checklist (night before): charge laptop, test platform login, check background, confirm interview link, set alarm 30 min early.',
+      'Technical failure script: "I apologize for the technical issue. I\'m switching to [backup]. Can you hear me now? Thank you for your patience — I\'m ready to continue."',
+    ],
+    examples: [
+      'Candidate lost connection during remote interview. Immediately sent email: "Connection dropped — rejoining now." Rejoined within 90 seconds. Interviewer noted professionalism. Received offer.',
+      'Common mistake: conducting interview in coffee shop. Background noise, poor WiFi, and distractions led to failed technical round that candidate would have passed in quiet environment.',
+    ],
+    checklist: [
+      'Tested platform login and audio 24 hours before',
+      'Ethernet cable connected or WiFi signal confirmed strong',
+      'Phone hotspot available as backup',
+      'Room is quiet with door that closes',
+      'All notifications disabled on phone and computer',
+    ],
+    tags: ['remote', 'interview', 'zoom', 'setup', 'technical'],
+  },
+  {
+    id: 'mistakes/common-interview-mistakes',
+    title: 'Common Interview Mistakes',
+    category: 'mistakes',
+    content: 'Most interview failures are preventable. The same mistakes appear across thousands of interviews. Knowing them in advance removes them as risks.\n\nMISTAKE 1: Talking too long\nAnswers over 3 minutes lose the interviewer\'s attention. Use STAR and stop. If they want more, they\'ll ask.\n\nMISTAKE 2: Not asking questions\n"No questions" signals disinterest. Prepare 3–5 questions in advance. Asking nothing is a red flag.\n\nMISTAKE 3: Badmouthing previous employer\nAlways reframe negatively. "I learned a lot but was looking for more growth opportunities" — not "my manager was terrible."\n\nMISTAKE 4: Not researching the company\nNot knowing the product, recent news, or team signals laziness. Spend 30 minutes on their website, blog, and LinkedIn.\n\nMISTAKE 5: Answering "Tell me about yourself" with a life story\nThis is a 90-second pitch: current role → key achievement → why this company. Not your childhood.\n\nMISTAKE 6: Accepting the first salary offer\nCompanies expect negotiation. Accepting immediately leaves money on the table. Always ask for 24 hours to consider.\n\nMISTAKE 7: Forgetting to follow up\nSend a thank-you email within 2 hours of the interview. Mention one specific thing from the conversation. Less than 20% of candidates do this.\n\nMISTAKE 8: Not preparing for "Why do you want this role?"\nVague answers ("I like the company") fail. Specific answers succeed: "I saw your team is building X and my experience in Y maps directly to that problem."',
+    templates: [
+      'Thank-you email (send within 2 hours): "Hi [Name], thank you for the conversation today. I especially enjoyed discussing [specific topic]. I\'m excited about the [role] position and the team\'s work on [project]. Please let me know if you need anything else from me."',
+      '"Tell me about yourself" structure: "I\'m a [role] with [X years] of experience in [stack]. Most recently, I [key achievement]. I\'m interested in this role because [specific reason tied to company]."',
+    ],
+    examples: [
+      'Mistake: interviewer asks "Any questions?" Candidate says "No, I think we covered everything." Red flag — interviewer marks down as low interest. Strong response: "Yes — what does success look like for this role in the first 90 days?"',
+      'Mistake: asked about previous company. Candidate says "My last manager micromanaged everyone and the codebase was a disaster." Immediate red flag. Strong response: "It was a good learning experience. I grew technically but was ready for a team with stronger engineering culture."',
+    ],
+    checklist: [
+      'Prepared 5 questions to ask the interviewer',
+      'Practiced "Tell me about yourself" in under 90 seconds',
+      'Researched company product, recent news, and team on LinkedIn',
+      'Prepared neutral framing for why you left/are leaving current role',
+      'Drafted thank-you email template ready to personalize after interview',
+    ],
+    tags: ['mistakes', 'interview', 'preparation', 'follow-up', 'negotiation'],
+  },
 ];
 
 export function getPlaybookEntry(id: string): PlaybookEntry | undefined {
