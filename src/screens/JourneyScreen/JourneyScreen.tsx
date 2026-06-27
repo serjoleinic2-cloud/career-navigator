@@ -3,6 +3,8 @@ import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, getActiveNode, submitTask } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
 import type { SkillNode } from '@/core/skill_state';
+import { getActiveProfession } from '@/core/profession_loader';
+import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
 import type { TaskContent } from '@/core/task_content';
 import './JourneyScreen.css';
 
@@ -37,6 +39,24 @@ export function JourneyScreen() {
   const ui = getUIState();
   const nav = getNavigation();
   const node: SkillNode | null = getActiveNode();
+
+  let professionNodes: { id: string; title: string; state: string; domain: string }[] = [];
+  try {
+    const profession = getActiveProfession();
+    professionNodes = profession.skillGraph.map(n => ({
+      id: n.id,
+      title: n.skill,
+      state: n.state,
+      domain: typeof n.domain === 'string' ? n.domain : String(n.domain),
+    }));
+  } catch {
+    professionNodes = ui.nodes.map(n => ({
+      id: n.id,
+      title: n.title,
+      state: n.state,
+      domain: 'Unknown',
+    }));
+  }
 
   const handleNodeSelect = (nodeId: string) => {
     setActiveNode(nodeId);
@@ -80,6 +100,13 @@ export function JourneyScreen() {
           <span className="badge confidence">{ui.confidenceBadge}</span>
         </div>
       </div>
+
+      {/* Journey Path */}
+      <JourneyPath 
+        nodes={professionNodes} 
+        activeNodeId={ui.activeNodeId}
+        onNodeSelect={handleNodeSelect} 
+      />
 
       {/* Node Info */}
       <div className="node-info">
