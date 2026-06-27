@@ -1,124 +1,1031 @@
+# Career Navigator — Feature Tasks (Next Sprint)
 
-Полный аудит
+Apply all tasks below in order. Read each target file before editing. Do not change anything not listed. Do not invent imports — only use what already exists in the project.
 
-🔴 Critical — 3 штуки
+---
 
-C1 — Два живых runtime-стейта
-FILE: runtime_controller.ts + runtime_store.ts
-runtime_controller.ts хранит модульную переменную runtimeState: JourneyRuntimeState | null. runtime_store.ts хранит отдельный state: UnifiedRuntimeState. runtime_engine.ts читает и пишет в store через getState/setState. runtime_controller.ts — в свою переменную. Они никогда не синхронизируются. UI_REFRESH приходит, JourneyScreen читает через getUIState() (который, судя по импорту, идёт через ui_bridge → вероятно, через store), а getActiveNode() читает напрямую из runtimeState. Гарантированный рассинхрон при любом событии.
-FIX:
-ts// runtime_controller.ts — убрать module-level var, делегировать в store
-import { replaceState, getState } from './runtime_store';
+## TASK 1 — Onboarding: restore missing screens from the original idea
 
-export function getRuntimeState(): JourneyRuntimeState | null {
-  return getState() as JourneyRuntimeState ?? null;
+The original design has 7 specific onboarding screens. The current implementation is missing:
+- Emotional state (confident/unsure/frustrated/exhausted/lost)
+- Current situation (no_job/unsatisfied/higher_salary/career_change/remote_work)
+- Applications count (number input)
+- Interviews count (number input)
+- Confidence level (1–10 slider)
+- Fears (multi-select checkboxes)
+
+The types for ALL of these already exist in `src/core/onboarding/onboarding_state.ts`.
+The engine functions `setExperience`, `selectProfession` etc. also exist in `src/core/onboarding/onboarding_engine.ts`.
+
+### 1a — Add missing setter functions to onboarding_engine.ts
+
+FILE: `src/core/onboarding/onboarding_engine.ts`
+
+Add these functions after the existing `togglePreference` function:
+
+```ts
+export function setSituation(situation: CurrentSituation): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, situation };
 }
-// Все места где runtimeState = { ...runtimeState, ... } → updateState(prev => ({...prev, ...}))
-PRIORITY: Must Fix
 
-C2 — submitTask() всегда крашится при использовании через JourneyScreen
-FILE: runtime_controller.ts:143
-ts// submitTask() строка ~143:
-if (!runtimeState || !activeTask || !activeTaskDefinition) {
-  throw new Error('No active task');  // <-- всегда срабатывает
+export function setEmotion(emotion: EmotionalState): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, emotion };
 }
-JourneyScreen вызывает handleCompleteTask() → submitTask({ taskId, completed: true }). Но перед этим handleStartTask(task) просто сетает локальный selectedTask — не вызывает createTaskFromDefinition() и не устанавливает activeTaskDefinition. Результат: activeTaskDefinition === null → crash.
-FIX:
-ts// JourneyScreen.tsx — handleCompleteTask:
-const handleCompleteTask = () => {
-  if (!selectedTask || !node) return;
-  const definition = loadTaskForNode(node.id);
-  if (!definition) return;
-  createTaskFromDefinition(definition);
-  const result = submitTask({ taskId: selectedTask.id, completed: true });
-  setTaskResult(result);
-  setSelectedTask(null);
-};
-PRIORITY: Must Fix
 
-C3 — progression_loop.ts импортирует несуществующий event bus
-FILE: src/core/interaction/progression_loop.ts:8
-tsimport { emit } from './event_bus'; // ← файл не существует
-Должно быть:
-tsimport { emit } from '../events/system_event_bus';
-И нужно обновить все 4 вызова emit('onTaskCompleted', ...) → на правильные SystemEventType:
-tsemit('TASK_COMPLETED', { nodeId: activeNodeId });
-emit('SKILL_PROGRESS', { nodeId: updatedNode.id, newState: updatedNode.state });
-emit('CHAPTER_CHANGED', { chapterId: currentChapter?.id ?? '' });
-emit('READINESS_CHANGED', { readiness: readiness.readinessScore });
-PRIORITY: Must Fix
+export function setApplicationsCount(count: number): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, applicationsCount: count };
+}
 
-🟠 High — 5 штук
+export function setInterviewsCount(count: number): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, interviewsCount: count };
+}
 
-H1 — startOnboarding() вызывается на уровне модуля
-FILE: OnboardingScreen.tsx:16
-tsstartOnboarding(); // ← TOP LEVEL, вне компонента
-На каждый hot-reload, на каждый повторный импорт, до того как React смонтировал компонент — стейт онбординга сбрасывается. На production Capacitor это проявится при suspend/resume.
-FIX:
-tsexport default function OnboardingScreen() {
+export function setConfidenceLevel(level: number): void {
+  if (!onboardingState) return;
+  onboardingState = { ...onboardingState, confidenceLevel: level };
+}
+
+export function toggleFear(fear: string): void {
+  if (!onboardingState) return;
+  const fears = onboardingState.fears.includes(fear)
+    ? onboardingState.fears.filter(f => f !== fear)
+    : [...onboardingState.fears, fear];
+  onboardingState = { ...onboardingState, fears };
+}
+```
+
+Also add `CurrentSituation` and `EmotionalState` to the import at the top of the file — they come from `'./onboarding_state'`. The existing import line is:
+```ts
+import type { OnboardingState, CurrentSituation, EmotionalState } from './onboarding_state';
+```
+This import already exists — no change needed there.
+
+### 1b — Rebuild OnboardingScreen with all 7 correct screens
+
+FILE: `src/screens/OnboardingScreen/OnboardingScreen.tsx`
+
+Replace the entire file with the following. This version:
+- Has correct 7-step flow matching the original idea
+- Moves `startOnboarding()` into `useEffect` (already fixed in bug fix task, but include here too)
+- Uses `onComplete` prop instead of `window.location.reload()`
+- Imports all new setter functions
+
+```tsx
+import { useState, useEffect } from 'react';
+import {
+  startOnboarding,
+  getOnboardingState,
+  selectProfession,
+  setSituation,
+  setEmotion,
+  setApplicationsCount,
+  setInterviewsCount,
+  setConfidenceLevel,
+  toggleFear,
+  nextStep,
+  previousStep,
+  finishOnboarding,
+} from '@/core/onboarding/onboarding_engine';
+import type { CurrentSituation, EmotionalState } from '@/core/onboarding/onboarding_state';
+import { startJourney } from '@/core/runtime/runtime_controller';
+
+interface Props {
+  onComplete: () => void;
+}
+
+const FEARS = [
+  'Rejection',
+  'Interviews',
+  'Lack of experience',
+  'Competition',
+  'English',
+  'Salary negotiation',
+];
+
+const SITUATIONS: { value: CurrentSituation; label: string }[] = [
+  { value: 'no_job', label: 'No job right now' },
+  { value: 'unsatisfied', label: 'Working but unhappy' },
+  { value: 'higher_salary', label: 'Want higher salary' },
+  { value: 'career_change', label: 'Changing profession' },
+  { value: 'remote_work', label: 'Looking for remote work' },
+];
+
+const EMOTIONS: { value: EmotionalState; label: string; emoji: string }[] = [
+  { value: 'confident', label: 'Confident', emoji: '💪' },
+  { value: 'unsure', label: 'Unsure', emoji: '🤔' },
+  { value: 'frustrated', label: 'Frustrated', emoji: '😤' },
+  { value: 'exhausted', label: 'Exhausted', emoji: '😮‍💨' },
+  { value: 'lost', label: 'Lost', emoji: '😶' },
+];
+
+export default function OnboardingScreen({ onComplete }: Props) {
   const [initialized, setInitialized] = useState(false);
-  useEffect(() => { if (!initialized) { startOnboarding(); setInitialized(true); } }, []);
-  // ...
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!initialized) {
+      startOnboarding();
+      setInitialized(true);
+    }
+  }, [initialized]);
+
+  const state = getOnboardingState();
+  if (!state || !initialized) return null;
+
+  const rerender = () => setTick(v => v + 1);
+
+  const handleNext = () => {
+    const result = nextStep();
+    if (result.success) {
+      rerender();
+    } else {
+      alert(result.error || 'Please fill required fields');
+    }
+  };
+
+  const handleBack = () => {
+    previousStep();
+    rerender();
+  };
+
+  const handleFinish = () => {
+    const finalState = finishOnboarding();
+    if (finalState) {
+      startJourney(finalState);
+      onComplete();
+    } else {
+      alert('Please complete all steps');
+    }
+  };
+
+  const containerStyle: React.CSSProperties = {
+    maxWidth: 480,
+    margin: '0 auto',
+    padding: '24px 20px',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    background: '#071320',
+    color: '#ffffff',
+  };
+
+  const optionStyle = (selected: boolean): React.CSSProperties => ({
+    display: 'block',
+    width: '100%',
+    padding: '16px 20px',
+    marginBottom: 10,
+    borderRadius: 14,
+    border: selected ? '2px solid #48BB78' : '1px solid rgba(255,255,255,0.1)',
+    background: selected ? 'rgba(72,187,120,0.15)' : 'rgba(255,255,255,0.05)',
+    color: '#ffffff',
+    fontSize: 16,
+    textAlign: 'left' as const,
+    cursor: 'pointer',
+    transition: '180ms ease',
+  });
+
+  const renderStep = () => {
+    switch (state.step) {
+      case 0:
+        return (
+          <div>
+            <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 16px' }}>Welcome to Career Navigator</h1>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, lineHeight: 1.6, margin: '0 0 12px' }}>
+              Your guided path to a software engineering career in the US market.
+            </p>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, lineHeight: 1.6 }}>
+              We'll help you build your resume, LinkedIn, applications, interview skills, and negotiation strategy.
+            </p>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>What's your situation?</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>Choose the one that fits best</p>
+            {SITUATIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                style={optionStyle(state.situation === value)}
+                onClick={() => { setSituation(value); rerender(); }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        );
+
+      case 2:
+        return (
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>How are you feeling?</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>Your emotional state helps us calibrate your journey</p>
+            {EMOTIONS.map(({ value, label, emoji }) => (
+              <button
+                key={value}
+                style={optionStyle(state.emotion === value)}
+                onClick={() => { setEmotion(value); rerender(); }}
+              >
+                {emoji} {label}
+              </button>
+            ))}
+          </div>
+        );
+
+      case 3:
+        return (
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Choose your profession</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>Your journey will be built for this career path</p>
+            <button
+              style={optionStyle(state.professionId === 'software_engineer')}
+              onClick={() => { selectProfession('software_engineer'); rerender(); }}
+            >
+              💻 Software Engineer
+            </button>
+            <button
+              style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
+              disabled
+            >
+              📊 Data Analyst (coming soon)
+            </button>
+            <button
+              style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
+              disabled
+            >
+              🛡 Cybersecurity (coming soon)
+            </button>
+            <button
+              style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
+              disabled
+            >
+              📣 Digital Marketing (coming soon)
+            </button>
+            <button
+              style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
+              disabled
+            >
+              🎧 Customer Support (coming soon)
+            </button>
+          </div>
+        );
+
+      case 4: {
+        const appCount = state.applicationsCount ?? 0;
+        const intCount = state.interviewsCount ?? 0;
+        return (
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Your job search history</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 28px' }}>Approximate numbers are fine</p>
+
+            <label style={{ display: 'block', marginBottom: 24 }}>
+              <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 12 }}>
+                Applications sent: <strong style={{ color: '#48BB78' }}>{appCount}</strong>
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={200}
+                step={5}
+                value={appCount}
+                onChange={e => { setApplicationsCount(Number(e.target.value)); rerender(); }}
+                style={{ width: '100%', accentColor: '#48BB78' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                <span>0</span><span>100</span><span>200+</span>
+              </div>
+            </label>
+
+            <label style={{ display: 'block' }}>
+              <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 12 }}>
+                Interviews attended: <strong style={{ color: '#4A90D9' }}>{intCount}</strong>
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={50}
+                step={1}
+                value={intCount}
+                onChange={e => { setInterviewsCount(Number(e.target.value)); rerender(); }}
+                style={{ width: '100%', accentColor: '#4A90D9' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                <span>0</span><span>25</span><span>50+</span>
+              </div>
+            </label>
+          </div>
+        );
+      }
+
+      case 5: {
+        const level = state.confidenceLevel ?? 5;
+        const levelLabels: Record<number, string> = {
+          1: 'Very low', 2: 'Low', 3: 'Low', 4: 'Below average',
+          5: 'Average', 6: 'Average', 7: 'Good', 8: 'Good',
+          9: 'High', 10: 'Very high',
+        };
+        return (
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Confidence level</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 32px' }}>How ready do you feel for interviews right now?</p>
+
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+              <span style={{ fontSize: 64, fontWeight: 700, color: '#48BB78' }}>{level}</span>
+              <span style={{ fontSize: 24, color: 'rgba(255,255,255,0.4)' }}>/10</span>
+              <p style={{ margin: '8px 0 0', fontSize: 16, color: 'rgba(255,255,255,0.7)' }}>{levelLabels[level]}</p>
+            </div>
+
+            <input
+              type="range"
+              min={1}
+              max={10}
+              step={1}
+              value={level}
+              onChange={e => { setConfidenceLevel(Number(e.target.value)); rerender(); }}
+              style={{ width: '100%', accentColor: '#48BB78' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
+              <span>Not ready</span><span>Ready</span>
+            </div>
+          </div>
+        );
+      }
+
+      case 6:
+        return (
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Your biggest fears</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>Select all that apply — we'll address them in your journey</p>
+            {FEARS.map(fear => {
+              const selected = state.fears.includes(fear);
+              return (
+                <button
+                  key={fear}
+                  style={optionStyle(selected)}
+                  onClick={() => { toggleFear(fear); rerender(); }}
+                >
+                  {selected ? '✓ ' : ''}{fear}
+                </button>
+              );
+            })}
+          </div>
+        );
+
+      case 7:
+        return (
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 24px' }}>Your journey is ready</h2>
+            {[
+              { label: 'Profession', value: state.professionId?.replace('_', ' ') || '—' },
+              { label: 'Situation', value: SITUATIONS.find(s => s.value === state.situation)?.label || '—' },
+              { label: 'Confidence', value: state.confidenceLevel ? `${state.confidenceLevel}/10` : '—' },
+              { label: 'Applications sent', value: state.applicationsCount ?? 0 },
+              { label: 'Interviews attended', value: state.interviewsCount ?? 0 },
+              { label: 'Fears to address', value: state.fears.length > 0 ? state.fears.join(', ') : 'None selected' },
+            ].map(({ label, value }) => (
+              <div key={label} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '14px 16px',
+                marginBottom: 8,
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: 12,
+                fontSize: 14,
+              }}>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</span>
+                <span style={{ color: '#ffffff', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{String(value)}</span>
+              </div>
+            ))}
+          </div>
+        );
+
+      default:
+        return <div>Unknown step</div>;
+    }
+  };
+
+  const totalSteps = 8;
+  const progress = ((state.step + 1) / totalSteps) * 100;
+  const isLastStep = state.step === 7;
+
+  return (
+    <div style={containerStyle}>
+      {/* Progress bar */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{
+          height: 3,
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            height: '100%',
+            width: `${progress}%`,
+            background: '#48BB78',
+            borderRadius: 2,
+            transition: '300ms ease',
+          }} />
+        </div>
+        <p style={{ margin: '8px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+          Step {state.step + 1} of {totalSteps}
+        </p>
+      </div>
+
+      <div style={{ flex: 1 }}>
+        {renderStep()}
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginTop: 32, paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {state.step > 0 && (
+          <button
+            onClick={handleBack}
+            style={{
+              flex: 1,
+              padding: '16px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              color: '#ffffff',
+              fontSize: 16,
+              cursor: 'pointer',
+              minHeight: 54,
+            }}
+          >
+            Back
+          </button>
+        )}
+        {!isLastStep ? (
+          <button
+            onClick={handleNext}
+            style={{
+              flex: 2,
+              padding: '16px',
+              borderRadius: 14,
+              border: 'none',
+              background: '#48BB78',
+              color: '#ffffff',
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: 'pointer',
+              minHeight: 54,
+            }}
+          >
+            Continue
+          </button>
+        ) : (
+          <button
+            onClick={handleFinish}
+            style={{
+              flex: 2,
+              padding: '16px',
+              borderRadius: 14,
+              border: 'none',
+              background: '#48BB78',
+              color: '#ffffff',
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: 'pointer',
+              minHeight: 54,
+            }}
+          >
+            Start Journey →
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
-PRIORITY: Must Fix
+```
 
-H2 — App.tsx: hash routing рассинхронизирован со state
-FILE: App.tsx:28-33
-Кнопка "Notes" в JourneyScreen делает window.location.hash = '#notes'. Это тригерит hashchange → setShowNotes(true). Кнопка назад делает window.location.hash = '' + setShowNotes(false). Но на Capacitor iOS hashchange не всегда файрится при programmatic change. Плюс: при первой загрузке onHashChange не вызывается — hash из URL не читается.
-FIX:
-tsuseEffect(() => {
-  const onHashChange = () => { /* ... */ };
-  window.addEventListener('hashchange', onHashChange);
-  onHashChange(); // ← читаем hash при mount
-  return () => window.removeEventListener('hashchange', onHashChange);
-}, []);
-PRIORITY: Must Fix
+### 1c — Update onboarding_engine.ts validation for new step count
 
-H3 — getProfession() возвращает undefined, нет guard
-FILE: runtime_controller.ts:46
-tsconst profession = getProfession(runtime.professionId);
-if (!profession) return null; // ← это есть, ок
-Но getActiveProfession() (импортируемый в JourneyScreen) — судя по profession_loader.ts паттерну — вероятно бросает исключение если профессия не зарегистрирована. JourneyScreen оборачивает его в try/catch — это хороший признак, но fallback на ui.nodes скрывает проблему вместо того чтобы её решить.
-FIX: В profession_registry.ts нужно регистрировать software_engineer до рендера. Добавить в main.tsx:
-tsimport '@/professions/software_engineer/module'; // side-effect import = регистрация
-PRIORITY: Should Fix
+FILE: `src/core/onboarding/onboarding_engine.ts`
 
-H4 — loadRuntime() не валидирует схему
-FILE: runtime_persistence.ts
-load<JourneyRuntimeState>() делает прямой cast JSON → тип. Если в localStorage лежит стейт от предыдущей версии без полей confidenceScore, chapterProgress и т.д. — всё упадёт в submitTask().
-FIX:
-tsexport function loadRuntime(): JourneyRuntimeState | null {
-  const raw = load<Record<string, unknown>>(opts);
-  if (!raw || typeof raw.professionId !== 'string' || !raw.nodeStates) return null;
-  if (!('confidenceScore' in raw)) return null; // schema guard
-  return raw as JourneyRuntimeState;
+The onboarding now has 8 steps (0–7). Update the `nextStep` function:
+
+Find:
+```ts
+  if (onboardingState.step >= 6) {
+    return { success: false, error: 'Already at last step' };
+  }
+```
+Replace with:
+```ts
+  if (onboardingState.step >= 7) {
+    return { success: false, error: 'Already at last step' };
+  }
+```
+
+Update validation for new step numbers. Find the entire `validateOnboardingStep` function and replace with:
+```ts
+function validateOnboardingStep(state: OnboardingState): { valid: boolean; error?: string } {
+  switch (state.step) {
+    case 1:
+      if (!state.situation) return { valid: false, error: 'Please select your situation' };
+      return { valid: true };
+    case 2:
+      if (!state.emotion) return { valid: false, error: 'Please select your emotional state' };
+      return { valid: true };
+    case 3:
+      if (!state.professionId) return { valid: false, error: 'Please select a profession' };
+      return { valid: true };
+    case 7:
+      if (!state.professionId) return { valid: false, error: 'Missing profession' };
+      return { valid: true };
+    default:
+      return { valid: true };
+  }
 }
-PRIORITY: Must Fix
+```
 
-H5 — taskResult typed as any в JourneyScreen
-FILE: JourneyScreen.tsx:20
-tsconst [taskResult, setTaskResult] = useState<any>(null);
-submitTask() возвращает TaskResult. Используй его:
-tsimport type { TaskResult } from '@/core/task/task_execution_engine';
-const [taskResult, setTaskResult] = useState<TaskResult | null>(null);
-PRIORITY: Should Fix
+---
 
-🔵 Medium — 6 штук
-#ФайлПроблемаM1JourneyScreen.tsx:33subscribe() вызывается 6 раз, все unsubscribe хранятся отдельно — это правильно. Но refresh — inline callback не мемоизирован при первом рендере. useCallback с [] — ок, но убедиться что он реально стабиленM2skill_state.tsSTATE_FLOW маппит locked → null. Но startJourney() инициализирует все ноды в locked. Нажатие на ноду ничего не делает пока не вызван явный unlock. Нет механизма разблокировки первой нодыM3attempt_engine.tsevaluateAttempt() вызывает transition(node, 'tap_primary') — но skill_engine.ts не в репо. Если transition ожидает другой сигнатуры — silent failM4OnboardingScreen.tsxhandleFinish() вызывает window.location.reload() после startJourney(). На Capacitor это убивает WebView state. Нужно setShowOnboarding(false) через prop/callbackM5runtime_controller.tsadvanceNode() помечен как legacy но всё ещё используется. Внутри он вызывает submitTask(true) — булево значение вместо объекта. submitTask ожидает unknown — это пройдёт тайпчек, но логика внутри не обработает true как валидный payloadM6JourneyScreen.tsxlocalStorage.setItem('playbook_selected_entry', JSON.stringify(entry)) — прямой доступ к localStorage в UI-компоненте. Нет абстракции, нет error handling
+## TASK 2 — Playbook: add missing categories from the original idea
 
-🟤 Low — 4 штуки
-#ПроблемаL1skill_nodes.ts — поле domain у resume-structure и ниже написано строчными 'resume', у первых двух нод — 'Resume'. Несоответствие регистра ломает группировку если где-то делается domain.toLowerCase()L2system_event_bus.ts — clearAll() существует но нигде не вызывается при resetRuntime(). Старые listeners висят после сбросаL3OnboardingScreen.tsx — alert() для ошибок валидации. На iOS в Capacitor alert() блокирует WebView threadL4profession_registry.ts — registerProfession() бросает если уже зарегистрирована. При HMR в dev это крашит каждый hot-reload модуля профессии
+The original idea specifies these Playbook sections:
+- Interview Questions ✅ (exists)
+- Communication ❌ missing
+- Body Language ❌ missing
+- Confidence ❌ missing
+- Salary Negotiation ✅ (exists as 'salary')
+- Remote Interview ❌ missing
+- Professional Appearance ❌ missing
+- Common Mistakes ❌ missing
 
-🚫 Что сломается в production прямо сейчас
+### 2a — Add missing categories to playbook_types.ts
 
-Первый тап "Complete Task" → throw 'No active task' (C2)
-Все события из progression_loop → тихо дропаются (C3)
-Hot-reload во время онбординга → стейт сбрасывается (H1)
-Обновление приложения (новая схема localStorage) → белый экран (H4)
-window.location.reload() в handleFinish → на Capacitor неопределённое поведение (M4)
+FILE: `src/core/playbook/playbook_types.ts`
 
+Find the `PlaybookCategory` type (it will look something like):
+```ts
+export type PlaybookCategory = 'resume' | 'interview' | 'salary' | 'linkedin' | 'networking';
+```
+Replace with:
+```ts
+export type PlaybookCategory =
+  | 'resume'
+  | 'interview'
+  | 'salary'
+  | 'linkedin'
+  | 'networking'
+  | 'communication'
+  | 'body_language'
+  | 'confidence'
+  | 'remote'
+  | 'appearance'
+  | 'mistakes';
+```
 
-TOP 5 — что фиксить первым
-#ЗадачаУсилие1Исправить handleCompleteTask в JourneyScreen — вставить loadTaskForNode + createTaskFromDefinition перед submitTask15 мин2Исправить импорт event_bus в progression_loop.ts + маппинг event names10 мин3Перенести startOnboarding() в useEffect, window.location.reload() заменить на callback prop20 мин4Добавить schema guard в loadRuntime()20 мин5Синхронизировать два runtime стейта (или удалить runtime_store если runtime_controller достаточен)1-2 ч
+### 2b — Add 5 new Playbook entries to playbook_data.ts
 
-Дать OpenCode-инструкцию для всего этого пачкой?
+FILE: `src/core/playbook/playbook_data.ts`
+
+Add the following entries to the `PLAYBOOK` array, before the closing `];`:
+
+```ts
+  {
+    id: 'communication/strong-weak-phrases',
+    title: 'Strong vs Weak Phrases',
+    category: 'communication',
+    content: 'The words you choose in an interview signal confidence, clarity, and competence. Weak phrases introduce doubt. Strong phrases demonstrate ownership and directness.\n\nWEAK PHRASES TO AVOID:\n- "I think I can..." → signals uncertainty\n- "Maybe I could..." → signals hesitation\n- "I\'m not sure but..." → signals lack of preparation\n- "I just did..." → minimizes your contribution\n- "I kind of worked on..." → vague and uncommitted\n- "Hopefully I\'ll be able to..." → future uncertainty\n\nSTRONG PHRASES TO USE:\n- "I led..." / "I built..." / "I designed..."\n- "I\'m confident that..."\n- "Based on my experience with X..."\n- "I would approach this by..."\n- "The result was..." / "I measured success by..."\n\nFOR TECHNICAL QUESTIONS:\n- Weak: "I\'ve heard of that, I think I used it once"\n- Strong: "I\'ve worked with X in [project]. The key tradeoff I noticed was..."\n\nFOR GAPS IN KNOWLEDGE:\n- Weak: "I don\'t know that"\n- Strong: "I haven\'t used that specific tool, but I\'ve solved similar problems with X. I\'d approach it by..."',
+    templates: [
+      'Weak: "I think I might be able to handle that kind of project."\nStrong: "I\'ve delivered similar projects. I\'d start by breaking it into milestones and validating the approach early."',
+      'Weak: "I just kind of helped with the backend stuff."\nStrong: "I designed and implemented the authentication service, including JWT handling and role-based access control."',
+    ],
+    examples: [
+      'Question: "Do you know Kubernetes?"\nWeak: "Not really, but I\'ve maybe heard of it."\nStrong: "I haven\'t used Kubernetes in production, but I\'ve worked with Docker Compose and understand container orchestration concepts. I\'d be comfortable learning it on the job."',
+    ],
+    checklist: [
+      'Removed "I think" and "maybe" from prepared answers',
+      'Every answer starts with "I" + strong action verb',
+      'Knowledge gaps addressed with adjacent experience',
+      'Practiced answers out loud to catch weak phrases',
+      'Recorded a mock answer and listened for filler language',
+    ],
+    tags: ['communication', 'phrases', 'confidence', 'language', 'interview'],
+  },
+  {
+    id: 'body_language/interview-presence',
+    title: 'Body Language in Interviews',
+    category: 'body_language',
+    content: 'Body language communicates confidence before you say a word. Research shows interviewers form first impressions in under 7 seconds — mostly from non-verbal signals.\n\nPOSTURE:\n- Sit upright with back against the chair\n- Lean slightly forward (5–10°) to show engagement\n- Keep both feet flat on the floor\n- Avoid crossing arms — it signals defensiveness\n\nEYE CONTACT:\n- Maintain eye contact 60–70% of the time\n- Look away naturally when thinking — not down\n- For video calls: look at the camera, not your own face\n- Avoid staring — break contact every 5–7 seconds\n\nHANDS:\n- Keep hands visible on the table or in your lap\n- Use open gestures when emphasizing a point\n- Avoid touching your face (signals anxiety)\n- No fidgeting with pens, phones, or clothing\n\nFACIAL EXPRESSION:\n- Smile genuinely when introduced — hold for 2 seconds\n- Nod slowly to show you\'re listening\n- Avoid blank face when the interviewer is speaking\n\nZOOM-SPECIFIC:\n- Camera at eye level — not looking up or down\n- Background is clean and professional\n- Lighting is in front of you, not behind\n- Join 5 minutes early to test audio/video',
+    templates: [
+      'Pre-interview routine: 5 minutes before, stand up, take 3 slow breaths, roll shoulders back. This activates confident posture and reduces cortisol.',
+      'Power pose for 2 minutes before the call: stand with feet wide, hands on hips. Research shows this increases testosterone and reduces stress hormones.',
+    ],
+    examples: [
+      'Common mistake: nodding too fast signals nervousness. Slow deliberate nods signal active listening and calm confidence.',
+      'Zoom mistake: looking at your own video window means the interviewer sees you looking slightly down-left, not at them. Cover your own face tile with a sticky note.',
+    ],
+    checklist: [
+      'Camera is at eye level for video interviews',
+      'Background is neutral and professional',
+      'Practiced maintaining eye contact in a mirror or on camera',
+      'Removed fidget objects from desk',
+      'Lighting source is in front of me, not behind',
+    ],
+    tags: ['body_language', 'interview', 'zoom', 'presence', 'confidence'],
+  },
+  {
+    id: 'confidence/anxiety-management',
+    title: 'Managing Interview Anxiety',
+    category: 'confidence',
+    content: 'Interview anxiety is normal. The goal is not to eliminate it but to use it. Adrenaline improves focus and performance when channeled correctly.\n\nBEFORE THE INTERVIEW:\n\nPhysical reset (30 minutes before):\n- Walk for 10 minutes — movement burns cortisol\n- Box breathing: inhale 4s → hold 4s → exhale 4s → hold 4s → repeat 4 times\n- Cold water on wrists — reduces pulse rate\n\nMental reset:\n- Write down 3 things you\'re genuinely good at\n- Remind yourself: they invited you — you already passed initial screening\n- Replace "I must not fail" with "I am here to see if this is a good fit for both sides"\n\nDURING THE INTERVIEW:\n\nSlowing down:\n- Pause 2–3 seconds before answering — signals thoughtfulness, not nervousness\n- Drink water — gives you a natural pause and slows speech\n- Speak slower than you think you need to\n\nHandling blank moments:\n- "That\'s a great question. Let me think for a moment."\n- "I want to give you a complete answer — can I take 30 seconds?"\n- Interviewers prefer a 5-second pause over a rushed wrong answer\n\nAFTER REJECTION:\n- Rejection is data, not verdict\n- Every interview is a training session\n- Ask for feedback — most companies will share it',
+    templates: [
+      '4-7-8 breathing: inhale for 4, hold for 7, exhale for 8. Use this in the waiting room or before joining the video call.',
+      'Reframe script: "I am not being judged. I am exploring whether this team and I are a match. They need someone — I am here to find out if that is me."',
+    ],
+    examples: [
+      'Candidate froze during a system design question. Said: "Let me think about this for a moment." Took 10 seconds, then gave a structured answer. Received offer. Interviewers noted "composed under pressure" in feedback.',
+      'Candidate asked at end: "Do you have any concerns about my background I could address?" Interviewer mentioned React experience. Candidate explained relevant project. Turned a potential rejection into an offer.',
+    ],
+    checklist: [
+      'Practiced box breathing at least once before the interview day',
+      'Written down 3 genuine strengths to review before the call',
+      'Prepared 2 phrases for handling blank moments',
+      'Scheduled 10-minute walk within 30 minutes of interview time',
+      'Reframed the interview as a conversation, not an exam',
+    ],
+    tags: ['confidence', 'anxiety', 'psychology', 'mindset', 'breathing'],
+  },
+  {
+    id: 'remote/remote-interview-guide',
+    title: 'Remote Interview Guide',
+    category: 'remote',
+    content: 'Remote interviews have unique failure modes that in-person interviews do not. Technical problems are the #1 avoidable reason candidates lose remote offers.\n\nTECHNICAL SETUP (test 24 hours before):\n- Internet: use ethernet cable if possible; test speed at fast.com (minimum 10 Mbps up)\n- Backup: have phone hotspot ready\n- Audio: external microphone or headset — laptop mic picks up room echo\n- Camera: 1080p preferred; clean lens\n- Platform: install Zoom, Teams, Meet — whichever they use. Test login and audio\n\nENVIRONMENT:\n- Quiet room with door closed\n- Notify household members of interview time\n- Turn off phone notifications, desktop notifications, Slack\n- Close all browser tabs except what you need\n- Have water nearby\n\nDURING THE INTERVIEW:\n- If audio drops: "I think the connection cut out — could you repeat the last part?"\n- If video freezes: turn off video temporarily to save bandwidth\n- If major technical failure: call or email the interviewer immediately\n\nASYNCHRONOUS INTERVIEWS (one-way video):\n- Record in a quiet place with good lighting\n- Dress as for in-person interview\n- Look at camera, not the question on screen\n- Re-record if needed — most platforms allow multiple attempts',
+    templates: [
+      'Pre-interview checklist (night before): charge laptop, test platform login, check background, confirm interview link, set alarm 30 min early.',
+      'Technical failure script: "I apologize for the technical issue. I\'m switching to [backup]. Can you hear me now? Thank you for your patience — I\'m ready to continue."',
+    ],
+    examples: [
+      'Candidate lost connection during remote interview. Immediately sent email: "Connection dropped — rejoining now." Rejoined within 90 seconds. Interviewer noted professionalism. Received offer.',
+      'Common mistake: conducting interview in coffee shop. Background noise, poor WiFi, and distractions led to failed technical round that candidate would have passed in quiet environment.',
+    ],
+    checklist: [
+      'Tested platform login and audio 24 hours before',
+      'Ethernet cable connected or WiFi signal confirmed strong',
+      'Phone hotspot available as backup',
+      'Room is quiet with door that closes',
+      'All notifications disabled on phone and computer',
+    ],
+    tags: ['remote', 'interview', 'zoom', 'setup', 'technical'],
+  },
+  {
+    id: 'mistakes/common-interview-mistakes',
+    title: 'Common Interview Mistakes',
+    category: 'mistakes',
+    content: 'Most interview failures are preventable. The same mistakes appear across thousands of interviews. Knowing them in advance removes them as risks.\n\nMISTAKE 1: Talking too long\nAnswers over 3 minutes lose the interviewer\'s attention. Use STAR and stop. If they want more, they\'ll ask.\n\nMISTAKE 2: Not asking questions\n"No questions" signals disinterest. Prepare 3–5 questions in advance. Asking nothing is a red flag.\n\nMISTAKE 3: Badmouthing previous employer\nAlways reframe negatively. "I learned a lot but was looking for more growth opportunities" — not "my manager was terrible."\n\nMISTAKE 4: Not researching the company\nNot knowing the product, recent news, or team signals laziness. Spend 30 minutes on their website, blog, and LinkedIn.\n\nMISTAKE 5: Answering "Tell me about yourself" with a life story\nThis is a 90-second pitch: current role → key achievement → why this company. Not your childhood.\n\nMISTAKE 6: Accepting the first salary offer\nCompanies expect negotiation. Accepting immediately leaves money on the table. Always ask for 24 hours to consider.\n\nMISTAKE 7: Forgetting to follow up\nSend a thank-you email within 2 hours of the interview. Mention one specific thing from the conversation. Less than 20% of candidates do this.\n\nMISTAKE 8: Not preparing for "Why do you want this role?"\nVague answers ("I like the company") fail. Specific answers succeed: "I saw your team is building X and my experience in Y maps directly to that problem."',
+    templates: [
+      'Thank-you email (send within 2 hours): "Hi [Name], thank you for the conversation today. I especially enjoyed discussing [specific topic]. I\'m excited about the [role] position and the team\'s work on [project]. Please let me know if you need anything else from me."',
+      '"Tell me about yourself" structure: "I\'m a [role] with [X years] of experience in [stack]. Most recently, I [key achievement]. I\'m interested in this role because [specific reason tied to company]."',
+    ],
+    examples: [
+      'Mistake: interviewer asks "Any questions?" Candidate says "No, I think we covered everything." Red flag — interviewer marks down as low interest. Strong response: "Yes — what does success look like for this role in the first 90 days?"',
+      'Mistake: asked about previous company. Candidate says "My last manager micromanaged everyone and the codebase was a disaster." Immediate red flag. Strong response: "It was a good learning experience. I grew technically but was ready for a team with stronger engineering culture."',
+    ],
+    checklist: [
+      'Prepared 5 questions to ask the interviewer',
+      'Practiced "Tell me about yourself" in under 90 seconds',
+      'Researched company product, recent news, and team on LinkedIn',
+      'Prepared neutral framing for why you left/are leaving current role',
+      'Drafted thank-you email template ready to personalize after interview',
+    ],
+    tags: ['mistakes', 'interview', 'preparation', 'follow-up', 'negotiation'],
+  },
+```
+
+---
+
+## TASK 3 — JourneyPath: unlock first node automatically
+
+Currently all nodes start as `locked` and clicking does nothing. The first node of the entry profession must be unlocked on journey start.
+
+FILE: `src/core/runtime/journey_runtime.ts`
+
+Read this file first. Find where `nodeStates` is initialized (it will loop over `skillGraph` and set each node state). Find the line that initializes node states — it likely sets all nodes to their default state from `skill_nodes.ts` (which is `'locked'`).
+
+After building the nodeStates map, add logic to set the first node (entryNodeId) to `'awareness'` instead of `'locked'`:
+
+Find the section that builds nodeStates (it will look similar to):
+```ts
+const nodeStates: Record<string, SkillNode> = {};
+for (const node of profession.skillGraph) {
+  nodeStates[node.id] = { ...node };
+}
+```
+
+After that block, add:
+```ts
+// Unlock the entry node so the user can begin immediately
+if (profession.entryNodeId && nodeStates[profession.entryNodeId]) {
+  nodeStates[profession.entryNodeId] = {
+    ...nodeStates[profession.entryNodeId],
+    state: 'awareness',
+    nextState: 'understanding',
+  };
+}
+```
+
+If the file structure is different, find the equivalent place where the initial nodeStates are set and apply the same logic — unlock entryNodeId to 'awareness'.
+
+---
+
+## TASK 4 — JourneyPath: fix domain casing so chapter grouping works
+
+FILE: `src/components/JourneyPath/JourneyPath.tsx`
+
+The `chapters` object groups nodes by `node.domain`. Domains in skill_nodes.ts are mixed case: `'Resume'`, `'resume'`, `'LinkedIn'` etc. This causes duplicate chapter groups.
+
+Find:
+```ts
+  const chapters = nodes.reduce((acc, node) => {
+    const key = node.domain || 'Unknown';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(node);
+    return acc;
+  }, {} as Record<string, JourneyNode[]>);
+```
+
+Replace with:
+```ts
+  const chapters = nodes.reduce((acc, node) => {
+    const raw = node.domain || 'Unknown';
+    const key = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(node);
+    return acc;
+  }, {} as Record<string, JourneyNode[]>);
+```
+
+---
+
+## TASK 5 — Self-Assessment: add Gap Analysis screen after chapter completion
+
+This is a new screen. Create it as a new file.
+
+FILE: `src/screens/GapAnalysisScreen/GapAnalysisScreen.tsx` (create new)
+
+```tsx
+import './GapAnalysisScreen.css';
+
+interface Props {
+  chapterTitle: string;
+  userScore: number;          // 1–10 from slider
+  systemScore: number;        // calculated from nodeStates progress
+  gaps: string[];             // list of gap descriptions
+  onContinue: () => void;
+}
+
+export function GapAnalysisScreen({ chapterTitle, userScore, systemScore, gaps, onContinue }: Props) {
+  const diff = userScore - systemScore;
+  const overconfident = diff > 2;
+  const underconfident = diff < -2;
+  const aligned = !overconfident && !underconfident;
+
+  return (
+    <div className="gap-screen">
+      <div className="gap-header">
+        <h2>{chapterTitle}</h2>
+        <p className="gap-subtitle">Chapter Complete — Self Assessment</p>
+      </div>
+
+      <div className="gap-scores">
+        <div className="gap-score-card user">
+          <span className="gap-score-label">Your score</span>
+          <span className="gap-score-value">{userScore}<span className="gap-score-max">/10</span></span>
+        </div>
+        <div className="gap-divider">vs</div>
+        <div className="gap-score-card system">
+          <span className="gap-score-label">System score</span>
+          <span className="gap-score-value">{systemScore}<span className="gap-score-max">/10</span></span>
+        </div>
+      </div>
+
+      <div className={`gap-verdict ${overconfident ? 'over' : underconfident ? 'under' : 'aligned'}`}>
+        {overconfident && (
+          <>
+            <h3>You may be overestimating</h3>
+            <p>Your self-assessment is significantly higher than your activity suggests. This can lead to under-preparation before interviews.</p>
+          </>
+        )}
+        {underconfident && (
+          <>
+            <h3>You may be underestimating yourself</h3>
+            <p>Your completed work shows more readiness than your self-score suggests. Confidence is part of interview performance.</p>
+          </>
+        )}
+        {aligned && (
+          <>
+            <h3>Good self-awareness</h3>
+            <p>Your self-assessment aligns well with your actual progress. This calibration is a strong signal of interview readiness.</p>
+          </>
+        )}
+      </div>
+
+      {gaps.length > 0 && (
+        <div className="gap-list">
+          <h4>Possible blind spots</h4>
+          {gaps.map((gap, i) => (
+            <div key={i} className="gap-item">
+              <span className="gap-icon">⚠</span>
+              <span>{gap}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <button className="gap-continue-btn" onClick={onContinue}>
+        Continue Journey →
+      </button>
+    </div>
+  );
+}
+```
+
+FILE: `src/screens/GapAnalysisScreen/GapAnalysisScreen.css` (create new)
+
+```css
+.gap-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 24px 20px calc(40px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #071320 0%, #10142B 100%);
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.gap-header {
+  margin-bottom: 32px;
+}
+
+.gap-header h2 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.gap-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.gap-scores {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.gap-score-card {
+  flex: 1;
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.gap-score-card.user {
+  border-color: rgba(74,144,217,0.4);
+  background: rgba(74,144,217,0.1);
+}
+
+.gap-score-card.system {
+  border-color: rgba(72,187,120,0.4);
+  background: rgba(72,187,120,0.1);
+}
+
+.gap-score-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gap-score-value {
+  font-size: 40px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.gap-score-max {
+  font-size: 20px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 400;
+}
+
+.gap-divider {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+}
+
+.gap-verdict {
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.gap-verdict.over {
+  background: rgba(246,173,85,0.1);
+  border: 1px solid rgba(246,173,85,0.3);
+}
+
+.gap-verdict.under {
+  background: rgba(74,144,217,0.1);
+  border: 1px solid rgba(74,144,217,0.3);
+}
+
+.gap-verdict.aligned {
+  background: rgba(72,187,120,0.1);
+  border: 1px solid rgba(72,187,120,0.3);
+}
+
+.gap-verdict h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.gap-verdict p {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.6;
+}
+
+.gap-list {
+  margin-bottom: 32px;
+}
+
+.gap-list h4 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.gap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.5;
+}
+
+.gap-icon {
+  color: #F6AD55;
+  flex-shrink: 0;
+}
+
+.gap-continue-btn {
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  border: none;
+  background: #48BB78;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 56px;
+  margin-top: auto;
+}
+```
+
+---
+
+## VERIFICATION CHECKLIST
+
+After all tasks:
+
+1. `src/core/onboarding/onboarding_engine.ts` — has `setSituation`, `setEmotion`, `setApplicationsCount`, `setInterviewsCount`, `setConfidenceLevel`, `toggleFear` functions; step limit is 7; validation updated for new steps
+2. `src/screens/OnboardingScreen/OnboardingScreen.tsx` — 8 steps (0–7), no `window.location.reload()`, uses `onComplete` prop, imports all new setter functions
+3. `src/core/playbook/playbook_types.ts` — `PlaybookCategory` includes `'communication' | 'body_language' | 'confidence' | 'remote' | 'appearance' | 'mistakes'`
+4. `src/core/playbook/playbook_data.ts` — 5 new entries added: `communication/strong-weak-phrases`, `body_language/interview-presence`, `confidence/anxiety-management`, `remote/remote-interview-guide`, `mistakes/common-interview-mistakes`
+5. `src/core/runtime/journey_runtime.ts` — entry node is set to `'awareness'` after nodeStates initialization
+6. `src/components/JourneyPath/JourneyPath.tsx` — domain key is normalized to Title Case before grouping
+7. `src/screens/GapAnalysisScreen/GapAnalysisScreen.tsx` — new file created
+8. `src/screens/GapAnalysisScreen/GapAnalysisScreen.css` — new file created
