@@ -1,241 +1,367 @@
-Правильная интеграция — не создавать второй state внутри React. React должен быть только представлением (view), а onboarding_engine.ts — единственным владельцем состояния (state authority). Это соответствует той архитектуре, которую вы уже приводили в порядок.
+Я бы не интегрировал TaskContent через runtime_controller. Наоборот — runtime вообще не должен знать, как отображаются задачи. Runtime отвечает за состояние прогресса, а UI читает контент из уже существующего SkillNode.tasks.
 
-Я бы дал Opencode такое задание.
+Вот задание, которое я бы дал Opencode.
 
-IMPLEMENTATION PATCH — OnboardingScreen Integration (Single State Authority)
+IMPLEMENTATION PATCH — JourneyScreen TaskContent Integration
 
-Цель:
-Создать рабочий OnboardingScreen без дублирования state management.
+ЦЕЛЬ
 
-ВАЖНО:
-Не создавать useReducer/useState для хранения onboardingState.
-Единственный source of truth — существующий onboarding_engine.ts.
+Переписать JourneyScreen так, чтобы он отображал реальные TaskContent из SkillNode.
 
-Архитектура
+НЕ МЕНЯТЬ:
 
-onboarding_engine.ts
-        │
-        │ owns OnboardingState
-        ▼
-OnboardingScreen
-        │
-        ▼
-React UI
+- runtime_controller.ts
+- learning_engine.ts
+- attempt_engine.ts
+- progression_loop.ts
+- task_execution_engine.ts
 
-React хранит только render tick.
+TaskContent — это presentation/content layer.
+Runtime продолжает работать как раньше.
 
-──────────────────────────────────
+──────────────────────────────────────
 
-1. OnboardingScreen
+АРХИТЕКТУРА
 
-Создать:
+Оставить существующую цепочку:
 
-src/screens/OnboardingScreen/OnboardingScreen.tsx
+JourneyRuntime
+        ↓
+runtime_controller
+        ↓
+active SkillNode
+        ↓
+JourneyScreen
 
-Экран не хранит onboardingState.
+TaskContent не становится частью Runtime Engine.
 
-Допустимо хранить только:
+Runtime знает только:
 
-const [, rerender] = useState(0);
+activeNodeId
+task progress
+scores
 
-или
+Контент берет UI.
 
-const [tick, setTick] = useState(0);
+──────────────────────────────────────
 
-для перерисовки.
+ШАГ 1
 
-──────────────────────────────────
+Получить текущую SkillNode
 
-2. Получение состояния
+Использовать существующий API.
 
-НЕ делать:
+Например
 
-const [state, setState] = useState(...)
-
-НЕ копировать onboardingState в React.
-
-Использовать существующий engine:
-
-getOnboardingState()
-
-или аналогичный accessor.
-
-Каждый render читает состояние напрямую из engine.
-
-──────────────────────────────────
-
-3. Изменение состояния
-
-Все действия пользователя идут ТОЛЬКО через engine.
-
-Например:
-
-selectProfession(...)
-
-setExperience(...)
-
-toggleGoal(...)
-
-setTimeline(...)
-
-togglePreference(...)
-
-nextStep()
-
-previousStep()
-
-finishOnboarding()
-
-Если подобных функций нет —
-добавить их В onboarding_engine.ts.
-
-НЕ создавать такую логику внутри компонента.
-
-──────────────────────────────────
-
-4. Обновление UI
-
-После любого вызова engine:
-
-setTick(v => v + 1)
+const node = getActiveNode()
 
 или
 
-rerender(v => v + 1)
+const runtime = getRuntimeState()
 
-React ничего не вычисляет.
+НЕ создавать новые runtime модели.
 
-Он просто перечитывает состояние из engine.
+──────────────────────────────────────
 
-──────────────────────────────────
+ШАГ 2
 
-5. Validation
+Получить список задач
 
-НЕ писать validation в компоненте.
+Использовать
 
-Перед next:
+node.tasks
 
-const result = nextStep();
+НЕ генерировать generic checklist.
+
+НЕ создавать fake tasks.
+
+НЕ использовать hardcoded cards.
+
+Если tasks пустой
+
+показать
+
+"No tasks available"
+
+──────────────────────────────────────
+
+ШАГ 3
+
+Task List
+
+Для каждой задачи вывести
+
+title
+
+objective
+
+estimatedMinutes
+
+difficulty
+
+Карточка должна быть компактной.
+
+Никаких instructions сразу.
+
+──────────────────────────────────────
+
+ШАГ 4
+
+Task Detail
+
+После выбора карточки
+
+открывается detail panel
+
+Отобразить
+
+title
+
+objective
+
+instructions[]
+
+completionCriteria[]
+
+tips[]
+
+expectedOutcome
+
+estimatedMinutes
+
+difficulty
+
+Никакой новой логики.
+
+Только отображение данных.
+
+──────────────────────────────────────
+
+ШАГ 5
+
+Advice
+
+Использовать
+
+node.advice
+
+Создать collapsible секции
+
+Awareness
+
+Understanding
+
+Application
+
+Readiness
+
+Execution
+
+Confidence
+
+По умолчанию открыть только Awareness.
+
+Остальные свернуты.
+
+Никаких новых моделей.
+
+──────────────────────────────────────
+
+ШАГ 6
+
+Signals
+
+Использовать
+
+node.signals
+
+Показать checklist
+
+Без runtime логики.
+
+Это informational блок.
+
+──────────────────────────────────────
+
+ШАГ 7
+
+Complete Task
+
+При нажатии
+
+Complete Task
+
+НЕ изменять существующий execution pipeline.
+
+Использовать существующий API
+
+submitTask()
 
 или
 
-const result = validateCurrentStep();
+completeTask()
 
-Если validation не прошла:
+или
 
-показать сообщение.
+processUserAction()
 
-Вся логика остается внутри:
+(что уже существует в проекте)
 
-onboarding_validation.ts
+НЕ создавать новый execution engine.
 
-onboarding_flow.ts
+НЕ менять learning_engine.
 
-──────────────────────────────────
+──────────────────────────────────────
 
-6. Завершение onboarding
+ШАГ 8
 
-После Step 7:
+После выполнения
 
-finishOnboarding()
+Использовать существующий результат runtime.
+
+Показать
+
+Result
+
+Recommendation
+
+Readiness delta
+
+Confidence delta
+
+Next Task
+
+или
+
+Next SkillNode
+
+Никаких самостоятельных вычислений UI.
+
+──────────────────────────────────────
+
+ШАГ 9
+
+Навигация
+
+Bottom Navigation остается.
+
+Previous Skill
+
+Next Skill
+
+Использовать существующий runtime_controller.
+
+──────────────────────────────────────
+
+ШАГ 10
+
+Удалить
+
+Удалить весь generic UI
+
+Checklist Card
+
+Text Task
+
+Practice Task
+
+Exercise Card
+
+Hardcoded buttons
+
+Placeholder tasks
+
+Оставить только реальные TaskContent.
+
+──────────────────────────────────────
+
+ВАЖНО
+
+TaskContent — immutable content.
+
+Runtime не хранит TaskContent.
+
+Runtime хранит только
+
+active node
+
+progress
+
+scores
+
+completed state
+
+UI получает
+
+SkillNode
 
 ↓
 
-startJourney(onboardingSnapshot)
+TaskContent
 
 ↓
 
-runtime initialized
+Render
+
+Таким образом сохраняется разделение:
+
+Runtime Layer
+отвечает за состояние
+
+Content Layer
+отвечает за содержание задач
+
+Presentation Layer
+отвечает за отображение
+
+──────────────────────────────────────
+
+ОЖИДАЕМЫЙ РЕЗУЛЬТАТ
+
+JourneyHeader
 
 ↓
 
-App переключается на JourneyScreen
+Skill Information
 
-OnboardingScreen не знает,
-как создается runtime.
+↓
 
-Он только вызывает engine.
+Advice (collapsible)
 
-──────────────────────────────────
+↓
 
-7. App.tsx
+Signals
 
-App является только роутером.
+↓
 
-При запуске:
+Task List
 
-if (runtimePersistence.hasRuntime())
+↓
 
-    render JourneyScreen
+Task Detail
 
-else
+↓
 
-    render OnboardingScreen
+Complete Task
 
-После finishOnboarding:
+↓
 
-App автоматически начинает отображать JourneyScreen.
+Runtime Result
 
-──────────────────────────────────
+↓
 
-8. Запрещено
+Bottom Navigation
 
-НЕЛЬЗЯ:
+Никаких изменений в Runtime Architecture.
 
-копировать onboardingState в React
+Никакого дублирования Task Engine.
 
-использовать useReducer
+Только замена presentation layer с generic задач на реальные TaskContent.
 
-создавать второй state manager
+Это решение соответствует архитектуре, которую вы выстраивали после консолидации:
 
-дублировать validation
+Runtime Layer — состояние (прогресс, активная нода, оценки).
+Content Layer — SkillNode + TaskContent (неизменяемые данные).
+Presentation Layer — JourneyScreen (рендер и взаимодействие).
 
-дублировать onboarding flow
-
-создавать отдельный wizard engine
-
-──────────────────────────────────
-
-9. Разрешено
-
-Разрешается:
-
-render tick
-
-локальные состояния UI
-(например открытый dropdown)
-
-анимации
-
-focus
-
-scroll
-
-НО не бизнес-состояние.
-
-──────────────────────────────────
-
-Результат
-
-После патча:
-
-onboarding_engine.ts
-    ↓
-единственный владелец состояния
-
-OnboardingScreen
-    ↓
-тонкий UI
-
-onboarding_flow.ts
-    ↓
-единственная логика переходов
-
-onboarding_validation.ts
-    ↓
-единственная логика проверки
-
-Без дублирования state management.
-Без второй копии OnboardingState.
-
-Именно такой подход хорошо сочетается с тем, что вы уже сделали ранее: сначала убрали дублирование runtime, затем сделали единый event bus. Следующий логичный шаг — сохранить тот же принцип и для onboarding: один движок владеет состоянием, UI только отображает его и вызывает команды. Это позволит избежать появления ещё одного "двойного источника истины", с которым вы уже боролись в runtime.
+Такое разделение позволит в будущем легко добавлять новые профессии: достаточно будет создать новые ProfessionModule с SkillNode.tasks, а JourneyScreen останется универсальным и не потребует изменений.
