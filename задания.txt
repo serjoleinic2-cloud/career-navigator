@@ -1,500 +1,167 @@
-Это как раз тот случай, где архитектура уже понятна. Не нужно спрашивать "как структурировать". Нужно дать Opencode конкретное задание на реализацию.
-
-# IMPLEMENTATION PATCH — Offline Interview Trainer
-
-Цель: реализовать полноценный Interview Trainer для Career Navigator.
-
-Не менять Runtime.
-Не менять Event Bus.
-Не создавать новую систему задач.
-Использовать существующие TaskContent, SkillNode и Runtime.
-
----
-
-# Использовать существующие модели
-
-* src/core/task_content.ts
-* src/core/skill_state.ts
-* src/core/runtime/runtime_controller.ts
-
-Не создавать InterviewQuestionModel.
-
-Не создавать InterviewEngine.
-
-TaskContent уже является источником данных.
-
-Маппинг:
-
-```text
-TaskContent.title                 → карточка задания
-TaskContent.objective             → вопрос интервьюера
-TaskContent.instructions          → подсказки
-TaskContent.completionCriteria    → критерии оценки
-TaskContent.tips                  → рекомендации после ответа
-TaskContent.expectedOutcome       → эталон результата
-```
-
----
-
-# Создать
-
-```text
-src/screens/InterviewTrainer/
-    InterviewTrainerScreen.tsx
-    InterviewTrainer.css
-
-src/voice/
-    tts.ts
-```
-
-stt.ts оставить без изменений.
-
----
-
-# Реализовать TTS
-
-В tts.ts реализовать настоящий wrapper над Web Speech API.
-
-API:
-
-```ts
-speak(
-    text: string,
-    options?: {
-        rate?: number;
-        pitch?: number;
-        volume?: number;
-        voiceName?: string;
-    }
-)
-
-stop()
-
-isSpeaking()
-```
-
-Использовать:
-
-speechSynthesis
-
-SpeechSynthesisUtterance
-
-Если speechSynthesis отсутствует —
-
-функции должны безопасно завершаться без ошибок.
-
-Не использовать сторонние библиотеки.
-
-Работа полностью офлайн.
-
-Используются системные голоса устройства.
-
----
-
-# Экран InterviewTrainer
-
-Получает текущую TaskContent из Runtime.
-
-Использовать существующий runtime_controller.
-
-Никаких отдельных registries.
-
----
-
-# Layout
-
-Верх:
-
-Progress Bar
-
-ниже
-
-Question Card
-
-ниже
-
-Buttons
-
-ниже
-
-Answer Input
-
-ниже
-
-Hints
-
-ниже
-
-Feedback
-
----
-
-# Question
-
-Всегда отображать:
-
-* крупным текстом
-
-Использовать
-
-TaskContent.objective
-
-Размер
-
-28-34px
-
-Текст никогда не скрывается.
-
-Это обязательное требование доступности.
-
----
-
-# Listen Button
-
-Кнопка
-
-🔊 Listen
-
-Нажатие:
-
-```ts
-speak(task.objective)
-```
-
----
-
-# Repeat Button
-
-Кнопка
-
-🔁 Repeat
-
-Поведение
-
-Каждая задача
-
-имеет
-
-repeatCount
-
-Начальное
-
-0
-
-Максимум
-
-2
-
-После второго повтора
-
-Repeat
-
-disabled
-
-на
-
-10 секунд
-
-После окончания
-
-автоматически становится доступной.
-
-Не показывать countdown.
-
-Можно показать только disabled состояние.
-
----
-
-# Difficulty
-
-Использовать существующее поле
-
-difficulty
-
-Маппинг
-
-difficulty <= 1.2
-
-Easy
-
-60 sec
-
-difficulty <= 2.0
-
-Medium
-
-45 sec
-
-иначе
-
-Hard
-
-30 sec
-
----
-
-# Timer
-
-После нажатия Listen
-
-или
-
-Start
-
-таймер запускается автоматически.
-
-Использовать
-
-setInterval
-
-Обновление
-
-каждые
-
-100 ms
-
----
-
-# Timer UI
-
-Только тонкая полоска сверху.
-
-Без цифрового обратного отсчёта.
-
-Не создавать давление.
-
-Полоска постепенно уменьшается.
-
-Использовать
-
-transform: scaleX()
-
-или
-
-width
-
-через CSS transition.
-
----
-
-# Timeout
-
-Когда время вышло
-
-автоматически выполнить
-
-submitAnswer()
-
-Если поле пустое
-
-ответ считается пустым.
-
-Feedback
-
-Time's up.
-
----
-
-# Answer
-
-Использовать
-
-textarea
-
-Пока только текст.
-
-STT позже.
-
----
-
-# Hints
-
-По кнопке
-
-Need a hint?
-
-раскрыть
-
-TaskContent.instructions
-
-как
-
-ordered list.
-
-По умолчанию
-
-скрыты.
-
----
-
-# Rule-based Evaluation
-
-Создать
-
-evaluateAnswer()
-
-Без AI.
-
-Алгоритм
-
-из completionCriteria
-
-извлечь
-
-ключевые слова
-
-сравнить
-
-с ответом пользователя
-
-регистр игнорировать
-
-если совпало
-
-> =70%
-
-PASS
-
-иначе
-
-NEEDS IMPROVEMENT
-
-Вернуть
-
-```ts
-{
-    score: number,
-    matched: string[],
-    missing: string[],
-    passed: boolean
-}
-```
-
-Функция должна быть полностью независимой.
-
----
-
-# Feedback
-
-Использовать
-
-matched
-
-↓
-
-What you did well
-
-missing
-
-↓
-
-What to improve
-
-tips
-
-↓
-
-Quick advice
-
-expectedOutcome
-
-↓
-
-Reference answer
-
----
-
-# Completion
-
-После успешной оценки
-
-вызвать
-
-существующий submitTask()
-
-или эквивалентную функцию Runtime.
-
-Не создавать новую систему прогресса.
-
----
-
-# Accessibility
-
-Обязательно
-
-* Question всегда виден
-* Все кнопки минимум 44x44 px
-* Полная работа без аудио
-* Полная работа только с клавиатурой
-* Контраст WCAG AA
-* focus-visible
-
----
-
-# CSS
-
-Dark theme
-
-Glass cards
-
-Backdrop blur
-
-Mobile First
-
-Safe Area
-
-Никаких Canvas
-
-Никакого WebGL
-
-Только CSS.
-
----
-
-# Performance
-
-Не использовать сторонние библиотеки.
-
-Не создавать глобальные listeners.
-
-speechSynthesis отменять при unmount:
-
-```ts
-speechSynthesis.cancel()
-```
-
-Очистить
-
-interval
-
-timeout
-
-listeners
-
-в cleanup.
-
----
-
-# Интеграция
-
-Runtime остаётся единственным источником данных.
-
-InterviewTrainer только отображает TaskContent.
-
-После завершения задачи Runtime самостоятельно обновляет Journey.
-
-Никаких новых Engine.
-
-Никаких новых Registry.
-
-Никаких новых моделей.
-
----
-
-# Результат
-
-Вернуть готовый IMPLEMENTATION PATCH.
-
-Проект должен компилироваться без дополнительных изменений.
-
-Новые файлы должны быть полностью подключены к существующей архитектуре.
+Ок, это уже нормальный шаг — ты наконец добавляешь knowledge layer, а не ещё один runtime/engine.
+
+Но тут важно сразу зафиксировать структуру, иначе Playbook начнёт дублировать SkillNode advice (и снова разъедется архитектура).
+
+📘 Как правильно структурировать Playbook (без дублирования)
+🧠 Базовый принцип
+
+У тебя теперь 3 уровня знаний:
+
+1. SkillNode advice      → "что делать сейчас" (операционный уровень)
+2. TaskContent           → "как выполнить задачу" (пошагово)
+3. PlaybookEntry         → "почему и как это работает глубоко" (теория + шаблоны + стратегия)
+✅ КЛЮЧЕВОЕ ПРАВИЛО
+
+Playbook НЕ должен отвечать на:
+
+"что мне делать сейчас"
+
+Playbook отвечает на:
+
+"как это устроено в индустрии"
+"какие есть паттерны"
+"какие шаблоны используют реальные кандидаты"
+"как думают интервьюеры / рекрутеры"
+🧩 1. STRUCTURE (как сделать правильно)
+📦 PlaybookEntry (канонический формат)
+export type PlaybookEntry = {
+  id: string;
+  title: string;
+  category: 'resume' | 'linkedin' | 'interview' | 'salary' | 'networking';
+
+  content: string; // deep explanation (1–3 pages equivalent)
+
+  templates: string[]; // reusable structures (NOT advice)
+  examples: string[];   // real-world examples
+  checklist: string[];  // self-check system
+
+  tags: string[]; // optional but IMPORTANT for filtering
+};
+🧱 2. КАК ИЗБЕЖАТЬ ДУБЛИРОВАНИЯ
+❌ НЕ ДЕЛАТЬ
+
+Playbook НЕ должен содержать:
+
+"Write your resume summary like this…" → ❌ (это TaskContent)
+"Improve your LinkedIn headline…" → ❌ (это SkillNode advice)
+✅ ДЕЛАТЬ
+
+Playbook должен содержать:
+
+🔹 Resume Summary Formula
+
+формулы типа:
+
+[Role] with [X years] experience in [stack]...
+🔹 STAR breakdown system
+S/T/A/R explanation
+what recruiters look for in each part
+🔹 Salary negotiation psychology
+anchoring effects
+BATNA logic
+why recruiters ask ranges
+🧠 3. ARCHITECTURE ЛОГИКА
+📊 Layer separation
+UI (JourneyScreen)
+    ↓
+SkillNode (direction)
+    ↓
+TaskContent (execution)
+    ↓
+Playbook (knowledge base)
+📚 4. PLAYBOOK SCREEN (правильная структура)
+UI structure:
+[Categories Sidebar]
+  Resume
+  LinkedIn
+  Interview
+  Salary
+  Networking
+
+[Search Bar]
+
+[Entry List]
+
+→ Selected Entry:
+
+TITLE
+CONTENT
+
+TEMPLATES
+- ...
+
+EXAMPLES
+- ...
+
+CHECKLIST
+- ...
+
+[Apply to Task]
+🔗 5. КАК СВЯЗАТЬ С TASKS (ВАЖНО)
+TaskContent расширение:
+playbookReference?: string;
+Пример:
+playbookReference: "resume/star-method-guide"
+В Task UI:
+📖 Open Playbook
+→ fetch(playbookReference)
+🧭 6. CATEGORY MAPPING (чтобы не превратилось в мусор)
+Category	Use case
+resume	structure, bullets, ATS
+linkedin	headline, profile, SEO
+interview	STAR, behavioral, technical
+salary	negotiation, offers
+networking	referrals, messages
+🧠 7. КРИТИЧЕСКАЯ АРХИТЕКТУРНАЯ ЗАЩИТА
+🚫 Запрещено:
+Playbook → не вызывает runtime
+Playbook → не знает о SkillNode state
+Playbook → не содержит "steps of journey"
+Playbook → не содержит UI logic
+✅ Разрешено:
+TaskContent → ссылается на Playbook
+Playbook → полностью статический
+Playbook → offline-only (TS constants)
+📦 8. OFFLINE-FIRST РЕАЛИЗАЦИЯ
+export const PLAYBOOK: PlaybookEntry[] = [
+  {
+    id: "interview/star-method-guide",
+    title: "STAR Method Mastery",
+    category: "interview",
+    content: "...",
+    templates: [...],
+    examples: [...],
+    checklist: [...]
+  }
+];
+🚀 9. ВАЖНЫЙ ВЫВОД
+
+Ты сейчас фактически строишь 4-й слой системы:
+
+Engine Layer (runtime)
+Task Layer (execution)
+Skill Layer (direction)
+Knowledge Layer (Playbook) ← ты сейчас здесь
+⚠️ ГЛАВНЫЙ РИСК (который тебе сейчас нужно избежать)
+
+Если не зафиксировать правило:
+
+Playbook = "deep knowledge only"
+
+ты получишь:
+
+дубли advice из SkillNode
+дубли TaskContent instructions
+разъезд логики между слоями
+✔️ ИТОГ
+Правильная структура уже сейчас:
+SkillNode → направляет
+TaskContent → выполняет
+Playbook → объясняет глубоко
+
+Если хочешь, следующим шагом я могу:
+
+👉 разложить тебе 15 PlaybookEntry сразу под Software Engineer
+👉 или дать Opencode задание на реализацию PlaybookScreen + data layer
+
+Сейчас ты впервые дошёл до стадии knowledge architecture, это уже не "аудит проекта", это продуктовая система.
