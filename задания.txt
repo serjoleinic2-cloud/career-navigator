@@ -1,407 +1,124 @@
-Это хороший модуль, но я бы не делал один Share System. Я бы сразу разделил его на две независимые подсистемы:
 
-Export (получение данных)
-Share (передача пользователю)
+Полный аудит
 
-Это разные ответственности.
+🔴 Critical — 3 штуки
 
-Правильная архитектура
-Runtime
-      │
-      ▼
-Share Mapper
-      │
-      ▼
-Share Model
-      │
- ┌────┴────────────┐
- │                 │
- ▼                 ▼
-Export System   Share System
-(JSON/CSV/PDF)  (PNG/Text/Web Share)
+C1 — Два живых runtime-стейта
+FILE: runtime_controller.ts + runtime_store.ts
+runtime_controller.ts хранит модульную переменную runtimeState: JourneyRuntimeState | null. runtime_store.ts хранит отдельный state: UnifiedRuntimeState. runtime_engine.ts читает и пишет в store через getState/setState. runtime_controller.ts — в свою переменную. Они никогда не синхронизируются. UI_REFRESH приходит, JourneyScreen читает через getUIState() (который, судя по импорту, идёт через ui_bridge → вероятно, через store), а getActiveNode() читает напрямую из runtimeState. Гарантированный рассинхрон при любом событии.
+FIX:
+ts// runtime_controller.ts — убрать module-level var, делегировать в store
+import { replaceState, getState } from './runtime_store';
 
-Таким образом Runtime вообще не знает, что существует шаринг.
-
-1. ShareModel
-
-Сначала создаётся единая модель.
-
-export interface ShareModel {
-
-    profession: string;
-
-    completedSkills: number;
-
-    totalSkills: number;
-
-    readinessScore: number;
-
-    confidenceScore: number;
-
-    currentChapter: string;
-
-    quote: string;
-
-    themeColor: string;
-
+export function getRuntimeState(): JourneyRuntimeState | null {
+  return getState() as JourneyRuntimeState ?? null;
 }
-
-UI, PNG, PDF, JSON используют одну модель.
-
-2. Share Mapper
-
-Создать
-
-share_mapper.ts
-
-Единственная задача:
-
-RuntimeState
-        ↓
-ShareModel
-
-Никакой логики UI.
-
-3. Export System
-
-Отдельная папка.
-
-src/core/export/
-
-    export_json.ts
-
-    export_csv.ts
-
-    export_pdf.ts (будущее)
-
-    export_service.ts
-
-Экспорт не должен знать про Share Card.
-
-JSON
-
-Экспортирует
-
-Career Runtime
-
-Onboarding
-
-Scores
-
-Completed Nodes
-
-Completed Tasks
-CSV
-
-Каждая строка
-
-Date
-
-Chapter
-
-Skill
-
-Task
-
-Result
-
-Duration
-
-Status
-
-То есть журнал прохождения.
-
-PDF
-
-Потом просто добавится новый exporter.
-
-Ничего менять не придётся.
-
-4. Share System
-
-Совершенно отдельно.
-
-src/core/share/
-
-    share_service.ts
-
-    share_card_mapper.ts
-
-    share_image.ts
-
-    native_share.ts
-5. Share Card
-
-Вообще не зависит от Runtime.
-
-Получает
-
-ShareModel
-
-↓
-
-рисует карточку.
-
-Карточка должна использовать
-
-Profession
-
-Progress
-
-Readiness
-
-Confidence
-
-Current Chapter
-
-Quote
-
-Theme
-
-Больше ничего.
-
-6. Генерация PNG
-
-Я бы не делал Canvas.
-
-Лучше
-
-HTML
-
-↓
-
-DOM
-
-↓
-
-html-to-image
-
-↓
-
-PNG
-
-Работает значительно проще.
-
-7. ShareService
-
-Единая точка входа.
-
-shareText()
-
-shareImage()
-
-copyText()
-
-copyImage()
-
-nativeShare()
-
-Именно сюда позже можно добавить Telegram, WhatsApp, Discord и т.д.
-
-8. Privacy
-
-Очень важно.
-
-ShareService должен получать
-
-ShareOptions
-{
-
-hideScores,
-
-hideProfession,
-
-hideQuote,
-
-hideProgress
-
+// Все места где runtimeState = { ...runtimeState, ... } → updateState(prev => ({...prev, ...}))
+PRIORITY: Must Fix
+
+C2 — submitTask() всегда крашится при использовании через JourneyScreen
+FILE: runtime_controller.ts:143
+ts// submitTask() строка ~143:
+if (!runtimeState || !activeTask || !activeTaskDefinition) {
+  throw new Error('No active task');  // <-- всегда срабатывает
 }
-
-Чтобы пользователь сам решал.
-
-9. Никакой сети
-
-Запретить любую отправку.
-
-Share
-
-↓
-
-Clipboard
-
-↓
-
-File
-
-↓
-
-Navigator.share()
-
-↓
-
-END
-
-Никаких POST.
-
-10. Offline
-
-Работает полностью.
-
-JSON
-
-↓
-
-Blob
-
-↓
-
-download
-
-CSV
-
-↓
-
-Blob
-
-↓
-
-download
-
-PNG
-
-↓
-
-Blob
-
-↓
-
-download
-
-11. Не использовать Runtime напрямую
-
-Нельзя
-
-ShareCard
-
-↓
-
-runtime_store
-
-Должно быть
-
-Runtime
-
-↓
-
-Share Mapper
-
-↓
-
-ShareModel
-
-↓
-
-ShareCard
-12. Масштабируемость
-
-Когда появится
-
-Achievements
-
-Certificates
-
-Learning Statistics
-
-Study Heatmap
-
-Weekly Report
-
-они просто попадут в
-
-ShareModel
-
-И автоматически смогут экспортироваться во все форматы.
-
-Что дать Opencode
-
-Я бы дал именно такое техническое задание:
-
-Реализовать Share/Export System с разделением ответственности.
-
-Требования:
-
-1. Не изменять Runtime.
-
-2. Создать папку:
-
-src/core/share/
-
-    share_mapper.ts
-    share_service.ts
-    share_image.ts
-    native_share.ts
-
-3. Создать папку:
-
-src/core/export/
-
-    export_service.ts
-    export_json.ts
-    export_csv.ts
-
-4. Создать ShareModel:
-
-profession
-completedSkills
-totalSkills
-readinessScore
-confidenceScore
-currentChapter
-quote
-themeColor
-
-5. Создать share_mapper.ts:
-
-JourneyRuntimeState + UIState
-↓
-
-ShareModel
-
-6. Share Card должна использовать только ShareModel.
-
-7. ShareService:
-
-copyText()
-
-copyImage()
-
-shareText()
-
-shareImage()
-
-nativeShare()
-
-8. ExportService:
-
-exportJSON()
-
-exportCSV()
-
-Подготовить архитектуру для exportPDF() без реализации.
-
-9. Все экспорты должны работать полностью offline через Blob/File.
-
-10. Не выполнять никаких сетевых запросов.
-
-11. Добавить ShareOptions:
-
-hideScores
-hideProfession
-hideProgress
-hideQuote
-
-12. Runtime, Event Bus, Learning Engine и Persistence не изменять.
-
-13. Архитектура должна позволять легко добавить PDF, Markdown и другие форматы экспорта без изменения существующего API.
-
-Это решение соответствует уже выбранной вами архитектуре: Runtime остаётся источником данных, Mapper преобразует их в модель представления, а Export и Share становятся независимыми сервисами, которые легко расширять новыми форматами и способами обмена без затрагивания ядра приложения.
+JourneyScreen вызывает handleCompleteTask() → submitTask({ taskId, completed: true }). Но перед этим handleStartTask(task) просто сетает локальный selectedTask — не вызывает createTaskFromDefinition() и не устанавливает activeTaskDefinition. Результат: activeTaskDefinition === null → crash.
+FIX:
+ts// JourneyScreen.tsx — handleCompleteTask:
+const handleCompleteTask = () => {
+  if (!selectedTask || !node) return;
+  const definition = loadTaskForNode(node.id);
+  if (!definition) return;
+  createTaskFromDefinition(definition);
+  const result = submitTask({ taskId: selectedTask.id, completed: true });
+  setTaskResult(result);
+  setSelectedTask(null);
+};
+PRIORITY: Must Fix
+
+C3 — progression_loop.ts импортирует несуществующий event bus
+FILE: src/core/interaction/progression_loop.ts:8
+tsimport { emit } from './event_bus'; // ← файл не существует
+Должно быть:
+tsimport { emit } from '../events/system_event_bus';
+И нужно обновить все 4 вызова emit('onTaskCompleted', ...) → на правильные SystemEventType:
+tsemit('TASK_COMPLETED', { nodeId: activeNodeId });
+emit('SKILL_PROGRESS', { nodeId: updatedNode.id, newState: updatedNode.state });
+emit('CHAPTER_CHANGED', { chapterId: currentChapter?.id ?? '' });
+emit('READINESS_CHANGED', { readiness: readiness.readinessScore });
+PRIORITY: Must Fix
+
+🟠 High — 5 штук
+
+H1 — startOnboarding() вызывается на уровне модуля
+FILE: OnboardingScreen.tsx:16
+tsstartOnboarding(); // ← TOP LEVEL, вне компонента
+На каждый hot-reload, на каждый повторный импорт, до того как React смонтировал компонент — стейт онбординга сбрасывается. На production Capacitor это проявится при suspend/resume.
+FIX:
+tsexport default function OnboardingScreen() {
+  const [initialized, setInitialized] = useState(false);
+  useEffect(() => { if (!initialized) { startOnboarding(); setInitialized(true); } }, []);
+  // ...
+}
+PRIORITY: Must Fix
+
+H2 — App.tsx: hash routing рассинхронизирован со state
+FILE: App.tsx:28-33
+Кнопка "Notes" в JourneyScreen делает window.location.hash = '#notes'. Это тригерит hashchange → setShowNotes(true). Кнопка назад делает window.location.hash = '' + setShowNotes(false). Но на Capacitor iOS hashchange не всегда файрится при programmatic change. Плюс: при первой загрузке onHashChange не вызывается — hash из URL не читается.
+FIX:
+tsuseEffect(() => {
+  const onHashChange = () => { /* ... */ };
+  window.addEventListener('hashchange', onHashChange);
+  onHashChange(); // ← читаем hash при mount
+  return () => window.removeEventListener('hashchange', onHashChange);
+}, []);
+PRIORITY: Must Fix
+
+H3 — getProfession() возвращает undefined, нет guard
+FILE: runtime_controller.ts:46
+tsconst profession = getProfession(runtime.professionId);
+if (!profession) return null; // ← это есть, ок
+Но getActiveProfession() (импортируемый в JourneyScreen) — судя по profession_loader.ts паттерну — вероятно бросает исключение если профессия не зарегистрирована. JourneyScreen оборачивает его в try/catch — это хороший признак, но fallback на ui.nodes скрывает проблему вместо того чтобы её решить.
+FIX: В profession_registry.ts нужно регистрировать software_engineer до рендера. Добавить в main.tsx:
+tsimport '@/professions/software_engineer/module'; // side-effect import = регистрация
+PRIORITY: Should Fix
+
+H4 — loadRuntime() не валидирует схему
+FILE: runtime_persistence.ts
+load<JourneyRuntimeState>() делает прямой cast JSON → тип. Если в localStorage лежит стейт от предыдущей версии без полей confidenceScore, chapterProgress и т.д. — всё упадёт в submitTask().
+FIX:
+tsexport function loadRuntime(): JourneyRuntimeState | null {
+  const raw = load<Record<string, unknown>>(opts);
+  if (!raw || typeof raw.professionId !== 'string' || !raw.nodeStates) return null;
+  if (!('confidenceScore' in raw)) return null; // schema guard
+  return raw as JourneyRuntimeState;
+}
+PRIORITY: Must Fix
+
+H5 — taskResult typed as any в JourneyScreen
+FILE: JourneyScreen.tsx:20
+tsconst [taskResult, setTaskResult] = useState<any>(null);
+submitTask() возвращает TaskResult. Используй его:
+tsimport type { TaskResult } from '@/core/task/task_execution_engine';
+const [taskResult, setTaskResult] = useState<TaskResult | null>(null);
+PRIORITY: Should Fix
+
+🔵 Medium — 6 штук
+#ФайлПроблемаM1JourneyScreen.tsx:33subscribe() вызывается 6 раз, все unsubscribe хранятся отдельно — это правильно. Но refresh — inline callback не мемоизирован при первом рендере. useCallback с [] — ок, но убедиться что он реально стабиленM2skill_state.tsSTATE_FLOW маппит locked → null. Но startJourney() инициализирует все ноды в locked. Нажатие на ноду ничего не делает пока не вызван явный unlock. Нет механизма разблокировки первой нодыM3attempt_engine.tsevaluateAttempt() вызывает transition(node, 'tap_primary') — но skill_engine.ts не в репо. Если transition ожидает другой сигнатуры — silent failM4OnboardingScreen.tsxhandleFinish() вызывает window.location.reload() после startJourney(). На Capacitor это убивает WebView state. Нужно setShowOnboarding(false) через prop/callbackM5runtime_controller.tsadvanceNode() помечен как legacy но всё ещё используется. Внутри он вызывает submitTask(true) — булево значение вместо объекта. submitTask ожидает unknown — это пройдёт тайпчек, но логика внутри не обработает true как валидный payloadM6JourneyScreen.tsxlocalStorage.setItem('playbook_selected_entry', JSON.stringify(entry)) — прямой доступ к localStorage в UI-компоненте. Нет абстракции, нет error handling
+
+🟤 Low — 4 штуки
+#ПроблемаL1skill_nodes.ts — поле domain у resume-structure и ниже написано строчными 'resume', у первых двух нод — 'Resume'. Несоответствие регистра ломает группировку если где-то делается domain.toLowerCase()L2system_event_bus.ts — clearAll() существует но нигде не вызывается при resetRuntime(). Старые listeners висят после сбросаL3OnboardingScreen.tsx — alert() для ошибок валидации. На iOS в Capacitor alert() блокирует WebView threadL4profession_registry.ts — registerProfession() бросает если уже зарегистрирована. При HMR в dev это крашит каждый hot-reload модуля профессии
+
+🚫 Что сломается в production прямо сейчас
+
+Первый тап "Complete Task" → throw 'No active task' (C2)
+Все события из progression_loop → тихо дропаются (C3)
+Hot-reload во время онбординга → стейт сбрасывается (H1)
+Обновление приложения (новая схема localStorage) → белый экран (H4)
+window.location.reload() в handleFinish → на Capacitor неопределённое поведение (M4)
+
+
+TOP 5 — что фиксить первым
+#ЗадачаУсилие1Исправить handleCompleteTask в JourneyScreen — вставить loadTaskForNode + createTaskFromDefinition перед submitTask15 мин2Исправить импорт event_bus в progression_loop.ts + маппинг event names10 мин3Перенести startOnboarding() в useEffect, window.location.reload() заменить на callback prop20 мин4Добавить schema guard в loadRuntime()20 мин5Синхронизировать два runtime стейта (или удалить runtime_store если runtime_controller достаточен)1-2 ч
+
+Дать OpenCode-инструкцию для всего этого пачкой?
