@@ -1,0 +1,62 @@
+.share-screen {
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+  color: #e0e0e0;
+}
+
+.share-screen h1 {
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+  color: #ffffff;
+}
+
+.share-card-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.privacy-options {
+  margin-bottom: 24px;
+}
+
+.privacy-options h3 {
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: #ccc;
+}
+
+.privacy-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.privacy-option input {
+  accent-color: #7c7cff;
+}
+
+.share-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.share-actions button {
+  padding: 12px 20px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.share-actions button:hover {
+  background: #2a2a4a;
+}
