@@ -20,7 +20,10 @@ export type SystemEventType =
   | 'TASK_STARTED'
   | 'TASK_ABORTED'
   | 'READINESS_CHANGED'
-  | 'JOURNEY_COMPLETED';
+  | 'JOURNEY_COMPLETED'
+  | 'NOTE_CREATED'
+  | 'NOTE_UPDATED'
+  | 'NOTE_DELETED';
 
 export type SystemEvent = {
   type: SystemEventType;

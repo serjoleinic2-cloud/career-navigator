@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
-import { setActiveNode, getActiveNode, submitTask } from '@/core/runtime/runtime_controller';
+import { setActiveNode, getActiveNode, submitTask, getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
 import type { SkillNode } from '@/core/skill_state';
-import { getActiveProfession } from '@/core/profession_loader';
+import { getActiveProfession, getActiveProfessionId } from '@/core/profession_loader';
 import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
 import type { TaskContent } from '@/core/task_content';
 import { InterviewTrainerScreen } from '@/screens/InterviewTrainer/InterviewTrainerScreen';
 import { getPlaybookEntry } from '@/core/playbook/playbook_data';
+import { addNote } from '@/core/user_data/notes/notes_controller';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
@@ -16,6 +17,7 @@ export function JourneyScreen() {
   const [taskResult, setTaskResult] = useState<any>(null);
   const [expandedAdvice, setExpandedAdvice] = useState<string>('awareness');
   const [trainerTask, setTrainerTask] = useState<TaskContent | null>(null);
+  const [noteContent, setNoteContent] = useState('');
 
   const refresh = useCallback(() => {
     setTick(t => t + 1);
@@ -81,6 +83,20 @@ export function JourneyScreen() {
 
   const handleCloseResult = () => {
     setTaskResult(null);
+  };
+
+  const handleSaveNote = () => {
+    if (!selectedTask || !noteContent.trim()) return;
+    const professionId = getActiveProfessionId() || '';
+    const runtime = getRuntimeState();
+    addNote({
+      professionId,
+      chapterId: runtime?.activeChapterId || '',
+      nodeId: node?.id || '',
+      taskId: selectedTask.id,
+      content: noteContent.trim(),
+    });
+    setNoteContent('');
   };
 
   const toggleAdvice = (key: string) => {
@@ -234,6 +250,29 @@ export function JourneyScreen() {
               </div>
             )}
 
+            <div className="note-section">
+              <h5>Notes</h5>
+              <textarea
+                value={noteContent}
+                onChange={e => setNoteContent(e.target.value)}
+                onKeyDown={e => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSaveNote();
+                  }
+                }}
+                placeholder="Write a note about this task..."
+                rows={3}
+              />
+              <button
+                onClick={handleSaveNote}
+                disabled={!noteContent.trim()}
+                className="note-save-btn"
+              >
+                Save Note
+              </button>
+            </div>
+
             <div className="task-actions">
               <button onClick={() => setSelectedTask(null)}>Back</button>
               <button onClick={() => setTrainerTask(selectedTask)} className="primary">Practice with Trainer</button>
@@ -267,6 +306,9 @@ export function JourneyScreen() {
           onClick={() => handleNodeSelect(nav.previousNodeId!)}
         >
           ← Previous
+        </button>
+        <button onClick={() => { window.location.hash = '#notes'; }}>
+          Notes
         </button>
         <button 
           disabled={!nav.hasNext} 
