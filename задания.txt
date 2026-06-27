@@ -1,184 +1,433 @@
-Теперь главная проблема уже не архитектура.
+IMPLEMENTATION PATCH — JourneyScreen CSS Integration
 
-Главная проблема — ничего из этого не подключено в рабочее приложение.
+Цель: полностью стилизовать JourneyScreen в существующем проекте Career Navigator.
 
-Сейчас не нужны новые аудиты и новые промпты про архитектуру. Нужен режим implementation.
+Не создавать новые компоненты.
+Не менять runtime.
+Не менять event bus.
+Не менять бизнес-логику.
 
-Я бы полностью сменил стратегию.
+Изменить только UI и CSS.
 
-Что осталось сделать
+Файлы
 
-Не придумывать.
+Создать (если отсутствуют):
 
-Не проектировать.
+src/screens/JourneyScreen/JourneyScreen.css
 
-Не делать аудиты.
+или
 
-А просто собирать приложение.
+JourneyScreen.module.css
 
-Я бы двигался так:
+в зависимости от архитектуры проекта.
 
-Этап 1
+Подключить стили в JourneyScreen.tsx.
 
-Persistence
+Общая концепция
 
-↓
+Mobile First.
 
-Onboarding
+Основной target:
 
-↓
+max-width: 480px
 
-App.tsx
+Должно одинаково хорошо выглядеть на Android и iPhone.
 
-Получить приложение, которое вообще запускается.
+Использовать CSS Variables.
 
-Этап 2
+Создать переменные:
+
+--bg-0
+--bg-1
+--glass
+--glass-border
+
+--resume
+--linkedin
+--applications
+--interview
+--offer
+
+--text
+--text-secondary
+
+--radius
+--transition
+Background
+
+Фон приложения
+
+linear-gradient(
+180deg,
+#071320 0%,
+#10142B 35%,
+#18132F 70%,
+#090D19 100%
+)
+
+background-attachment: fixed
+
+Layout
 
 JourneyScreen
 
-↓
+display:flex
+flex-direction:column
 
-TaskContent
+min-height:100vh
 
-↓
+padding-bottom:
+calc(90px + env(safe-area-inset-bottom))
+Header
 
-Task execution
+Glass card
 
-Чтобы пользователь увидел реальные задачи.
+backdrop-filter: blur(18px)
 
-Этап 3
+background:
+rgba(255,255,255,.05)
 
-World Layer
+border:
+1px solid rgba(255,255,255,.08)
 
-↓
+border-radius:24px
 
+Sticky
+
+position:sticky
+
+top:0
+
+z-index:20
 Journey Path
 
-↓
+Использовать существующий JourneyPath.
 
-CSS
+Добавить контейнер
 
-Красивый интерфейс.
+perspective:900px;
 
-Этап 4
+Сам путь
 
-Voice
+transform:
+rotateX(58deg)
+
+Только CSS.
+
+Без Canvas.
+
+Active Node
+
+Активная нода
+
+Размер
+
+68px
+
+Glow
+
+filter:drop-shadow(...)
+
+Pulse
+
+@keyframes pulse
+
+Только
+
+transform:scale()
+
+opacity
+
+Без top/left.
+
+Completed Node
+
+Круг
+
+Зелёный
+
+#48BB78
+
+Иконка check.
+
+Locked Node
+
+Серый
+
+Небольшая прозрачность
+
+Замочек
+
+Node Card
+
+Glass
+
+border-radius:20px
+
+padding:20px
+
+Hover
+
+translateY(-2px)
+
+background alpha ↑
+
+Transition
+
+220ms
+Advice
+
+Accordion.
+
+Закрытый
+
+max-height:0
+
+opacity:0
+
+Открытый
+
+max-height:800px
+
+opacity:1
+
+Переход
+
+max-height
+
+opacity
+
+transform
+
+Без JS-анимаций.
+
+Signals
+
+Checklist
+
+Каждый элемент
+
+display:flex
+
+gap:12px
+
+Иконка
+
+✔
+
+или
+
+○
+Tasks
+
+Карточки
+
+padding:18px
+
+border-radius:18px
+
+background:
+rgba(255,255,255,.05)
+
+Hover
+
+transform:
+translateY(-2px)
+scale(1.01)
+
+Active
+
+Тонкий цветной border слева.
+
+Difficulty Badge
+
+Использовать pill
+
+border-radius:999px
+
+padding:
+4px 10px
+
+Цвет
+
+Resume:
+#4A90D9
+
+LinkedIn:
+#7B68EE
+
+Applications:
+#F6AD55
+
+Interview:
+#2D3748
+
+Offer:
+#48BB78
+Estimated Time
+
+Отображать
+
+🕒 25 min
+
+справа.
+
+Task Detail
+
+Белый текст
+
+Вторичный текст
+
+rgba(255,255,255,.7)
+
+Instructions
+
+нумерованный список
+
+Completion Criteria
+
+зелёные checkboxes
+
+Tips
+
+выделенный glass блок
+
+Expected Outcome
+
+отдельный footer.
+
+Bottom Navigation
+
+Всегда снизу
+
+position:fixed
+
+bottom:0
+
+left:0
+
+right:0
+
+Safe Area
+
+padding-bottom:
+env(safe-area-inset-bottom)
+
+Glass
+
+Blur
+
+Большие кнопки
+
+Высота
+
+60px
+Chapter Colors
+
+Resume
+
+#4A90D9
+
+LinkedIn
+
+#7B68EE
+
+Applications
+
+#F6AD55
 
 Interview
 
-Notifications
+#2D3748
 
-Analytics
+Offer
 
-Это уже полировка.
+#48BB78
 
-То есть сейчас нельзя спрашивать
+Использовать их:
 
-"Как лучше сделать persistence?"
+active node
+progress indicator
+difficulty badge
+section accent
+left border карточек
+Animations
 
-Это уже решено.
+Допустимы только
 
-Нужно писать Opencode:
+opacity
 
-Сделай.
+transform
 
-Я бы вообще перестал писать вопросы.
+filter
 
-Вместо
+Не использовать
 
-"Как правильно интегрировать..."
+top
+left
+width
+height
 
-писать
+для анимаций.
 
-"Внести изменения."
+Shadows
 
-Потому что архитектура уже определена.
+Использовать только лёгкие
 
-Следующий цикл
+drop-shadow
 
-Теперь Kimi должен генерировать не дизайн файлов.
+или
 
-А implementation patches.
+box-shadow:
+0 8px 24px rgba(0,0,0,.18)
 
-Например.
+Запрещены тяжёлые многослойные тени.
 
-PATCH 1
-Внести изменения в проект.
+Performance
 
-Цель:
-Полностью подключить Persistence.
+Использовать
 
-Изменить существующие файлы.
+will-change:
+transform
 
-Создать:
-src/core/persistence/runtime_persistence.ts
+только:
 
-Использовать localStorage.
+active node
+accordion
+task hover
 
-API:
+Не использовать глобально.
 
-saveRuntime(runtime)
+Accessibility
 
-loadRuntime()
+Минимальная область нажатия
 
-clearRuntime()
+44x44px
 
-Модифицировать runtime_controller.ts.
+Контраст текста
 
-После каждой мутации:
+не ниже WCAG AA.
 
-setActiveNode()
+Responsive
 
-advanceNode()
+Поддержать:
 
-advanceChapter()
+320px
 
-resetRuntime()
+360px
 
-вызывать saveRuntime().
+390px
 
-При старте:
+412px
 
-если runtime существует —
+480px
 
-восстановить его,
+Без горизонтального скролла.
 
-иначе создать новый.
-
-Не менять Runtime API.
-
-Не менять Learning Engine.
-
-Не менять Event Bus.
+Результат
 
 Вернуть готовый PATCH.
 
-Потом
+Изменить существующие JSX при необходимости.
 
-PATCH 2
-
-App.tsx
-
-PATCH 3
-
-Onboarding
-
-PATCH 4
-
-JourneyScreen
-
-PATCH 5
-
-World
-
-PATCH 6
-
-CSS
-
-И так далее.
-
-Моя рекомендация
-
-Я бы вообще перестал делать архитектурные проверки до тех пор, пока приложение не начнёт полноценно работать. Сейчас вы уже дошли до стадии, где ценность приносит не очередной аудит, а последовательное внедрение готовых решений.
-
-Если продолжать в таком темпе, то за несколько следующих крупных патчей можно получить уже работающий MVP Career Navigator, а не ещё одну папку с отчётами и архитектурными документами.
+Все className должны соответствовать CSS.
