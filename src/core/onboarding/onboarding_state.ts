@@ -20,6 +20,12 @@ export type OnboardingState = {
   professionId: string | null;
   confidenceLevel: number | null;
   fears: string[];
+  step: number;
+  experienceLevel: string | null;
+  goals: string[];
+  timeline: string | null;
+  preferences: string[];
+  isComplete: boolean;
 };
 
 export function createEmptyOnboardingState(): OnboardingState {
@@ -31,5 +37,11 @@ export function createEmptyOnboardingState(): OnboardingState {
     professionId: null,
     confidenceLevel: null,
     fears: [],
+    step: 0,
+    experienceLevel: null,
+    goals: [],
+    timeline: null,
+    preferences: [],
+    isComplete: false,
   };
 }
