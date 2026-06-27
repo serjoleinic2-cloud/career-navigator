@@ -4,6 +4,7 @@ import type { OnboardingState } from '../onboarding/onboarding_state';
 import type { UserAction } from '../skill_engine';
 import type { SkillNode, SkillState } from '../skill_state';
 import { getActiveChapters, getActiveProfession } from '../profession_loader';
+import { getProfession } from '../../professions/profession_registry';
 import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
@@ -37,6 +38,16 @@ export function getRuntimeState(): JourneyRuntimeState | null {
 
 export function getActiveTask(): Task | null {
   return activeTask;
+}
+
+export function getActiveNode(): SkillNode | null {
+  const runtime = getRuntimeState();
+  if (!runtime || !runtime.professionId || !runtime.activeNodeId) return null;
+
+  const profession = getProfession(runtime.professionId);
+  if (!profession) return null;
+
+  return profession.skillGraph.find(n => n.id === runtime.activeNodeId) || null;
 }
 
 export function getActiveTaskDefinition(): TaskDefinition | null {

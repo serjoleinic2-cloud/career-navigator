@@ -1,22 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
-import { setActiveNode, createTask, submitTask, getActiveTask } from '@/core/runtime/runtime_controller';
-import { snapToActiveNode } from '@/core/focus_snap_controller';
+import { setActiveNode, getActiveNode, submitTask } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
-import type { SystemEvent } from '@/core/events/system_event_bus';
-import { JourneyVisualLayer } from '@/components/JourneyVisualLayer/JourneyVisualLayer';
-import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
-import { JourneyHeader } from '@/components/JourneyHeader/JourneyHeader';
-import { JourneyBottomNav } from '@/components/JourneyBottomNav/JourneyBottomNav';
-import type { TaskResult } from '@/core/task/task_execution_engine';
-import type { TaskType } from '@/core/task/task_execution_engine';
+import type { SkillNode } from '@/core/skill_state';
+import type { TaskContent } from '@/core/task_content';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
   const [, setTick] = useState(0);
-  const [taskResult, setTaskResult] = useState<TaskResult | null>(null);
-  const [isTaskActive, setIsTaskActive] = useState(false);
-  const [taskType, setTaskType] = useState<TaskType>('CHECKBOX_TASK');
+  const [selectedTask, setSelectedTask] = useState<TaskContent | null>(null);
+  const [taskResult, setTaskResult] = useState<any>(null);
+  const [expandedAdvice, setExpandedAdvice] = useState<string>('awareness');
 
   const refresh = useCallback(() => {
     setTick(t => t + 1);
@@ -29,10 +23,6 @@ export function JourneyScreen() {
     const unsubScore = subscribe('SCORE_UPDATED', refresh);
     const unsubUI = subscribe('UI_REFRESH', refresh);
     const unsubTask = subscribe('TASK_COMPLETED', refresh);
-    const unsubJourney = subscribe('JOURNEY_COMPLETED', (_event: SystemEvent) => {
-      alert('🎉 Journey Complete! All skills mastered.');
-      refresh();
-    });
 
     return () => {
       unsubNode();
@@ -41,265 +31,190 @@ export function JourneyScreen() {
       unsubScore();
       unsubUI();
       unsubTask();
-      unsubJourney();
     };
   }, [refresh]);
 
   const ui = getUIState();
   const nav = getNavigation();
-
-  useEffect(() => {
-    snapToActiveNode(ui.activeNodeId);
-  }, [ui.activeNodeId]);
+  const node: SkillNode | null = getActiveNode();
 
   const handleNodeSelect = (nodeId: string) => {
     setActiveNode(nodeId);
-  };
-
-  const handleStartTask = (type: TaskType) => {
-    const titles: Record<TaskType, string> = {
-      CHECKBOX_TASK: 'Checklist Review',
-      TEXT_TASK: 'Written Reflection',
-      SELF_ASSESSMENT: 'Self Assessment',
-      MULTIPLE_CHOICE: 'Knowledge Check',
-    };
-    createTask(type, titles[type], `Complete the ${titles[type]} for this skill.`);
-    setTaskType(type);
-    setIsTaskActive(true);
+    setSelectedTask(null);
     setTaskResult(null);
   };
 
-  const handleSubmitTask = (payload: unknown) => {
-    const result = submitTask(payload);
+  const handleStartTask = (task: TaskContent) => {
+    setSelectedTask(task);
+    setTaskResult(null);
+  };
+
+  const handleCompleteTask = () => {
+    if (!selectedTask) return;
+    const result = submitTask({ taskId: selectedTask.id, completed: true });
     setTaskResult(result);
-    setIsTaskActive(false);
+    setSelectedTask(null);
   };
 
   const handleCloseResult = () => {
     setTaskResult(null);
-    if (taskResult?.success && taskResult.skillTransition?.changed) {
-      const nodes = ui.nodes;
-      const currentIndex = nodes.findIndex(n => n.id === ui.activeNodeId);
-      if (currentIndex >= 0 && currentIndex < nodes.length - 1) {
-        setActiveNode(nodes[currentIndex + 1].id);
-      }
-    }
   };
+
+  const toggleAdvice = (key: string) => {
+    setExpandedAdvice(expandedAdvice === key ? '' : key);
+  };
+
+  if (!node) {
+    return <div className="journey-screen"><h1>No active node</h1></div>;
+  }
+
+  const adviceKeys = ['awareness', 'understanding', 'application', 'readiness', 'execution', 'confidence'] as const;
 
   return (
     <div className="journey-screen">
-      <JourneyHeader
-        chapterTitle={ui.currentChapterTitle}
-        readiness={ui.readinessBadge}
-        confidence={ui.confidenceBadge}
-      />
-      <div className="journey-path-container">
-        <JourneyPath nodes={ui.nodes} onNodeSelect={handleNodeSelect} />
-        <JourneyVisualLayer nodes={ui.nodes} />
+      {/* Header */}
+      <div className="journey-header">
+        <h2>{ui.currentChapterTitle}</h2>
+        <div className="badges">
+          <span className="badge readiness">{ui.readinessBadge}</span>
+          <span className="badge confidence">{ui.confidenceBadge}</span>
+        </div>
       </div>
-      <JourneyBottomNav
-        activeNodeId={ui.activeNodeId}
-        onNodeSelect={handleNodeSelect}
-        onAdvance={isTaskActive ? () => {} : () => handleStartTask('CHECKBOX_TASK')}
-        hasNext={nav.hasNext}
-        hasPrevious={nav.hasPrevious}
-      />
 
-      {!isTaskActive && !taskResult && (
-        <div className="task-selector">
-          <button onClick={() => handleStartTask('CHECKBOX_TASK')}>Checklist</button>
-          <button onClick={() => handleStartTask('TEXT_TASK')}>Text Task</button>
-          <button onClick={() => handleStartTask('SELF_ASSESSMENT')}>Self Assessment</button>
-          <button onClick={() => handleStartTask('MULTIPLE_CHOICE')}>Quiz</button>
-        </div>
-      )}
+      {/* Node Info */}
+      <div className="node-info">
+        <h3>{node.skill}</h3>
+        <p className="domain">{node.domain}</p>
+      </div>
 
-      {isTaskActive && (
-        <div className="task-overlay">
-          <div className="task-panel">
-            <h3>{getActiveTask()?.title ?? 'Task'}</h3>
-            <p>{getActiveTask()?.description ?? ''}</p>
-            <TaskInputForm type={taskType} onSubmit={handleSubmitTask} />
-          </div>
-        </div>
-      )}
-
-      {taskResult && (
-        <div className="result-overlay" onClick={handleCloseResult}>
-          <div className="result-card" onClick={e => e.stopPropagation()}>
-            <h3>
-              {taskResult.success ? '✓ Task Completed' : '✗ Task Incomplete'}
-            </h3>
-
-            <div className="result-score">
-              <span className="score-label">Score</span>
-              <span className="score-value">{taskResult.score}</span>
-            </div>
-
-            <div className="result-deltas">
-              <div className="delta-row">
-                <span>Confidence</span>
-                <span className={taskResult.confidenceDelta >= 0 ? 'positive' : 'negative'}>
-                  {taskResult.confidenceDelta >= 0 ? '+' : ''}
-                  {Math.round(taskResult.confidenceDelta * 100)}%
-                </span>
-              </div>
-              <div className="delta-row">
-                <span>Readiness</span>
-                <span className={taskResult.readinessDelta >= 0 ? 'positive' : 'negative'}>
-                  {taskResult.readinessDelta >= 0 ? '+' : ''}
-                  {taskResult.readinessDelta}
-                </span>
-              </div>
-            </div>
-
-            {taskResult.skillTransition?.changed && (
-              <div className="result-skill">
-                <strong>Skill Progress:</strong>{' '}
-                {taskResult.skillTransition.previous} → {taskResult.skillTransition.current}
-              </div>
-            )}
-
-            {taskResult.chapterProgressDelta > 0 && (
-              <div className="result-chapter">
-                <strong>Chapter Progress:</strong> +{taskResult.chapterProgressDelta}%
-              </div>
-            )}
-
-            <div className="result-feedback">
-              <p>{taskResult.feedback}</p>
-            </div>
-
-            <div className="result-recommendation">
-              <strong>Next:</strong> {taskResult.recommendation}
-            </div>
-
-            <button className="result-close" onClick={handleCloseResult}>
-              Continue
+      {/* Advice - Collapsible */}
+      <div className="advice-section">
+        <h4>Advice</h4>
+        {adviceKeys.map(key => (
+          <div key={key} className="advice-item">
+            <button 
+              className="advice-toggle" 
+              onClick={() => toggleAdvice(key)}
+            >
+              {key.charAt(0).toUpperCase() + key.slice(1)}
+              {expandedAdvice === key ? ' ▼' : ' ▶'}
             </button>
+            {expandedAdvice === key && node.advice[key] && (
+              <p className="advice-text">{node.advice[key]}</p>
+            )}
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function TaskInputForm({ type, onSubmit }: { type: TaskType; onSubmit: (payload: unknown) => void }) {
-  const [payload, setPayload] = useState<unknown>(null);
-
-  switch (type) {
-    case 'CHECKBOX_TASK':
-      return <CheckboxTaskForm onChange={setPayload} onSubmit={() => onSubmit(payload)} />;
-    case 'TEXT_TASK':
-      return <TextTaskForm onChange={setPayload} onSubmit={() => onSubmit(payload)} />;
-    case 'SELF_ASSESSMENT':
-      return <SelfAssessmentForm onChange={setPayload} onSubmit={() => onSubmit(payload)} />;
-    case 'MULTIPLE_CHOICE':
-      return <MultipleChoiceForm onChange={setPayload} onSubmit={() => onSubmit(payload)} />;
-    default:
-      return null;
-  }
-}
-
-function CheckboxTaskForm({ onChange, onSubmit }: { onChange: (v: unknown) => void; onSubmit: () => void }) {
-  const [items, setItems] = useState([
-    { label: 'Reviewed resume structure', checked: false },
-    { label: 'Updated contact information', checked: false },
-    { label: 'Added relevant experience', checked: false },
-  ]);
-
-  useEffect(() => {
-    onChange(items);
-  }, [items]);
-
-  return (
-    <div className="checkbox-task">
-      {items.map((item, i) => (
-        <label key={i} className="checkbox-item">
-          <input
-            type="checkbox"
-            checked={item.checked}
-            onChange={e => {
-              const updated = [...items];
-              updated[i].checked = e.target.checked;
-              setItems(updated);
-            }}
-          />
-          {item.label}
-        </label>
-      ))}
-      <button onClick={onSubmit}>Submit</button>
-    </div>
-  );
-}
-
-function TextTaskForm({ onChange, onSubmit }: { onChange: (v: unknown) => void; onSubmit: () => void }) {
-  const [text, setText] = useState('');
-
-  return (
-    <div className="text-task">
-      <textarea
-        placeholder="Write your reflection here (min 20 chars)..."
-        value={text}
-        onChange={e => {
-          setText(e.target.value);
-          onChange(e.target.value);
-        }}
-        rows={4}
-      />
-      <button onClick={onSubmit} disabled={text.trim().length < 20}>
-        Submit
-      </button>
-    </div>
-  );
-}
-
-function SelfAssessmentForm({ onChange, onSubmit }: { onChange: (v: unknown) => void; onSubmit: () => void }) {
-  const [rating, setRating] = useState(3);
-
-  return (
-    <div className="self-assessment">
-      <p>Rate your confidence (1-5):</p>
-      <div className="rating-buttons">
-        {[1, 2, 3, 4, 5].map(n => (
-          <button
-            key={n}
-            className={rating === n ? 'selected' : ''}
-            onClick={() => {
-              setRating(n);
-              onChange(n);
-            }}
-          >
-            {n}
-          </button>
         ))}
       </div>
-      <button onClick={onSubmit}>Submit</button>
-    </div>
-  );
-}
 
-function MultipleChoiceForm({ onChange: _onChange, onSubmit }: { onChange: (v: unknown) => void; onSubmit: () => void }) {
-  const [answer, setAnswer] = useState('');
+      {/* Signals */}
+      <div className="signals-section">
+        <h4>Signals (Mastery Criteria)</h4>
+        <ul>
+          {node.signals.map((signal, i) => (
+            <li key={i}>{signal}</li>
+          ))}
+        </ul>
+      </div>
 
-  return (
-    <div className="multiple-choice">
-      <p>What is the best practice for resume formatting?</p>
-      <label>
-        <input type="radio" name="mc" value="correct" onChange={e => setAnswer(e.target.value)} />
-        Use clear sections with bullet points
-      </label>
-      <label>
-        <input type="radio" name="mc" value="wrong1" onChange={e => setAnswer(e.target.value)} />
-        Use a single paragraph for everything
-      </label>
-      <label>
-        <input type="radio" name="mc" value="wrong2" onChange={e => setAnswer(e.target.value)} />
-        Include every job ever held
-      </label>
-      <button onClick={onSubmit} disabled={!answer}>
-        Submit
-      </button>
+      {/* Tasks List */}
+      <div className="tasks-section">
+        <h4>Tasks ({node.tasks.length})</h4>
+        {!selectedTask && !taskResult && (
+          <div className="task-list">
+            {node.tasks.map(task => (
+              <div 
+                key={task.id} 
+                className="task-card"
+                onClick={() => handleStartTask(task)}
+              >
+                <div className="task-header">
+                  <h5>{task.title}</h5>
+                  <span className="task-meta">{task.estimatedMinutes} min • Difficulty {task.difficulty}</span>
+                </div>
+                <p className="task-objective">{task.objective}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Task Detail */}
+        {selectedTask && !taskResult && (
+          <div className="task-detail">
+            <h4>{selectedTask.title}</h4>
+            <p className="objective"><strong>Objective:</strong> {selectedTask.objective}</p>
+            
+            <div className="instructions">
+              <h5>Instructions</h5>
+              <ol>
+                {selectedTask.instructions.map((inst, i) => (
+                  <li key={i}>{inst}</li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="completion-criteria">
+              <h5>Completion Criteria</h5>
+              <ul>
+                {selectedTask.completionCriteria.map((crit, i) => (
+                  <li key={i}>{crit}</li>
+                ))}
+              </ul>
+            </div>
+
+            {selectedTask.tips.length > 0 && (
+              <div className="tips">
+                <h5>Tips</h5>
+                <ul>
+                  {selectedTask.tips.map((tip, i) => (
+                    <li key={i}>{tip}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <p className="expected-outcome"><strong>Expected Outcome:</strong> {selectedTask.expectedOutcome}</p>
+            <p className="meta">{selectedTask.estimatedMinutes} minutes • Difficulty {selectedTask.difficulty}</p>
+
+            <div className="task-actions">
+              <button onClick={() => setSelectedTask(null)}>Back</button>
+              <button onClick={handleCompleteTask} className="primary">Complete Task</button>
+            </div>
+          </div>
+        )}
+
+        {/* Task Result */}
+        {taskResult && (
+          <div className="task-result">
+            <h4>{taskResult.success ? '✓ Task Completed' : '✗ Task Incomplete'}</h4>
+            <p><strong>Score:</strong> {taskResult.score}</p>
+            {taskResult.confidenceDelta !== undefined && (
+              <p>Confidence: {taskResult.confidenceDelta >= 0 ? '+' : ''}{Math.round(taskResult.confidenceDelta * 100)}%</p>
+            )}
+            {taskResult.readinessDelta !== undefined && (
+              <p>Readiness: {taskResult.readinessDelta >= 0 ? '+' : ''}{taskResult.readinessDelta}</p>
+            )}
+            {taskResult.feedback && <p className="feedback">{taskResult.feedback}</p>}
+            {taskResult.recommendation && <p className="recommendation"><strong>Next:</strong> {taskResult.recommendation}</p>}
+            <button onClick={handleCloseResult}>Continue</button>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="bottom-nav">
+        <button 
+          disabled={!nav.hasPrevious} 
+          onClick={() => handleNodeSelect(nav.previousNodeId!)}
+        >
+          ← Previous
+        </button>
+        <button 
+          disabled={!nav.hasNext} 
+          onClick={() => handleNodeSelect(nav.nextNodeId!)}
+        >
+          Next →
+        </button>
+      </div>
     </div>
   );
 }
