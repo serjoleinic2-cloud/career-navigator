@@ -1,76 +1,109 @@
-Архитектурный анализ
-Что реально хорошо ✅
-Task execution engine — хорошо спроектирован. beginTask → submitTask → validateTask → completeTask → runTaskPipeline — чистый pipeline, детерминированный, тестируемый. Это лучшая часть кодовой базы.
-Event bus — правильная идея. Один system_event_bus, subscribe возвращает unsubscribe, UI реагирует на события а не опрашивает состояние.
-Offline-first — вся логика в коде, localStorage через версионированный wrapper. Правильно.
-Типизация — SkillNode, TaskResult, JourneyRuntimeState — нормальные типы, не any везде.
+Создай ARCHITECTURE_SNAPSHOT.md. Не анализируй. Просто выгрузи текущее состояние проекта.
 
-Главная проблема — три параллельных состояния ⚠️
-Это не мелкий баг, это архитектурный долг который будет давать новые баги постоянно:
-UnifiedRuntimeState (runtime_store.ts)
-    ↕ пишет system_bootstrap.ts
-    ↕ читает ui_runtime_bridge.ts, syncUI()
+Пусть туда попадет примерно следующее:
 
-JourneyRuntimeState (runtime_controller.ts)  
-    ↕ пишет startJourney(), submitTask()
-    ↕ читает JourneyScreen, getActiveNode()
+Career Navigator v0.xx
 
-profession_loader.ts activeState
-    ↕ пишет только startJourney() (после фикса)
-    ↕ читает journey_runtime.ts
-Три состояния живут независимо и синхронизируются вручную в нескольких местах. Баг который ты сейчас чинишь — прямое следствие этого. Следующий баг будет тоже отсюда.
+=== Folder Tree ===
+src/
+  core/
+  screens/
+  world/
+  components/
+  ...
 
-Конкретные структурные проблемы
-1. JourneyScreen читает из трёх источников одновременно
-tsconst ui = getUIState();        // → UnifiedRuntimeState через ui_bridge
-const nav = getNavigation();    // → неизвестно откуда
-const node = getActiveNode();   // → JourneyRuntimeState.nodeStates
+=== Runtime ===
+JourneyRuntimeState
+...
+поля
 
-professionNodes = profession.skillGraph.map(...)  // → статичный skillGraph
-professionNodes берётся из статичного skillGraph (состояние нод не обновляется), а node — из runtimeState.nodeStates (обновляется). Они рассинхронизируются после первого завершённого таска — JourneyPath показывает старые состояния нод.
-2. ui_runtime_bridge.ts работает со старым UnifiedRuntimeState
-syncUI() принимает UnifiedRuntimeState — но реальный прогресс хранится в JourneyRuntimeState. readinessBadge и confidenceBadge которые видит пользователь — из стейта который bootstrap записал один раз при старте и больше не обновлял.
-3. VALIDATION_RULES в task_execution_engine — не подходят для реальных задач
-tsTEXT_TASK: (payload) => {
-  const length = text.trim().length;
-  return { valid: length >= 20, ... };  // 20 символов = success
-}
-Пользователь пишет "ok done" → 7 символов → fail. Пишет "done done done done" → 19 символов → fail. Любые 20 символов → partial/success. Это не валидация, это счётчик букв. Для offline-приложения без AI-проверки нужна другая механика.
-4. professionNodes в JourneyScreen — dead code path
-tstry {
-  const profession = getActiveProfession();
-  professionNodes = profession.skillGraph.map(n => ({ ...n.state })); // STATIC
-} catch {
-  professionNodes = ui.nodes.map(...); // FALLBACK
-}
-После фикса getActiveProfession() перестанет бросать → всегда будет использоваться статичный skillGraph → прогресс нод в JourneyPath никогда не обновится визуально.
+=== Event Bus ===
+какие события
+кто эмитит
+кто слушает
 
-Что стоит исправить в архитектуре
-Приоритет 1 — один источник правды для нод (2-3 часа работы)
-JourneyScreen должен брать ноды только из runtimeState.nodeStates, не из skillGraph:
-ts// Вместо profession.skillGraph.map(...)
-const runtime = getRuntimeState();
-professionNodes = runtime
-  ? Object.values(runtime.nodeStates).map(n => ({
-      id: n.id,
-      title: n.skill,
-      state: n.state,
-      domain: n.domain,
-    }))
-  : [];
-Приоритет 2 — убрать UnifiedRuntimeState из активного пути (рефакторинг)
-UnifiedRuntimeState и JourneyRuntimeState дублируют одни и те же данные (confidenceScore, readinessScore, professionId). Bootstrap создаёт UnifiedRuntimeState, journey runtime создаёт JourneyRuntimeState. UI должен читать только из одного.
-Простейший фикс без большого рефакторинга — getUIState() в ui_bridge.ts должен читать из JourneyRuntimeState через getRuntimeState(), а не из UnifiedRuntimeState.
-Приоритет 3 — валидация тасков (30 минут)
-Для offline-приложения без AI правильная механика — самооценка пользователя, не подсчёт символов. Заменить VALIDATION_RULES на:
-ts// Любой submitTask с { completed: true } → success
-// Пользователь сам решает что он сделал задание
-CHECKBOX_TASK: () => ({ valid: true, quality: 1.0 }),
-TEXT_TASK: (payload) => {
-  const text = String(payload || '').trim();
-  return { valid: text.length > 0, quality: 1.0 };
-},
+=== UI Screens ===
 
-Итог
-КомпонентОценкаПроблемаTask execution pipeline8/10Валидация бессмысленнаяEvent bus8/10ОкPersistence7/10Ок после фикса схемыState management4/103 параллельных стейтаJourneyScreen data flow3/103 источника, один статичныйBootstrap5/10Два profession сервиса
-Архитектура жизнеспособна для MVP с одной профессией. Но если добавлять фичи поверх текущего state management — каждый второй будет давать похожий баг на "start journey". Стоит сначала закрыть Приоритет 1 (ноды из runtimeState) — это даст видимый прогресс нод в UI и уберёт класс багов.
+App.tsx
+
+OnboardingScreen
+
+JourneyScreen
+
+InterviewTrainerScreen
+
+PlaybookScreen
+
+NotesScreen
+
+ShareScreen
+
+=== Navigation ===
+...
+
+=== Persistence ===
+...
+
+=== World ===
+...
+
+=== Что реально работает ===
+
+=== Что является stub ===
+
+=== TODO ===
+
+Это обычно получается 20-40 страниц текста, а не тысячи файлов.
+
+Такой файл я могу полностью понять.
+
+Еще лучше
+
+Пусть Kimi сделает второй файл
+
+PROJECT_INDEX.md
+
+где будет буквально
+
+src/screens/JourneyScreen/JourneyScreen.tsx
+назначение
+какие функции экспортирует
+какие хуки использует
+какие css подключает
+
+src/world/LevelRenderer.tsx
+...
+
+src/core/runtime/runtime_controller.ts
+...
+
+То есть каталог проекта с описанием.
+
+После этого я уже знаю архитектуру почти как IDE.
+
+А для проверки конкретной фичи
+
+Например ты говоришь
+
+Проверь Interview Trainer.
+
+Не надо весь проект.
+
+Попроси Kimi сделать
+
+FEATURE_DUMP_INTERVIEW.md
+
+в который входят:
+
+InterviewTrainerScreen.tsx
+tts.ts
+stt.ts
+runtime_controller.ts (нужные методы)
+
+TaskContent interface
+
+SkillNode interface
+
+И ВСЁ.
+
+Я смогу проверить логику полностью.
