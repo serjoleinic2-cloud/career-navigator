@@ -34,7 +34,6 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect, totalNodes, rea
   const chapterNames = Object.keys(chapters);
 
   const activeOrigIndex = nodes.findIndex(n => n.id === activeNodeId);
-  const activeReversedIndex = reversedNodes.findIndex(n => n.id === activeNodeId);
 
   useEffect(() => {
     if (activeNodeId && nodeRefs.current.has(activeNodeId)) {
