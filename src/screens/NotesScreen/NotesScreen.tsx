@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAllNotes, updateNote, deleteNote } from '@/core/user_data/notes/notes_controller';
+import { getAllNotes, addNote, updateNote, deleteNote } from '@/core/user_data/notes/notes_controller';
+import { getActiveProfessionId } from '@/core/profession_loader';
+import { getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
 import type { Note } from '@/core/user_data/notes/note';
 import './NotesScreen.css';
@@ -9,6 +11,8 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+  const [newNoteContent, setNewNoteContent] = useState('');
+  const [toast, setToast] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
     setNotes(getAllNotes());
@@ -43,6 +47,27 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
     setEditContent('');
   };
 
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
+
+  const handleSaveNewNote = () => {
+    if (!newNoteContent.trim()) return;
+    const professionId = getActiveProfessionId() || '';
+    const runtime = getRuntimeState();
+    addNote({
+      professionId,
+      chapterId: runtime?.activeChapterId || '',
+      nodeId: runtime?.activeNodeId || '',
+      content: newNoteContent.trim(),
+    });
+    setNewNoteContent('');
+    setToast('Note saved');
+  };
+
   const handleDelete = (id: string) => {
     deleteNote(id);
     if (editingId === id) {
@@ -66,17 +91,39 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
         onChange={e => setSearchQuery(e.target.value)}
       />
 
+      {/* New Note Form */}
+      <div className="new-note-form">
+        <textarea
+          value={newNoteContent}
+          onChange={e => setNewNoteContent(e.target.value)}
+          placeholder="Write a new note..."
+          rows={3}
+        />
+        <button
+          className="save-note-btn"
+          onClick={handleSaveNewNote}
+          disabled={!newNoteContent.trim()}
+        >
+          Save Note
+        </button>
+      </div>
+
+      {/* Saved Notes */}
       <div className="notes-list">
         {filtered.length === 0 && (
           <p className="empty-state">
-            {searchQuery ? 'No notes match your search.' : 'No notes yet. Add notes from the task detail screen.'}
+            {searchQuery ? 'No notes match your search.' : 'No notes yet. Write your first note below.'}
           </p>
         )}
         {filtered.map(note => (
           <div key={note.id} className="note-card">
+            <button
+              className="note-delete"
+              onClick={() => handleDelete(note.id)}
+            >
+              ×
+            </button>
             <div className="note-meta">
-              <span className="note-node">{note.nodeId}</span>
-              {note.taskId && <span className="note-task">{note.taskId}</span>}
               <span className="note-date">
                 {new Date(note.updatedAt).toLocaleDateString()}
               </span>
@@ -99,19 +146,15 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
                 className="note-content"
                 onClick={() => handleStartEdit(note)}
               >
-                {note.content}
+                {note.content.length > 30 ? note.content.slice(0, 30) + '...' : note.content}
               </div>
             )}
-
-            <button
-              className="note-delete"
-              onClick={() => handleDelete(note.id)}
-            >
-              Delete
-            </button>
           </div>
         ))}
       </div>
+
+      {/* Toast */}
+      {toast && <div className="note-toast">{toast}</div>}
     </div>
   );
 }

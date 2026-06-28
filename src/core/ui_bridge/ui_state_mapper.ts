@@ -29,8 +29,11 @@ export function mapRuntimeToUI(
     };
   }
 
-  const total = profession.skillGraph.length;
-  const nodes = profession.skillGraph.map((n, i) => toUINode(n, i, total));
+  const nodeStatesValues = Object.values(runtimeState.nodeStates);
+  const total = nodeStatesValues.length > 0 ? nodeStatesValues.length : profession.skillGraph.length;
+  const nodes = nodeStatesValues.length > 0
+    ? nodeStatesValues.map((n, i) => toUINode(n, i, total))
+    : profession.skillGraph.map((n, i) => toUINode(n, i, total));
 
   const completedNodes = nodes.filter(n => n.state === 'completed').map(n => n.id);
   const lockedNodes = nodes.filter(n => n.state === 'locked').map(n => n.id);

@@ -96,7 +96,7 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathPr
                     }}
                     className={`journey-node journey-node-${status}`}
                     style={{ marginLeft: offset }}
-                    onClick={() => status !== 'locked' && onNodeSelect(node.id)}
+                    onClick={() => onNodeSelect(node.id)}
                   >
                     <div 
                       className="node-circle"

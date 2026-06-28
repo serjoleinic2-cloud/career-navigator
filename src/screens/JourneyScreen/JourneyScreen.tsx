@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, getActiveNode, submitTask, getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
@@ -10,6 +10,8 @@ import { InterviewTrainerScreen } from '@/screens/InterviewTrainer/InterviewTrai
 import { getPlaybookEntry } from '@/core/playbook/playbook_data';
 import { addNote } from '@/core/user_data/notes/notes_controller';
 import { loadTaskForNode, createTaskFromDefinition } from '@/core/runtime/runtime_controller';
+import { getTaskByNodeId } from '@/core/task/task_content_engine';
+import type { TaskDefinition } from '@/core/task/task_content_engine';
 import type { TaskResult } from '@/core/task/task_execution_engine';
 import './JourneyScreen.css';
 
@@ -20,6 +22,12 @@ export function JourneyScreen() {
   const [expandedAdvice, setExpandedAdvice] = useState<string>('awareness');
   const [trainerTask, setTrainerTask] = useState<TaskContent | null>(null);
   const [noteContent, setNoteContent] = useState('');
+  const [clickedNodeId, setClickedNodeId] = useState<string | null>(null);
+  const [platformTaskDef, setPlatformTaskDef] = useState<TaskDefinition | null>(null);
+  const [fabVisible, setFabVisible] = useState(true);
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(() => {
     setTick(t => t + 1);
@@ -43,12 +51,44 @@ export function JourneyScreen() {
     };
   }, [refresh]);
 
+  // Scroll listener for FAB hide/show
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let lastScroll = 0;
+    const onScroll = () => {
+      const current = el.scrollTop;
+      setFabVisible(current <= lastScroll || current < 20);
+      lastScroll = current;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Timer for active task
+  useEffect(() => {
+    if (selectedTask && !taskResult) {
+      timerRef.current = setInterval(() => {
+        setTimerSeconds(t => t + 1);
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [selectedTask, taskResult]);
+
   const ui = getUIState();
   const nav = getNavigation();
   const node: SkillNode | null = getActiveNode();
 
-  // Always read from runtimeState.nodeStates — this is the live state after task completions.
-  // skillGraph is static and must never be used for rendering node progress.
   const runtime = getRuntimeState();
   const professionNodes: { id: string; title: string; state: string; domain: string }[] = runtime
     ? Object.values(runtime.nodeStates).map(n => ({
@@ -59,10 +99,49 @@ export function JourneyScreen() {
       }))
     : [];
 
+  const allNodesCompleted = runtime
+    ? Object.values(runtime.nodeStates).every(n => n.state === 'confidence')
+    : false;
+
+  const formatTime = (seconds: number): string => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   const handleNodeSelect = (nodeId: string) => {
     setActiveNode(nodeId);
     setSelectedTask(null);
     setTaskResult(null);
+    const taskDef = getTaskByNodeId(nodeId);
+    setPlatformTaskDef(taskDef ?? null);
+    setClickedNodeId(nodeId);
+  };
+
+  const handleClosePlatformModal = () => {
+    setClickedNodeId(null);
+    setPlatformTaskDef(null);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setTimerSeconds(0);
+  };
+
+  const handleStartTaskFromModal = () => {
+    const node = runtime ? runtime.nodeStates[clickedNodeId!] : null;
+    if (!node) return;
+    const taskContent = node.tasks[0];
+    if (taskContent) {
+      handleStartTask(taskContent);
+    }
+    handleClosePlatformModal();
+  };
+
+  const handleNextNodeInModal = () => {
+    if (!nav.hasNext || !nav.nextNodeId) return;
+    handleClosePlatformModal();
+    handleNodeSelect(nav.nextNodeId);
   };
 
   const handleStartTask = (task: TaskContent) => {
@@ -124,10 +203,62 @@ export function JourneyScreen() {
     return <div className="journey-screen"><h1>No active node</h1></div>;
   }
 
+  if (allNodesCompleted) {
+    return (
+      <div className="journey-screen journey-complete-screen">
+        <div className="confetti-container">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              className="confetti-particle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                backgroundColor: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#45B7D1', '#96CEB4'][i % 5],
+              }}
+            />
+          ))}
+        </div>
+        <div className="journey-complete-content">
+          <div className="complete-icon">✅</div>
+          <h1>You're ready!</h1>
+          <p className="complete-subtitle">You've completed all nodes in your career journey.</p>
+          <div className="final-score">
+            <span className="score-label">Career Score</span>
+            <span className="score-value">{runtime?.readinessScore ?? 0}%</span>
+          </div>
+          <div className="complete-actions">
+            <button className="primary" onClick={() => { window.location.hash = '#journey'; refresh(); }}>
+              Review Journey
+            </button>
+            <button onClick={() => { window.location.hash = '#onboarding'; }}>
+              Start New Profession
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const adviceKeys = ['awareness', 'understanding', 'application', 'readiness', 'execution', 'confidence'] as const;
 
   return (
-    <div className="journey-screen">
+    <div className="journey-screen" ref={scrollRef}>
+      {/* FAB */}
+      <button
+        className={`fab-button ${fabVisible ? 'fab-visible' : 'fab-hidden'}`}
+        onClick={() => {
+          if (node) {
+            const taskDef = getTaskByNodeId(node.id);
+            setPlatformTaskDef(taskDef ?? null);
+            setClickedNodeId(node.id);
+          }
+        }}
+        aria-label="Start Day"
+      >
+        ▶
+      </button>
+
       {/* Header */}
       <div className="journey-header">
         <h2>{ui.currentChapterTitle}</h2>
@@ -203,7 +334,21 @@ export function JourneyScreen() {
         {/* Task Detail */}
         {selectedTask && !taskResult && (
           <div className="task-detail">
-            <h4>{selectedTask.title}</h4>
+            <div className="task-detail-header">
+              <div>
+                <h4>{selectedTask.title}</h4>
+                <div className="task-progress-dots">
+                  {node.tasks.map((t, i) => (
+                    <span
+                      key={t.id}
+                      className={`progress-dot ${t.id === selectedTask.id ? 'active' : ''} ${i < node.tasks.indexOf(selectedTask) ? 'done' : ''}`}
+                    />
+                  ))}
+                  <span className="progress-label">Task {node.tasks.indexOf(selectedTask) + 1} of {node.tasks.length}</span>
+                </div>
+              </div>
+              <div className="task-timer">⏱ {formatTime(timerSeconds)}</div>
+            </div>
             <p className="objective"><strong>Objective:</strong> {selectedTask.objective}</p>
             
             <div className="instructions">
@@ -259,6 +404,7 @@ export function JourneyScreen() {
 
             <div className="note-section">
               <h5>Notes</h5>
+              <div className="char-count">{noteContent.length} characters</div>
               <textarea
                 value={noteContent}
                 onChange={e => setNoteContent(e.target.value)}
@@ -291,8 +437,26 @@ export function JourneyScreen() {
         {/* Task Result */}
         {taskResult && (
           <div className="task-result">
-            <h4>{taskResult.success ? '✓ Task Completed' : '✗ Task Incomplete'}</h4>
-            <p><strong>Score:</strong> {taskResult.score}</p>
+            {taskResult.success && (
+              <div className="confetti-burst">
+                {Array.from({ length: 20 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="burst-particle"
+                    style={{
+                      left: `${50 + (Math.random() - 0.5) * 80}%`,
+                      top: `${50 + (Math.random() - 0.5) * 80}%`,
+                      animationDelay: `${Math.random() * 0.5}s`,
+                      backgroundColor: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#45B7D1', '#96CEB4'][i % 5],
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            <div className={`checkmark-icon ${taskResult.success ? 'checkmark-draw' : ''}`}>
+              {taskResult.success ? '✓' : '✗'}
+            </div>
+            <h4>{taskResult.success ? 'Task Completed!' : 'Task Incomplete'}</h4>
             {taskResult.confidenceDelta !== undefined && (
               <p>Confidence: {taskResult.confidenceDelta >= 0 ? '+' : ''}{Math.round(taskResult.confidenceDelta * 100)}%</p>
             )}
@@ -301,7 +465,14 @@ export function JourneyScreen() {
             )}
             {taskResult.feedback && <p className="feedback">{taskResult.feedback}</p>}
             {taskResult.recommendation && <p className="recommendation"><strong>Next:</strong> {taskResult.recommendation}</p>}
-            <button onClick={handleCloseResult}>Continue</button>
+            <div className="result-actions">
+              <button onClick={handleCloseResult}>Return to Journey</button>
+              {nav.hasNext && nav.nextNodeId && (
+                <button className="primary" onClick={() => { handleCloseResult(); handleNodeSelect(nav.nextNodeId!); }}>
+                  Next Task →
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -324,6 +495,76 @@ export function JourneyScreen() {
           Next →
         </button>
       </div>
+
+      {/* Platform Modal (Bottom Sheet) */}
+      {clickedNodeId && runtime && runtime.nodeStates[clickedNodeId] && (() => {
+        const clickedNode = runtime.nodeStates[clickedNodeId];
+        const nodeState = clickedNode.state;
+        const isLocked = nodeState === 'locked';
+        const isCompleted = nodeState === 'confidence' || nodeState === 'execution';
+        const taskDef = platformTaskDef;
+
+        return (
+          <div className="platform-modal-overlay" onClick={handleClosePlatformModal}>
+            <div className="platform-modal-sheet" onClick={e => e.stopPropagation()}>
+              <div className="modal-handle" />
+              <div className="modal-header">
+                <h3>{clickedNode.skill}</h3>
+                <button className="modal-close" onClick={handleClosePlatformModal}>✕</button>
+              </div>
+
+              {isLocked && (
+                <div className="modal-body locked-content">
+                  <div className="locked-icon">🔒</div>
+                  <p>Complete previous tasks to unlock this node.</p>
+                </div>
+              )}
+
+              {isCompleted && (
+                <div className="modal-body completed-content">
+                  <div className="completed-icon">✓</div>
+                  <p className="completed-title">Node Completed</p>
+                  <div className="completed-signals">
+                    <h5>Signals Achieved</h5>
+                    <ul>
+                      {clickedNode.signals?.map((signal: string, i: number) => (
+                        <li key={i}>{signal}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {!isLocked && !isCompleted && taskDef && (
+                <div className="modal-body active-content">
+                  <p className="task-description">{taskDef.description}</p>
+                  <div className="task-meta-row">
+                    <span>⏱ {taskDef.estimatedDuration} min</span>
+                    <span>Difficulty: {'★'.repeat(taskDef.difficulty)}{'☆'.repeat(5 - taskDef.difficulty)}</span>
+                  </div>
+                  <button className="start-task-btn" onClick={handleStartTaskFromModal}>
+                    Start Task
+                  </button>
+                </div>
+              )}
+
+              {!isLocked && !isCompleted && !taskDef && (
+                <div className="modal-body">
+                  <p>No task available for this node.</p>
+                </div>
+              )}
+
+              <div className="modal-footer">
+                {nav.hasNext && nav.nextNodeId && (
+                  <button className="next-task-btn" onClick={handleNextNodeInModal}>
+                    Next Task →
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

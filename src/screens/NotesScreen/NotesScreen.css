@@ -145,7 +145,79 @@
 
 .empty-state {
   text-align: center;
-  color: #666;
+  color: #B2BEC3;
   padding: 40px 0;
   font-size: 0.95rem;
+}
+
+/* New Note Form */
+.new-note-form {
+  margin-bottom: 24px;
+}
+
+.new-note-form textarea {
+  width: 100%;
+  background: #12122a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #e0e0e0;
+  padding: 12px;
+  font-size: 0.95rem;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+  margin-bottom: 8px;
+}
+
+.save-note-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #FF6B6B;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.save-note-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.save-note-btn:hover:not(:disabled) {
+  background: #e05555;
+}
+
+/* Toast */
+.note-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FF6B6B;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  z-index: 200;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards;
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.note-card .note-meta {
+  padding-right: 24px;
 }
