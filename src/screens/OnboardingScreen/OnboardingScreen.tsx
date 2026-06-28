@@ -15,6 +15,7 @@ import {
 } from '@/core/onboarding/onboarding_engine';
 import type { CurrentSituation, EmotionalState } from '@/core/onboarding/onboarding_state';
 import { startJourney } from '@/core/runtime/runtime_controller';
+import { getAvailableProfessions } from '@/professions/profession_auto_loader';
 
 interface Props {
   onComplete: () => void;
@@ -169,43 +170,52 @@ export default function OnboardingScreen({ onComplete }: Props) {
           </div>
         );
 
-      case 3:
+      case 3: {
+        const availableProfessions = getAvailableProfessions();
+        const COMING_SOON = [
+          { id: 'data_analyst', title: 'Data Analyst', icon: '📊' },
+          { id: 'cybersecurity', title: 'Cybersecurity', icon: '🛡' },
+          { id: 'digital_marketing', title: 'Digital Marketing', icon: '📣' },
+          { id: 'customer_support', title: 'Customer Support', icon: '🎧' },
+        ].filter(cs => !availableProfessions.find(p => p.id === cs.id));
+
+        const PROFESSION_ICONS: Record<string, string> = {
+          software_engineer: '💻',
+          data_analyst: '📊',
+          cybersecurity: '🛡',
+          digital_marketing: '📣',
+          customer_support: '🎧',
+        };
+
         return (
           <div>
             <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Choose your profession</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>Your journey will be built for this career path</p>
-            <button
-              style={optionStyle(state.professionId === 'software_engineer')}
-              onClick={() => { selectProfession('software_engineer'); rerender(); }}
-            >
-              💻 Software Engineer
-            </button>
-            <button
-              style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
-              disabled
-            >
-              📊 Data Analyst (coming soon)
-            </button>
-            <button
-              style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
-              disabled
-            >
-              🛡 Cybersecurity (coming soon)
-            </button>
-            <button
-              style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
-              disabled
-            >
-              📣 Digital Marketing (coming soon)
-            </button>
-            <button
-              style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
-              disabled
-            >
-              🎧 Customer Support (coming soon)
-            </button>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>
+              Your journey will be built for this career path
+            </p>
+
+            {availableProfessions.map(profession => (
+              <button
+                key={profession.id}
+                style={optionStyle(state.professionId === profession.id)}
+                onClick={() => { selectProfession(profession.id); rerender(); }}
+              >
+                {PROFESSION_ICONS[profession.id] ?? '🎯'} {profession.title}
+              </button>
+            ))}
+
+            {COMING_SOON.map(cs => (
+              <button
+                key={cs.id}
+                style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
+                disabled
+              >
+                {cs.icon} {cs.title} (coming soon)
+              </button>
+            ))}
           </div>
         );
+      }
 
       case 4: {
         const appCount = state.applicationsCount ?? 0;

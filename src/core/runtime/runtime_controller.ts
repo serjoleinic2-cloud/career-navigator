@@ -3,7 +3,7 @@ import { initializeJourneyRuntime } from './journey_runtime';
 import type { OnboardingState } from '../onboarding/onboarding_state';
 import type { UserAction } from '../skill_engine';
 import type { SkillNode, SkillState } from '../skill_state';
-import { getActiveChapters, getActiveProfession } from '../profession_loader';
+import { getActiveChapters, getActiveProfession, setActiveProfession } from '../profession_loader';
 import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
@@ -24,6 +24,16 @@ let activeTask: Task | null = null;
 let activeTaskDefinition: TaskDefinition | null = null;
 
 export function startJourney(onboardingState: OnboardingState): JourneyRuntimeState {
+  // Ensure core profession_loader knows the active profession
+  // before initializeJourneyRuntime calls getActiveProfession()
+  const professionId = onboardingState.professionId ?? 'software_engineer';
+  try {
+    setActiveProfession(professionId);
+  } catch (err) {
+    console.error('[startJourney] setActiveProfession failed:', err);
+    throw new Error(`Failed to activate profession: ${professionId}`);
+  }
+
   runtimeState = initializeJourneyRuntime(onboardingState);
   saveRuntime(runtimeState);
   emit('SYSTEM_BOOTED', { professionId: runtimeState.professionId });

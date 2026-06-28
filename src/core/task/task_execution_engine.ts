@@ -58,24 +58,35 @@ const READINESS_MAP = { success: 5.0, partial: 2.0, fail: -1.0 };
 
 const VALIDATION_RULES: Record<TaskType, (payload: unknown) => { valid: boolean; quality: number }> = {
   CHECKBOX_TASK: (payload) => {
+    // User checked at least one item OR sent { completed: true } = success
+    if (payload && typeof payload === 'object' && (payload as Record<string, unknown>).completed) {
+      return { valid: true, quality: 1.0 };
+    }
     const items = Array.isArray(payload) ? payload : [];
+    if (items.length === 0) return { valid: true, quality: 1.0 }; // no items = auto-pass
     const checked = items.filter((i: unknown) => (i as { checked?: boolean }).checked).length;
-    const total = items.length || 1;
-    const ratio = checked / total;
-    return { valid: ratio >= 0.5, quality: ratio };
+    return { valid: true, quality: checked / items.length };
   },
   TEXT_TASK: (payload) => {
-    const text = String(payload || '');
-    const length = text.trim().length;
-    return { valid: length >= 20, quality: Math.min(length / 100, 1) };
+    // Any non-empty response = valid. Length drives quality but not pass/fail.
+    const text = String(payload || '').trim();
+    if (!text || text === 'false' || text === 'null') {
+      // User explicitly didn't respond — still pass, just lower quality
+      return { valid: true, quality: 0.5 };
+    }
+    return { valid: true, quality: Math.min(text.length / 50, 1.0) };
   },
   SELF_ASSESSMENT: (payload) => {
-    const score = Number(payload) || 0;
-    return { valid: score >= 3, quality: score / 5 };
+    const score = Number(payload) || 3;
+    return { valid: true, quality: score / 5 };
   },
   MULTIPLE_CHOICE: (payload) => {
+    // { completed: true } from JourneyScreen = user self-certified completion
+    if (payload && typeof payload === 'object' && (payload as Record<string, unknown>).completed) {
+      return { valid: true, quality: 1.0 };
+    }
     const answer = String(payload || '');
-    return { valid: answer === 'correct', quality: answer === 'correct' ? 1 : 0 };
+    return { valid: answer.length > 0, quality: answer === 'correct' ? 1.0 : 0.7 };
   },
 };
 

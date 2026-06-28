@@ -3,7 +3,7 @@ import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, getActiveNode, submitTask, getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
 import type { SkillNode } from '@/core/skill_state';
-import { getActiveProfession, getActiveProfessionId } from '@/core/profession_loader';
+import { getActiveProfessionId } from '@/core/profession_loader';
 import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
 import type { TaskContent } from '@/core/task_content';
 import { InterviewTrainerScreen } from '@/screens/InterviewTrainer/InterviewTrainerScreen';
@@ -47,23 +47,17 @@ export function JourneyScreen() {
   const nav = getNavigation();
   const node: SkillNode | null = getActiveNode();
 
-  let professionNodes: { id: string; title: string; state: string; domain: string }[] = [];
-  try {
-    const profession = getActiveProfession();
-    professionNodes = profession.skillGraph.map(n => ({
-      id: n.id,
-      title: n.skill,
-      state: n.state,
-      domain: typeof n.domain === 'string' ? n.domain : String(n.domain),
-    }));
-  } catch {
-    professionNodes = ui.nodes.map(n => ({
-      id: n.id,
-      title: n.title,
-      state: n.state,
-      domain: 'Unknown',
-    }));
-  }
+  // Always read from runtimeState.nodeStates — this is the live state after task completions.
+  // skillGraph is static and must never be used for rendering node progress.
+  const runtime = getRuntimeState();
+  const professionNodes: { id: string; title: string; state: string; domain: string }[] = runtime
+    ? Object.values(runtime.nodeStates).map(n => ({
+        id: n.id,
+        title: n.skill,
+        state: n.state,
+        domain: typeof n.domain === 'string' ? n.domain : String(n.domain),
+      }))
+    : [];
 
   const handleNodeSelect = (nodeId: string) => {
     setActiveNode(nodeId);

@@ -1,6 +1,6 @@
-import { loadProfessionSync } from '../../professions/loader/profession_loader';
-import { SoftwareEngineerModule } from '../../professions/software_engineer/module';
+import { getDefaultProfession } from '../../professions/profession_registry';
 import { setActiveProfession, getActiveProfession } from '../../professions/profession_service';
+import { setActiveProfession as setCoreActiveProfession } from '../profession_loader';
 import { createEmptyUnifiedState } from '../runtime/unified_runtime_state';
 import type { UnifiedRuntimeState } from '../runtime/unified_runtime_state';
 import { replaceState } from '../runtime/runtime_store';
@@ -20,8 +20,20 @@ export type UserProfile = {
 export function initializeSystem(
   userProfile: UserProfile = { userId: 'anonymous' }
 ): SystemContext {
-  loadProfessionSync(SoftwareEngineerModule);
-  setActiveProfession(userProfile.professionId ?? 'software_engineer');
+  // Professions are already registered by profession_auto_loader before this runs.
+  // loadProfessionSync is a no-op here since registerProfession guards duplicates.
+  // We just need to set the active profession.
+  const targetProfessionId = userProfile.professionId
+    ?? getDefaultProfession()?.id
+    ?? 'software_engineer';
+
+  setActiveProfession(targetProfessionId);
+  // Also sync core profession_loader (used by journey_runtime.ts)
+  try {
+    setCoreActiveProfession(targetProfessionId);
+  } catch {
+    // Will be set again in startJourney — safe to ignore here
+  }
 
   const profession = getActiveProfession();
   if (!profession) {
