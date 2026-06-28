@@ -1,0 +1,32 @@
+.primary-button {
+  height: 58px;
+  border-radius: 18px;
+  border: none;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  color: #FFF;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.2s, transform 0.1s;
+  min-height: 44px;
+  width: 100%;
+}
+
+.primary-button:hover {
+  filter: brightness(1.05);
+}
+
+.primary-button:active {
+  transform: scale(0.98);
+}
+
+.primary-button:disabled {
+  opacity: 0.5;
+  filter: grayscale(1);
+  cursor: not-allowed;
+  transform: none;
+}

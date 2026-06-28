@@ -1,33 +1,18 @@
-UI FOUNDATION PATCH v1
+JOURNEY SCREEN UX REBUILD v1
 
-Цель:
-Создать единый UI Layout для всего приложения. Не менять runtime, engine, event bus, persistence.
+Цель
 
-Создать компоненты:
+Полностью перестроить JourneyScreen вокруг одной активной задачи.
 
-src/components/layout/
-  AppShell.tsx
-  TopBar.tsx
-  BottomNavigation.tsx
-  GlassCard.tsx
-  IconButton.tsx
-  PrimaryButton.tsx
-  ProgressRing.tsx
+Не менять runtime, learning engine, event bus, persistence.
 
-src/styles/
-  layout.css
-  theme.css
-  animations.css
+Использовать новый AppShell и UI Framework.
 
-Требования.
-
-APP SHELL
-
-Все экраны должны использовать
+=========================================
+НОВАЯ СТРУКТУРА
+=========================================
 
 <AppShell>
-
-внутри которого есть
 
 TopBar
 
@@ -35,182 +20,291 @@ Scrollable Content
 
 BottomNavigation
 
-BottomNavigation всегда fixed.
+=========================================
+1. HERO CARD
+=========================================
 
-Использовать
+Самая верхняя карточка.
 
-padding-bottom: calc(90px + env(safe-area-inset-bottom));
+Показывает только:
 
-TOP BAR
+Chapter
 
-Высота 64px.
+Skill
 
-Glass background.
+Task X of Y
 
-Слева
+Readiness %
+
+Confidence %
+
+Большая ProgressRing.
+
+Большая кнопка
+
+Continue
+
+или
+
+Start Task
+
+если задача ещё не открыта.
+
+=========================================
+2. TODAY'S MISSION
+=========================================
+
+Следующая большая карточка.
+
+Название
+
+Today's Mission
+
+Внутри
+
+Task Title
+
+Objective
+
+Estimated time
+
+Difficulty
+
+Кнопка
+
+Start Mission
+
+Это самая большая кнопка экрана.
+
+=========================================
+3. TASK FLOW
+=========================================
+
+После нажатия
+
+Start Mission
+
+экран НЕ открывает другую страницу.
+
+Он раскрывает Mission Card.
+
+Внутри появляются шаги.
+
+Например
+
+□□□□□□□□
+
+Step 1
+
+Read objective
+
+кнопка
+
+Done
+
+□□□□□□□□
+
+после Done
+
+автоматически раскрывается
+
+Step 2
+
+□□□□□□□□
+
+после Step2
+
+раскрывается
+
+Step3
+
+□□□□□□□□
+
+и так далее
+
+Пользователь никогда не видит сразу длинную инструкцию.
+
+Только один шаг одновременно.
+
+=========================================
+4. PROGRESS INSIDE TASK
+=========================================
+
+Над шагами
+
+Mission Progress
+
+1 / 4
+
+2 / 4
+
+3 / 4
+
+4 / 4
+
+Полоса прогресса.
+
+=========================================
+5. HELP
+=========================================
+
+Внизу Mission Card
+
+две маленькие кнопки
+
+Need Hint
+
+Open Playbook
+
+Hint раскрывает только tips.
+
+Playbook открывает playbook.
+
+=========================================
+6. COMPLETE
+=========================================
+
+После выполнения последнего шага
+
+не происходит сразу submit.
+
+Появляется карточка
+
+Mission Review
+
+Checklist
+
+✓ Objective complete
+
+✓ Evidence prepared
+
+✓ Criteria satisfied
+
+Большая кнопка
+
+Complete Mission
+
+=========================================
+7. RESULT
+=========================================
+
+После Complete Mission
+
+не открывать popup.
+
+Не уходить со страницы.
+
+Показать красивую Result Card.
+
+Mission Complete
+
++XP
+
++Readiness
+
++Confidence
+
+Unlocked
+
+Next Mission
+
+Большая кнопка
+
+Continue Journey
+
+=========================================
+8. SIDEBAR DATA
+=========================================
+
+Advice
+
+Signals
+
+Notes
+
+не занимают место.
+
+Сделать их collapsible.
+
+По умолчанию свернуты.
+
+=========================================
+9. HEADER
+=========================================
+
+Header всегда остаётся сверху.
 
 Back
 
-или
+Chapter
 
-Menu
+Settings
 
-по ситуации.
+=========================================
+10. UX RULES
+=========================================
 
-Центр
+Никогда не показывать пользователю одновременно:
 
-Название страницы.
+Advice
 
-Справа
+Signals
 
-Profile
+Instructions
 
-или
-
-Settings.
-
-Использовать круглые IconButton.
-
-BOTTOM NAVIGATION
-
-5 вкладок.
-
-Journey
+Checklist
 
 Playbook
 
 Notes
 
-World
+Все открываются отдельно.
 
-Profile
+Один экран = одна задача.
 
-Каждая:
+=========================================
+11. АНИМАЦИИ
+=========================================
 
-иконка
+Раскрытие карточек
 
-подпись
+opacity + translateY
 
-активное состояние
+250ms
 
-неактивное состояние
+Кнопки
 
-При нажатии scale 0.95.
+scale
 
-Активная вкладка имеет glow.
+Mission Complete
 
-GLASS CARD
+fade + scale
 
-Единый компонент.
+=========================================
+12. НЕ ДЕЛАТЬ
+=========================================
 
-border-radius 24px
+Никаких modal.
 
-blur
+Никаких alert.
 
-полупрозрачный фон
+Никаких confirm.
 
-тонкая светлая рамка
+Никаких длинных полотен текста.
 
-никаких тяжелых теней.
+=========================================
+РЕЗУЛЬТАТ
 
-PRIMARY BUTTON
+После патча пользователь открывает приложение и за 3 секунды понимает:
 
-Высота 58px
+Где я.
 
-border-radius 18px
+Что делать.
 
-градиент
+Сколько осталось.
 
-hover
+Что получу после выполнения.
 
-active
+Весь интерфейс работает как последовательность маленьких действий, а не как экран с большим количеством информации.
 
-disabled
-
-ICON BUTTON
-
-56x56
-
-круг
-
-glass
-
-hover
-
-active
-
-PROGRESS RING
-
-SVG
-
-анимация заполнения
-
-используется далее для Readiness и Confidence.
-
-THEME
-
-Создать CSS variables.
-
-background
-
-surface
-
-glass
-
-textPrimary
-
-textSecondary
-
-success
-
-warning
-
-danger
-
-resumeColor
-
-linkedinColor
-
-applicationsColor
-
-interviewColor
-
-offerColor
-
-ANIMATIONS
-
-Создать общие keyframes.
-
-fadeUp
-
-fadeIn
-
-pulse
-
-glow
-
-slideIn
-
-scalePress
-
-Все компоненты используют только transform и opacity.
-
-Никаких left/top animations.
-
-Результат.
-
-После патча любой экран приложения можно собрать из готовых компонентов без копирования CSS.
-
-Никакой бизнес-логики.
-
-Только UI Framework.
-
-После этого мы переделаем JourneyScreen полностью. Не косметически, а так, чтобы человек впервые открыв приложение, интуитивно понял:
-
-где он находится;
-что делать прямо сейчас;
-что будет дальше;
-как вернуться назад;
-сколько осталось.
-
-Именно с этого момента приложение начнет ощущаться как Duolingo, Monument Valley или Elevate, а не как набор экранов разработчика.
+Это будет фундамент UX. После него мы займемся JourneyPath, чтобы путь стал визуальной игрой, а не просто списком нод. Именно тогда приложение начнет напоминать Monument Valley, Elevate и Duolingo по ощущениям прохождения.

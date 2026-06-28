@@ -1,0 +1,15 @@
+:root {
+  --bg: #F5F0EB;
+  --surface: #FFFFFF;
+  --glass: rgba(255,255,255,0.7);
+  --textPrimary: #2D3436;
+  --textSecondary: #636E72;
+  --success: #00B894;
+  --warning: #FDCB6E;
+  --danger: #FF6B6B;
+  --resumeColor: #FF6B6B;
+  --linkedinColor: #0077B5;
+  --applicationsColor: #00B894;
+  --interviewColor: #6C5CE7;
+  --offerColor: #FDCB6E;
+}
