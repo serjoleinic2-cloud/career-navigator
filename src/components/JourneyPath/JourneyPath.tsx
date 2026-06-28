@@ -13,13 +13,17 @@ interface JourneyPathProps {
   nodes: JourneyNode[];
   activeNodeId: string | null;
   onNodeSelect: (nodeId: string) => void;
+  totalNodes: number;
+  readinessScore: number;
 }
 
-export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathProps) {
+export function JourneyPath({ nodes, activeNodeId, onNodeSelect, totalNodes, readinessScore }: JourneyPathProps) {
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const chapters = nodes.reduce((acc, node) => {
+  const reversedNodes = [...nodes].reverse();
+
+  const chapters = reversedNodes.reduce((acc, node) => {
     const raw = node.domain || 'Unknown';
     const key = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
     if (!acc[key]) acc[key] = [];
@@ -28,6 +32,9 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathPr
   }, {} as Record<string, JourneyNode[]>);
 
   const chapterNames = Object.keys(chapters);
+
+  const activeOrigIndex = nodes.findIndex(n => n.id === activeNodeId);
+  const activeReversedIndex = reversedNodes.findIndex(n => n.id === activeNodeId);
 
   useEffect(() => {
     if (activeNodeId && nodeRefs.current.has(activeNodeId)) {
@@ -57,14 +64,16 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathPr
         const chapterNodes = chapters[chapterName];
         const isLastChapter = chapterIndex === chapterNames.length - 1;
 
+        const chapterActiveIndex = chapterNodes.findIndex(n => n.id === activeNodeId);
+
         return (
           <div key={chapterName} className="chapter-zone">
-            <div 
-              className="chapter-background" 
+            <div
+              className="chapter-background"
               style={{ background: theme.gradient }}
             />
-            <div 
-              className="chapter-particles" 
+            <div
+              className="chapter-particles"
               style={{ background: theme.particles }}
             />
 
@@ -76,17 +85,27 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathPr
             </div>
 
             <div className="chapter-path">
-              <div 
-                className="path-line" 
-                style={{ 
+              <div
+                className="path-line"
+                style={{
                   background: `linear-gradient(180deg, ${theme.primary} 0%, ${theme.secondary} 100%)`,
                   boxShadow: `0 0 20px ${theme.primary}40`,
                 }}
               />
 
+              {chapterActiveIndex >= 0 && (
+                <div
+                  className="ghost-trail"
+                  style={{
+                    height: `${((chapterActiveIndex + 1) / chapterNodes.length) * 100}%`,
+                  }}
+                />
+              )}
+
               {chapterNodes.map((node, nodeIndex) => {
                 const status = getNodeStatus(node);
                 const offset = getZigZagOffset(nodeIndex);
+                const isActive = node.id === activeNodeId;
 
                 return (
                   <div
@@ -98,10 +117,10 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathPr
                     style={{ marginLeft: offset }}
                     onClick={() => onNodeSelect(node.id)}
                   >
-                    <div 
+                    <div
                       className="node-circle"
                       style={{
-                        borderColor: status === 'current' ? theme.primary : undefined,
+                        borderColor: isActive ? theme.primary : undefined,
                         backgroundColor: status === 'completed' ? theme.primary : undefined,
                       }}
                     >
@@ -110,16 +129,29 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathPr
                       {status === 'current' && '●'}
                       {status === 'available' && '○'}
                     </div>
-                    
+
+                    {isActive && (
+                      <div className="node-character">
+                        <span className="character-body">🧑</span>
+                        <span className="character-arrow">⬆</span>
+                      </div>
+                    )}
+
+                    {isActive && (
+                      <div className="active-pill">
+                        Day {activeOrigIndex + 1}/{totalNodes} • {readinessScore}% Ready
+                      </div>
+                    )}
+
                     <div className="node-label">
                       <span className="node-skill">{node.title}</span>
                       <span className="node-domain">{node.domain}</span>
                     </div>
 
-                    {status === 'current' && (
+                    {isActive && (
                       <>
-                        <div 
-                          className="node-glow" 
+                        <div
+                          className="node-glow"
                           style={{ background: theme.primary }}
                         />
                         <div className="you-are-here">

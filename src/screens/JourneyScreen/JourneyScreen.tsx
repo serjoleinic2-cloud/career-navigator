@@ -281,13 +281,9 @@ export function JourneyScreen() {
         </button>
       </div>
 
-      {/* Header */}
-      <div className="journey-header">
+      {/* Minimal Header */}
+      <div className="journey-header-minimal">
         <h2>{ui.currentChapterTitle}</h2>
-        <div className="badges">
-          <span className="badge readiness">{ui.readinessBadge}</span>
-          <span className="badge confidence">{ui.confidenceBadge}</span>
-        </div>
       </div>
 
       {/* Journey Path */}
@@ -295,6 +291,8 @@ export function JourneyScreen() {
         nodes={professionNodes} 
         activeNodeId={ui.activeNodeId}
         onNodeSelect={handleNodeSelect} 
+        totalNodes={professionNodes.length}
+        readinessScore={runtime?.readinessScore ?? 0}
       />
 
       {/* Node Info */}

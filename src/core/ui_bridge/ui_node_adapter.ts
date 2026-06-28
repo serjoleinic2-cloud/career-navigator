@@ -38,8 +38,8 @@ export function toUINode(
   const uiState = mapStateToUI(skillNode.state);
 
   let positionHint: 'top' | 'middle' | 'bottom' | undefined;
-  if (index === 0) positionHint = 'top';
-  else if (index === total - 1) positionHint = 'bottom';
+  if (index === 0) positionHint = 'bottom';
+  else if (index === total - 1) positionHint = 'top';
   else positionHint = 'middle';
 
   return {
