@@ -64,9 +64,11 @@ export function initializeJourneyRuntime(onboardingState: OnboardingState): Jour
 
   const nodeMap = buildNodeMap(nodes);
 
-  if (profession.entryNodeId && nodeMap[profession.entryNodeId]) {
-    nodeMap[profession.entryNodeId] = {
-      ...nodeMap[profession.entryNodeId],
+  // Unlock the entry node so the user can start immediately
+  const entryNodeId = profession.entryNodeId ?? profession.skillGraph[0]?.id;
+  if (entryNodeId && nodeMap[entryNodeId]) {
+    nodeMap[entryNodeId] = {
+      ...nodeMap[entryNodeId],
       state: 'awareness',
       nextState: 'understanding',
     };

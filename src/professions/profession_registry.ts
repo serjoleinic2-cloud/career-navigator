@@ -19,7 +19,7 @@ const registry = new Map<string, ProfessionModule>();
 
 export function registerProfession(module: ProfessionModule): void {
   if (registry.has(module.id)) {
-    throw new Error(`Profession ${module.id} already registered`);
+    return; // silent on HMR double-registration
   }
   registry.set(module.id, module);
 }

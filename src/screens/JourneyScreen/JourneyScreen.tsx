@@ -78,14 +78,19 @@ export function JourneyScreen() {
 
   const handleCompleteTask = () => {
     if (!selectedTask || !node) return;
+
+    // Ensure task definition is loaded before submitting
     const definition = loadTaskForNode(node.id);
-    if (!definition) {
-      console.warn('No task definition for node', node.id);
-      return;
+    if (definition) {
+      createTaskFromDefinition(definition);
     }
-    createTaskFromDefinition(definition);
-    const result = submitTask({ taskId: selectedTask.id, completed: true });
-    setTaskResult(result);
+
+    try {
+      const result = submitTask({ taskId: selectedTask.id, completed: true });
+      setTaskResult(result);
+    } catch (err) {
+      console.error('[JourneyScreen] submitTask failed:', err);
+    }
     setSelectedTask(null);
   };
 

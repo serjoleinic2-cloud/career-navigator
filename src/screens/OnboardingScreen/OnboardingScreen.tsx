@@ -77,11 +77,19 @@ export default function OnboardingScreen({ onComplete }: Props) {
 
   const handleFinish = () => {
     const finalState = finishOnboarding();
-    if (finalState) {
-      startJourney(finalState);
-      onComplete();
-    } else {
+    if (!finalState) {
+      console.error('[Onboarding] finishOnboarding() returned null — professionId:', getOnboardingState()?.professionId);
       alert('Please complete all steps');
+      return;
+    }
+    console.log('[Onboarding] Starting journey with:', finalState.professionId);
+    try {
+      startJourney(finalState);
+      console.log('[Onboarding] Journey started, calling onComplete');
+      onComplete();
+    } catch (err) {
+      console.error('[Onboarding] startJourney threw:', err);
+      alert('Failed to start journey. Check console.');
     }
   };
 

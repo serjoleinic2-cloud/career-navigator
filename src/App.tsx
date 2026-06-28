@@ -33,7 +33,18 @@ function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  if (!isReady) return <div>Loading...</div>;
+  if (!isReady) return <div style={{ background: '#071320', minHeight: '100vh' }} />;
+
+  if (showOnboarding) {
+    return (
+      <OnboardingScreen
+        onComplete={() => {
+          setShowOnboarding(false);
+          window.location.hash = '';
+        }}
+      />
+    );
+  }
 
   if (showNotes) {
     return (
@@ -53,14 +64,6 @@ function App() {
           setShowPlaybook(false);
           window.location.hash = '';
         }}
-      />
-    );
-  }
-
-  if (showOnboarding) {
-    return (
-      <OnboardingScreen
-        onComplete={() => setShowOnboarding(false)}
       />
     );
   }

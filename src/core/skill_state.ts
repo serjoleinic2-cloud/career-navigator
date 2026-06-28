@@ -23,7 +23,7 @@ export interface SkillNode {
 }
 
 export const STATE_FLOW: Record<SkillState, SkillState | null> = {
-  locked: null,
+  locked: 'awareness',
   awareness: 'understanding',
   understanding: 'application',
   application: 'readiness',

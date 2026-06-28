@@ -4,16 +4,12 @@ import { isSystemReady } from './system_context';
 
 export function startCareerNavigator(userId?: string): SystemContext {
   if (isSystemReady()) {
-    throw new Error('System already initialized');
+    // Already initialized — safe to ignore on HMR
+    return initializeSystem({ userId: userId ?? `user_${Date.now()}` });
   }
-
-  return initializeSystem({
-    userId: userId ?? `user_${Date.now()}`,
-  });
+  return initializeSystem({ userId: userId ?? `user_${Date.now()}` });
 }
 
 export function restartCareerNavigator(userId?: string): SystemContext {
-  return initializeSystem({
-    userId: userId ?? `user_${Date.now()}`,
-  });
+  return initializeSystem({ userId: userId ?? `user_${Date.now()}` });
 }
