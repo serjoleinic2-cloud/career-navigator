@@ -1,0 +1,57 @@
+.mission-flow {
+  margin: 0 16px 16px;
+}
+
+.mission-flow-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mission-flow-progress-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--textSecondary, #636E72);
+  min-width: 36px;
+}
+
+.mission-flow-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mission-flow-progress-fill {
+  height: 100%;
+  background: #FF6B6B;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.mission-flow-step {
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+
+.mission-flow-step-card {
+  margin-bottom: 12px;
+}
+
+.mission-flow-step-number {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--textSecondary, #636E72);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.mission-flow-step-text {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  color: var(--textPrimary, #2D3436);
+  line-height: 1.6;
+}

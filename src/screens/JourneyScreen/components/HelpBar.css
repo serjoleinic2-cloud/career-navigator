@@ -1,0 +1,39 @@
+.help-bar {
+  display: flex;
+  gap: 12px;
+  margin: 0 16px 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.help-bar-hint {
+  width: 100%;
+  animation: fadeUp 0.25s ease-out;
+}
+
+.help-bar-hint-title {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--textSecondary, #636E72);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.help-bar-hint-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.help-bar-hint-item {
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--textSecondary, #636E72);
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.help-bar-hint-item:last-child {
+  border-bottom: none;
+}

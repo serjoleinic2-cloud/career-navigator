@@ -1,0 +1,65 @@
+.hero-card {
+  margin: 16px;
+  animation: fadeUp 0.3s ease-out;
+}
+
+.hero-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.hero-card-info {
+  flex: 1;
+  margin-right: 16px;
+}
+
+.hero-card-chapter {
+  font-size: 12px;
+  color: var(--textSecondary, #636E72);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.hero-card-skill {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--textPrimary, #2D3436);
+}
+
+.hero-card-progress {
+  font-size: 13px;
+  color: var(--textSecondary, #636E72);
+}
+
+.hero-card-scores {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.hero-card-score {
+  flex: 1;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.hero-card-score-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--textPrimary, #2D3436);
+}
+
+.hero-card-score-label {
+  display: block;
+  font-size: 11px;
+  color: var(--textSecondary, #636E72);
+  margin-top: 2px;
+}

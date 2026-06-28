@@ -1,0 +1,74 @@
+.collapsible-sidebar {
+  margin: 0 16px 16px;
+}
+
+.sidebar-section {
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.sidebar-toggle {
+  width: 100%;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--textPrimary, #2D3436);
+  min-height: 44px;
+}
+
+.sidebar-toggle:active {
+  transform: scale(0.98);
+}
+
+.sidebar-arrow {
+  font-size: 12px;
+  color: var(--textSecondary, #636E72);
+  transition: transform 0.2s;
+}
+
+.sidebar-content {
+  padding: 0 20px 16px;
+  animation: fadeUp 0.25s ease-out;
+}
+
+.sidebar-advice-item {
+  margin-bottom: 12px;
+}
+
+.sidebar-advice-key {
+  display: block;
+  font-size: 11px;
+  color: var(--textSecondary, #636E72);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.sidebar-advice-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--textPrimary, #2D3436);
+  line-height: 1.5;
+}
+
+.sidebar-signals-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar-signal-item {
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--textSecondary, #636E72);
+  line-height: 1.5;
+}
