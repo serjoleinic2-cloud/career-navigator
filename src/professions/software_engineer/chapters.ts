@@ -26,6 +26,12 @@ export const SOFTWARE_ENGINEER_CHAPTERS: Chapter[] = [
     nodeIds: ['interview-prep', 'mock-interview', 'technical-prep', 'interview-mindset', 'behavioral-prep', 'system-design-prep', 'on-site-prep', 'phone-screen', 'interview-followup', 'presentation-prep'],
   },
   {
+    id: 'offer_preparation',
+    title: 'Offer Preparation',
+    description: 'Prepare for salary negotiations, review offers, and plan your transition.',
+    nodeIds: ['salary_negotiation', 'offer_review', 'resignation_letter'],
+  },
+  {
     id: 'offer',
     title: 'Offer',
     description: 'Negotiate and evaluate offers to maximize your career trajectory.',

@@ -5,12 +5,14 @@ import OnboardingScreen from './screens/OnboardingScreen/OnboardingScreen';
 import { JourneyScreen } from './screens/JourneyScreen/JourneyScreen';
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
+import { DashboardScreen } from './screens/DashboardScreen/DashboardScreen';
 
 function App() {
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showPlaybook, setShowPlaybook] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   useEffect(() => {
     const saved = loadRuntime();
@@ -27,6 +29,7 @@ function App() {
     const onHashChange = () => {
       setShowPlaybook(window.location.hash === '#playbook');
       setShowNotes(window.location.hash === '#notes');
+      setShowDashboard(window.location.hash === '#dashboard');
     };
     window.addEventListener('hashchange', onHashChange);
     onHashChange();
@@ -51,6 +54,17 @@ function App() {
       <NotesScreen
         onBack={() => {
           setShowNotes(false);
+          window.location.hash = '';
+        }}
+      />
+    );
+  }
+
+  if (showDashboard) {
+    return (
+      <DashboardScreen
+        onBack={() => {
+          setShowDashboard(false);
           window.location.hash = '';
         }}
       />

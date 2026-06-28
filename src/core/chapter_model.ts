@@ -6,6 +6,7 @@ export type ChapterId =
   | 'interview_practice'
   | 'offer_prep'
   | 'interviews'
+  | 'offer_preparation'
   | 'offer';
 
 export type Chapter = {

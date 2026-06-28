@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 35%, var(--bg-2) 70%, var(--bg-3) 100%);
+  background: #2D3436;
   background-attachment: fixed;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -171,16 +171,32 @@
   text-align: center;
 }
 
+.trainer-countdown-circle {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trainer-countdown-circle svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .trainer-countdown-number {
-  font-size: 80px;
+  font-size: 72px;
   font-weight: 700;
   color: var(--interview);
   line-height: 1;
+  z-index: 1;
   animation: countdown-pop 1s ease-in-out;
 }
 
 .trainer-countdown-label {
-  margin-top: 16px;
+  margin-top: 24px;
   font-size: 16px;
   color: var(--text-secondary);
 }
@@ -229,6 +245,74 @@
 
 .trainer-recording-hint {
   margin: 12px 0 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Waveform */
+.trainer-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 20px 0 8px;
+  height: 40px;
+}
+
+.trainer-waveform-bar {
+  width: 4px;
+  height: 100%;
+  background: #FF6B6B;
+  border-radius: 2px;
+  animation: waveform-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes waveform-pulse {
+  0% { transform: scaleY(0.2); }
+  100% { transform: scaleY(1); }
+}
+
+/* Pulsing Record Button */
+.trainer-record-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid #FF6B6B;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: record-pulse 1.5s ease-in-out infinite;
+  transition: transform 0.2s;
+  margin: 0 auto;
+}
+
+.trainer-record-btn:hover {
+  transform: scale(1.05);
+}
+
+.trainer-record-btn:active {
+  transform: scale(0.95);
+}
+
+.trainer-record-btn-inner {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: #FF6B6B;
+  display: block;
+}
+
+@keyframes record-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.5); }
+  50% { box-shadow: 0 0 0 16px rgba(255, 107, 107, 0); }
+}
+
+.trainer-record-label {
+  display: block;
+  text-align: center;
+  margin-top: 8px;
   font-size: 13px;
   color: var(--text-muted);
 }

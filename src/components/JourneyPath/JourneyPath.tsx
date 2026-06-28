@@ -117,10 +117,16 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect }: JourneyPathPr
                     </div>
 
                     {status === 'current' && (
-                      <div 
-                        className="node-glow" 
-                        style={{ background: theme.primary }}
-                      />
+                      <>
+                        <div 
+                          className="node-glow" 
+                          style={{ background: theme.primary }}
+                        />
+                        <div className="you-are-here">
+                          <span className="pulsing-dot" style={{ backgroundColor: theme.primary }} />
+                          You are here
+                        </div>
+                      </>
                     )}
                   </div>
                 );

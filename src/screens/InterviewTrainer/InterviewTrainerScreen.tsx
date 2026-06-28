@@ -303,8 +303,22 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: TrainerPro
       {/* Phase: countdown */}
       {phase === 'countdown' && (
         <div className="trainer-countdown">
-          <div className="trainer-countdown-number" key={countdownValue}>
-            {countdownValue}
+          <div className="trainer-countdown-circle">
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
+              <circle
+                cx="80" cy="80" r="70"
+                fill="none"
+                stroke="var(--interview)"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 70}
+                strokeDashoffset={2 * Math.PI * 70 * (1 - countdownValue / 5)}
+                transform="rotate(-90 80 80)"
+                style={{ transition: 'stroke-dashoffset 0.9s linear' }}
+              />
+            </svg>
+            <div className="trainer-countdown-number">{countdownValue}</div>
           </div>
           <p className="trainer-countdown-label">Prepare your answer...</p>
         </div>
@@ -313,17 +327,23 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: TrainerPro
       {/* Phase: recording */}
       {phase === 'recording' && (
         <>
-          <div className="trainer-buttons">
-            <button className="trainer-btn primary" onClick={handleStopRecording} aria-label="Stop recording">
-              ⏹ Stop Recording
-            </button>
-          </div>
           <div className="trainer-recording">
             <div className="trainer-recording-indicator">
               <span className="trainer-recording-dot" />
               <span className="trainer-recording-text">Recording...</span>
             </div>
+            <div className="trainer-waveform">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="trainer-waveform-bar" style={{ animationDelay: `${i * 0.15}s` }} />
+              ))}
+            </div>
             <p className="trainer-recording-hint">Speak clearly into your microphone</p>
+          </div>
+          <div className="trainer-buttons">
+            <button className="trainer-record-btn" onClick={handleStopRecording} aria-label="Stop recording">
+              <span className="trainer-record-btn-inner" />
+            </button>
+            <span className="trainer-record-label">Tap to stop</span>
           </div>
         </>
       )}

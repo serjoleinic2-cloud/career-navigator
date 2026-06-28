@@ -26,6 +26,8 @@ export function JourneyScreen() {
   const [platformTaskDef, setPlatformTaskDef] = useState<TaskDefinition | null>(null);
   const [fabVisible, setFabVisible] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
+  const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
+  const [lockedToast, setLockedToast] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -109,10 +111,26 @@ export function JourneyScreen() {
     return `${m}:${s}`;
   };
 
+  // Toast auto-dismiss
+  useEffect(() => {
+    if (lockedToast) {
+      const t = setTimeout(() => setLockedToast(null), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [lockedToast]);
+
   const handleNodeSelect = (nodeId: string) => {
     setActiveNode(nodeId);
     setSelectedTask(null);
     setTaskResult(null);
+    const clickedRuntime = getRuntimeState();
+    const clickedNodeState = clickedRuntime?.nodeStates[nodeId]?.state;
+    if (clickedNodeState === 'locked') {
+      setLockedToast('Complete previous tasks to unlock this node.');
+      setClickedNodeId(null);
+      setPlatformTaskDef(null);
+      return;
+    }
     const taskDef = getTaskByNodeId(nodeId);
     setPlatformTaskDef(taskDef ?? null);
     setClickedNodeId(nodeId);
@@ -161,6 +179,7 @@ export function JourneyScreen() {
     try {
       const result = submitTask({ taskId: selectedTask.id, completed: true });
       setTaskResult(result);
+      setCompletedTaskIds(prev => [...prev, selectedTask.id]);
     } catch (err) {
       console.error('[JourneyScreen] submitTask failed:', err);
     }
@@ -245,19 +264,22 @@ export function JourneyScreen() {
   return (
     <div className="journey-screen" ref={scrollRef}>
       {/* FAB */}
-      <button
-        className={`fab-button ${fabVisible ? 'fab-visible' : 'fab-hidden'}`}
-        onClick={() => {
-          if (node) {
-            const taskDef = getTaskByNodeId(node.id);
-            setPlatformTaskDef(taskDef ?? null);
-            setClickedNodeId(node.id);
-          }
-        }}
-        aria-label="Start Day"
-      >
-        ▶
-      </button>
+      <div className={`fab-container ${fabVisible ? 'fab-visible' : 'fab-hidden'}`}>
+        <span className="fab-tooltip" data-tooltip="Quick start current task">Quick start current task</span>
+        <button
+          className="fab-button"
+          onClick={() => {
+            if (node) {
+              const taskDef = getTaskByNodeId(node.id);
+              setPlatformTaskDef(taskDef ?? null);
+              setClickedNodeId(node.id);
+            }
+          }}
+          aria-label="Start Day"
+        >
+          ▶
+        </button>
+      </div>
 
       {/* Header */}
       <div className="journey-header">
@@ -334,20 +356,30 @@ export function JourneyScreen() {
         {/* Task Detail */}
         {selectedTask && !taskResult && (
           <div className="task-detail">
+            {node.tasks.indexOf(selectedTask) > 0 && completedTaskIds.includes(node.tasks[node.tasks.indexOf(selectedTask) - 1]?.id) && (
+              <div className="previous-task-badge">Previous task completed ✅</div>
+            )}
             <div className="task-detail-header">
               <div>
                 <h4>{selectedTask.title}</h4>
                 <div className="task-progress-dots">
-                  {node.tasks.map((t, i) => (
-                    <span
-                      key={t.id}
-                      className={`progress-dot ${t.id === selectedTask.id ? 'active' : ''} ${i < node.tasks.indexOf(selectedTask) ? 'done' : ''}`}
-                    />
-                  ))}
+                  {node.tasks.map(t => {
+                    const isCompleted = completedTaskIds.includes(t.id);
+                    const isCurrent = t.id === selectedTask.id;
+                    return (
+                      <span key={t.id} className="progress-dot-wrapper">
+                        <span
+                          className={`progress-dot ${isCurrent ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                        >
+                          {isCompleted && '✓'}
+                        </span>
+                      </span>
+                    );
+                  })}
                   <span className="progress-label">Task {node.tasks.indexOf(selectedTask) + 1} of {node.tasks.length}</span>
                 </div>
               </div>
-              <div className="task-timer">⏱ {formatTime(timerSeconds)}</div>
+              <div className="task-timer">Est. {selectedTask.estimatedMinutes} min | Spent {formatTime(timerSeconds)}</div>
             </div>
             <p className="objective"><strong>Objective:</strong> {selectedTask.objective}</p>
             
@@ -488,6 +520,9 @@ export function JourneyScreen() {
         <button onClick={() => { window.location.hash = '#notes'; }}>
           Notes
         </button>
+        <button onClick={() => { window.location.hash = '#dashboard'; }}>
+          Dashboard
+        </button>
         <button 
           disabled={!nav.hasNext} 
           onClick={() => handleNodeSelect(nav.nextNodeId!)}
@@ -497,10 +532,13 @@ export function JourneyScreen() {
       </div>
 
       {/* Platform Modal (Bottom Sheet) */}
+      {/* Locked Toast */}
+      {lockedToast && <div className="locked-toast">{lockedToast}</div>}
+
+      {/* Platform Modal (Bottom Sheet) */}
       {clickedNodeId && runtime && runtime.nodeStates[clickedNodeId] && (() => {
         const clickedNode = runtime.nodeStates[clickedNodeId];
         const nodeState = clickedNode.state;
-        const isLocked = nodeState === 'locked';
         const isCompleted = nodeState === 'confidence' || nodeState === 'execution';
         const taskDef = platformTaskDef;
 
@@ -512,13 +550,6 @@ export function JourneyScreen() {
                 <h3>{clickedNode.skill}</h3>
                 <button className="modal-close" onClick={handleClosePlatformModal}>✕</button>
               </div>
-
-              {isLocked && (
-                <div className="modal-body locked-content">
-                  <div className="locked-icon">🔒</div>
-                  <p>Complete previous tasks to unlock this node.</p>
-                </div>
-              )}
 
               {isCompleted && (
                 <div className="modal-body completed-content">
@@ -535,7 +566,7 @@ export function JourneyScreen() {
                 </div>
               )}
 
-              {!isLocked && !isCompleted && taskDef && (
+              {!isCompleted && taskDef && (
                 <div className="modal-body active-content">
                   <p className="task-description">{taskDef.description}</p>
                   <div className="task-meta-row">
@@ -548,7 +579,7 @@ export function JourneyScreen() {
                 </div>
               )}
 
-              {!isLocked && !isCompleted && !taskDef && (
+              {!isCompleted && !taskDef && (
                 <div className="modal-body">
                   <p>No task available for this node.</p>
                 </div>

@@ -13,6 +13,7 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
   const [editContent, setEditContent] = useState('');
   const [newNoteContent, setNewNoteContent] = useState('');
   const [toast, setToast] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
     setNotes(getAllNotes());
@@ -69,10 +70,37 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
   };
 
   const handleDelete = (id: string) => {
-    deleteNote(id);
-    if (editingId === id) {
-      setEditingId(null);
-      setEditContent('');
+    setConfirmDeleteId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (confirmDeleteId) {
+      deleteNote(confirmDeleteId);
+      if (editingId === confirmDeleteId) {
+        setEditingId(null);
+        setEditContent('');
+      }
+      setConfirmDeleteId(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteId(null);
+  };
+
+  const getNodeColor = (nodeId: string): string => {
+    const rt = getRuntimeState();
+    const node = rt?.nodeStates[nodeId];
+    if (!node) return '#888';
+    switch (node.state) {
+      case 'locked': return '#808080';
+      case 'awareness': return '#FFD700';
+      case 'understanding': return '#FF8C00';
+      case 'application': return '#4A90D9';
+      case 'readiness': return '#9B59B6';
+      case 'execution': return '#2ECC71';
+      case 'confidence': return '#008080';
+      default: return '#888';
     }
   };
 
@@ -117,6 +145,7 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
         )}
         {filtered.map(note => (
           <div key={note.id} className="note-card">
+            <div className="stage-dot" style={{ backgroundColor: getNodeColor(note.nodeId) }} />
             <button
               className="note-delete"
               onClick={() => handleDelete(note.id)}
@@ -129,7 +158,13 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
               </span>
             </div>
 
-            {editingId === note.id ? (
+            {confirmDeleteId === note.id ? (
+              <div className="confirm-delete">
+                <span>Delete forever?</span>
+                <button className="confirm-yes" onClick={handleConfirmDelete}>Yes</button>
+                <button className="confirm-no" onClick={handleCancelDelete}>No</button>
+              </div>
+            ) : editingId === note.id ? (
               <div className="note-edit">
                 <textarea
                   value={editContent}

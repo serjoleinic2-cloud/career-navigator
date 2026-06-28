@@ -581,6 +581,88 @@ export const TASK_LIBRARY: TaskDefinition[] = [
       fail: 'Set a 24-hour deadline. Make the best decision with the information you have.',
     },
   },
+  // ═══════════════════════════════════════════════════════════
+  // CHAPTER 6: OFFER PREPARATION (3 tasks)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'task-salary-prep',
+    chapterId: 'offer_preparation',
+    nodeId: 'salary_negotiation',
+    title: 'Salary Research & Negotiation Prep',
+    description: 'Research market rates for your role and prepare your negotiation strategy.',
+    type: 'TEXT_TASK',
+    difficulty: 3,
+    estimatedDuration: 20,
+    validationType: { type: 'min_length', min: 80, placeholder: 'Market rate range: ___\nTarget salary: ___\nKey talking points: ___' },
+    completionRule: 'all_or_nothing',
+    rewards: { confidenceBonus: 0.15, readinessBonus: 5, chapterProgress: 15 },
+    feedback: {
+      success: 'Excellent preparation! Knowing market rates removes the guesswork from negotiations.',
+      partial: 'Good research. Add specific numbers and justifications to strengthen your position.',
+      fail: 'Without market data, you cannot negotiate confidently. Research 3+ sources before proceeding.',
+    },
+    recommendation: {
+      success: 'You are ready to negotiate. Move to Offer Review to evaluate your full package.',
+      partial: 'Check Levels.fyi and Glassdoor for more accurate data points.',
+      fail: 'Use Levels.fyi, Glassdoor, and Blind to gather salary data for your role and location.',
+    },
+  },
+  {
+    id: 'task-offer-review',
+    chapterId: 'offer_preparation',
+    nodeId: 'offer_review',
+    title: 'Complete Offer Review',
+    description: 'Review the full offer package including salary, equity, benefits, and growth potential.',
+    type: 'CHECKBOX_TASK',
+    difficulty: 2,
+    estimatedDuration: 15,
+    validationType: {
+      type: 'min_checked',
+      min: 3,
+      items: [
+        'Reviewed base salary against market data',
+        'Evaluated equity or stock option value',
+        'Reviewed benefits (health, PTO, remote policy)',
+        'Assessed growth opportunities and team quality',
+        'Compared with other offers or alternatives',
+      ],
+    },
+    completionRule: 'partial_credit',
+    rewards: { confidenceBonus: 0.10, readinessBonus: 3, chapterProgress: 15 },
+    feedback: {
+      success: 'Thorough review! You understand the full value of your offer beyond just salary.',
+      partial: 'Good start. Focus on the areas you skipped to make a fully informed decision.',
+      fail: 'An offer is more than a number. Review all components before making a decision.',
+    },
+    recommendation: {
+      success: 'You know what your offer is worth. Time to prepare for your transition.',
+      partial: 'Research one more area you skipped — equity or benefits can be significant.',
+      fail: 'Read the full offer letter carefully. Create a list of questions for the recruiter.',
+    },
+  },
+  {
+    id: 'task-resignation-letter',
+    chapterId: 'offer_preparation',
+    nodeId: 'resignation_letter',
+    title: 'Write Your Resignation Letter',
+    description: 'Write a professional resignation letter for your current position (or draft one for future use).',
+    type: 'TEXT_TASK',
+    difficulty: 1,
+    estimatedDuration: 10,
+    validationType: { type: 'min_length', min: 40, placeholder: 'Dear [Manager],\n\nPlease accept this letter as formal notification...\n\nSincerely,\n[Your Name]' },
+    completionRule: 'all_or_nothing',
+    rewards: { confidenceBonus: 0.05, readinessBonus: 2, chapterProgress: 10 },
+    feedback: {
+      success: 'Professional and clear. Your resignation will leave a positive lasting impression.',
+      partial: 'Good draft. Keep it concise and positive — avoid negative comments.',
+      fail: 'Keep it simple: state your departure date, express gratitude, and offer transition help.',
+    },
+    recommendation: {
+      success: 'You are fully prepared for your career transition. Journey complete!',
+      partial: 'Shorten your letter and remove any negative or emotional language.',
+      fail: 'Use a simple template: notification → gratitude → transition offer → closing.',
+    },
+  },
 ];
 
 // ─── Task Factory ───────────────────────────────────────────

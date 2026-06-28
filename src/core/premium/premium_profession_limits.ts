@@ -25,7 +25,7 @@ export function isFeatureAvailable(
 
 export const FREE_CHAPTER_IDS: ChapterId[] = ['resume', 'linkedin', 'applications'];
 
-export const PREMIUM_CHAPTER_IDS: ChapterId[] = ['interviews', 'offer'];
+export const PREMIUM_CHAPTER_IDS: ChapterId[] = ['interviews', 'offer_preparation', 'offer'];
 
 export function isChapterFree(chapterId: ChapterId): boolean {
   return FREE_CHAPTER_IDS.includes(chapterId);

@@ -5,5 +5,6 @@ export const CHAPTER_ORDER: ChapterId[] = [
   'linkedin',
   'applications',
   'interviews',
+  'offer_preparation',
   'offer',
 ];
