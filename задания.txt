@@ -1,43 +1,258 @@
-Не интегрируй AppShell в App.tsx пока.
+MISSION CARD UX PATCH v1
 
-Сейчас нужно только создать UI Foundation как независимый слой.
+Цель
 
-Сделай следующее:
+Переделать отображение текущей задачи без изменения runtime, learning engine, event bus или persistence.
 
-1. Создай компоненты:
+Использовать новые UI-компоненты:
 - AppShell
-- TopBar
-- BottomNavigation
 - GlassCard
 - PrimaryButton
-- IconButton
 - ProgressRing
+- IconButton
 
-2. Создай:
-- theme.css
-- layout.css
-- animations.css
+Изменять только JourneyScreen и связанные UI-компоненты.
 
-3. AppShell должен принимать через props:
-- title
-- showBack
-- onBack
-- children
-- activeTab
-- onTabChange
+=========================================
+УБРАТЬ
+=========================================
 
-4. BottomNavigation не должна знать ничего о runtime, navigation, Journey или React Router. Только callback onTabChange(tabId).
+Не выводить одновременно:
 
-5. TopBar также не должна знать о runtime. Только отображение title и callbacks.
+- Advice
+- Signals
+- Tasks
+- Instructions
+- Completion Criteria
+- Tips
 
-6. Никакой логики приложения не переносить.
+Не показывать длинный экран с большим количеством информации.
 
-7. Никакие существующие экраны не изменять.
+=========================================
+НОВАЯ СТРУКТУРА
+=========================================
 
-8. App.tsx не трогать.
+<AppShell>
 
-9. JourneyScreen не трогать.
+TopBar
 
-10. Это инфраструктурный патч. После него компоненты должны существовать, но ещё нигде не использоваться.
+Hero Card
 
-После завершения предоставить IMPLEMENTATION REPORT и список созданных файлов.
+Today's Mission
+
+Mission Flow
+
+Mission Review
+
+BottomNavigation
+
+=========================================
+HERO CARD
+=========================================
+
+Показывает:
+
+Chapter
+
+Skill
+
+Task X of Y
+
+ProgressRing
+
+Readiness
+
+Confidence
+
+Кнопка Continue.
+
+=========================================
+TODAY'S MISSION
+=========================================
+
+GlassCard.
+
+Отображает:
+
+Task Title
+
+Objective
+
+Estimated Minutes
+
+Difficulty
+
+Кнопка
+
+Start Mission
+
+=========================================
+MISSION FLOW
+=========================================
+
+После Start Mission
+
+не открывать новый экран.
+
+Развернуть карточку.
+
+Показать только первый instruction.
+
+Каждый instruction становится отдельным Step.
+
+Структура:
+
+Step 1
+
+Текст
+
+Done
+
+После Done
+
+раскрывается Step 2.
+
+И так далее.
+
+В каждый момент времени пользователь видит только один активный шаг.
+
+=========================================
+MISSION PROGRESS
+=========================================
+
+Над шагами
+
+Mission Progress
+
+например
+
+2 / 4
+
+и progress bar.
+
+=========================================
+HELP
+=========================================
+
+Под шагом
+
+две маленькие кнопки
+
+Need Hint
+
+Open Playbook
+
+Need Hint раскрывает tips.
+
+Open Playbook вызывает существующий Playbook.
+
+=========================================
+MISSION REVIEW
+=========================================
+
+После последнего шага
+
+показать карточку
+
+Mission Review
+
+Checklist:
+
+Objective completed
+
+Evidence prepared
+
+Completion Criteria satisfied
+
+Большая кнопка
+
+Complete Mission
+
+=========================================
+MISSION RESULT
+=========================================
+
+После submitTask()
+
+НЕ переходить на другой экран.
+
+Показать красивую Result Card.
+
+Mission Complete
+
+XP gained
+
+Readiness gained
+
+Confidence gained
+
+Unlocked
+
+Next Mission
+
+Кнопка Continue Journey
+
+=========================================
+COLLAPSIBLE
+=========================================
+
+Advice
+
+Signals
+
+Notes
+
+внизу страницы.
+
+Все свернуты.
+
+Открываются независимо.
+
+=========================================
+АНИМАЦИИ
+=========================================
+
+Использовать только:
+
+opacity
+
+transform
+
+scale
+
+Никаких modal.
+
+Никаких alert.
+
+=========================================
+НЕ ТРОГАТЬ
+=========================================
+
+runtime_controller
+
+learning_engine
+
+event_bus
+
+task_execution_engine
+
+TaskContent
+
+SkillNode
+
+=========================================
+РЕЗУЛЬТАТ
+
+JourneyScreen становится экраном выполнения одной миссии.
+
+Пользователь всегда понимает:
+
+что делать сейчас,
+
+какой следующий шаг,
+
+сколько осталось,
+
+что получит после завершения.
+
+Предоставить IMPLEMENTATION REPORT и список изменённых файлов.

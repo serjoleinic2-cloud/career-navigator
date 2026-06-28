@@ -1,33 +1,32 @@
 import './ProgressRing.css';
 
 interface ProgressRingProps {
-  percent: number;
-  size?: 'big' | 'mini';
+  progress: number;
+  size?: number;
   strokeColor?: string;
   label?: string;
 }
 
-export function ProgressRing({ percent, size = 'big', strokeColor = '#FF6B6B', label }: ProgressRingProps) {
-  const dim = size === 'big' ? 120 : 40;
-  const strokeWidth = size === 'big' ? 8 : 4;
-  const r = (dim - strokeWidth) / 2;
+export function ProgressRing({ progress, size = 120, strokeColor = '#FF6B6B', label }: ProgressRingProps) {
+  const strokeWidth = size >= 80 ? 8 : 4;
+  const r = (size - strokeWidth) / 2;
   const c = 2 * Math.PI * r;
-  const offset = c - (percent / 100) * c;
+  const offset = c - (progress / 100) * c;
 
   return (
-    <div className={`progress-ring progress-ring-${size}`}>
-      <svg width={dim} height={dim} viewBox={`0 0 ${dim} ${dim}`}>
+    <div className="progress-ring" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <circle
-          cx={dim / 2}
-          cy={dim / 2}
+          cx={size / 2}
+          cy={size / 2}
           r={r}
           fill="none"
           stroke="rgba(0,0,0,0.06)"
           strokeWidth={strokeWidth}
         />
         <circle
-          cx={dim / 2}
-          cy={dim / 2}
+          cx={size / 2}
+          cy={size / 2}
           r={r}
           fill="none"
           stroke={strokeColor}
@@ -35,13 +34,13 @@ export function ProgressRing({ percent, size = 'big', strokeColor = '#FF6B6B', l
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={offset}
-          transform={`rotate(-90 ${dim / 2} ${dim / 2})`}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
           className="progress-ring-fill"
         />
       </svg>
-      {label && size === 'big' && (
+      {label && size >= 80 && (
         <div className="progress-ring-label">
-          <span className="progress-ring-percent">{percent}%</span>
+          <span className="progress-ring-percent">{progress}%</span>
           <span className="progress-ring-text">{label}</span>
         </div>
       )}

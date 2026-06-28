@@ -9,16 +9,6 @@
   transition: stroke-dashoffset 600ms ease-out;
 }
 
-.progress-ring-big {
-  width: 120px;
-  height: 120px;
-}
-
-.progress-ring-mini {
-  width: 40px;
-  height: 40px;
-}
-
 .progress-ring-label {
   position: absolute;
   display: flex;

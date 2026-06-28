@@ -4,38 +4,24 @@ import './TopBar.css';
 
 interface TopBarProps {
   title: string;
-  leftIcon?: string;
-  leftLabel?: string;
-  onLeftClick?: () => void;
-  rightIcon?: string;
-  rightLabel?: string;
-  onRightClick?: () => void;
-  children?: ReactNode;
+  showBack?: boolean;
+  onBack?: () => void;
+  rightAction?: ReactNode;
 }
 
-export function TopBar({
-  title,
-  leftIcon = '←',
-  leftLabel = 'Back',
-  onLeftClick,
-  rightIcon,
-  rightLabel = 'Settings',
-  onRightClick,
-  children,
-}: TopBarProps) {
+export function TopBar({ title, showBack, onBack, rightAction }: TopBarProps) {
   return (
     <div className="top-bar">
       <div className="top-bar-left">
-        {onLeftClick && (
-          <IconButton icon={leftIcon} label={leftLabel} onClick={onLeftClick} />
-        )}
+        <IconButton
+          icon={showBack ? '←' : '☰'}
+          label={showBack ? 'Back' : 'Menu'}
+          onClick={showBack ? onBack : undefined}
+        />
       </div>
       <h1 className="top-bar-title">{title}</h1>
       <div className="top-bar-right">
-        {children}
-        {onRightClick && rightIcon && (
-          <IconButton icon={rightIcon} label={rightLabel} onClick={onRightClick} />
-        )}
+        {rightAction}
       </div>
     </div>
   );

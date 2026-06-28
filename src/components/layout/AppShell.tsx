@@ -7,37 +7,18 @@ import '../../styles/animations.css';
 
 interface AppShellProps {
   title: string;
+  showBack?: boolean;
+  onBack?: () => void;
+  children: ReactNode;
   activeTab: string;
   onTabChange: (tabId: string) => void;
-  onBack?: () => void;
-  rightIcon?: string;
-  rightLabel?: string;
-  onRightClick?: () => void;
-  children: ReactNode;
 }
 
-export function AppShell({
-  title,
-  activeTab,
-  onTabChange,
-  onBack,
-  rightIcon,
-  rightLabel,
-  onRightClick,
-  children,
-}: AppShellProps) {
+export function AppShell({ title, showBack, onBack, children, activeTab, onTabChange }: AppShellProps) {
   return (
     <div className="app-shell">
-      <TopBar
-        title={title}
-        onLeftClick={onBack}
-        rightIcon={rightIcon}
-        rightLabel={rightLabel}
-        onRightClick={onRightClick}
-      />
-      <main className="app-shell-content">
-        {children}
-      </main>
+      <TopBar title={title} showBack={showBack} onBack={onBack} />
+      <main className="app-shell-content">{children}</main>
       <BottomNavigation activeTab={activeTab} onTabChange={onTabChange} />
     </div>
   );
