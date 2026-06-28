@@ -1,109 +1,216 @@
-Создай ARCHITECTURE_SNAPSHOT.md. Не анализируй. Просто выгрузи текущее состояние проекта.
+UI FOUNDATION PATCH v1
 
-Пусть туда попадет примерно следующее:
+Цель:
+Создать единый UI Layout для всего приложения. Не менять runtime, engine, event bus, persistence.
 
-Career Navigator v0.xx
+Создать компоненты:
 
-=== Folder Tree ===
-src/
-  core/
-  screens/
-  world/
-  components/
-  ...
+src/components/layout/
+  AppShell.tsx
+  TopBar.tsx
+  BottomNavigation.tsx
+  GlassCard.tsx
+  IconButton.tsx
+  PrimaryButton.tsx
+  ProgressRing.tsx
 
-=== Runtime ===
-JourneyRuntimeState
-...
-поля
+src/styles/
+  layout.css
+  theme.css
+  animations.css
 
-=== Event Bus ===
-какие события
-кто эмитит
-кто слушает
+Требования.
 
-=== UI Screens ===
+APP SHELL
 
-App.tsx
+Все экраны должны использовать
 
-OnboardingScreen
+<AppShell>
 
-JourneyScreen
+внутри которого есть
 
-InterviewTrainerScreen
+TopBar
 
-PlaybookScreen
+Scrollable Content
 
-NotesScreen
+BottomNavigation
 
-ShareScreen
+BottomNavigation всегда fixed.
 
-=== Navigation ===
-...
+Использовать
 
-=== Persistence ===
-...
+padding-bottom: calc(90px + env(safe-area-inset-bottom));
 
-=== World ===
-...
+TOP BAR
 
-=== Что реально работает ===
+Высота 64px.
 
-=== Что является stub ===
+Glass background.
 
-=== TODO ===
+Слева
 
-Это обычно получается 20-40 страниц текста, а не тысячи файлов.
+Back
 
-Такой файл я могу полностью понять.
+или
 
-Еще лучше
+Menu
 
-Пусть Kimi сделает второй файл
+по ситуации.
 
-PROJECT_INDEX.md
+Центр
 
-где будет буквально
+Название страницы.
 
-src/screens/JourneyScreen/JourneyScreen.tsx
-назначение
-какие функции экспортирует
-какие хуки использует
-какие css подключает
+Справа
 
-src/world/LevelRenderer.tsx
-...
+Profile
 
-src/core/runtime/runtime_controller.ts
-...
+или
 
-То есть каталог проекта с описанием.
+Settings.
 
-После этого я уже знаю архитектуру почти как IDE.
+Использовать круглые IconButton.
 
-А для проверки конкретной фичи
+BOTTOM NAVIGATION
 
-Например ты говоришь
+5 вкладок.
 
-Проверь Interview Trainer.
+Journey
 
-Не надо весь проект.
+Playbook
 
-Попроси Kimi сделать
+Notes
 
-FEATURE_DUMP_INTERVIEW.md
+World
 
-в который входят:
+Profile
 
-InterviewTrainerScreen.tsx
-tts.ts
-stt.ts
-runtime_controller.ts (нужные методы)
+Каждая:
 
-TaskContent interface
+иконка
 
-SkillNode interface
+подпись
 
-И ВСЁ.
+активное состояние
 
-Я смогу проверить логику полностью.
+неактивное состояние
+
+При нажатии scale 0.95.
+
+Активная вкладка имеет glow.
+
+GLASS CARD
+
+Единый компонент.
+
+border-radius 24px
+
+blur
+
+полупрозрачный фон
+
+тонкая светлая рамка
+
+никаких тяжелых теней.
+
+PRIMARY BUTTON
+
+Высота 58px
+
+border-radius 18px
+
+градиент
+
+hover
+
+active
+
+disabled
+
+ICON BUTTON
+
+56x56
+
+круг
+
+glass
+
+hover
+
+active
+
+PROGRESS RING
+
+SVG
+
+анимация заполнения
+
+используется далее для Readiness и Confidence.
+
+THEME
+
+Создать CSS variables.
+
+background
+
+surface
+
+glass
+
+textPrimary
+
+textSecondary
+
+success
+
+warning
+
+danger
+
+resumeColor
+
+linkedinColor
+
+applicationsColor
+
+interviewColor
+
+offerColor
+
+ANIMATIONS
+
+Создать общие keyframes.
+
+fadeUp
+
+fadeIn
+
+pulse
+
+glow
+
+slideIn
+
+scalePress
+
+Все компоненты используют только transform и opacity.
+
+Никаких left/top animations.
+
+Результат.
+
+После патча любой экран приложения можно собрать из готовых компонентов без копирования CSS.
+
+Никакой бизнес-логики.
+
+Только UI Framework.
+
+После этого мы переделаем JourneyScreen полностью. Не косметически, а так, чтобы человек впервые открыв приложение, интуитивно понял:
+
+где он находится;
+что делать прямо сейчас;
+что будет дальше;
+как вернуться назад;
+сколько осталось.
+
+Именно с этого момента приложение начнет ощущаться как Duolingo, Monument Valley или Elevate, а не как набор экранов разработчика.
