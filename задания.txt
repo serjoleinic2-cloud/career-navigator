@@ -68,3 +68,59 @@ Constraints:
 - NO list-based UI
 - NO traditional dashboard components
 - MUST follow game-world paradigm
+
+Create a modular profession package for a gamified Career Navigator app.
+
+Profession: Software Engineer
+
+This is NOT UI-only. It is a full game module.
+
+Structure:
+
+1. world-map definition:
+- nodes for progression:
+  fundamentals → algorithms → system design → interviews → offer
+
+2. missions:
+- 10–15 tasks
+- each task is a small learning/action step
+
+3. interview system:
+- list of technical + behavioral questions
+- structured as boss fight stage
+
+4. progression system:
+- skill growth per node completion
+- confidence score impact
+
+5. playbook:
+- rules of software engineering career progression
+
+6. style:
+- must match Monument Valley inspired world system
+
+Output:
+- JSON or TypeScript module
+- structured, not UI components
+- reusable by core engine
+PROMPT ДЛЯ OPENCODE
+Implement profession module system in Career Navigator.
+
+Requirements:
+
+1. Create /professions directory structure.
+2. Implement loader:
+   loadProfession(professionId)
+3. Ensure WorldMap uses profession module as data source.
+4. Replace any hardcoded journey data with profession-driven data.
+5. Active profession must control:
+   - nodes
+   - missions
+   - interview content
+6. Ensure runtime supports switching professions.
+7. Maintain separation between core engine and profession modules.
+
+Constraints:
+- NO hardcoded UI flows
+- ALL progression must come from profession module
+- system must be extensible for future professions
