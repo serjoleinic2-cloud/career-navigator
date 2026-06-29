@@ -1,439 +1,419 @@
-/* === BASE === */
 .mission-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
+  width: 100%;
+  height: 100vh;
+  background: #f5f0eb;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: background-color 500ms ease;
+  position: relative;
 }
 
-.mission-screen::-webkit-scrollbar {
-  width: 0;
-  background: transparent;
+.mission-enter {
+  animation: missionEnter 0.5s ease-out;
 }
 
-/* === HEADER === */
+@keyframes missionEnter {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
 .mission-header {
+  padding: 20px 24px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  padding-top: calc(12px + env(safe-area-inset-top, 0px));
-  flex-shrink: 0;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.mission-header-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.mission-header-chapter {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+.header-day {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff6b6b;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.header-chapter {
+  font-size: 17px;
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.header-scores {
+  display: flex;
+  gap: 8px;
+}
+
+.score-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 600;
 }
 
-.mission-header-task {
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.score-badge.readiness {
+  background: rgba(0, 184, 148, 0.15);
+  color: #00b894;
 }
 
-/* === BODY === */
-.mission-body {
+.score-badge.confidence {
+  background: rgba(102, 126, 234, 0.15);
+  color: #667eea;
+}
+
+/* Mission Card */
+.mission-card {
   flex: 1;
-  overflow-y: auto;
-  padding: 16px;
+  margin: 20px 24px;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
-.mission-body::-webkit-scrollbar {
+.mission-card::-webkit-scrollbar {
   width: 0;
   background: transparent;
 }
 
-/* === TASK 50: Mission Card === */
-.mission-card-wrapper {
-  animation: card-fade-scale 0.35s ease;
-  max-width: 400px;
-  width: 100%;
-  margin: auto;
+.mission-pulse {
+  animation: missionPulse 0.6s ease-out;
 }
 
-@keyframes card-fade-scale {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes missionPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 12px 40px rgba(0, 184, 148, 0.2); }
+  100% { transform: scale(1); }
 }
 
-.mission-card-glass {
-  border-radius: 32px !important;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  padding: 24px !important;
-}
-
-.mission-card-emoji {
-  font-size: 40px;
-  margin-bottom: 8px;
-}
-
-.mission-card-heading {
-  margin: 0 0 4px;
+.task-type-badge {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 20px;
   font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.mission-card-title {
-  margin: 0 0 20px;
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.mission-card-section {
-  text-align: left;
+  font-weight: 500;
+  color: #667eea;
   margin-bottom: 20px;
 }
 
-.mission-card-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
+.task-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3436;
+  margin-bottom: 12px;
+  line-height: 1.3;
 }
 
-.mission-card-objective {
-  margin: 0;
+.task-description {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: #636e72;
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
 
+/* Card Meta (difficulty, time) */
 .mission-card-meta {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 24px;
 }
 
 .mission-card-meta-item {
   flex: 1;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: #f8f9fa;
+  border-radius: 14px;
   text-align: center;
 }
 
 .mission-card-meta-label {
   display: block;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #b2bec3;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
+  font-weight: 600;
 }
 
 .mission-card-meta-value {
   display: block;
   font-size: 15px;
   font-weight: 600;
-  color: #fff;
+  color: #2d3436;
 }
 
-/* === TASK 51: Step Screen === */
-.step-screen {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  animation: step-slide-in 0.3s ease;
-  max-width: 400px;
-  width: 100%;
-  margin: 0 auto;
+/* Task Sections */
+.task-section {
+  margin-bottom: 20px;
 }
 
-@keyframes step-slide-in {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.step-screen-content {
-  flex: 1;
-}
-
-.step-indicator {
-  display: inline-block;
-  font-size: 13px;
+.task-section-label {
+  font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.08);
-  padding: 4px 12px;
-  border-radius: 999px;
-  margin-bottom: 16px;
+  color: #b2bec3;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
 }
 
-.step-title {
-  font-size: 28px;
-  font-weight: 800;
-  margin: 0 0 16px;
-  color: #fff;
-  letter-spacing: -0.5px;
+/* Instructions list */
+.task-instructions {
+  margin: 0;
+  padding-left: 20px;
 }
 
-.step-instruction {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.7;
-  margin: 0 0 24px;
+.task-instruction-item {
+  font-size: 14px;
+  color: #2d3436;
+  line-height: 1.6;
+  margin-bottom: 6px;
 }
 
-.step-checklist {
+/* Checklist */
+.task-checklist {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 24px;
 }
 
-/* === TASK 52: Checklist Item === */
 .checklist-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #f8f9fa;
   border-radius: 14px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
-  width: 100%;
-  text-align: left;
-  color: #fff;
-  font-size: 14px;
-  font-family: inherit;
+  transition: all 0.2s ease;
 }
 
 .checklist-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: #f0f1f2;
 }
 
-.checklist-item--checked {
-  background: rgba(72, 187, 120, 0.1);
-  border-color: rgba(72, 187, 120, 0.3);
-  transform: scale(0.98);
+.checklist-item.checked {
+  background: rgba(0, 184, 148, 0.1);
 }
 
-.checklist-item-box {
+.checklist-box {
   width: 22px;
   height: 22px;
+  border: 2px solid #dfe6e9;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  transition: all 0.2s ease;
 }
 
-.checklist-item--checked .checklist-item-box {
-  background: #48BB78;
-  border-color: #48BB78;
-  animation: check-pop 0.3s ease;
+.checklist-item.checked .checklist-box {
+  background: #00b894;
+  border-color: #00b894;
 }
 
-@keyframes check-pop {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+.checklist-mark {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.checklist-item-check {
-  animation: checkmark-draw 0.25s ease 0.05s forwards;
-}
-
-.checklist-item-check path {
-  stroke-dasharray: 20;
-  stroke-dashoffset: 20;
-  animation: checkmark-draw 0.25s ease 0.05s forwards;
-}
-
-@keyframes checkmark-draw {
-  to { stroke-dashoffset: 0; }
-}
-
-.checklist-item-label {
-  flex: 1;
+.checklist-label {
+  font-size: 14px;
+  color: #2d3436;
   line-height: 1.4;
 }
 
-.checklist-item--checked .checklist-item-label {
-  color: rgba(255, 255, 255, 0.7);
+.checklist-item.checked .checklist-label {
+  color: #636e72;
+  text-decoration: line-through;
 }
 
-/* === TASK 53: Mission Progress === */
-.mission-progress {
-  margin-bottom: 24px;
-  flex-shrink: 0;
+/* Text Input */
+.task-textarea {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #dfe6e9;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+  background: #f8f9fa;
 }
 
-.mission-progress-header {
+.task-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  background: #fff;
+}
+
+/* Reflection */
+.task-reflection {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.mission-progress-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.mission-progress-percent {
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.mission-progress-track {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.mission-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #48BB78, #68D391);
-  border-radius: 2px;
-  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* === Step Screen Actions === */
-.step-actions {
-  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 16px 0;
-  flex-shrink: 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 16px;
 }
 
-.step-actions > button:last-child {
-  flex: 1;
+.reflection-stars {
+  display: flex;
+  gap: 10px;
 }
 
-/* === TASK 54: Success Screen === */
-.success-screen {
-  flex: 1;
+.reflection-star {
+  font-size: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #dfe6e9;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.reflection-star:hover {
+  transform: scale(1.2);
+}
+
+.reflection-star.active {
+  color: #fdcb6e;
+}
+
+.reflection-label {
+  font-size: 13px;
+  color: #636e72;
+  font-weight: 500;
+}
+
+/* Bottom */
+.mission-bottom {
+  padding: 20px 24px 32px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+}
+
+.mission-primary-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 18px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mission-primary-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.mission-primary-btn:active {
+  transform: scale(0.98);
+}
+
+.mission-primary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Completing state */
+.mission-completing {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: success-appear 0.4s ease;
-  padding: 24px;
+  gap: 12px;
+  padding: 18px;
+  color: #636e72;
+  font-size: 15px;
 }
 
-@keyframes success-appear {
+.completing-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #dfe6e9;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Completed state */
+.mission-completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: completedAppear 0.4s ease-out;
+}
+
+@keyframes completedAppear {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
 
-.success-screen-content {
-  text-align: center;
-  max-width: 320px;
-  width: 100%;
-}
-
-.success-icon {
-  font-size: 72px;
-  margin-bottom: 16px;
-  animation: success-star 0.6s ease;
-}
-
-@keyframes success-star {
-  0% { transform: scale(0) rotate(-30deg); opacity: 0; }
-  60% { transform: scale(1.2) rotate(10deg); }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-
-.success-title {
+.completed-icon {
+  width: 56px;
+  height: 56px;
+  background: #00b894;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 28px;
-  font-weight: 800;
-  margin: 0 0 24px;
   color: #fff;
 }
 
-.success-stats {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 32px;
+.completed-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #00b894;
+}
+
+/* Empty state */
+.mission-empty {
+  align-items: center;
   justify-content: center;
+  gap: 24px;
 }
 
-.success-stat {
-  flex: 1;
-  max-width: 100px;
-  padding: 14px 8px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+.mission-empty-text {
+  font-size: 18px;
+  color: #636e72;
 }
 
-.success-stat-value {
-  display: block;
-  font-size: 20px;
-  font-weight: 700;
-  color: #48BB78;
-  margin-bottom: 4px;
-}
-
-.success-stat-label {
-  display: block;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.success-action {
-  max-width: 240px;
-  margin: 0 auto;
-}
-
-/* === Responsive === */
+/* Responsive */
 @media (max-width: 480px) {
-  .mission-card-glass {
-    padding: 20px !important;
+  .mission-header {
+    padding: 16px;
   }
-  .step-title {
-    font-size: 24px;
+  .mission-card {
+    margin: 16px;
+    padding: 24px;
   }
-  .success-icon {
-    font-size: 56px;
+  .task-title {
+    font-size: 20px;
   }
-  .success-title {
-    font-size: 24px;
+  .mission-bottom {
+    padding: 16px 16px 24px;
   }
 }

@@ -1,134 +1,235 @@
-import { useState, useCallback, useMemo } from 'react';
-import { IconButton } from '@/components/layout/IconButton';
-import { loadTaskForNode, createTaskFromDefinition, submitTask } from '@/core/runtime/runtime_controller';
-import type { TaskContent } from '@/core/task_content';
-import type { TaskResult } from '@/core/task/task_execution_engine';
-import { MissionCard } from './components/MissionCard';
-import { StepScreen } from './components/StepScreen';
-import { SuccessScreen } from './components/SuccessScreen';
-import { useMissionSteps } from './hooks/useMissionSteps';
+import { useState, useCallback, useEffect } from 'react';
 import './MissionScreen.css';
-
-const CHAPTER_BG: Record<string, string> = {
-  resume: '#0a1628',
-  linkedin: '#1a0a2e',
-  applications: '#2a1408',
-  interview: '#0d1117',
-  offer: '#0a1f14',
-};
-
-const DEFAULT_BG = '#071320';
+import type { JourneyRuntimeState } from '../../core/runtime/journey_runtime';
+import { submitTask } from '../../core/runtime/runtime_controller';
+import { emit } from '../../core/events/system_event_bus';
 
 interface MissionScreenProps {
-  task: TaskContent;
-  nodeId: string;
-  chapterDomain?: string;
+  runtimeState: JourneyRuntimeState;
   chapterTitle?: string;
-  onBack: () => void;
-  onContinue: () => void;
+  onComplete: () => void;
 }
 
-type MissionPhase = 'card' | 'step' | 'success';
+type TaskView = 'active' | 'completing' | 'completed';
 
-export function MissionScreen({ task, nodeId, chapterDomain, chapterTitle, onBack, onContinue }: MissionScreenProps) {
-  const [phase, setPhase] = useState<MissionPhase>('card');
-  const [taskResult, setTaskResult] = useState<TaskResult | null>(null);
-  const [checkedMap, setCheckedMap] = useState<Record<number, boolean[]>>({});
+export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chapterTitle, onComplete }) => {
+  const [taskView, setTaskView] = useState<TaskView>('active');
+  const [textInput, setTextInput] = useState('');
+  const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+  const [reflectionScore, setReflectionScore] = useState<number>(0);
 
-  const steps = task.instructions;
-  const criteria = task.completionCriteria;
+  const activeNodeId = runtimeState.activeNodeId;
+  const nodeStates = runtimeState.nodeStates;
+  const activeNode = nodeStates[activeNodeId];
+  const activeTask = activeNode?.tasks?.[0];
 
-  const criteriaPerStep = useMemo(() => {
-    if (steps.length === 0 || criteria.length === 0) return steps.map(() => [] as string[]);
-    const base = Math.ceil(criteria.length / steps.length);
-    const result: string[][] = [];
-    let ci = 0;
-    for (let i = 0; i < steps.length; i++) {
-      const end = i === steps.length - 1 ? criteria.length : ci + base;
-      result.push(criteria.slice(ci, end));
-      ci = end;
-    }
-    return result;
-  }, [steps, criteria]);
+  useEffect(() => {
+    setTaskView('active');
+    setTextInput('');
+    setCheckedItems(new Set());
+    setReflectionScore(0);
+  }, [activeNodeId]);
 
-  const { currentStep, totalSteps, nextStep, prevStep, isLastStep, progress } =
-    useMissionSteps(steps.length);
+  const handleSubmit = useCallback(() => {
+    setTaskView('completing');
 
-  const bgColor = useMemo(() => {
-    if (!chapterDomain) return DEFAULT_BG;
-    return CHAPTER_BG[chapterDomain.toLowerCase()] || DEFAULT_BG;
-  }, [chapterDomain]);
-
-  const getCheckedItems = useCallback((stepIdx: number): boolean[] => {
-    return checkedMap[stepIdx] ?? criteriaPerStep[stepIdx]?.map(() => false) ?? [];
-  }, [checkedMap, criteriaPerStep]);
-
-  const handleToggleItem = useCallback((stepIdx: number, itemIdx: number) => {
-    setCheckedMap(prev => {
-      const current = [...(prev[stepIdx] ?? criteriaPerStep[stepIdx]?.map(() => false) ?? [])];
-      current[itemIdx] = !current[itemIdx];
-      return { ...prev, [stepIdx]: current };
+    const result = submitTask({
+      text: textInput,
+      checked: Array.from(checkedItems),
+      score: reflectionScore,
     });
-  }, [criteriaPerStep]);
 
-  const handleStart = useCallback(() => {
-    setPhase('step');
+    if (result.success) {
+      setTimeout(() => {
+        setTaskView('completed');
+        emit('UI_REFRESH', {});
+      }, 600);
+    }
+  }, [textInput, checkedItems, reflectionScore]);
+
+  const handleChecklistToggle = useCallback((index: number) => {
+    setCheckedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
   }, []);
 
-  const handleDone = useCallback(() => {
-    if (isLastStep) {
-      const definition = loadTaskForNode(nodeId);
-      if (definition) {
-        createTaskFromDefinition(definition);
-      }
-      try {
-        const result = submitTask({ taskId: task.id, completed: true });
-        setTaskResult(result);
-      } catch (err) {
-        console.error('[MissionScreen] submitTask failed:', err);
-      }
-      setPhase('success');
-    } else {
-      nextStep();
-    }
-  }, [isLastStep, nextStep, nodeId, task.id]);
+  const handleContinue = useCallback(() => {
+    onComplete();
+  }, [onComplete]);
+
+  if (!activeTask) {
+    return (
+      <div className="mission-screen mission-empty">
+        <div className="mission-empty-text">No active mission</div>
+        <button className="mission-primary-btn" onClick={onComplete}>
+          Return to Journey
+        </button>
+      </div>
+    );
+  }
+
+  const dayNumber = Object.values(nodeStates).filter(n =>
+    n.state === 'confidence' || n.state === 'execution'
+  ).length + 1;
+
+  const canSubmit = textInput.trim() || checkedItems.size > 0 || reflectionScore > 0;
 
   return (
-    <div className="mission-screen" style={{ backgroundColor: bgColor }}>
-      <header className="mission-header">
-        <IconButton icon="←" label="Back" size={40} onClick={onBack} />
-        <div className="mission-header-info">
-          <span className="mission-header-chapter">{chapterTitle || 'Mission'}</span>
-          <span className="mission-header-task">{task.title}</span>
+    <div className={`mission-screen ${taskView === 'active' ? 'mission-enter' : ''}`}>
+      {/* Header */}
+      <div className="mission-header">
+        <div className="header-day">Day {dayNumber}</div>
+        <div className="header-chapter">
+          {chapterTitle || runtimeState.activeChapterId || 'Resume'}
         </div>
-      </header>
-
-      {phase === 'card' && (
-        <div className="mission-body">
-          <MissionCard task={task} onStart={handleStart} />
+        <div className="header-scores">
+          <div className="score-badge readiness">
+            {Math.round(runtimeState.readinessScore)}%
+          </div>
+          <div className="score-badge confidence">
+            {Math.round(runtimeState.confidenceScore * 100)}%
+          </div>
         </div>
-      )}
+      </div>
 
-      {phase === 'step' && steps.length > 0 && (
-        <div className="mission-body">
-          <StepScreen
-            key={currentStep}
-            stepIndex={currentStep}
-            totalSteps={totalSteps}
-            instruction={steps[currentStep]}
-            criteria={criteriaPerStep[currentStep]}
-            checkedItems={getCheckedItems(currentStep)}
-            onToggleItem={(i) => handleToggleItem(currentStep, i)}
-            onDone={handleDone}
-            onPrevious={prevStep}
-            progress={progress}
-          />
+      {/* Mission Card */}
+      <div className={`mission-card ${taskView === 'completing' ? 'mission-pulse' : ''}`}>
+        {/* Task Type Indicator */}
+        <div className="task-type-badge">
+          {activeTask.completionCriteria.length > 0 ? '☑️ Complete' : '✏️ Write'}
         </div>
-      )}
 
-      {phase === 'success' && (
-        <SuccessScreen result={taskResult} onContinue={onContinue} />
-      )}
+        {/* Task Title */}
+        <h2 className="task-title">{activeTask.title}</h2>
+
+        {/* Task Description */}
+        <p className="task-description">{activeTask.objective}</p>
+
+        {/* Difficulty & Time */}
+        <div className="mission-card-meta">
+          <div className="mission-card-meta-item">
+            <span className="mission-card-meta-label">Difficulty</span>
+            <span className="mission-card-meta-value">
+              {Array(activeTask.difficulty).fill('●').join('')}
+              {Array(Math.max(0, 5 - activeTask.difficulty)).fill('○').join('')}
+            </span>
+          </div>
+          <div className="mission-card-meta-item">
+            <span className="mission-card-meta-label">Est. Time</span>
+            <span className="mission-card-meta-value">{activeTask.estimatedMinutes} min</span>
+          </div>
+        </div>
+
+        {/* Instructions */}
+        {activeTask.instructions.length > 0 && (
+          <div className="task-section">
+            <div className="task-section-label">Steps</div>
+            <ol className="task-instructions">
+              {activeTask.instructions.map((inst, i) => (
+                <li key={i} className="task-instruction-item">{inst}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {/* Task Content */}
+        <div className="task-content">
+          {/* Checklist from completionCriteria */}
+          {activeTask.completionCriteria.length > 0 && (
+            <div className="task-section">
+              <div className="task-section-label">Completion Checklist</div>
+              <div className="task-checklist">
+                {activeTask.completionCriteria.map((criterion, index) => (
+                  <div
+                    key={index}
+                    className={`checklist-item ${checkedItems.has(index) ? 'checked' : ''}`}
+                    onClick={() => handleChecklistToggle(index)}
+                  >
+                    <div className="checklist-box">
+                      {checkedItems.has(index) && <span className="checklist-mark">✓</span>}
+                    </div>
+                    <span className="checklist-label">{criterion}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Text Input for notes/reflection */}
+          <div className="task-section">
+            <div className="task-section-label">Your Notes</div>
+            <textarea
+              className="task-textarea"
+              placeholder="Write your thoughts, answers, or reflection here..."
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              rows={4}
+            />
+          </div>
+
+          {/* Reflection Rating */}
+          <div className="task-section">
+            <div className="task-section-label">Self Assessment</div>
+            <div className="task-reflection">
+              <div className="reflection-stars">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    className={`reflection-star ${star <= reflectionScore ? 'active' : ''}`}
+                    onClick={() => setReflectionScore(star)}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              <div className="reflection-label">
+                {reflectionScore === 0 && 'Tap to rate your work'}
+                {reflectionScore === 1 && 'Needs work'}
+                {reflectionScore === 2 && 'Getting there'}
+                {reflectionScore === 3 && 'Good'}
+                {reflectionScore === 4 && 'Great'}
+                {reflectionScore === 5 && 'Excellent'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Action */}
+      <div className="mission-bottom">
+        {taskView === 'active' && (
+          <button
+            className="mission-primary-btn"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+          >
+            Complete Mission
+          </button>
+        )}
+
+        {taskView === 'completing' && (
+          <div className="mission-completing">
+            <div className="completing-spinner" />
+            <span>Saving progress...</span>
+          </div>
+        )}
+
+        {taskView === 'completed' && (
+          <div className="mission-completed">
+            <div className="completed-icon">✓</div>
+            <div className="completed-text">Mission Complete!</div>
+            <button className="mission-primary-btn" onClick={handleContinue}>
+              Continue Journey
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};

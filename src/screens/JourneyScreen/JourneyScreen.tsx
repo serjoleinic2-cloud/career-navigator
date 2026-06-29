@@ -1,17 +1,15 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
+import { getUIState } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, getActiveNode, getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
 import type { SkillNode } from '@/core/skill_state';
-import type { TaskContent } from '@/core/task_content';
 import { BackgroundLayer } from './components/BackgroundLayer';
 import { JourneyHeader } from './components/JourneyHeader';
 import { ChapterHub } from './components/ChapterHub';
 import type { ChapterData } from './components/ChapterHub';
 import { ChapterCompleteScreen } from './components/ChapterCompleteScreen';
 import { JourneyCompleteScreen } from './components/JourneyCompleteScreen';
-import { FloatingMissionCard } from './components/FloatingMissionCard';
 import { JourneyBottomNav } from './components/JourneyBottomNav';
 import { useCamera } from './hooks/useCamera';
 import { useChapterHub } from './hooks/useChapterHub';
@@ -29,10 +27,8 @@ const DEFAULT_ICON = '📄';
 
 export function JourneyScreen() {
   const [, setTick] = useState(0);
-  const [missionTask, setMissionTask] = useState<TaskContent | null>(null);
-  const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
+  const [showMission, setShowMission] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
-  const [missionCardOpen, setMissionCardOpen] = useState(false);
   const { view, selectedChapter, selectChapter, dismissComplete } = useChapterHub();
   const { cameraStyle, zoomOut } = useCamera();
 
@@ -66,7 +62,6 @@ export function JourneyScreen() {
   }, [lockedToast]);
 
   const ui = getUIState();
-  const nav = getNavigation();
   const node: SkillNode | null = getActiveNode();
   const runtime = getRuntimeState();
 
@@ -114,12 +109,10 @@ export function JourneyScreen() {
       return;
     }
     if (nodeId === ui.activeNodeId) {
-      setMissionCardOpen(true);
+      setShowMission(true);
       return;
     }
     setActiveNode(nodeId);
-    setMissionCardOpen(false);
-    setMissionTask(null);
   }, [ui.activeNodeId]);
 
   const handleChapterSelect = useCallback((chapterId: string) => {
@@ -138,38 +131,19 @@ export function JourneyScreen() {
     else window.location.hash = `#${tabId}`;
   }, []);
 
-  const startMission = useCallback(() => {
-    if (!node) return;
-    const ti = Math.min(completedTaskIds.length, node.tasks.length - 1);
-    setMissionTask(node.tasks[ti]);
-    setMissionCardOpen(false);
-  }, [node, completedTaskIds]);
-
-  const handleMissionBack = useCallback(() => {
-    setMissionTask(null);
-  }, []);
-
-  const handleMissionContinue = useCallback(() => {
-    if (missionTask) {
-      setCompletedTaskIds(prev => [...prev, missionTask.id]);
-    }
-    setMissionTask(null);
-    if (nav.hasNext && nav.nextNodeId) {
-      handleNodeSelect(nav.nextNodeId);
-    }
-  }, [missionTask, nav, handleNodeSelect]);
+  const handleMissionComplete = useCallback(() => {
+    setShowMission(false);
+    refresh();
+  }, [refresh]);
 
   const isChaptersView = view === 'chapter' || view === 'chapterComplete';
 
-  if (missionTask && node) {
+  if (showMission && runtime) {
     return (
       <MissionScreen
-        task={missionTask}
-        nodeId={node.id}
-        chapterDomain={node.domain}
+        runtimeState={runtime}
         chapterTitle={ui.currentChapterTitle}
-        onBack={handleMissionBack}
-        onContinue={handleMissionContinue}
+        onComplete={handleMissionComplete}
       />
     );
   }
@@ -229,14 +203,6 @@ export function JourneyScreen() {
           readinessDelta={12}
           confidenceDelta={8}
           onContinue={handleDismissComplete}
-        />
-      )}
-
-      {missionCardOpen && node && (
-        <FloatingMissionCard
-          node={node}
-          onContinue={startMission}
-          onClose={() => setMissionCardOpen(false)}
         />
       )}
 

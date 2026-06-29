@@ -1,64 +1,70 @@
-Create a React + TypeScript screen called MissionScreen for a gamified Career Navigation app.
+Create a React + TypeScript component called WorldMap for a gamified Career Navigator app.
 
-The screen is NOT a form or task list.
+This is NOT a dashboard or navigation screen.
 
-It is a single-focus game level experience.
+It is a game world representation of user career progress.
 
 Requirements:
 
 1. Layout:
-- Header with Day, Chapter, CareerScore, ConfidenceScore
-- Center Mission Card (single active task only)
-- Bottom primary action button
+- Vertical path of nodes (top = future, bottom = start)
+- Active node centered in view
+- Future nodes blurred/faded
+- Completed nodes below active
 
-2. Mission Card:
-- displays one task at a time
-- supports 3 types:
-  - text input task
-  - action checklist task
-  - reflection rating task
+2. Nodes:
+- 4 states: completed, active, locked, future
+- Visual differences must be strong (glow, blur, opacity)
 
-3. Behavior:
-- only one active task
-- completion triggers callback submitTask()
-- updates runtime state
+3. Interaction:
+- Tap node → opens MissionScreen
+- Vertical swipe → scroll camera along path
+- Long press → optional details
 
-4. Visual style:
-- minimal Apple-like UI
-- soft shadows
-- floating central card
-- large whitespace
-- no dashboards, no lists
+4. World behavior:
+- World reacts to JourneyRuntimeState updates
+- activeNodeId controls camera focus
+- nodeStates control visuals
 
-5. Animations:
-- screen enter fade + slide up
-- task completion pulse
-- button press micro interaction
+5. Zones:
+- START (plains)
+- LEARNING (forest)
+- PRACTICE (mountains)
+- INTERVIEW (city)
+- OFFER (castle)
 
-6. Integration:
-- uses JourneyRuntimeState
-- calls applyTaskResultToRuntime()
-- emits UI_REFRESH event
+6. Style:
+- Monument Valley inspired minimal 3D feel
+- soft lighting, fog, depth layers
+- minimal UI overlay
+
+7. Animation:
+- smooth camera movement (600–900ms)
+- node activation pulse
+- path glow on progress
 
 Output:
 - full React component
 - TypeScript types
-- basic CSS modules styling
-⚙️ 11. PROMPT FOR OPENCODE (INTEGRATION TASK)
-Integrate MissionScreen into existing Career Navigator project.
+- CSS modules or styled system
 
-Tasks:
+PROMPT ДЛЯ OPENCODE
+Integrate WorldMap as the main screen of Career Navigator.
 
-1. Add MissionScreen as main task execution screen.
-2. Route from World Map node click → MissionScreen.
-3. Pass active node task from JourneyRuntimeState.activeNodeId.
-4. Ensure submitTask() updates runtime state correctly.
-5. Trigger UI_REFRESH event after task completion.
-6. Fix any state sync issues between nodeStates and activeTask.
-7. Ensure only one active task is visible at a time.
-8. Remove any legacy multi-task UI if exists.
+Requirements:
+
+1. Replace existing JourneyScreen as primary view.
+2. Ensure WorldMap reads from JourneyRuntimeState:
+   - activeNodeId
+   - nodeStates
+3. Implement camera focus system based on activeNodeId.
+4. Connect node click → MissionScreen navigation.
+5. Ensure state updates after Mission completion reflect immediately on map.
+6. Add smooth transitions between WorldMap and MissionScreen.
+7. Maintain offline-first architecture.
+8. Remove any legacy dashboard navigation patterns.
 
 Constraints:
-- Must follow existing architecture in ARCHITECTURE_SNAPSHOT
-- Must NOT introduce new screens outside agreed list
-- Must keep offline-first behavior
+- NO list-based UI
+- NO traditional dashboard components
+- MUST follow game-world paradigm
