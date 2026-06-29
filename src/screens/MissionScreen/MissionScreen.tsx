@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import './MissionScreen.css';
 import type { JourneyRuntimeState } from '../../core/runtime/journey_runtime';
-import { applyMissionResult } from '../../core/skill_engine';
 import { emit } from '../../core/events/system_event_bus';
 
 interface MissionScreenProps {
@@ -33,18 +32,16 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   const handleSubmit = useCallback(() => {
     setTaskView('completing');
 
-    const result = applyMissionResult({
+    emit('MISSION_SUBMIT', {
       text: textInput,
       checked: Array.from(checkedItems),
       score: reflectionScore,
     });
 
-    if (result.success) {
-      setTimeout(() => {
-        setTaskView('completed');
-        emit('UI_REFRESH', {});
-      }, 600);
-    }
+    setTimeout(() => {
+      setTaskView('completed');
+      emit('UI_REFRESH', {});
+    }, 600);
   }, [textInput, checkedItems, reflectionScore]);
 
   const handleChecklistToggle = useCallback((index: number) => {

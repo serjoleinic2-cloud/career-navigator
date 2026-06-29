@@ -19,7 +19,7 @@ D:\career-navigator/
 │
 └── src/
     ├── main.tsx                       — Точка входа: регистрация профессий, рендер App
-    ├── App.tsx                        — Корневой компонент: роутинг (journey/playbook/notes/share), AppShell
+    ├── App.tsx                        — Корневой компонент: роутинг (world/playbook/notes/share/debug), default = WorldRendererScreen
     ├── App.css                        — Легаси стили Vite (почти не используется)
     ├── index.css                      — Tailwind layers: glass-panel, glow, atmosphere, hide-scrollbar
     │
@@ -92,7 +92,7 @@ D:\career-navigator/
     │       └── ShareCard.css
     │
     ├── core/                          — Ядро: вся бизнес-логика
-    │   ├── index.ts                   — Реэкспорт всех публичных API ядра
+    │   ├── index.ts                   — Реэкспорт API ядра: skill_engine как единый источник, WorldRendererScreen как main screen
     │   │
     │   ├── runtime/                   — Управление состоянием рантайма
     │   │   ├── index.ts
@@ -111,7 +111,7 @@ D:\career-navigator/
     │   │
     │   ├── events/                    — Шина событий
     │   │   ├── index.ts
-    │   │   └── system_event_bus.ts    — Глобальная pub/sub шина (25+ типов событий)
+    │   │   └── system_event_bus.ts    — Глобальная pub/sub шина (26+ типов, включая MISSION_SUBMIT)
     │   │
     │   ├── onboarding/                — Онбординг пользователя
     │   │   ├── index.ts
@@ -265,7 +265,7 @@ D:\career-navigator/
     │   ├── chapters.ts                — Константа CHAPTER_ORDER
     │   ├── confidence_engine.ts       — Расчёт confidence из success rate, интервью, стресса
     │   ├── readiness_engine.ts        — Расчёт readiness вектора и score
-    │   ├── skill_engine.ts            — Skill state machine: переходы по user actions
+    │   ├── skill_engine.ts            — Единый источник правды: state accessors + applyMissionResult (внутр.) + подписка на MISSION_SUBMIT
     │   ├── skill_state.ts             — SkillNode interface, SkillState type
     │   ├── task_content.ts            — TaskContent interface
     │   ├── rules.ts                   — Константы правил системы
@@ -312,9 +312,9 @@ D:\career-navigator/
     │           └── offer.ts           — Задачи главы Offer (~435 строк)
     │
     ├── screens/                       — Экраны приложения
-    │   ├── JourneyScreen/            — Главный экран путешествия
+    │   ├── JourneyScreen/            — Экран путешествия (debug fallback)
     │   │   ├── index.ts
-    │   │   ├── JourneyScreen.tsx     — Hub + камера + миссии + навигация
+    │   │   ├── JourneyScreenDebug.tsx — Debug-версия: список нод, открыть миссию (без бизнес-логики)
     │   │   ├── JourneyScreen.css
     │   │   ├── components/
     │   │   │   ├── BackgroundLayer.tsx     — Фоновый цвет по главе
@@ -348,7 +348,7 @@ D:\career-navigator/
     │   │
     │   ├── MissionScreen/             — Экран выполнения миссии
     │   │   ├── index.ts
-    │   │   ├── MissionScreen.tsx      — Текущая реализация: runtimeState, submitTask
+    │   │   ├── MissionScreen.tsx      — Interaction layer: emit('MISSION_SUBMIT'), только сбор ввода
     │   │   ├── MissionScreen.css
     │   │   ├── components/            — Старые компоненты (не используются)
     │   │   │   ├── MissionCard.tsx    — (устарело)
@@ -401,7 +401,7 @@ D:\career-navigator/
     │   ├── visual_world_contract.ts   — WorldNodeVisual, WorldState, WorldTimeOfDay
     │   ├── visual_world_engine.ts     — WorldState из career state
     │   ├── world_builder.ts           — UI nodes → world visuals (position, glow)
-    │   ├── world_renderer.ts          — Рендер кадра с камерой и туманом
+    │   ├── world_renderer.tsx         — Рендер кадра + WorldRendererScreen (главный экран по умолчанию)
     │   ├── world_scene.ts             — Создание/обновление сцены
     │   ├── world_zone_mapper.ts       — Career state → visual zones (plains/foothills/summit)
     │   ├── journey_node.ts            — JourneyNode: task/checkpoint/lock
@@ -410,7 +410,6 @@ D:\career-navigator/
     │   ├── WorldFlowConnector.ts      — Career option → world state
     │   ├── EnvironmentGenerator.tsx   — React: окружение (градиенты) под уровень
     │   ├── LevelRenderer.tsx          — React: карточка уровня с glow
-    │   ├── VerticalPath.tsx           — SVG вертикальный путь
     │   ├── progressStore.ts           — Zustand store прогресса мира
     │   ├── useWorldProgression.ts     — Hook: move to next level
     │   ├── camera/

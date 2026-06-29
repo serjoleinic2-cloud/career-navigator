@@ -23,7 +23,8 @@ export type SystemEventType =
   | 'JOURNEY_COMPLETED'
   | 'NOTE_CREATED'
   | 'NOTE_UPDATED'
-  | 'NOTE_DELETED';
+  | 'NOTE_DELETED'
+  | 'MISSION_SUBMIT';
 
 export type SystemEvent = {
   type: SystemEventType;

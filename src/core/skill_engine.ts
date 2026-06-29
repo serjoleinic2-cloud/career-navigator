@@ -2,6 +2,7 @@ import type { SkillNode } from './skill_state';
 import { STATE_FLOW } from './skill_state';
 import { submitTask, getRuntimeState } from './runtime/runtime_controller';
 import type { JourneyRuntimeState } from './runtime/journey_runtime';
+import { subscribe } from './events/system_event_bus';
 
 export type UserAction = 'tap_primary' | 'tap_secondary';
 
@@ -57,6 +58,15 @@ export function getActiveNodeId(): string {
   return getRuntimeState()?.activeNodeId ?? '';
 }
 
-export function applyMissionResult(result: MissionResult) {
+/* ── Internal: process mission results ── */
+
+function applyMissionResult(result: MissionResult) {
   return submitTask(result);
 }
+
+/* ── Event-driven mission processing ── */
+
+subscribe('MISSION_SUBMIT', (event) => {
+  const payload = event.payload as unknown as MissionResult;
+  applyMissionResult(payload);
+});

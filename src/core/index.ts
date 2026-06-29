@@ -11,7 +11,6 @@ export {
   getReadiness,
   getNodeStates,
   getActiveNodeId,
-  applyMissionResult,
 } from './skill_engine';
 export type { UserAction, MissionResult } from './skill_engine';
 
