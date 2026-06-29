@@ -1,118 +1,120 @@
-TITLE: CAREER NAVIGATOR — ARCHITECTURE FIX (EVENT LAYER CLEANUP)
+TITLE: CAREER NAVIGATOR — STABILITY BUG FIX PASS
 
 GOAL:
-Fix architecture violation where UI layer directly calls core logic.
-Convert system to event-driven interaction model.
-
-CURRENT ISSUE:
-MissionScreen directly imports and calls:
-- applyMissionResult from skill_engine
-
-This breaks architecture rule:
-UI must NOT directly call core logic functions.
-
-FINAL ARCHITECTURE RULE:
-
-MissionScreen (UI)
-    → emits EVENT
-skill_engine (CORE)
-    → processes event
-world_renderer (VIEW)
-    → only renders state
+Fix runtime inconsistencies introduced after migration to event-driven architecture.
+Do NOT add new features. Only fix bugs and state desync.
 
 --------------------------------------
 
-TASK 1 — MissionScreen FIX
+BUG 1 — UI optimistic completion
 
-FILE:
-src/screens/MissionScreen/MissionScreen.tsx
+ISSUE:
+MissionScreen sets:
+setTaskView('completed')
+immediately after emit('MISSION_SUBMIT')
 
-REMOVE:
-- import { applyMissionResult } from '../../core/skill_engine';
-- direct call to applyMissionResult()
+PROBLEM:
+UI shows success before skill_engine confirms result.
 
-REPLACE WITH:
+FIX:
+Remove immediate completion state change.
 
-Use event system:
+REPLACE FLOW WITH:
 
-import { emit } from '../../core/events/system_event_bus';
+1. emit('MISSION_SUBMIT')
+2. WAIT for 'MISSION_RESULT' event from skill_engine
+3. ONLY THEN setTaskView('completed')
 
-Replace handleSubmit logic:
+--------------------------------------
 
-emit('MISSION_SUBMIT', {
-  text: textInput,
-  checked: Array.from(checkedItems),
-  score: reflectionScore,
+BUG 2 — missing MISSION_RESULT event
+
+CHECK skill_engine.ts:
+
+REQUIRED:
+After processing submitTask(), MUST emit:
+
+emit('MISSION_RESULT', {
+  success: boolean,
+  updatedState: JourneyRuntimeState
 });
 
-DO NOT process result in UI.
-DO NOT compute success/failure in UI.
-
-UI only emits event.
+If missing → ADD IT.
 
 --------------------------------------
 
-TASK 2 — skill_engine EVENT HANDLER
+BUG 3 — UI does not handle MISSION_RESULT
 
-FILE:
-src/core/skill_engine.ts
+IN MissionScreen.tsx:
 
-ADD event listener:
+ADD listener:
 
-on('MISSION_SUBMIT', (payload) => {
-  submitTask(payload);
+on('MISSION_RESULT', (payload) => {
+  if (payload.success) {
+    setTaskView('completed');
+  } else {
+    setTaskView('active');
+    show error state (simple retry UI or shake animation)
+  }
 });
 
-OR if event system requires registration:
-ensure skill_engine subscribes to system_event_bus.
-
-MOVE ALL LOGIC INTO skill_engine:
-- scoring
-- progression updates
-- node state updates
-
-UI must not know results logic.
-
 --------------------------------------
 
-TASK 3 — REMOVE DIRECT COUPLING
+BUG 4 — state desync risk
 
 Ensure:
-- MissionScreen does NOT import skill_engine functions
-- ONLY event bus is used
+- world_renderer uses ONLY skill_engine state
+- NO cached local state copies
+- NO UI-derived state affecting world
 
 --------------------------------------
 
-TASK 4 — VERIFY DATA FLOW
+BUG 5 — event duplication risk
 
-Must be ONLY:
+Ensure event_bus does NOT double trigger:
+- MISSION_SUBMIT handled once only
+- MISSION_RESULT emitted once only per submit
 
-MissionScreen
-   → emit('MISSION_SUBMIT')
-skill_engine
-   → updates state
-world_renderer
-   → re-renders from state
+Add guards if needed.
 
 --------------------------------------
 
 PROHIBITED:
-- no direct function calls from UI to core
-- no applyMissionResult in UI
-- no duplicated scoring logic in UI
+- No new features
+- No UI redesign
+- No new screens
+- No gameplay changes
+
+ONLY:
+- fix state flow
+- fix event consistency
+- fix UI desync
 
 --------------------------------------
 
 EXPECTED RESULT:
 
-- Clean event-driven architecture
-- UI fully decoupled from core engine
-- skill_engine becomes single authority
-- system ready for modular professions (DLC system)
+- Mission completion only happens after engine confirmation
+- No UI false positives
+- Stable event-driven flow
+- No duplicate state transitions
 
---------------------------------------
+СУТЬ ПРОБЛЕМЫ (коротко)
 
-IMPORTANT:
-Do NOT refactor UI design.
-Do NOT change styling.
-Only fix architecture coupling.
+Ты сейчас в классической ситуации:
+
+❗ “перешли на event-driven → UI начал жить быстрее, чем engine”
+
+🎯 ПОСЛЕ ЭТОГО FIXA ДОЛЖНО БЫТЬ ТАК:
+submit → engine → result → UI update
+
+НЕ:
+
+submit → UI assumes success ❌
+🚀 ДАЛЬШЕ
+
+После этого шага система стабилизируется и можно будет:
+
+подключать professions как DLC
+усиливать World Map
+добавлять “game feel” без риска багов
