@@ -1,120 +1,20 @@
-TITLE: CAREER NAVIGATOR — STABILITY BUG FIX PASS
-
-GOAL:
-Fix runtime inconsistencies introduced after migration to event-driven architecture.
-Do NOT add new features. Only fix bugs and state desync.
-
---------------------------------------
-
-BUG 1 — UI optimistic completion
-
-ISSUE:
-MissionScreen sets:
-setTaskView('completed')
-immediately after emit('MISSION_SUBMIT')
-
-PROBLEM:
-UI shows success before skill_engine confirms result.
-
-FIX:
-Remove immediate completion state change.
-
-REPLACE FLOW WITH:
-
-1. emit('MISSION_SUBMIT')
-2. WAIT for 'MISSION_RESULT' event from skill_engine
-3. ONLY THEN setTaskView('completed')
-
---------------------------------------
-
-BUG 2 — missing MISSION_RESULT event
-
-CHECK skill_engine.ts:
-
-REQUIRED:
-After processing submitTask(), MUST emit:
-
-emit('MISSION_RESULT', {
-  success: boolean,
-  updatedState: JourneyRuntimeState
-});
-
-If missing → ADD IT.
-
---------------------------------------
-
-BUG 3 — UI does not handle MISSION_RESULT
-
-IN MissionScreen.tsx:
-
-ADD listener:
-
-on('MISSION_RESULT', (payload) => {
-  if (payload.success) {
-    setTaskView('completed');
-  } else {
-    setTaskView('active');
-    show error state (simple retry UI or shake animation)
-  }
-});
-
---------------------------------------
-
-BUG 4 — state desync risk
-
-Ensure:
-- world_renderer uses ONLY skill_engine state
-- NO cached local state copies
-- NO UI-derived state affecting world
-
---------------------------------------
-
-BUG 5 — event duplication risk
-
-Ensure event_bus does NOT double trigger:
-- MISSION_SUBMIT handled once only
-- MISSION_RESULT emitted once only per submit
-
-Add guards if needed.
-
---------------------------------------
-
-PROHIBITED:
-- No new features
-- No UI redesign
-- No new screens
-- No gameplay changes
-
-ONLY:
-- fix state flow
-- fix event consistency
-- fix UI desync
-
---------------------------------------
-
-EXPECTED RESULT:
-
-- Mission completion only happens after engine confirmation
-- No UI false positives
-- Stable event-driven flow
-- No duplicate state transitions
-
-СУТЬ ПРОБЛЕМЫ (коротко)
-
-Ты сейчас в классической ситуации:
-
-❗ “перешли на event-driven → UI начал жить быстрее, чем engine”
-
-🎯 ПОСЛЕ ЭТОГО FIXA ДОЛЖНО БЫТЬ ТАК:
-submit → engine → result → UI update
-
-НЕ:
-
-submit → UI assumes success ❌
-🚀 ДАЛЬШЕ
-
-После этого шага система стабилизируется и можно будет:
-
-подключать professions как DLC
-усиливать World Map
-добавлять “game feel” без риска багов
+РЕАЛЬНОЕ СОСТОЯНИЕ (не assumptions):
+Table
+Файл	Что проверил	Результат
+skill_engine.ts	Есть ли on('MISSION_SUBMIT')? Есть ли emit('MISSION_RESULT')? Есть ли guards?	НЕТ — ни одного из трёх
+system_event_bus.ts	Есть ли duplicate protection?	НЕТ — emit вызывает все listeners без dedup
+world_renderer.tsx	Есть ли cached state?	ЧИСТО — только consume + render
+MissionScreen.tsx	Прямой вызов или event?	ПРЯМОЙ ВЫЗОВ applyMissionResult
+App.tsx	Правильный routing?	ЧИСТО
+5 КРИТИЧЕСКИХ БАГОВ:
+MissionScreen — прямой вызов applyMissionResult вместо emit('MISSION_SUBMIT')
+skill_engine — нет обработчика on('MISSION_SUBMIT')
+skill_engine — нет emit('MISSION_RESULT') после обработки
+MissionScreen — нет listener на MISSION_RESULT
+skill_engine — нет guard isProcessingMission (double submit возможен)
+Event flow НЕ работает как задумано. Сейчас:
+plain
+MissionScreen → applyMissionResult() [прямой вызов] → skill_engine → UI_REFRESH
+Должно быть:
+plain
+MissionScreen → emit('MISSION_SUBMIT') → skill_engine → emit('MISSION_RESULT') → MissionScreen
