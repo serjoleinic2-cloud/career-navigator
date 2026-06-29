@@ -1,25 +1,40 @@
 import type { ReactNode } from 'react';
 import { TopBar } from './TopBar';
 import { BottomNavigation } from './BottomNavigation';
-import '../../styles/layout.css';
-import '../../styles/theme.css';
-import '../../styles/animations.css';
 
 interface AppShellProps {
+  children: ReactNode;
   title: string;
   showBack?: boolean;
   onBack?: () => void;
-  children: ReactNode;
-  activeTab: string;
-  onTabChange: (tabId: string) => void;
+  activeTab?: string;
+  onTabChange?: (tabId: string) => void;
+  rightAction?: ReactNode;
 }
 
-export function AppShell({ title, showBack, onBack, children, activeTab, onTabChange }: AppShellProps) {
+export function AppShell({
+  children,
+  title,
+  showBack,
+  onBack,
+  activeTab,
+  onTabChange,
+  rightAction,
+}: AppShellProps) {
   return (
     <div className="app-shell">
-      <TopBar title={title} showBack={showBack} onBack={onBack} />
-      <main className="app-shell-content">{children}</main>
-      <BottomNavigation activeTab={activeTab} onTabChange={onTabChange} />
+      <TopBar
+        title={title}
+        showBack={showBack}
+        onBack={onBack}
+        rightAction={rightAction}
+      />
+      <main className="app-shell-content">
+        {children}
+      </main>
+      {onTabChange && activeTab && (
+        <BottomNavigation activeTab={activeTab} onTabChange={onTabChange} />
+      )}
     </div>
   );
 }

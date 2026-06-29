@@ -1,235 +1,397 @@
-.playbook-screen {
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-  color: #fff;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #071320 0%, #090D19 100%);
+/* Categories Grid View */
+.playbook-categories-view {
+  padding: 24px 20px;
+  min-height: 100%;
 }
 
-.playbook-screen h1 {
-  margin: 0 0 8px 0;
+.playbook-main-title {
   font-size: 28px;
-}
-
-.subtitle {
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0 0 24px 0;
-  font-size: 14px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 14px 18px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  font-weight: 700;
+  margin: 0 0 4px;
   color: #fff;
-  font-size: 15px;
-  margin-bottom: 20px;
-  box-sizing: border-box;
 }
 
-.search-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.categories {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-
-.category-button {
-  padding: 10px 20px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+.playbook-subtitle {
   font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 28px;
+}
+
+.playbook-categories-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.playbook-category-card {
+  aspect-ratio: 1;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
   cursor: pointer;
-  transition: all 0.2s;
-  min-height: 44px;
-}
-
-.category-button.active {
-  background: #4A90D9;
-  border-color: #4A90D9;
-}
-
-.entries-list {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 12px;
+  transition: all 250ms ease;
+  min-height: 44px;
+  position: relative;
+  overflow: hidden;
 }
 
-.entry-card {
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
+.playbook-category-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, var(--cat-color), transparent 70%);
+  opacity: 0.06;
+  transition: opacity 300ms ease;
 }
 
-.entry-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
+.playbook-category-card:hover::before {
+  opacity: 0.12;
 }
 
-.entry-category-tag {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #4A90D9;
-  margin-bottom: 8px;
-  display: block;
+.playbook-category-card:active {
+  transform: scale(0.96);
 }
 
-.entry-card h3 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
+.playbook-category-icon {
+  font-size: 36px;
+  line-height: 1;
 }
 
-.entry-card p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.6);
+.playbook-category-label {
   font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Entries View */
+.playbook-entries-view {
+  padding: 24px 20px;
+  min-height: 100%;
+  animation: playbookFadeIn 300ms ease;
+}
+
+.playbook-entries-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  color: #fff;
+}
+
+.playbook-mission-banner {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  color: #FF8E8E;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.playbook-entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.playbook-entry-card {
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: all 200ms ease;
+  min-height: 44px;
+  width: 100%;
+}
+
+.playbook-entry-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
+}
+
+.playbook-entry-card h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.playbook-entry-card p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
   line-height: 1.5;
 }
 
-.entry-tags-preview {
+.playbook-entry-tags {
   display: flex;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
 }
 
-.tag-small {
+.playbook-tag {
   font-size: 11px;
   padding: 4px 10px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.back-button {
-  margin-bottom: 20px;
-  padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.05);
+/* Entry Detail View */
+.playbook-entry-view {
+  padding: 24px 20px 100px;
+  min-height: 100%;
+  animation: playbookFadeIn 300ms ease;
+}
+
+.playbook-back-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
   color: #fff;
+  font-size: 20px;
   cursor: pointer;
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.playbook-entry-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: #fff;
+}
+
+.playbook-entry-cat {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.35);
+  display: block;
+  margin-bottom: 24px;
+}
+
+.playbook-entry-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.playbook-entry-content p {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Accordion */
+.playbook-accordion {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.playbook-accordion-header {
+  width: 100%;
+  padding: 16px 18px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   min-height: 44px;
 }
 
-.entry-detail {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 28px;
+.playbook-accordion-arrow {
+  font-size: 12px;
+  transition: transform 250ms ease;
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.entry-category {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #4A90D9;
-  display: block;
-  margin-bottom: 8px;
+.playbook-accordion-arrow.open {
+  transform: rotate(180deg);
 }
 
-.entry-detail h2 {
-  margin: 0 0 24px 0;
-  font-size: 24px;
+.playbook-accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 350ms ease, padding 350ms ease;
+  padding: 0 18px;
 }
 
-.entry-section {
-  margin-bottom: 28px;
+.playbook-accordion-body.open {
+  max-height: 2000px;
+  padding: 0 18px 18px;
 }
 
-.entry-section h3 {
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  color: #4A90D9;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+/* Templates */
+.playbook-templates {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.entry-content p {
-  margin: 0 0 12px 0;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.7;
-  font-size: 15px;
-}
-
-.template-card,
-.example-card {
+.playbook-template-card {
   padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
-  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.template-card pre {
-  margin: 0 0 12px 0;
+.playbook-template-card pre {
+  margin: 0 0 12px;
   white-space: pre-wrap;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.template-card button {
+.playbook-copy-btn {
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   color: #fff;
   font-size: 13px;
   cursor: pointer;
   min-height: 44px;
 }
 
-.entry-checklist {
+/* Examples */
+.playbook-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.playbook-example-card {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.playbook-example-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Checklist */
+.playbook-checklist {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.entry-checklist li {
+.playbook-checklist li {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.entry-checklist input[type="checkbox"] {
+.playbook-checklist input[type="checkbox"] {
   width: 20px;
   height: 20px;
   margin-top: 2px;
-  accent-color: #48BB78;
+  accent-color: #FF6B6B;
 }
 
-.entry-checklist label {
-  color: rgba(255, 255, 255, 0.8);
+.playbook-checklist label {
   font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.5;
 }
 
-.entry-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 24px;
+/* Apply Button */
+.playbook-apply-btn {
+  position: fixed;
+  bottom: calc(100px + env(safe-area-inset-bottom));
+  left: 20px;
+  right: 20px;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 54px;
+  z-index: 10;
 }
 
-.tag {
-  padding: 6px 14px;
-  border-radius: 20px;
-  background: rgba(74, 144, 217, 0.15);
-  color: #7BB3E8;
-  font-size: 13px;
+/* Flip Animation */
+.playbook-flip-overlay {
+  position: fixed;
+  inset: 0;
+  background: #071320;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  animation: playbookFlip 500ms ease forwards;
+  pointer-events: none;
+}
+
+.playbook-flip-page {
+  width: 80%;
+  height: 60%;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transform-origin: left center;
+  animation: playbookPageFlip 500ms ease forwards;
+}
+
+@keyframes playbookFlip {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes playbookPageFlip {
+  0% {
+    transform: perspective(1200px) rotateY(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: perspective(1200px) rotateY(-180deg);
+    opacity: 0;
+  }
+}
+
+@keyframes playbookFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -3,56 +3,52 @@ import {
   startOnboarding,
   getOnboardingState,
   selectProfession,
+  setExperience,
+  toggleGoal,
+  setTimeline,
+  togglePreference,
   setSituation,
   setEmotion,
-  setApplicationsCount,
-  setInterviewsCount,
-  setConfidenceLevel,
-  toggleFear,
   nextStep,
   previousStep,
   finishOnboarding,
 } from '@/core/onboarding/onboarding_engine';
-import type { CurrentSituation, EmotionalState } from '@/core/onboarding/onboarding_state';
 import { startJourney } from '@/core/runtime/runtime_controller';
-import { getAvailableProfessions } from '@/professions/profession_auto_loader';
+import { PrimaryButton } from '@/components/layout/PrimaryButton';
+
+const PAGES = [
+  'welcome',
+  'profession',
+  'experience',
+  'mission',
+  'timeline',
+  'preferences',
+  'review',
+] as const;
+
+const EXPERIENCE_LEVELS = ['Junior', 'Middle', 'Senior'];
+const MISSION_OPTIONS = ['Get my first job', 'Career switch', 'Interview prep', 'Skill growth'];
+const TIMELINE_OPTIONS = ['1 Month', '3 Months', '6 Months', '1 Year'];
+const PREFERENCE_OPTIONS = ['Remote', 'Hybrid', 'On-site', 'US', 'EU'];
 
 interface Props {
   onComplete: () => void;
 }
 
-const FEARS = [
-  'Rejection',
-  'Interviews',
-  'Lack of experience',
-  'Competition',
-  'English',
-  'Salary negotiation',
-];
-
-const SITUATIONS: { value: CurrentSituation; label: string }[] = [
-  { value: 'no_job', label: 'No job right now' },
-  { value: 'unsatisfied', label: 'Working but unhappy' },
-  { value: 'higher_salary', label: 'Want higher salary' },
-  { value: 'career_change', label: 'Changing profession' },
-  { value: 'remote_work', label: 'Looking for remote work' },
-];
-
-const EMOTIONS: { value: EmotionalState; label: string; emoji: string }[] = [
-  { value: 'confident', label: 'Confident', emoji: '💪' },
-  { value: 'unsure', label: 'Unsure', emoji: '🤔' },
-  { value: 'frustrated', label: 'Frustrated', emoji: '😤' },
-  { value: 'exhausted', label: 'Exhausted', emoji: '😮‍💨' },
-  { value: 'lost', label: 'Lost', emoji: '😶' },
-];
-
 export default function OnboardingScreen({ onComplete }: Props) {
   const [initialized, setInitialized] = useState(false);
+  const [page, setPage] = useState(0);
+  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
+  const [animating, setAnimating] = useState(false);
   const [, setTick] = useState(0);
+
+  const rerender = () => setTick(v => v + 1);
 
   useEffect(() => {
     if (!initialized) {
       startOnboarding();
+      setSituation('no_job');
+      setEmotion('confident');
       setInitialized(true);
     }
   }, [initialized]);
@@ -60,360 +56,464 @@ export default function OnboardingScreen({ onComplete }: Props) {
   const state = getOnboardingState();
   if (!state || !initialized) return null;
 
-  const rerender = () => setTick(v => v + 1);
+  const comingSoon = [
+    { id: 'data_scientist', title: 'Data Scientist', icon: '📊' },
+    { id: 'product_manager', title: 'Product Manager', icon: '📋' },
+  ];
 
   const handleNext = () => {
-    const result = nextStep();
-    if (result.success) {
+    if (animating) return;
+    setDirection('forward');
+    setAnimating(true);
+    setTimeout(() => {
+      const result = nextStep();
+      if (result.success) {
+        setPage(p => p + 1);
+      } else {
+        console.warn('[Onboarding] nextStep failed:', result.error);
+      }
       rerender();
-    } else {
-      alert(result.error || 'Please fill required fields');
-    }
+      setAnimating(false);
+    }, 200);
   };
 
   const handleBack = () => {
-    previousStep();
-    rerender();
+    if (animating || page === 0) return;
+    setDirection('backward');
+    setAnimating(true);
+    setTimeout(() => {
+      previousStep();
+      setPage(p => p - 1);
+      rerender();
+      setAnimating(false);
+    }, 200);
   };
 
   const handleFinish = () => {
     const finalState = finishOnboarding();
     if (!finalState) {
-      console.error('[Onboarding] finishOnboarding() returned null — professionId:', getOnboardingState()?.professionId);
-      alert('Please complete all steps');
       return;
     }
-    console.log('[Onboarding] Starting journey with:', finalState.professionId);
     try {
       startJourney(finalState);
-      console.log('[Onboarding] Journey started, calling onComplete');
       onComplete();
-    } catch (err) {
-      console.error('[Onboarding] startJourney threw:', err);
-      alert('Failed to start journey. Check console.');
+    } catch {
+      // fail silently
     }
   };
 
-  const containerStyle: React.CSSProperties = {
-    maxWidth: 480,
-    margin: '0 auto',
-    padding: '24px 20px',
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    background: '#071320',
-    color: '#ffffff',
-  };
-
-  const optionStyle = (selected: boolean): React.CSSProperties => ({
-    display: 'block',
-    width: '100%',
-    padding: '16px 20px',
-    marginBottom: 10,
-    borderRadius: 14,
-    border: selected ? '2px solid #48BB78' : '1px solid rgba(255,255,255,0.1)',
-    background: selected ? 'rgba(72,187,120,0.15)' : 'rgba(255,255,255,0.05)',
-    color: '#ffffff',
-    fontSize: 16,
-    textAlign: 'left' as const,
-    cursor: 'pointer',
-    transition: '180ms ease',
-  });
-
-  const renderStep = () => {
-    switch (state.step) {
-      case 0:
-        return (
-          <div>
-            <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 16px' }}>Welcome to Career Navigator</h1>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, lineHeight: 1.6, margin: '0 0 12px' }}>
-              Your guided path to a software engineering career in the US market.
-            </p>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, lineHeight: 1.6 }}>
-              We'll help you build your resume, LinkedIn, applications, interview skills, and negotiation strategy.
-            </p>
-          </div>
-        );
-
-      case 1:
-        return (
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>What's your situation?</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>Choose the one that fits best</p>
-            {SITUATIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                style={optionStyle(state.situation === value)}
-                onClick={() => { setSituation(value); rerender(); }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        );
-
-      case 2:
-        return (
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>How are you feeling?</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>Your emotional state helps us calibrate your journey</p>
-            {EMOTIONS.map(({ value, label, emoji }) => (
-              <button
-                key={value}
-                style={optionStyle(state.emotion === value)}
-                onClick={() => { setEmotion(value); rerender(); }}
-              >
-                {emoji} {label}
-              </button>
-            ))}
-          </div>
-        );
-
-      case 3: {
-        const availableProfessions = getAvailableProfessions();
-        const COMING_SOON = [
-          { id: 'data_analyst', title: 'Data Analyst', icon: '📊' },
-          { id: 'cybersecurity', title: 'Cybersecurity', icon: '🛡' },
-          { id: 'digital_marketing', title: 'Digital Marketing', icon: '📣' },
-          { id: 'customer_support', title: 'Customer Support', icon: '🎧' },
-        ].filter(cs => !availableProfessions.find(p => p.id === cs.id));
-
-        const PROFESSION_ICONS: Record<string, string> = {
-          software_engineer: '💻',
-          data_analyst: '📊',
-          cybersecurity: '🛡',
-          digital_marketing: '📣',
-          customer_support: '🎧',
-        };
-
-        return (
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Choose your profession</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>
-              Your journey will be built for this career path
-            </p>
-
-            {availableProfessions.map(profession => (
-              <button
-                key={profession.id}
-                style={optionStyle(state.professionId === profession.id)}
-                onClick={() => { selectProfession(profession.id); rerender(); }}
-              >
-                {PROFESSION_ICONS[profession.id] ?? '🎯'} {profession.title}
-              </button>
-            ))}
-
-            {COMING_SOON.map(cs => (
-              <button
-                key={cs.id}
-                style={{ ...optionStyle(false), opacity: 0.4, cursor: 'not-allowed' }}
-                disabled
-              >
-                {cs.icon} {cs.title} (coming soon)
-              </button>
-            ))}
-          </div>
-        );
-      }
-
-      case 4: {
-        const appCount = state.applicationsCount ?? 0;
-        const intCount = state.interviewsCount ?? 0;
-        return (
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Your job search history</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 28px' }}>Approximate numbers are fine</p>
-
-            <label style={{ display: 'block', marginBottom: 24 }}>
-              <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 12 }}>
-                Applications sent: <strong style={{ color: '#48BB78' }}>{appCount}</strong>
-              </span>
-              <input
-                type="range"
-                min={0}
-                max={200}
-                step={5}
-                value={appCount}
-                onChange={e => { setApplicationsCount(Number(e.target.value)); rerender(); }}
-                style={{ width: '100%', accentColor: '#48BB78' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                <span>0</span><span>100</span><span>200+</span>
-              </div>
-            </label>
-
-            <label style={{ display: 'block' }}>
-              <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 12 }}>
-                Interviews attended: <strong style={{ color: '#4A90D9' }}>{intCount}</strong>
-              </span>
-              <input
-                type="range"
-                min={0}
-                max={50}
-                step={1}
-                value={intCount}
-                onChange={e => { setInterviewsCount(Number(e.target.value)); rerender(); }}
-                style={{ width: '100%', accentColor: '#4A90D9' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                <span>0</span><span>25</span><span>50+</span>
-              </div>
-            </label>
-          </div>
-        );
-      }
-
-      case 5: {
-        const level = state.confidenceLevel ?? 5;
-        const levelLabels: Record<number, string> = {
-          1: 'Very low', 2: 'Low', 3: 'Low', 4: 'Below average',
-          5: 'Average', 6: 'Average', 7: 'Good', 8: 'Good',
-          9: 'High', 10: 'Very high',
-        };
-        return (
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Confidence level</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 32px' }}>How ready do you feel for interviews right now?</p>
-
-            <div style={{ textAlign: 'center', marginBottom: 32 }}>
-              <span style={{ fontSize: 64, fontWeight: 700, color: '#48BB78' }}>{level}</span>
-              <span style={{ fontSize: 24, color: 'rgba(255,255,255,0.4)' }}>/10</span>
-              <p style={{ margin: '8px 0 0', fontSize: 16, color: 'rgba(255,255,255,0.7)' }}>{levelLabels[level]}</p>
-            </div>
-
-            <input
-              type="range"
-              min={1}
-              max={10}
-              step={1}
-              value={level}
-              onChange={e => { setConfidenceLevel(Number(e.target.value)); rerender(); }}
-              style={{ width: '100%', accentColor: '#48BB78' }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
-              <span>Not ready</span><span>Ready</span>
-            </div>
-          </div>
-        );
-      }
-
-      case 6:
-        return (
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 8px' }}>Your biggest fears</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px' }}>Select all that apply — we'll address them in your journey</p>
-            {FEARS.map(fear => {
-              const selected = state.fears.includes(fear);
-              return (
-                <button
-                  key={fear}
-                  style={optionStyle(selected)}
-                  onClick={() => { toggleFear(fear); rerender(); }}
-                >
-                  {selected ? '✓ ' : ''}{fear}
-                </button>
-              );
-            })}
-          </div>
-        );
-
-      case 7:
-        return (
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 24px' }}>Your journey is ready</h2>
-            {[
-              { label: 'Profession', value: state.professionId?.replace('_', ' ') || '—' },
-              { label: 'Situation', value: SITUATIONS.find(s => s.value === state.situation)?.label || '—' },
-              { label: 'Confidence', value: state.confidenceLevel ? `${state.confidenceLevel}/10` : '—' },
-              { label: 'Applications sent', value: state.applicationsCount ?? 0 },
-              { label: 'Interviews attended', value: state.interviewsCount ?? 0 },
-              { label: 'Fears to address', value: state.fears.length > 0 ? state.fears.join(', ') : 'None selected' },
-            ].map(({ label, value }) => (
-              <div key={label} style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '14px 16px',
-                marginBottom: 8,
-                background: 'rgba(255,255,255,0.05)',
-                borderRadius: 12,
-                fontSize: 14,
-              }}>
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</span>
-                <span style={{ color: '#ffffff', fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>{String(value)}</span>
-              </div>
-            ))}
-          </div>
-        );
-
-      default:
-        return <div>Unknown step</div>;
+  const canProceed = (): boolean => {
+    switch (page) {
+      case 1: return !!state.professionId;
+      case 2: return !!state.experienceLevel;
+      case 3: return state.goals.length > 0;
+      case 4: return !!state.timeline;
+      case 5: return state.preferences.length > 0;
+      default: return true;
     }
   };
 
-  const totalSteps = 8;
-  const progress = ((state.step + 1) / totalSteps) * 100;
-  const isLastStep = state.step === 7;
+  const isLastPage = page === PAGES.length - 1;
+
+  const reviewItems = [
+    { icon: '💼', label: 'Profession', value: state.professionId?.replace(/_/g, ' ') || '-' },
+    { icon: '📈', label: 'Experience', value: state.experienceLevel || '-' },
+    { icon: '🎯', label: 'Goals', value: state.goals.length > 0 ? state.goals.join(', ') : '-' },
+    { icon: '⏱', label: 'Timeline', value: state.timeline || '-' },
+    { icon: '🌍', label: 'Preferences', value: state.preferences.length > 0 ? state.preferences.join(', ') : '-' },
+  ];
 
   return (
-    <div style={containerStyle}>
-      <div style={{ marginBottom: 32 }}>
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: '#071320',
+      color: '#fff',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      {/* Progress bar */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 3,
+        zIndex: 10,
+        background: 'rgba(255,255,255,0.06)',
+      }}>
         <div style={{
-          height: 3,
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: 2,
-          overflow: 'hidden',
+          height: '100%',
+          width: `${((page + 1) / PAGES.length) * 100}%`,
+          background: 'linear-gradient(90deg, #FF6B6B, #FF8E8E)',
+          transition: 'width 400ms ease',
+          borderRadius: '0 2px 2px 0',
+        }} />
+      </div>
+
+      {/* Page content */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '48px 24px 100px',
+        overflow: 'hidden',
+        position: 'relative',
+      }}>
+        <div key={page} style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          animation: direction === 'forward'
+            ? 'onboardingSlideIn 350ms ease forwards'
+            : 'onboardingSlideInBack 350ms ease forwards',
+          transformOrigin: direction === 'forward' ? 'left center' : 'right center',
         }}>
-          <div style={{
-            height: '100%',
-            width: `${progress}%`,
-            background: '#48BB78',
-            borderRadius: 2,
-            transition: '300ms ease',
-          }} />
+          {page === 0 && (
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              gap: 16,
+            }}>
+              <div style={{
+                width: 160,
+                height: 160,
+                borderRadius: 40,
+                background: 'linear-gradient(135deg, rgba(255,107,107,0.2), rgba(255,142,142,0.1))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 72,
+                marginBottom: 16,
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}>
+                🧭
+              </div>
+              <h1 style={{
+                fontSize: 32,
+                fontWeight: 700,
+                margin: 0,
+                background: 'linear-gradient(135deg, #FF6B6B, #FF8E8E)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                Career Navigator
+              </h1>
+              <p style={{
+                fontSize: 16,
+                color: 'rgba(255,255,255,0.6)',
+                maxWidth: 280,
+                lineHeight: 1.6,
+                margin: 0,
+              }}>
+                Become the engineer companies compete for
+              </p>
+              <div style={{ marginTop: 32, width: '100%', maxWidth: 280 }}>
+                <PrimaryButton onClick={handleNext}>
+                  Begin Journey
+                </PrimaryButton>
+              </div>
+            </div>
+          )}
+
+          {page === 1 && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px' }}>Choose your profession</h2>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 28px' }}>
+                Your journey will be tailored to this path
+              </p>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <ProfessionCard
+                  icon="💻"
+                  title="Software Engineer"
+                  subtitle="Available"
+                  active={state.professionId === 'software_engineer'}
+                  onClick={() => { selectProfession('software_engineer'); rerender(); }}
+                  disabled={false}
+                />
+                {comingSoon.map(cs => (
+                  <ProfessionCard
+                    key={cs.id}
+                    icon={cs.icon}
+                    title={cs.title}
+                    subtitle="Coming Soon"
+                    active={false}
+                    onClick={() => {}}
+                    disabled={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {page === 2 && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px' }}>Experience</h2>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 28px' }}>
+                Choose your current level
+              </p>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {EXPERIENCE_LEVELS.map(level => {
+                  const selected = state.experienceLevel === level;
+                  return (
+                    <button
+                      key={level}
+                      onClick={() => { setExperience(level); rerender(); }}
+                      style={{
+                        padding: '20px 24px',
+                        borderRadius: 20,
+                        border: selected ? '2px solid #FF6B6B' : '1px solid rgba(255,255,255,0.08)',
+                        background: selected ? 'rgba(255,107,107,0.12)' : 'rgba(255,255,255,0.04)',
+                        color: '#fff',
+                        fontSize: 17,
+                        fontWeight: selected ? 600 : 400,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 200ms ease',
+                        transform: selected ? 'scale(1.05)' : 'scale(1)',
+                        minHeight: 60,
+                      }}
+                    >
+                      {level}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {page === 3 && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px' }}>Your Mission</h2>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 28px' }}>
+                Select all that apply
+              </p>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {MISSION_OPTIONS.map(goal => {
+                  const selected = state.goals.includes(goal);
+                  return (
+                    <button
+                      key={goal}
+                      onClick={() => { toggleGoal(goal); rerender(); }}
+                      style={{
+                        padding: '20px 24px',
+                        borderRadius: 20,
+                        border: selected ? '2px solid #FF6B6B' : '1px solid rgba(255,255,255,0.08)',
+                        background: selected ? 'rgba(255,107,107,0.12)' : 'rgba(255,255,255,0.04)',
+                        color: '#fff',
+                        fontSize: 17,
+                        fontWeight: selected ? 600 : 400,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 200ms ease',
+                        minHeight: 60,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                      }}
+                    >
+                      <span style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 8,
+                        border: selected ? 'none' : '2px solid rgba(255,255,255,0.2)',
+                        background: selected ? '#FF6B6B' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 14,
+                        flexShrink: 0,
+                      }}>
+                        {selected ? '✓' : ''}
+                      </span>
+                      {goal}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {page === 4 && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px' }}>Timeline</h2>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 28px' }}>
+                When do you want to achieve your goal?
+              </p>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {TIMELINE_OPTIONS.map(option => {
+                  const selected = state.timeline === option;
+                  return (
+                    <button
+                      key={option}
+                      onClick={() => { setTimeline(option); rerender(); }}
+                      style={{
+                        padding: '20px 24px',
+                        borderRadius: 20,
+                        border: selected ? '2px solid #FF6B6B' : '1px solid rgba(255,255,255,0.08)',
+                        background: selected ? 'rgba(255,107,107,0.12)' : 'rgba(255,255,255,0.04)',
+                        color: '#fff',
+                        fontSize: 17,
+                        fontWeight: selected ? 600 : 400,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 200ms ease',
+                        transform: selected ? 'scale(1.05)' : 'scale(1)',
+                        minHeight: 60,
+                      }}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {page === 5 && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px' }}>Preferences</h2>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 28px' }}>
+                Select all that apply
+              </p>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {PREFERENCE_OPTIONS.map(pref => {
+                  const selected = state.preferences.includes(pref);
+                  return (
+                    <button
+                      key={pref}
+                      onClick={() => { togglePreference(pref); rerender(); }}
+                      style={{
+                        padding: '20px 24px',
+                        borderRadius: 20,
+                        border: selected ? '2px solid #FF6B6B' : '1px solid rgba(255,255,255,0.08)',
+                        background: selected ? 'rgba(255,107,107,0.12)' : 'rgba(255,255,255,0.04)',
+                        color: '#fff',
+                        fontSize: 17,
+                        fontWeight: selected ? 600 : 400,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 200ms ease',
+                        minHeight: 60,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                      }}
+                    >
+                      <span style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 8,
+                        border: selected ? 'none' : '2px solid rgba(255,255,255,0.2)',
+                        background: selected ? '#FF6B6B' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 14,
+                        flexShrink: 0,
+                      }}>
+                        {selected ? '✓' : ''}
+                      </span>
+                      {pref}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {page === 6 && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 24px', textAlign: 'center' }}>
+                Your Journey
+              </h2>
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+                justifyContent: 'center',
+              }}>
+                {reviewItems.map(item => (
+                  <div key={item.label} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 16,
+                    padding: '16px 20px',
+                    borderRadius: 16,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                  }}>
+                    <span style={{ fontSize: 28 }}>{item.icon}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 2 }}>
+                        {item.label}
+                      </div>
+                      <div style={{ fontSize: 15, fontWeight: 500, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {item.value}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        <p style={{ margin: '8px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-          Step {state.step + 1} of {totalSteps}
-        </p>
       </div>
 
-      <div style={{ flex: 1 }}>
-        {renderStep()}
-      </div>
-
-      <div style={{ display: 'flex', gap: 12, marginTop: 32, paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        {state.step > 0 && (
+      {/* Bottom controls */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: '16px 24px',
+        paddingBottom: 'calc(16px + env(safe-area-inset-bottom))',
+        display: 'flex',
+        gap: 12,
+        zIndex: 10,
+      }}>
+        {page > 0 && (
           <button
             onClick={handleBack}
             style={{
               flex: 1,
               padding: '16px',
-              borderRadius: 14,
+              borderRadius: 16,
               border: '1px solid rgba(255,255,255,0.1)',
               background: 'rgba(255,255,255,0.05)',
-              color: '#ffffff',
+              color: '#fff',
               fontSize: 16,
               cursor: 'pointer',
               minHeight: 54,
+              fontWeight: 500,
             }}
           >
             Back
           </button>
         )}
-        {!isLastStep ? (
+        {!isLastPage ? (
           <button
             onClick={handleNext}
+            disabled={!canProceed()}
             style={{
               flex: 2,
               padding: '16px',
-              borderRadius: 14,
+              borderRadius: 16,
               border: 'none',
-              background: '#48BB78',
-              color: '#ffffff',
+              background: !canProceed() ? 'rgba(255,107,107,0.3)' : 'linear-gradient(135deg, #FF6B6B, #FF8E8E)',
+              color: '#fff',
               fontSize: 16,
               fontWeight: 600,
-              cursor: 'pointer',
+              cursor: !canProceed() ? 'not-allowed' : 'pointer',
               minHeight: 54,
+              transition: 'opacity 200ms',
             }}
           >
             Continue
@@ -424,10 +524,10 @@ export default function OnboardingScreen({ onComplete }: Props) {
             style={{
               flex: 2,
               padding: '16px',
-              borderRadius: 14,
+              borderRadius: 16,
               border: 'none',
-              background: '#48BB78',
-              color: '#ffffff',
+              background: 'linear-gradient(135deg, #FF6B6B, #FF8E8E)',
+              color: '#fff',
               fontSize: 16,
               fontWeight: 600,
               cursor: 'pointer',
@@ -438,6 +538,86 @@ export default function OnboardingScreen({ onComplete }: Props) {
           </button>
         )}
       </div>
+
+      <style>{`
+        @keyframes onboardingSlideIn {
+          from {
+            opacity: 0;
+            transform: translateX(60px) scale(0.96);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+        @keyframes onboardingSlideInBack {
+          from {
+            opacity: 0;
+            transform: translateX(-60px) scale(0.96);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+      `}</style>
     </div>
+  );
+}
+
+function ProfessionCard({
+  icon,
+  title,
+  subtitle,
+  active,
+  onClick,
+  disabled,
+}: {
+  icon: string;
+  title: string;
+  subtitle: string;
+  active: boolean;
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  return (
+    <button
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      style={{
+        padding: '20px 24px',
+        borderRadius: 20,
+        border: active ? '2px solid #FF6B6B' : '1px solid rgba(255,255,255,0.08)',
+        background: active
+          ? 'rgba(255,107,107,0.12)'
+          : disabled
+          ? 'rgba(255,255,255,0.02)'
+          : 'rgba(255,255,255,0.04)',
+        color: '#fff',
+        fontSize: 17,
+        fontWeight: active ? 600 : 400,
+        textAlign: 'left',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'all 200ms ease',
+        opacity: disabled ? 0.4 : 1,
+        minHeight: 64,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        borderStyle: disabled ? 'dashed' : active ? 'solid' : 'solid',
+      }}
+    >
+      <span style={{ fontSize: 32 }}>{icon}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: active ? 600 : 400 }}>{title}</div>
+        <div style={{
+          fontSize: 13,
+          color: active ? '#FF8E8E' : 'rgba(255,255,255,0.35)',
+          marginTop: 2,
+        }}>
+          {subtitle}
+        </div>
+      </div>
+    </button>
   );
 }

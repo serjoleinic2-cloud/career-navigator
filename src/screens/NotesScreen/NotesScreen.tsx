@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getAllNotes, addNote, updateNote, deleteNote } from '@/core/user_data/notes/notes_controller';
 import { getActiveProfessionId } from '@/core/profession_loader';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
@@ -6,14 +6,38 @@ import { subscribe } from '@/core/events/system_event_bus';
 import type { Note } from '@/core/user_data/notes/note';
 import './NotesScreen.css';
 
-export function NotesScreen({ onBack }: { onBack: () => void }) {
+const CATEGORY_ORDER = ['resume', 'linkedin', 'interview', 'networking', 'salary'] as const;
+const CATEGORY_LABELS: Record<string, string> = {
+  resume: 'Resume',
+  linkedin: 'LinkedIn',
+  interview: 'Interview',
+  networking: 'Networking',
+  salary: 'Salary',
+};
+const CATEGORY_ICONS: Record<string, string> = {
+  resume: '📄',
+  linkedin: '🔗',
+  interview: '🎤',
+  networking: '🤝',
+  salary: '💰',
+};
+const CATEGORY_COLORS: Record<string, string> = {
+  resume: '#4A90D9',
+  linkedin: '#7B68EE',
+  interview: '#F6AD55',
+  networking: '#48BB78',
+  salary: '#FF6B6B',
+};
+
+export function NotesScreen() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
   const [newNoteContent, setNewNoteContent] = useState('');
-  const [toast, setToast] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [showNewNote, setShowNewNote] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const newNoteRef = useRef<HTMLTextAreaElement>(null);
 
   const refresh = useCallback(() => {
     setNotes(getAllNotes());
@@ -31,9 +55,32 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
     };
   }, [refresh]);
 
+  useEffect(() => {
+    if (showNewNote && newNoteRef.current) {
+      newNoteRef.current.focus();
+    }
+  }, [showNewNote]);
+
   const filtered = searchQuery
     ? notes.filter(n => n.content.toLowerCase().includes(searchQuery.toLowerCase()))
     : notes;
+
+  const grouped = filtered.reduce<Record<string, Note[]>>((acc, note) => {
+    const cat = note.chapterId || 'other';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(note);
+    return acc;
+  }, {});
+
+  const sortedCategories = Object.keys(grouped).sort((a, b) => {
+    const ai = CATEGORY_ORDER.indexOf(a as any);
+    const bi = CATEGORY_ORDER.indexOf(b as any);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+
+  const visibleCategories = selectedCategory
+    ? sortedCategories.filter(c => c === selectedCategory)
+    : sortedCategories;
 
   const handleStartEdit = (note: Note) => {
     setEditingId(note.id);
@@ -48,148 +95,158 @@ export function NotesScreen({ onBack }: { onBack: () => void }) {
     setEditContent('');
   };
 
-  useEffect(() => {
-    if (toast) {
-      const t = setTimeout(() => setToast(null), 2000);
-      return () => clearTimeout(t);
-    }
-  }, [toast]);
-
   const handleSaveNewNote = () => {
     if (!newNoteContent.trim()) return;
     const professionId = getActiveProfessionId() || '';
     const runtime = getRuntimeState();
     addNote({
       professionId,
-      chapterId: runtime?.activeChapterId || '',
+      chapterId: selectedCategory || runtime?.activeChapterId || '',
       nodeId: runtime?.activeNodeId || '',
       content: newNoteContent.trim(),
     });
     setNewNoteContent('');
-    setToast('Note saved');
+    setShowNewNote(false);
   };
 
   const handleDelete = (id: string) => {
-    setConfirmDeleteId(id);
-  };
-
-  const handleConfirmDelete = () => {
-    if (confirmDeleteId) {
-      deleteNote(confirmDeleteId);
-      if (editingId === confirmDeleteId) {
-        setEditingId(null);
-        setEditContent('');
-      }
-      setConfirmDeleteId(null);
+    deleteNote(id);
+    if (editingId === id) {
+      setEditingId(null);
+      setEditContent('');
     }
   };
 
-  const handleCancelDelete = () => {
-    setConfirmDeleteId(null);
-  };
-
-  const getNodeColor = (nodeId: string): string => {
-    const rt = getRuntimeState();
-    const node = rt?.nodeStates[nodeId];
-    if (!node) return '#888';
-    switch (node.state) {
-      case 'locked': return '#808080';
-      case 'awareness': return '#FFD700';
-      case 'understanding': return '#FF8C00';
-      case 'application': return '#4A90D9';
-      case 'readiness': return '#9B59B6';
-      case 'execution': return '#2ECC71';
-      case 'confidence': return '#008080';
-      default: return '#888';
-    }
-  };
+  const hasNotes = sortedCategories.length > 0 && sortedCategories.some(c => grouped[c].length > 0);
 
   return (
     <div className="notes-screen">
-      <button className="back-button" onClick={onBack}>← Back to Journey</button>
-
-      <h1>Notes</h1>
-      <p className="subtitle">{notes.length} note{notes.length !== 1 ? 's' : ''}</p>
+      <h1 className="notes-title">My Journal</h1>
 
       <input
         type="text"
-        className="search-input"
+        className="notes-search"
         placeholder="Search notes..."
         value={searchQuery}
         onChange={e => setSearchQuery(e.target.value)}
       />
 
-      {/* New Note Form */}
-      <div className="new-note-form">
-        <textarea
-          value={newNoteContent}
-          onChange={e => setNewNoteContent(e.target.value)}
-          placeholder="Write a new note..."
-          rows={3}
-        />
-        <button
-          className="save-note-btn"
-          onClick={handleSaveNewNote}
-          disabled={!newNoteContent.trim()}
-        >
-          Save Note
-        </button>
+      {/* Category filter chips */}
+      <div className="notes-categories">
+        {CATEGORY_ORDER.map(cat => (
+          <button
+            key={cat}
+            className={`notes-cat-chip ${selectedCategory === cat ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+            style={{
+              '--chip-color': CATEGORY_COLORS[cat],
+            } as React.CSSProperties}
+          >
+            {CATEGORY_ICONS[cat]} {CATEGORY_LABELS[cat]}
+          </button>
+        ))}
       </div>
 
-      {/* Saved Notes */}
-      <div className="notes-list">
-        {filtered.length === 0 && (
-          <p className="empty-state">
-            {searchQuery ? 'No notes match your search.' : 'No notes yet. Write your first note below.'}
-          </p>
+      {/* Notes grouped by category */}
+      <div className="notes-groups">
+        {!hasNotes && (
+          <div className="notes-empty">
+            <span className="notes-empty-icon">📝</span>
+            <p>No notes yet.</p>
+          </div>
         )}
-        {filtered.map(note => (
-          <div key={note.id} className="note-card">
-            <div className="stage-dot" style={{ backgroundColor: getNodeColor(note.nodeId) }} />
-            <button
-              className="note-delete"
-              onClick={() => handleDelete(note.id)}
-            >
-              ×
-            </button>
-            <div className="note-meta">
-              <span className="note-date">
-                {new Date(note.updatedAt).toLocaleDateString()}
-              </span>
+
+        {visibleCategories.map(cat => (
+          <div key={cat} className="notes-group">
+            <div className="notes-group-header" style={{ color: CATEGORY_COLORS[cat] || '#888' }}>
+              <span>{CATEGORY_ICONS[cat] || '📌'} {CATEGORY_LABELS[cat] || cat}</span>
+              <span className="notes-group-count">{grouped[cat].length}</span>
             </div>
 
-            {confirmDeleteId === note.id ? (
-              <div className="confirm-delete">
-                <span>Delete forever?</span>
-                <button className="confirm-yes" onClick={handleConfirmDelete}>Yes</button>
-                <button className="confirm-no" onClick={handleCancelDelete}>No</button>
-              </div>
-            ) : editingId === note.id ? (
-              <div className="note-edit">
-                <textarea
-                  value={editContent}
-                  onChange={e => setEditContent(e.target.value)}
-                  rows={4}
-                />
-                <div className="note-edit-actions">
-                  <button onClick={handleSaveEdit}>Save</button>
-                  <button onClick={() => setEditingId(null)}>Cancel</button>
-                </div>
-              </div>
-            ) : (
+            {grouped[cat].map(note => (
               <div
-                className="note-content"
-                onClick={() => handleStartEdit(note)}
+                key={note.id}
+                className={`notes-card ${editingId === note.id ? 'editing' : ''}`}
               >
-                {note.content.length > 30 ? note.content.slice(0, 30) + '...' : note.content}
+                <div className="notes-card-meta">
+                  <span className="notes-card-date">
+                    {new Date(note.updatedAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                  <button
+                    className="notes-card-delete"
+                    onClick={() => handleDelete(note.id)}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {editingId === note.id ? (
+                  <div className="notes-edit-form">
+                    <textarea
+                      value={editContent}
+                      onChange={e => setEditContent(e.target.value)}
+                      rows={4}
+                    />
+                    <div className="notes-edit-actions">
+                      <button className="notes-save-btn" onClick={handleSaveEdit}>Save</button>
+                      <button className="notes-cancel-btn" onClick={() => setEditingId(null)}>Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="notes-card-content"
+                    onClick={() => handleStartEdit(note)}
+                  >
+                    {note.content}
+                  </div>
+                )}
               </div>
-            )}
+            ))}
           </div>
         ))}
       </div>
 
-      {/* Toast */}
-      {toast && <div className="note-toast">{toast}</div>}
+      {/* New note floating button */}
+      <button
+        className="notes-fab"
+        onClick={() => setShowNewNote(true)}
+        aria-label="New note"
+      >
+        +
+      </button>
+
+      {/* New note drawer */}
+      {showNewNote && (
+        <div className="notes-drawer-overlay" onClick={() => setShowNewNote(false)}>
+          <div className="notes-drawer" onClick={e => e.stopPropagation()}>
+            <textarea
+              ref={newNoteRef}
+              value={newNoteContent}
+              onChange={e => setNewNoteContent(e.target.value)}
+              placeholder="Write a new note..."
+              rows={4}
+            />
+            <div className="notes-drawer-actions">
+              <button
+                className="notes-drawer-cancel"
+                onClick={() => { setShowNewNote(false); setNewNoteContent(''); }}
+              >
+                Cancel
+              </button>
+              <button
+                className="notes-drawer-save"
+                onClick={handleSaveNewNote}
+                disabled={!newNoteContent.trim()}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

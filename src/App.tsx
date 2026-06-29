@@ -5,14 +5,27 @@ import OnboardingScreen from './screens/OnboardingScreen/OnboardingScreen';
 import { JourneyScreen } from './screens/JourneyScreen/JourneyScreen';
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
-import { DashboardScreen } from './screens/DashboardScreen/DashboardScreen';
+import { ShareScreen } from './screens/ShareScreen/ShareScreen';
+import { AppShell } from './components/layout/AppShell';
+import './styles/layout.css';
+import './styles/theme.css';
+import './styles/animations.css';
+
+type Screen = 'journey' | 'playbook' | 'notes' | 'share';
+
+const SCREEN_TITLES: Record<Screen, string> = {
+  journey: 'Journey',
+  playbook: 'Playbook',
+  notes: 'My Journal',
+  share: 'Share Progress',
+};
 
 function App() {
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showPlaybook, setShowPlaybook] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
+  const [currentScreen, setCurrentScreen] = useState<Screen>('journey');
+  const [prevScreen, setPrevScreen] = useState<Screen | null>(null);
+  const [transitioning, setTransitioning] = useState(false);
 
   useEffect(() => {
     const saved = loadRuntime();
@@ -25,16 +38,22 @@ function App() {
     setIsReady(true);
   }, []);
 
-  useEffect(() => {
-    const onHashChange = () => {
-      setShowPlaybook(window.location.hash === '#playbook');
-      setShowNotes(window.location.hash === '#notes');
-      setShowDashboard(window.location.hash === '#dashboard');
-    };
-    window.addEventListener('hashchange', onHashChange);
-    onHashChange();
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
+  const navigateTo = (screen: Screen) => {
+    if (screen === currentScreen || transitioning) return;
+    setPrevScreen(currentScreen);
+    setTransitioning(true);
+    setCurrentScreen(screen);
+    setTimeout(() => {
+      setTransitioning(false);
+      setPrevScreen(null);
+    }, 300);
+  };
+
+  const handleTabChange = (tabId: string) => {
+    if (tabId === 'journey' || tabId === 'playbook' || tabId === 'notes') {
+      navigateTo(tabId);
+    }
+  };
 
   if (!isReady) return <div style={{ background: '#071320', minHeight: '100vh' }} />;
 
@@ -43,46 +62,60 @@ function App() {
       <OnboardingScreen
         onComplete={() => {
           setShowOnboarding(false);
-          window.location.hash = '';
         }}
       />
     );
   }
 
-  if (showNotes) {
-    return (
-      <NotesScreen
-        onBack={() => {
-          setShowNotes(false);
-          window.location.hash = '';
-        }}
-      />
-    );
-  }
+  const renderScreen = (screen: Screen, isPrev: boolean) => {
+    const common = {
+      key: screen + (isPrev ? '-prev' : ''),
+      style: {
+        position: 'absolute' as const,
+        inset: 0,
+        opacity: isPrev ? 0 : 1,
+        transform: isPrev ? 'translateX(-20px)' : 'translateX(0)',
+        transition: 'opacity 250ms ease, transform 250ms ease',
+        pointerEvents: isPrev ? ('none' as const) : ('auto' as const),
+      },
+    };
 
-  if (showDashboard) {
-    return (
-      <DashboardScreen
-        onBack={() => {
-          setShowDashboard(false);
-          window.location.hash = '';
-        }}
-      />
-    );
-  }
+    switch (screen) {
+      case 'journey':
+        return <div {...common}><JourneyScreen /></div>;
+      case 'playbook':
+        return (
+          <div {...common}>
+            <PlaybookScreen />
+          </div>
+        );
+      case 'notes':
+        return (
+          <div {...common}>
+            <NotesScreen />
+          </div>
+        );
+      case 'share':
+        return (
+          <div {...common}>
+            <ShareScreen />
+          </div>
+        );
+    }
+  };
 
-  if (showPlaybook) {
-    return (
-      <PlaybookScreen
-        onBack={() => {
-          setShowPlaybook(false);
-          window.location.hash = '';
-        }}
-      />
-    );
-  }
-
-  return <JourneyScreen />;
+  return (
+    <AppShell
+      title={SCREEN_TITLES[currentScreen]}
+      activeTab={currentScreen}
+      onTabChange={handleTabChange}
+    >
+      <div style={{ position: 'relative', minHeight: '100%' }}>
+        {prevScreen && renderScreen(prevScreen, true)}
+        {renderScreen(currentScreen, false)}
+      </div>
+    </AppShell>
+  );
 }
 
 export default App;

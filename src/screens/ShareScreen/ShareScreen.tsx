@@ -1,51 +1,50 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import { getState } from '@/core/runtime/runtime_store';
 import { getUIState } from '@/core/ui_bridge/ui_bridge';
 import { mapToShareModel } from '@/core/share/share_mapper';
-import { shareText, copyText, nativeShare, shareImage } from '@/core/share/share_service';
+import { copyText, nativeShare, shareImage } from '@/core/share/share_service';
 import { exportJSON, exportCSV } from '@/core/export/export_service';
-import { ShareCard } from '@/components/ShareCard/ShareCard';
+import type { ShareModel } from '@/core/share/share_model';
 import './ShareScreen.css';
 
-export function ShareScreen({ onBack }: { onBack: () => void }) {
-  const [options, setOptions] = useState({
-    hideScores: false,
-    hideProfession: false,
-    hideProgress: false,
-    hideQuote: false,
-  });
+export function ShareScreen() {
   const [copied, setCopied] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const runtime = getState();
   const ui = getUIState();
-  const model = mapToShareModel(runtime, ui);
+  const model: ShareModel = mapToShareModel(runtime, ui);
 
   const handleCopyText = useCallback(async () => {
-    const text = shareText(model, options);
+    const text = buildShareText(model);
     await copyText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [model, options]);
+  }, [model]);
 
   const handleShareImage = useCallback(async () => {
-    const card = document.querySelector('.share-card') as HTMLElement;
+    const card = cardRef.current;
     if (!card) return;
 
     try {
-      const dataUrl = await toPng(card, { pixelRatio: 2 });
+      const dataUrl = await toPng(card, {
+        pixelRatio: 2,
+        width: 1080,
+        height: 1080,
+      });
       const response = await fetch(dataUrl);
       const blob = await response.blob();
 
       if ('share' in navigator) {
-        await nativeShare(shareText(model, options), blob);
+        await nativeShare(buildShareText(model), blob);
       } else {
         shareImage(blob);
       }
-    } catch (err) {
-      console.error('Share failed:', err);
+    } catch {
+      // fail silently
     }
-  }, [model, options]);
+  }, [model]);
 
   const handleExportJSON = useCallback(() => {
     exportJSON();
@@ -57,41 +56,87 @@ export function ShareScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="share-screen">
-      <button className="back-button" onClick={onBack}>← Back to Journey</button>
-      <h1>Share Progress</h1>
-
-      <div className="share-card-wrapper">
-        <ShareCard model={model} options={options} />
-      </div>
-
-      <div className="privacy-options">
-        <h3>Privacy Options</h3>
-        {Object.entries(options).map(([key, value]) => (
-          <label key={key} className="privacy-option">
-            <input
-              type="checkbox"
-              checked={value}
-              onChange={e => setOptions(prev => ({ ...prev, [key]: e.target.checked }))}
+      {/* Share Card for display and export */}
+      <div className="share-card-container" ref={cardRef}>
+        <div
+          className="share-card-bg"
+          style={{
+            background: `linear-gradient(160deg, ${model.themeColor}15 0%, ${model.themeColor}08 50%, #071320 100%)`,
+          }}
+        >
+          {/* Emblem */}
+          <div className="share-emblem">
+            <div
+              className="share-emblem-ring"
+              style={{ borderColor: model.themeColor }}
             />
-            {key.replace('hide', 'Hide ').replace(/([A-Z])/g, ' $1')}
-          </label>
-        ))}
+            <span className="share-emblem-icon">🧭</span>
+          </div>
+
+          <div className="share-profession-label">{model.profession}</div>
+          <h1 className="share-heading">Journey</h1>
+
+          <div className="share-stats">
+            <div className="share-stat">
+              <span className="share-stat-value">{model.readinessScore}%</span>
+              <span className="share-stat-label">Readiness</span>
+            </div>
+            <div className="share-stat-divider" />
+            <div className="share-stat">
+              <span className="share-stat-value">{model.confidenceScore}%</span>
+              <span className="share-stat-label">Confidence</span>
+            </div>
+          </div>
+
+          <div className="share-skills">
+            Skills Mastered: <strong>{model.completedSkills}</strong> / {model.totalSkills}
+          </div>
+
+          <div
+            className="share-chapter-badge"
+            style={{
+              background: `${model.themeColor}22`,
+              borderColor: `${model.themeColor}44`,
+              color: model.themeColor,
+            }}
+          >
+            Current Chapter: {model.currentChapter}
+          </div>
+
+          <div className="share-quote">"{model.quote}"</div>
+
+          <div className="share-brand">Career Navigator</div>
+        </div>
       </div>
 
+      {/* Action Buttons */}
       <div className="share-actions">
-        <button onClick={handleCopyText}>
-          {copied ? '✓ Copied!' : '📋 Copy Text'}
-        </button>
-        <button onClick={handleShareImage}>
+        <button className="share-action-btn primary" onClick={handleShareImage}>
           🖼 Share Image
         </button>
-        <button onClick={handleExportJSON}>
+        <button className="share-action-btn" onClick={handleCopyText}>
+          {copied ? '✓ Copied!' : '📋 Copy Text'}
+        </button>
+        <button className="share-action-btn" onClick={handleExportJSON}>
           📄 Export JSON
         </button>
-        <button onClick={handleExportCSV}>
+        <button className="share-action-btn" onClick={handleExportCSV}>
           📊 Export CSV
         </button>
       </div>
     </div>
   );
+}
+
+function buildShareText(model: ShareModel): string {
+  return [
+    `🧭 Career Navigator`,
+    `${model.profession}`,
+    `Readiness: ${model.readinessScore}%`,
+    `Confidence: ${model.confidenceScore}%`,
+    `Skills: ${model.completedSkills}/${model.totalSkills}`,
+    `Chapter: ${model.currentChapter}`,
+    ``,
+    `"${model.quote}"`,
+  ].join('\n');
 }

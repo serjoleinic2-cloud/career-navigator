@@ -3,15 +3,39 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  background: var(--bg, #F5F0EB);
-  color: var(--textPrimary, #2D3436);
+  background: #071320;
+  color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .app-shell-content {
   flex: 1;
   overflow-y: auto;
-  padding-top: 64px;
-  padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  padding-top: 80px;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling: touch;
+}
+
+/* Screen transition */
+.screen-transition-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.screen-transition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.screen-transition-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.screen-transition-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 200ms ease, transform 200ms ease;
 }
