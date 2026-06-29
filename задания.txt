@@ -1,135 +1,118 @@
-TITLE: CAREER NAVIGATOR — ARCHITECTURE MERGE (CRITICAL REFACTOR)
+TITLE: CAREER NAVIGATOR — ARCHITECTURE FIX (EVENT LAYER CLEANUP)
 
 GOAL:
-Unify architecture. Remove duplicate game systems. Establish single source of truth.
+Fix architecture violation where UI layer directly calls core logic.
+Convert system to event-driven interaction model.
 
-CURRENT PROBLEM:
-There are 3 overlapping systems:
-1. JourneyScreen (legacy UI + partial logic)
-2. world_renderer (game-like visualization attempt)
-3. skill_engine (true core logic system)
+CURRENT ISSUE:
+MissionScreen directly imports and calls:
+- applyMissionResult from skill_engine
 
-This causes duplicated state handling and conflicting rendering logic.
+This breaks architecture rule:
+UI must NOT directly call core logic functions.
 
-FINAL ARCHITECTURE (MANDATORY):
+FINAL ARCHITECTURE RULE:
 
-skill_engine (SOURCE OF TRUTH)
-        ↓ emits state
-world_renderer (ONLY VISUAL RENDER LAYER)
-        ↓
-MissionScreen (ONLY INTERACTION LAYER)
-
---------------------------------------
-
-TASKS:
-
-1. skill_engine (DO NOT CHANGE LOGIC)
-- MUST remain the only system responsible for:
-  - careerState
-  - confidenceScore
-  - readiness
-  - nodeStates
-  - activeNodeId
-- It is the ONLY source of truth.
+MissionScreen (UI)
+    → emits EVENT
+skill_engine (CORE)
+    → processes event
+world_renderer (VIEW)
+    → only renders state
 
 --------------------------------------
 
-2. world_renderer (MAKE THIS THE MAIN SCREEN)
+TASK 1 — MissionScreen FIX
 
-Refactor world_renderer to become the PRIMARY GAME VIEW.
+FILE:
+src/screens/MissionScreen/MissionScreen.tsx
 
-Requirements:
-- MUST consume ONLY skill_engine state
-- MUST NOT calculate any logic
-- MUST NOT mutate state
-- MUST ONLY render visual representation of:
-  - nodes
-  - paths
-  - zones
-  - progression state
+REMOVE:
+- import { applyMissionResult } from '../../core/skill_engine';
+- direct call to applyMissionResult()
 
-Remove any embedded logic inside renderer.
+REPLACE WITH:
 
-RULE:
-state → pure visual output ONLY
+Use event system:
 
---------------------------------------
+import { emit } from '../../core/events/system_event_bus';
 
-3. JourneyScreen (DEPRECATE)
+Replace handleSubmit logic:
 
-- REMOVE from main navigation flow
-- DO NOT delete immediately
-- Convert into:
-  - fallback debug screen OR legacy wrapper
+emit('MISSION_SUBMIT', {
+  text: textInput,
+  checked: Array.from(checkedItems),
+  score: reflectionScore,
+});
 
-REMOVE from JourneyScreen:
-- timeline logic
-- node progression logic
-- state calculation logic
-- duplicate rendering of world/path
+DO NOT process result in UI.
+DO NOT compute success/failure in UI.
 
-JourneyScreen must NOT own gameplay logic anymore.
+UI only emits event.
 
 --------------------------------------
 
-4. VerticalPath / duplicated world logic
+TASK 2 — skill_engine EVENT HANDLER
 
-- IF logic overlaps with world_renderer → MERGE into world_renderer
-- Remove duplicate path rendering systems
-- Ensure ONLY ONE system renders progression path
+FILE:
+src/core/skill_engine.ts
+
+ADD event listener:
+
+on('MISSION_SUBMIT', (payload) => {
+  submitTask(payload);
+});
+
+OR if event system requires registration:
+ensure skill_engine subscribes to system_event_bus.
+
+MOVE ALL LOGIC INTO skill_engine:
+- scoring
+- progression updates
+- node state updates
+
+UI must not know results logic.
 
 --------------------------------------
 
-5. DATA FLOW ENFORCEMENT
+TASK 3 — REMOVE DIRECT COUPLING
 
-Enforce strict architecture:
+Ensure:
+- MissionScreen does NOT import skill_engine functions
+- ONLY event bus is used
 
-skill_engine
-    → emits state updates
-world_renderer
-    → renders state ONLY
+--------------------------------------
+
+TASK 4 — VERIFY DATA FLOW
+
+Must be ONLY:
+
 MissionScreen
-    → triggers actions ONLY via skill_engine
-
-NO EXCEPTIONS.
-
---------------------------------------
-
-6. MISSION SCREEN RULE
-
-MissionScreen must:
-- NOT mutate state directly
-- call only:
-  skill_engine.applyMissionResult()
-
-- act as interaction layer only
+   → emit('MISSION_SUBMIT')
+skill_engine
+   → updates state
+world_renderer
+   → re-renders from state
 
 --------------------------------------
 
-7. NAVIGATION CHANGE
-
-Set world_renderer as default entry screen of application.
-
-Remove JourneyScreen as primary route.
-
---------------------------------------
-
-8. PROHIBITED PRACTICES
-
-- NO duplicate state in UI layers
-- NO business logic in renderer
-- NO node computation outside skill_engine
-- NO parallel world systems
+PROHIBITED:
+- no direct function calls from UI to core
+- no applyMissionResult in UI
+- no duplicated scoring logic in UI
 
 --------------------------------------
 
 EXPECTED RESULT:
 
-After refactor:
-- ONE core engine (skill_engine)
-- ONE world renderer (visual system)
-- ONE interaction layer (MissionScreen)
+- Clean event-driven architecture
+- UI fully decoupled from core engine
+- skill_engine becomes single authority
+- system ready for modular professions (DLC system)
 
-All duplicate systems removed or demoted.
+--------------------------------------
 
-This is mandatory architecture cleanup for scalability into profession modules system.
+IMPORTANT:
+Do NOT refactor UI design.
+Do NOT change styling.
+Only fix architecture coupling.
