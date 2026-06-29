@@ -24,7 +24,8 @@ export type SystemEventType =
   | 'NOTE_CREATED'
   | 'NOTE_UPDATED'
   | 'NOTE_DELETED'
-  | 'MISSION_SUBMIT';
+  | 'MISSION_SUBMIT'
+  | 'MISSION_RESULT';
 
 export type SystemEvent = {
   type: SystemEventType;

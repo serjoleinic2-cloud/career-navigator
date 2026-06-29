@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { getUIState } from '@/core/ui_bridge/ui_bridge';
 import { getCareerState } from '@/core/skill_engine';
 import { buildWorldFromUI } from './world_builder';
@@ -57,14 +56,7 @@ export function renderWorld(
 }
 
 export function WorldRendererScreen(): JSX.Element {
-  const [uiState, setUiState] = useState(() => getUIState());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setUiState(getUIState());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const uiState = getUIState();
 
   const worldNodes = buildWorldFromUI(uiState.nodes);
   const careerState = getCareerState();

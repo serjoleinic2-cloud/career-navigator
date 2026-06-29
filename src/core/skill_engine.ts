@@ -2,7 +2,7 @@ import type { SkillNode } from './skill_state';
 import { STATE_FLOW } from './skill_state';
 import { submitTask, getRuntimeState } from './runtime/runtime_controller';
 import type { JourneyRuntimeState } from './runtime/journey_runtime';
-import { subscribe } from './events/system_event_bus';
+import { emit, subscribe } from './events/system_event_bus';
 
 export type UserAction = 'tap_primary' | 'tap_secondary';
 
@@ -66,7 +66,16 @@ function applyMissionResult(result: MissionResult) {
 
 /* ── Event-driven mission processing ── */
 
+let isProcessingMission = false;
+
 subscribe('MISSION_SUBMIT', (event) => {
+  if (isProcessingMission) return;
+  isProcessingMission = true;
+
   const payload = event.payload as unknown as MissionResult;
-  applyMissionResult(payload);
+  const result = applyMissionResult(payload);
+
+  emit('MISSION_RESULT', { success: result.success ?? false });
+
+  isProcessingMission = false;
 });

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import './MissionScreen.css';
 import type { JourneyRuntimeState } from '../../core/runtime/journey_runtime';
-import { emit } from '../../core/events/system_event_bus';
+import { emit, subscribe } from '../../core/events/system_event_bus';
 
 interface MissionScreenProps {
   runtimeState: JourneyRuntimeState;
@@ -16,6 +16,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   const [textInput, setTextInput] = useState('');
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
   const [reflectionScore, setReflectionScore] = useState<number>(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const activeNodeId = runtimeState.activeNodeId;
   const nodeStates = runtimeState.nodeStates;
@@ -27,21 +28,31 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
     setTextInput('');
     setCheckedItems(new Set());
     setReflectionScore(0);
+    setErrorMessage(null);
   }, [activeNodeId]);
+
+  useEffect(() => {
+    const unsub = subscribe('MISSION_RESULT', (event) => {
+      const payload = event.payload as { success: boolean };
+      if (payload.success) {
+        setTaskView('completed');
+      } else {
+        setTaskView('active');
+        setErrorMessage('Something went wrong. Try again.');
+      }
+    });
+    return unsub;
+  }, []);
 
   const handleSubmit = useCallback(() => {
     setTaskView('completing');
+    setErrorMessage(null);
 
     emit('MISSION_SUBMIT', {
       text: textInput,
       checked: Array.from(checkedItems),
       score: reflectionScore,
     });
-
-    setTimeout(() => {
-      setTaskView('completed');
-      emit('UI_REFRESH', {});
-    }, 600);
   }, [textInput, checkedItems, reflectionScore]);
 
   const handleChecklistToggle = useCallback((index: number) => {
@@ -185,6 +196,12 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           </div>
         </div>
       </div>
+
+      {errorMessage && (
+        <div className="mission-error">
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       <div className="mission-bottom">
         {taskView === 'active' && (
