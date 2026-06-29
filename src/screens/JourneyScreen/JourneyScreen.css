@@ -289,27 +289,6 @@
   font-weight: 500;
 }
 
-/* === Task flow overlay === */
-.journey-task-flow {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  background: linear-gradient(180deg, var(--bg-default) 0%, #10142B 100%);
-  overflow-y: auto;
-  padding: 20px 16px 100px;
-  animation: task-flow-in 0.3s ease;
-}
-
-@keyframes task-flow-in {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.journey-task-flow::-webkit-scrollbar {
-  width: 0;
-  background: transparent;
-}
-
 /* === Complete screen === */
 .journey-complete-screen {
   position: fixed;

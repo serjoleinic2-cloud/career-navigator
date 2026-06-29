@@ -1,0 +1,439 @@
+/* === BASE === */
+.mission-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 500ms ease;
+}
+
+.mission-screen::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* === HEADER === */
+.mission-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  flex-shrink: 0;
+}
+
+.mission-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mission-header-chapter {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.mission-header-task {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* === BODY === */
+.mission-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mission-body::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* === TASK 50: Mission Card === */
+.mission-card-wrapper {
+  animation: card-fade-scale 0.35s ease;
+  max-width: 400px;
+  width: 100%;
+  margin: auto;
+}
+
+@keyframes card-fade-scale {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.mission-card-glass {
+  border-radius: 32px !important;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  padding: 24px !important;
+}
+
+.mission-card-emoji {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.mission-card-heading {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mission-card-title {
+  margin: 0 0 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.mission-card-section {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.mission-card-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.mission-card-objective {
+  margin: 0;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mission-card-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.mission-card-meta-item {
+  flex: 1;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.mission-card-meta-label {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.mission-card-meta-value {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* === TASK 51: Step Screen === */
+.step-screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  animation: step-slide-in 0.3s ease;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@keyframes step-slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.step-screen-content {
+  flex: 1;
+}
+
+.step-indicator {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.step-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 16px;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.step-instruction {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+
+.step-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+/* === TASK 52: Checklist Item === */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  width: 100%;
+  text-align: left;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.checklist-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.checklist-item--checked {
+  background: rgba(72, 187, 120, 0.1);
+  border-color: rgba(72, 187, 120, 0.3);
+  transform: scale(0.98);
+}
+
+.checklist-item-box {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.checklist-item--checked .checklist-item-box {
+  background: #48BB78;
+  border-color: #48BB78;
+  animation: check-pop 0.3s ease;
+}
+
+@keyframes check-pop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.checklist-item-check {
+  animation: checkmark-draw 0.25s ease 0.05s forwards;
+}
+
+.checklist-item-check path {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  animation: checkmark-draw 0.25s ease 0.05s forwards;
+}
+
+@keyframes checkmark-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.checklist-item-label {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.checklist-item--checked .checklist-item-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* === TASK 53: Mission Progress === */
+.mission-progress {
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.mission-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mission-progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mission-progress-percent {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mission-progress-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mission-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #48BB78, #68D391);
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* === Step Screen Actions === */
+.step-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  flex-shrink: 0;
+}
+
+.step-actions > button:last-child {
+  flex: 1;
+}
+
+/* === TASK 54: Success Screen === */
+.success-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: success-appear 0.4s ease;
+  padding: 24px;
+}
+
+@keyframes success-appear {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.success-screen-content {
+  text-align: center;
+  max-width: 320px;
+  width: 100%;
+}
+
+.success-icon {
+  font-size: 72px;
+  margin-bottom: 16px;
+  animation: success-star 0.6s ease;
+}
+
+@keyframes success-star {
+  0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.success-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 24px;
+  color: #fff;
+}
+
+.success-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  justify-content: center;
+}
+
+.success-stat {
+  flex: 1;
+  max-width: 100px;
+  padding: 14px 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.success-stat-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #48BB78;
+  margin-bottom: 4px;
+}
+
+.success-stat-label {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.success-action {
+  max-width: 240px;
+  margin: 0 auto;
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+  .mission-card-glass {
+    padding: 20px !important;
+  }
+  .step-title {
+    font-size: 24px;
+  }
+  .success-icon {
+    font-size: 56px;
+  }
+  .success-title {
+    font-size: 24px;
+  }
+}

@@ -1,31 +1,22 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
-import { setActiveNode, getActiveNode, submitTask, getRuntimeState } from '@/core/runtime/runtime_controller';
+import { setActiveNode, getActiveNode, getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
-import { loadTaskForNode, createTaskFromDefinition } from '@/core/runtime/runtime_controller';
+import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
 import type { SkillNode } from '@/core/skill_state';
 import type { TaskContent } from '@/core/task_content';
-import type { TaskResult } from '@/core/task/task_execution_engine';
 import { BackgroundLayer } from './components/BackgroundLayer';
 import { JourneyHeader } from './components/JourneyHeader';
 import { JourneyPath } from './components/JourneyPath';
 import { FloatingMissionCard } from './components/FloatingMissionCard';
 import { JourneyBottomNav } from './components/JourneyBottomNav';
-import { MissionFlow } from './components/MissionFlow';
-import { HelpBar } from './components/HelpBar';
-import { MissionReview } from './components/MissionReview';
-import { ResultCard } from './components/ResultCard';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
   const [, setTick] = useState(0);
-  const [phase, setPhase] = useState<'idle' | 'mission' | 'review' | 'result'>('idle');
-  const [activeStep, setActiveStep] = useState(0);
-  const [selectedTask, setSelectedTask] = useState<TaskContent | null>(null);
-  const [taskResult, setTaskResult] = useState<TaskResult | null>(null);
+  const [missionTask, setMissionTask] = useState<TaskContent | null>(null);
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
-  const [showHint, setShowHint] = useState(false);
   const [missionCardOpen, setMissionCardOpen] = useState(false);
 
   const refresh = useCallback(() => {
@@ -94,11 +85,7 @@ export function JourneyScreen() {
     }
     setActiveNode(nodeId);
     setMissionCardOpen(false);
-    setSelectedTask(null);
-    setTaskResult(null);
-    setPhase('idle');
-    setActiveStep(0);
-    setShowHint(false);
+    setMissionTask(null);
   }, [ui.activeNodeId]);
 
   const handleTabChange = useCallback((tabId: string) => {
@@ -111,56 +98,36 @@ export function JourneyScreen() {
   const startMission = useCallback(() => {
     if (!node) return;
     const ti = Math.min(completedTaskIds.length, node.tasks.length - 1);
-    const task = node.tasks[ti];
-    setSelectedTask(task);
+    setMissionTask(node.tasks[ti]);
     setMissionCardOpen(false);
-    setPhase('mission');
-    setActiveStep(0);
-    setShowHint(false);
-    setTaskResult(null);
   }, [node, completedTaskIds]);
 
-  const handleStepComplete = useCallback(() => {
-    if (!selectedTask) return;
-    if (activeStep >= selectedTask.instructions.length - 1) {
-      setPhase('review');
-    } else {
-      setActiveStep(s => s + 1);
+  const handleMissionBack = useCallback(() => {
+    setMissionTask(null);
+  }, []);
+
+  const handleMissionContinue = useCallback(() => {
+    if (missionTask) {
+      setCompletedTaskIds(prev => [...prev, missionTask.id]);
     }
-  }, [selectedTask, activeStep]);
-
-  const handleCompleteMission = useCallback(() => {
-    if (!selectedTask || !node) return;
-
-    const definition = loadTaskForNode(node.id);
-    if (definition) {
-      createTaskFromDefinition(definition);
-    }
-
-    try {
-      const result = submitTask({ taskId: selectedTask.id, completed: true });
-      setTaskResult(result);
-      setCompletedTaskIds(prev => [...prev, selectedTask.id]);
-      setPhase('result');
-    } catch (err) {
-      console.error('[JourneyScreen] submitTask failed:', err);
-    }
-  }, [selectedTask, node]);
-
-  const handleContinueJourney = useCallback(() => {
-    setPhase('idle');
-    setTaskResult(null);
-    setSelectedTask(null);
-    setActiveStep(0);
-    setShowHint(false);
+    setMissionTask(null);
     if (nav.hasNext && nav.nextNodeId) {
       handleNodeSelect(nav.nextNodeId);
     }
-  }, [nav, handleNodeSelect]);
+  }, [missionTask, nav, handleNodeSelect]);
 
-  const handleOpenPlaybook = useCallback(() => {
-    window.location.hash = '#playbook';
-  }, []);
+  if (missionTask && node) {
+    return (
+      <MissionScreen
+        task={missionTask}
+        nodeId={node.id}
+        chapterDomain={node.domain}
+        chapterTitle={ui.currentChapterTitle}
+        onBack={handleMissionBack}
+        onContinue={handleMissionContinue}
+      />
+    );
+  }
 
   if (!node) {
     return (
@@ -212,16 +179,10 @@ export function JourneyScreen() {
     );
   }
 
-  const nextTaskIndex = node.tasks.findIndex(t => !completedTaskIds.includes(t.id));
-  const displayTask = selectedTask || node.tasks[nextTaskIndex >= 0 ? nextTaskIndex : 0];
-  const isTaskActive = phase === 'mission' || phase === 'review' || phase === 'result';
-
   return (
     <div className="journey-screen">
-      {/* Layer 1: Background */}
       <BackgroundLayer chapterDomain={activeChapterDomain} />
 
-      {/* Layer 2: Header */}
       <JourneyHeader
         chapterTitle={ui.currentChapterTitle || node.domain}
         nodeIndex={activeNodeIndex + 1}
@@ -229,60 +190,23 @@ export function JourneyScreen() {
         readinessScore={runtime?.readinessScore ?? 0}
       />
 
-      {!isTaskActive && (
-        <>
-          {/* Layer 3: World Layer (Path) */}
-          <div className="journey-world">
-            <JourneyPath
-              nodes={professionNodes}
-              activeNodeId={ui.activeNodeId}
-              onNodeSelect={handleNodeSelect}
-            />
-          </div>
+      <div className="journey-world">
+        <JourneyPath
+          nodes={professionNodes}
+          activeNodeId={ui.activeNodeId}
+          onNodeSelect={handleNodeSelect}
+        />
+      </div>
 
-          {/* Layer 4: Mission Card */}
-          {missionCardOpen && node && (
-            <FloatingMissionCard
-              node={node}
-              onContinue={startMission}
-              onClose={() => setMissionCardOpen(false)}
-            />
-          )}
-
-          {/* Layer 5: Bottom Navigation */}
-          <JourneyBottomNav activeTab="journey" onTabChange={handleTabChange} />
-        </>
+      {missionCardOpen && node && (
+        <FloatingMissionCard
+          node={node}
+          onContinue={startMission}
+          onClose={() => setMissionCardOpen(false)}
+        />
       )}
 
-      {/* Task flow overlay */}
-      {isTaskActive && (
-        <div className="journey-task-flow">
-          {displayTask && phase === 'mission' && (
-            <>
-              <MissionFlow
-                instructions={displayTask.instructions}
-                activeStep={activeStep}
-                totalSteps={displayTask.instructions.length}
-                onStepComplete={handleStepComplete}
-              />
-              <HelpBar
-                tips={displayTask.tips}
-                showHint={showHint}
-                onToggleHint={() => setShowHint(s => !s)}
-                onOpenPlaybook={handleOpenPlaybook}
-              />
-            </>
-          )}
-
-          {phase === 'review' && (
-            <MissionReview onComplete={handleCompleteMission} />
-          )}
-
-          {phase === 'result' && taskResult && (
-            <ResultCard result={taskResult} onContinue={handleContinueJourney} />
-          )}
-        </div>
-      )}
+      <JourneyBottomNav activeTab="journey" onTabChange={handleTabChange} />
 
       {lockedToast && <div className="locked-toast">{lockedToast}</div>}
     </div>
