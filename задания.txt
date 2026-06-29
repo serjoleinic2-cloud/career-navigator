@@ -1,126 +1,135 @@
-Create a React + TypeScript component called WorldMap for a gamified Career Navigator app.
+TITLE: CAREER NAVIGATOR — ARCHITECTURE MERGE (CRITICAL REFACTOR)
 
-This is NOT a dashboard or navigation screen.
+GOAL:
+Unify architecture. Remove duplicate game systems. Establish single source of truth.
 
-It is a game world representation of user career progress.
+CURRENT PROBLEM:
+There are 3 overlapping systems:
+1. JourneyScreen (legacy UI + partial logic)
+2. world_renderer (game-like visualization attempt)
+3. skill_engine (true core logic system)
 
-Requirements:
+This causes duplicated state handling and conflicting rendering logic.
 
-1. Layout:
-- Vertical path of nodes (top = future, bottom = start)
-- Active node centered in view
-- Future nodes blurred/faded
-- Completed nodes below active
+FINAL ARCHITECTURE (MANDATORY):
 
-2. Nodes:
-- 4 states: completed, active, locked, future
-- Visual differences must be strong (glow, blur, opacity)
+skill_engine (SOURCE OF TRUTH)
+        ↓ emits state
+world_renderer (ONLY VISUAL RENDER LAYER)
+        ↓
+MissionScreen (ONLY INTERACTION LAYER)
 
-3. Interaction:
-- Tap node → opens MissionScreen
-- Vertical swipe → scroll camera along path
-- Long press → optional details
+--------------------------------------
 
-4. World behavior:
-- World reacts to JourneyRuntimeState updates
-- activeNodeId controls camera focus
-- nodeStates control visuals
+TASKS:
 
-5. Zones:
-- START (plains)
-- LEARNING (forest)
-- PRACTICE (mountains)
-- INTERVIEW (city)
-- OFFER (castle)
+1. skill_engine (DO NOT CHANGE LOGIC)
+- MUST remain the only system responsible for:
+  - careerState
+  - confidenceScore
+  - readiness
+  - nodeStates
+  - activeNodeId
+- It is the ONLY source of truth.
 
-6. Style:
-- Monument Valley inspired minimal 3D feel
-- soft lighting, fog, depth layers
-- minimal UI overlay
+--------------------------------------
 
-7. Animation:
-- smooth camera movement (600–900ms)
-- node activation pulse
-- path glow on progress
+2. world_renderer (MAKE THIS THE MAIN SCREEN)
 
-Output:
-- full React component
-- TypeScript types
-- CSS modules or styled system
-
-PROMPT ДЛЯ OPENCODE
-Integrate WorldMap as the main screen of Career Navigator.
+Refactor world_renderer to become the PRIMARY GAME VIEW.
 
 Requirements:
+- MUST consume ONLY skill_engine state
+- MUST NOT calculate any logic
+- MUST NOT mutate state
+- MUST ONLY render visual representation of:
+  - nodes
+  - paths
+  - zones
+  - progression state
 
-1. Replace existing JourneyScreen as primary view.
-2. Ensure WorldMap reads from JourneyRuntimeState:
-   - activeNodeId
-   - nodeStates
-3. Implement camera focus system based on activeNodeId.
-4. Connect node click → MissionScreen navigation.
-5. Ensure state updates after Mission completion reflect immediately on map.
-6. Add smooth transitions between WorldMap and MissionScreen.
-7. Maintain offline-first architecture.
-8. Remove any legacy dashboard navigation patterns.
+Remove any embedded logic inside renderer.
 
-Constraints:
-- NO list-based UI
-- NO traditional dashboard components
-- MUST follow game-world paradigm
+RULE:
+state → pure visual output ONLY
 
-Create a modular profession package for a gamified Career Navigator app.
+--------------------------------------
 
-Profession: Software Engineer
+3. JourneyScreen (DEPRECATE)
 
-This is NOT UI-only. It is a full game module.
+- REMOVE from main navigation flow
+- DO NOT delete immediately
+- Convert into:
+  - fallback debug screen OR legacy wrapper
 
-Structure:
+REMOVE from JourneyScreen:
+- timeline logic
+- node progression logic
+- state calculation logic
+- duplicate rendering of world/path
 
-1. world-map definition:
-- nodes for progression:
-  fundamentals → algorithms → system design → interviews → offer
+JourneyScreen must NOT own gameplay logic anymore.
 
-2. missions:
-- 10–15 tasks
-- each task is a small learning/action step
+--------------------------------------
 
-3. interview system:
-- list of technical + behavioral questions
-- structured as boss fight stage
+4. VerticalPath / duplicated world logic
 
-4. progression system:
-- skill growth per node completion
-- confidence score impact
+- IF logic overlaps with world_renderer → MERGE into world_renderer
+- Remove duplicate path rendering systems
+- Ensure ONLY ONE system renders progression path
 
-5. playbook:
-- rules of software engineering career progression
+--------------------------------------
 
-6. style:
-- must match Monument Valley inspired world system
+5. DATA FLOW ENFORCEMENT
 
-Output:
-- JSON or TypeScript module
-- structured, not UI components
-- reusable by core engine
-PROMPT ДЛЯ OPENCODE
-Implement profession module system in Career Navigator.
+Enforce strict architecture:
 
-Requirements:
+skill_engine
+    → emits state updates
+world_renderer
+    → renders state ONLY
+MissionScreen
+    → triggers actions ONLY via skill_engine
 
-1. Create /professions directory structure.
-2. Implement loader:
-   loadProfession(professionId)
-3. Ensure WorldMap uses profession module as data source.
-4. Replace any hardcoded journey data with profession-driven data.
-5. Active profession must control:
-   - nodes
-   - missions
-   - interview content
-6. Ensure runtime supports switching professions.
-7. Maintain separation between core engine and profession modules.
+NO EXCEPTIONS.
 
-Constraints:
-- NO hardcoded UI flows
-- ALL progression must come from profession module
-- system must be extensible for future professions
+--------------------------------------
+
+6. MISSION SCREEN RULE
+
+MissionScreen must:
+- NOT mutate state directly
+- call only:
+  skill_engine.applyMissionResult()
+
+- act as interaction layer only
+
+--------------------------------------
+
+7. NAVIGATION CHANGE
+
+Set world_renderer as default entry screen of application.
+
+Remove JourneyScreen as primary route.
+
+--------------------------------------
+
+8. PROHIBITED PRACTICES
+
+- NO duplicate state in UI layers
+- NO business logic in renderer
+- NO node computation outside skill_engine
+- NO parallel world systems
+
+--------------------------------------
+
+EXPECTED RESULT:
+
+After refactor:
+- ONE core engine (skill_engine)
+- ONE world renderer (visual system)
+- ONE interaction layer (MissionScreen)
+
+All duplicate systems removed or demoted.
+
+This is mandatory architecture cleanup for scalability into profession modules system.
