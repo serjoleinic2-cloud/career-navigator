@@ -441,3 +441,735 @@
   font-size: 18px;
   font-weight: 500;
 }
+
+/* === CHAPTER HUB (TASK 57) === */
+.chapter-hub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+  padding: 40px 20px 120px;
+  width: 100%;
+}
+
+.chapter-island {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+  min-height: 220px;
+  padding: 32px 20px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: opacity 0.35s ease, transform 0.35s ease-out, min-height 0.35s ease;
+  overflow: hidden;
+}
+
+.chapter-island:hover:not(.island-locked) {
+  transform: scale(1.02);
+}
+
+.island-locked {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.island-hidden {
+  opacity: 0;
+  transform: translateY(40px) scale(0.9);
+  pointer-events: none;
+  min-height: 0;
+  padding: 0;
+  margin: -30px 0;
+  border: none;
+}
+
+.island-expanded {
+  min-height: 300px;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--island-accent);
+  border-width: 1px;
+  cursor: default;
+}
+
+.island-expanded:hover {
+  transform: none;
+}
+
+.island-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.island-emblema {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.island-complete-badge {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--island-accent, #48BB78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: island-check-pop 0.4s ease;
+}
+
+@keyframes island-check-pop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.island-icon {
+  line-height: 1;
+}
+
+.island-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 4px 0 0;
+  color: #fff;
+}
+
+.island-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.island-completed .island-emblema {
+  border-color: var(--island-accent, #48BB78);
+}
+
+.island-active .island-emblema {
+  border-color: var(--island-accent, #4A90D9);
+  animation: island-pulse 2s ease-in-out infinite;
+}
+
+@keyframes island-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.15); }
+  50% { box-shadow: 0 0 0 16px rgba(255, 255, 255, 0); }
+}
+
+.island-glow {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  filter: blur(30px);
+  opacity: 0.15;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.island-completed .island-glow {
+  opacity: 0.3;
+  animation: island-complete-glow 2s ease-in-out infinite;
+}
+
+@keyframes island-complete-glow {
+  0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+.island-fog {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(2px);
+}
+
+/* Chapter nodes container (expanded view) */
+.chapter-nodes-container {
+  position: relative;
+  width: 100%;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: nodes-appear 0.35s ease;
+}
+
+@keyframes nodes-appear {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chapter-nodes-path {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.nodes-path-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* === SKILL NODE CARD (TASK 58) === */
+.skill-node-card {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1;
+  animation: node-card-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes node-card-enter {
+  from { opacity: 0; transform: scale(0.8) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.card-left {
+  align-self: flex-start;
+}
+
+.card-right {
+  align-self: flex-end;
+}
+
+.skill-node-card:hover:not(.skill-node-card--locked) {
+  transform: scale(1.05);
+}
+
+.skill-node-card-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skill-node-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.skill-node-card-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.skill-node-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.skill-node-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-node-card-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.skill-node-card-play {
+  font-size: 14px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* Completed state */
+.skill-node-card--completed {
+  border-color: var(--card-accent, #48BB78);
+  background: rgba(72, 187, 120, 0.06);
+}
+
+.skill-node-card-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+}
+
+.skill-node-card-check {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--card-accent, #48BB78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  animation: check-pop 0.3s ease;
+}
+
+/* Current state */
+.skill-node-card--current {
+  border-color: var(--card-accent, #4A90D9);
+  box-shadow: 0 0 20px rgba(74, 144, 217, 0.15);
+  animation: current-glow 2s ease-in-out infinite;
+}
+
+@keyframes current-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(74, 144, 217, 0.1); }
+  50% { box-shadow: 0 0 24px rgba(74, 144, 217, 0.25); }
+}
+
+.skill-node-card-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 16px 10px;
+}
+
+.skill-node-card-progress-track {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.skill-node-card-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Locked state */
+.skill-node-card--locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: blur(0.5px);
+}
+
+.skill-node-card--locked:active {
+  animation: locked-shake 0.2s ease;
+}
+
+.skill-node-card-lock {
+  position: absolute;
+  right: 12px;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* === CHAPTER COMPLETE (TASK 59) === */
+.chapter-complete-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  animation: chapter-complete-fade 0.4s ease;
+  overflow: hidden;
+}
+
+@keyframes chapter-complete-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.chapter-complete-light-rays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.light-ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 200%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  transform-origin: center top;
+  animation: light-ray-rotate 8s linear infinite;
+}
+
+@keyframes light-ray-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.chapter-complete-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 24px;
+  animation: complete-content-appear 0.5s ease 0.1s both;
+}
+
+@keyframes complete-content-appear {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.chapter-complete-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #48BB78, #68D391);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: circle-glow 2s ease-in-out infinite;
+  box-shadow: 0 0 40px rgba(72, 187, 120, 0.3);
+}
+
+@keyframes circle-glow {
+  0%, 100% { box-shadow: 0 0 30px rgba(72, 187, 120, 0.2); }
+  50% { box-shadow: 0 0 60px rgba(72, 187, 120, 0.4); }
+}
+
+.chapter-complete-icon {
+  font-size: 40px;
+}
+
+.chapter-complete-heading {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  color: #fff;
+}
+
+.chapter-complete-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0 0 24px;
+}
+
+.chapter-complete-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  justify-content: center;
+}
+
+.chapter-complete-stat {
+  flex: 1;
+  max-width: 110px;
+  padding: 14px 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.chapter-complete-stat-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #48BB78;
+  margin-bottom: 4px;
+}
+
+.chapter-complete-stat-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === JOURNEY COMPLETE (TASK 60) === */
+.journey-complete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0f;
+  overflow-y: auto;
+}
+
+.journey-complete-final {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.journey-complete-light {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 107, 107, 0.08) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  animation: complete-light-fade 2s ease forwards;
+}
+
+@keyframes complete-light-fade {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.journey-complete-final-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+  animation: complete-text-scale 1s ease 0.5s both;
+}
+
+@keyframes complete-text-scale {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.journey-complete-artwork {
+  margin-bottom: 20px;
+}
+
+.artwork-placeholder {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-size: 48px;
+}
+
+.journey-complete-title {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.journey-complete-profession {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0 0 24px;
+}
+
+.journey-complete-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.jc-stat {
+  padding: 12px 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+.jc-stat-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.jc-stat-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.journey-complete-timeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.timeline-done {
+  background: rgba(72, 187, 120, 0.1);
+  color: #48BB78;
+}
+
+.timeline-check {
+  font-size: 12px;
+}
+
+.timeline-label {
+  font-weight: 500;
+}
+
+/* Celebration */
+.journey-complete-celebration {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  background: radial-gradient(ellipse at center, rgba(255, 107, 107, 0.05) 0%, transparent 70%);
+  animation: celebration-fade 0.5s ease;
+}
+
+@keyframes celebration-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.celebration-art {
+  margin-bottom: 40px;
+}
+
+.celebration-sparkle {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B6B, #FFE66D, #48BB78);
+  animation: sparkle-rotate 3s linear infinite;
+}
+
+@keyframes sparkle-rotate {
+  from { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  to { transform: rotate(360deg) scale(1); }
+}
+
+.celebration-big {
+  font-size: 48px;
+}
+
+.celebration-text h2 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 12px 0 0;
+  color: #fff;
+}
+
+.celebration-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 280px;
+  width: 100%;
+}
+
+.celebration-action-btn {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-height: 48px;
+}
+
+.celebration-action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.celebration-action-btn.primary {
+  background: #FF6B6B;
+  border-color: #FF6B6B;
+}
+
+.celebration-action-btn.primary:hover {
+  background: #e05555;
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+  .chapter-island {
+    min-height: 180px;
+    padding: 24px 16px;
+  }
+  .island-emblema {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+  }
+  .island-title {
+    font-size: 18px;
+  }
+  .skill-node-card {
+    max-width: 240px;
+  }
+  .chapter-complete-heading {
+    font-size: 24px;
+  }
+  .journey-complete-title {
+    font-size: 28px;
+  }
+}

@@ -7,10 +7,25 @@ import type { SkillNode } from '@/core/skill_state';
 import type { TaskContent } from '@/core/task_content';
 import { BackgroundLayer } from './components/BackgroundLayer';
 import { JourneyHeader } from './components/JourneyHeader';
-import { JourneyPath } from './components/JourneyPath';
+import { ChapterHub } from './components/ChapterHub';
+import type { ChapterData } from './components/ChapterHub';
+import { ChapterCompleteScreen } from './components/ChapterCompleteScreen';
+import { JourneyCompleteScreen } from './components/JourneyCompleteScreen';
 import { FloatingMissionCard } from './components/FloatingMissionCard';
 import { JourneyBottomNav } from './components/JourneyBottomNav';
+import { useCamera } from './hooks/useCamera';
+import { useChapterHub } from './hooks/useChapterHub';
 import './JourneyScreen.css';
+
+const CHAPTER_ICONS: Record<string, string> = {
+  resume: '📄',
+  linkedin: '💼',
+  applications: '📨',
+  interview: '🎤',
+  offer: '🏆',
+};
+
+const DEFAULT_ICON = '📄';
 
 export function JourneyScreen() {
   const [, setTick] = useState(0);
@@ -18,6 +33,8 @@ export function JourneyScreen() {
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [missionCardOpen, setMissionCardOpen] = useState(false);
+  const { view, selectedChapter, selectChapter, dismissComplete } = useChapterHub();
+  const { cameraStyle, zoomOut } = useCamera();
 
   const refresh = useCallback(() => {
     setTick(t => t + 1);
@@ -63,14 +80,31 @@ export function JourneyScreen() {
     return Object.values(runtime.nodeStates).every(n => n.state === 'confidence');
   }, [runtime]);
 
-  const activeNodeIndex = useMemo(() => {
-    return professionNodes.findIndex(n => n.id === ui.activeNodeId);
-  }, [professionNodes, ui.activeNodeId]);
-
   const activeChapterDomain = useMemo(() => {
     if (!node) return undefined;
     return node.domain;
   }, [node]);
+
+  const chapters = useMemo(() => {
+    if (!runtime) return [];
+    const domainMap: Record<string, SkillNode[]> = {};
+    Object.values(runtime.nodeStates).forEach(n => {
+      const domain = n.domain || 'Unknown';
+      if (!domainMap[domain]) domainMap[domain] = [];
+      domainMap[domain].push(n);
+    });
+    return Object.entries(domainMap).map(([domain, nodes]) => ({
+      id: domain,
+      title: domain,
+      icon: CHAPTER_ICONS[domain.toLowerCase()] || DEFAULT_ICON,
+      nodes,
+      completedCount: nodes.filter(n => n.state === 'confidence' || n.state === 'execution').length,
+      totalCount: nodes.length,
+      isActive: nodes.some(n => n.id === runtime.activeNodeId),
+      isLocked: nodes.every(n => n.state === 'locked'),
+      isCompleted: nodes.every(n => n.state === 'confidence'),
+    } as ChapterData));
+  }, [runtime]);
 
   const handleNodeSelect = useCallback((nodeId: string) => {
     const clickedRuntime = getRuntimeState();
@@ -87,6 +121,15 @@ export function JourneyScreen() {
     setMissionCardOpen(false);
     setMissionTask(null);
   }, [ui.activeNodeId]);
+
+  const handleChapterSelect = useCallback((chapterId: string) => {
+    selectChapter(chapterId);
+  }, [selectChapter]);
+
+  const handleDismissComplete = useCallback(() => {
+    zoomOut();
+    setTimeout(() => dismissComplete(), 400);
+  }, [zoomOut, dismissComplete]);
 
   const handleTabChange = useCallback((tabId: string) => {
     if (tabId === 'journey') window.location.hash = '';
@@ -116,6 +159,8 @@ export function JourneyScreen() {
     }
   }, [missionTask, nav, handleNodeSelect]);
 
+  const isChaptersView = view === 'chapter' || view === 'chapterComplete';
+
   if (missionTask && node) {
     return (
       <MissionScreen
@@ -142,39 +187,15 @@ export function JourneyScreen() {
   if (allNodesCompleted) {
     return (
       <div className="journey-screen">
-        <BackgroundLayer chapterDomain={activeChapterDomain} />
-        <div className="journey-complete-screen">
-          <div className="confetti-container">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div
-                key={i}
-                className="confetti-particle"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 2}s`,
-                  backgroundColor: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#45B7D1', '#96CEB4'][i % 5],
-                }}
-              />
-            ))}
-          </div>
-          <div className="journey-complete-content">
-            <div className="complete-icon">✅</div>
-            <h1>You're ready!</h1>
-            <p className="complete-subtitle">You've completed all nodes in your career journey.</p>
-            <div className="final-score">
-              <span className="score-label">Career Score</span>
-              <span className="score-value">{runtime?.readinessScore ?? 0}%</span>
-            </div>
-            <div className="complete-actions">
-              <button className="primary" onClick={() => { window.location.hash = '#journey'; refresh(); }}>
-                Review Journey
-              </button>
-              <button onClick={() => { window.location.hash = '#onboarding'; }}>
-                Start New Profession
-              </button>
-            </div>
-          </div>
-        </div>
+        <BackgroundLayer />
+        <JourneyCompleteScreen
+          totalSkills={professionNodes.length}
+          tasksCompleted={0}
+          hoursInvested={0}
+          readinessScore={runtime?.readinessScore ?? 0}
+          confidenceScore={runtime?.confidenceScore ?? 0}
+          chapters={chapters.map(c => ({ title: c.title, completed: c.isCompleted }))}
+        />
       </div>
     );
   }
@@ -184,19 +205,32 @@ export function JourneyScreen() {
       <BackgroundLayer chapterDomain={activeChapterDomain} />
 
       <JourneyHeader
-        chapterTitle={ui.currentChapterTitle || node.domain}
-        nodeIndex={activeNodeIndex + 1}
+        chapterTitle={isChaptersView && selectedChapter ? selectedChapter : (ui.currentChapterTitle || node.domain)}
+        nodeIndex={0}
         totalNodes={professionNodes.length}
         readinessScore={runtime?.readinessScore ?? 0}
       />
 
-      <div className="journey-world">
-        <JourneyPath
-          nodes={professionNodes}
+      <div className="journey-world" style={view === 'chapter' ? cameraStyle : undefined}>
+        <ChapterHub
+          chapters={chapters}
           activeNodeId={ui.activeNodeId}
+          selectedChapter={selectedChapter}
+          onChapterSelect={handleChapterSelect}
           onNodeSelect={handleNodeSelect}
         />
       </div>
+
+      {view === 'chapterComplete' && selectedChapter && (
+        <ChapterCompleteScreen
+          chapterTitle={selectedChapter}
+          skillsCompleted={chapters.find(c => c.id === selectedChapter)?.completedCount ?? 0}
+          totalSkills={chapters.find(c => c.id === selectedChapter)?.totalCount ?? 0}
+          readinessDelta={12}
+          confidenceDelta={8}
+          onContinue={handleDismissComplete}
+        />
+      )}
 
       {missionCardOpen && node && (
         <FloatingMissionCard
