@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { loadRuntime } from './core/persistence/runtime_persistence';
-import { initializeRuntime } from './core/runtime/runtime_controller';
-import OnboardingScreen from './screens/OnboardingScreen/OnboardingScreen';
+import { initializeRuntime, startJourney } from './core/runtime/runtime_controller';
+import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
+import type { OnboardingState } from './screens/OnboardingScreen/OnboardingScreen';
+import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
 import { JourneyScreen } from './screens/JourneyScreen/JourneyScreen';
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
@@ -23,6 +25,7 @@ const SCREEN_TITLES: Record<Screen, string> = {
 function App() {
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<Screen>('journey');
   const [prevScreen, setPrevScreen] = useState<Screen | null>(null);
   const [transitioning, setTransitioning] = useState(false);
@@ -60,8 +63,35 @@ function App() {
   if (showOnboarding) {
     return (
       <OnboardingScreen
-        onComplete={() => {
+        onComplete={(localState: OnboardingState) => {
+          const coreState = {
+            professionId: localState.profession,
+            experienceLevel: localState.experience,
+            goals: localState.goals,
+            timeline: localState.timeline,
+            preferences: localState.preferences,
+            situation: null,
+            emotion: null,
+            applicationsCount: null,
+            interviewsCount: null,
+            confidenceLevel: null,
+            fears: [],
+            step: 7,
+            isComplete: true,
+          };
+          startJourney(coreState);
           setShowOnboarding(false);
+          setShowIntro(true);
+        }}
+      />
+    );
+  }
+
+  if (showIntro) {
+    return (
+      <IntroJourneyScreen
+        onComplete={() => {
+          setShowIntro(false);
         }}
       />
     );

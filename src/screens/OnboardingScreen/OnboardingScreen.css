@@ -1,0 +1,287 @@
+.onboarding-screen {
+  width: 100%;
+  height: 100vh;
+  background: #1a1a2e;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.onboarding-page {
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Welcome screen */
+.onboarding-welcome {
+  text-align: center;
+}
+
+.welcome-illustration {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.illustration-placeholder {
+  font-size: 120px;
+  opacity: 0.8;
+  animation: float 3s ease-in-out infinite;
+}
+
+.welcome-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-subtitle {
+  font-size: 16px;
+  color: #a0a0b0;
+  margin-bottom: 48px;
+  line-height: 1.5;
+}
+
+/* Cards */
+.onboarding-heading {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  align-self: flex-start;
+}
+
+.onboarding-cards {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.onboarding-card {
+  width: 100%;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.onboarding-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.onboarding-card.selected {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+}
+
+.onboarding-card.scaled {
+  transform: scale(1.03);
+}
+
+.onboarding-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.onboarding-card.disabled:hover {
+  transform: none;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.card-label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.card-status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.card-status.available {
+  background: rgba(0, 184, 148, 0.2);
+  color: #00b894;
+}
+
+.card-check {
+  width: 24px;
+  height: 24px;
+  background: #667eea;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* Navigation */
+.onboarding-nav {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.onboarding-primary-btn {
+  flex: 1;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 16px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.onboarding-primary-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.onboarding-primary-btn:active {
+  transform: scale(0.98);
+}
+
+.onboarding-back-btn {
+  padding: 16px 24px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.onboarding-back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Review screen */
+.onboarding-review {
+  width: 100%;
+}
+
+.review-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.review-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.25s ease;
+}
+
+.review-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.review-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.review-label {
+  font-size: 12px;
+  color: #a0a0b0;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.review-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.onboarding-start-btn {
+  width: 100%;
+  padding: 20px;
+  font-size: 18px;
+}
+
+/* Progress dots */
+.onboarding-progress {
+  position: absolute;
+  bottom: 32px;
+  display: flex;
+  gap: 8px;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.progress-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: #667eea;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.4s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.4s ease-out;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
