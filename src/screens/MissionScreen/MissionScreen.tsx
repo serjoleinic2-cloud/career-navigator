@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import './MissionScreen.css';
 import type { JourneyRuntimeState } from '../../core/runtime/journey_runtime';
-import { submitTask } from '../../core/runtime/runtime_controller';
+import { applyMissionResult } from '../../core/skill_engine';
 import { emit } from '../../core/events/system_event_bus';
 
 interface MissionScreenProps {
@@ -33,7 +33,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   const handleSubmit = useCallback(() => {
     setTaskView('completing');
 
-    const result = submitTask({
+    const result = applyMissionResult({
       text: textInput,
       checked: Array.from(checkedItems),
       score: reflectionScore,
@@ -82,7 +82,6 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
 
   return (
     <div className={`mission-screen ${taskView === 'active' ? 'mission-enter' : ''}`}>
-      {/* Header */}
       <div className="mission-header">
         <div className="header-day">Day {dayNumber}</div>
         <div className="header-chapter">
@@ -98,20 +97,14 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         </div>
       </div>
 
-      {/* Mission Card */}
       <div className={`mission-card ${taskView === 'completing' ? 'mission-pulse' : ''}`}>
-        {/* Task Type Indicator */}
         <div className="task-type-badge">
           {activeTask.completionCriteria.length > 0 ? '☑️ Complete' : '✏️ Write'}
         </div>
 
-        {/* Task Title */}
         <h2 className="task-title">{activeTask.title}</h2>
-
-        {/* Task Description */}
         <p className="task-description">{activeTask.objective}</p>
 
-        {/* Difficulty & Time */}
         <div className="mission-card-meta">
           <div className="mission-card-meta-item">
             <span className="mission-card-meta-label">Difficulty</span>
@@ -126,7 +119,6 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           </div>
         </div>
 
-        {/* Instructions */}
         {activeTask.instructions.length > 0 && (
           <div className="task-section">
             <div className="task-section-label">Steps</div>
@@ -138,9 +130,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           </div>
         )}
 
-        {/* Task Content */}
         <div className="task-content">
-          {/* Checklist from completionCriteria */}
           {activeTask.completionCriteria.length > 0 && (
             <div className="task-section">
               <div className="task-section-label">Completion Checklist</div>
@@ -161,7 +151,6 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
             </div>
           )}
 
-          {/* Text Input for notes/reflection */}
           <div className="task-section">
             <div className="task-section-label">Your Notes</div>
             <textarea
@@ -173,7 +162,6 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
             />
           </div>
 
-          {/* Reflection Rating */}
           <div className="task-section">
             <div className="task-section-label">Self Assessment</div>
             <div className="task-reflection">
@@ -201,7 +189,6 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         </div>
       </div>
 
-      {/* Bottom Action */}
       <div className="mission-bottom">
         {taskView === 'active' && (
           <button

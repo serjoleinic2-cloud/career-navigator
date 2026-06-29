@@ -4,7 +4,8 @@ import { initializeRuntime, startJourney } from './core/runtime/runtime_controll
 import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
 import type { OnboardingState } from './screens/OnboardingScreen/OnboardingScreen';
 import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
-import { JourneyScreen } from './screens/JourneyScreen/JourneyScreen';
+import { WorldRendererScreen } from './world/world_renderer';
+import { JourneyScreenDebug } from './screens/JourneyScreen/JourneyScreenDebug';
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
 import { ShareScreen } from './screens/ShareScreen/ShareScreen';
@@ -13,20 +14,21 @@ import './styles/layout.css';
 import './styles/theme.css';
 import './styles/animations.css';
 
-type Screen = 'journey' | 'playbook' | 'notes' | 'share';
+type Screen = 'world' | 'playbook' | 'notes' | 'share' | 'debug';
 
-const SCREEN_TITLES: Record<Screen, string> = {
-  journey: 'Journey',
+const SCREEN_TITLES: Record<string, string> = {
+  world: 'Career Navigator',
   playbook: 'Playbook',
   notes: 'My Journal',
   share: 'Share Progress',
+  debug: 'Debug',
 };
 
 function App() {
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('journey');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('world');
   const [prevScreen, setPrevScreen] = useState<Screen | null>(null);
   const [transitioning, setTransitioning] = useState(false);
 
@@ -53,7 +55,7 @@ function App() {
   };
 
   const handleTabChange = (tabId: string) => {
-    if (tabId === 'journey' || tabId === 'playbook' || tabId === 'notes') {
+    if (tabId === 'world' || tabId === 'playbook' || tabId === 'notes') {
       navigateTo(tabId);
     }
   };
@@ -111,33 +113,23 @@ function App() {
     };
 
     switch (screen) {
-      case 'journey':
-        return <div {...common}><JourneyScreen /></div>;
+      case 'world':
+        return <div {...common}><WorldRendererScreen /></div>;
       case 'playbook':
-        return (
-          <div {...common}>
-            <PlaybookScreen />
-          </div>
-        );
+        return <div {...common}><PlaybookScreen /></div>;
       case 'notes':
-        return (
-          <div {...common}>
-            <NotesScreen />
-          </div>
-        );
+        return <div {...common}><NotesScreen /></div>;
       case 'share':
-        return (
-          <div {...common}>
-            <ShareScreen />
-          </div>
-        );
+        return <div {...common}><ShareScreen /></div>;
+      case 'debug':
+        return <div {...common}><JourneyScreenDebug /></div>;
     }
   };
 
   return (
     <AppShell
-      title={SCREEN_TITLES[currentScreen]}
-      activeTab={currentScreen}
+      title={SCREEN_TITLES[currentScreen] || 'Career Navigator'}
+      activeTab={currentScreen === 'debug' ? 'journey' : currentScreen}
       onTabChange={handleTabChange}
     >
       <div style={{ position: 'relative', minHeight: '100%' }}>
