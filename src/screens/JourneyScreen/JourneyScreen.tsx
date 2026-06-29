@@ -1,21 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getUIState, getNavigation } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, getActiveNode, submitTask, getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
-import type { SkillNode } from '@/core/skill_state';
-import { JourneyPath } from '@/components/JourneyPath/JourneyPath';
-import type { TaskContent } from '@/core/task_content';
-import { InterviewTrainerScreen } from '@/screens/InterviewTrainer/InterviewTrainerScreen';
 import { loadTaskForNode, createTaskFromDefinition } from '@/core/runtime/runtime_controller';
+import type { SkillNode } from '@/core/skill_state';
+import type { TaskContent } from '@/core/task_content';
 import type { TaskResult } from '@/core/task/task_execution_engine';
-import { AppShell } from '@/components/layout/AppShell';
-import { HeroCard } from './components/HeroCard';
-import { MissionCard } from './components/MissionCard';
+import { BackgroundLayer } from './components/BackgroundLayer';
+import { JourneyHeader } from './components/JourneyHeader';
+import { JourneyPath } from './components/JourneyPath';
+import { FloatingMissionCard } from './components/FloatingMissionCard';
+import { JourneyBottomNav } from './components/JourneyBottomNav';
 import { MissionFlow } from './components/MissionFlow';
 import { HelpBar } from './components/HelpBar';
 import { MissionReview } from './components/MissionReview';
 import { ResultCard } from './components/ResultCard';
-import { CollapsibleSidebar } from './components/CollapsibleSidebar';
 import './JourneyScreen.css';
 
 export function JourneyScreen() {
@@ -24,10 +23,10 @@ export function JourneyScreen() {
   const [activeStep, setActiveStep] = useState(0);
   const [selectedTask, setSelectedTask] = useState<TaskContent | null>(null);
   const [taskResult, setTaskResult] = useState<TaskResult | null>(null);
-  const [trainerTask, setTrainerTask] = useState<TaskContent | null>(null);
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [missionCardOpen, setMissionCardOpen] = useState(false);
 
   const refresh = useCallback(() => {
     setTick(t => t + 1);
@@ -61,64 +60,76 @@ export function JourneyScreen() {
   const ui = getUIState();
   const nav = getNavigation();
   const node: SkillNode | null = getActiveNode();
-
   const runtime = getRuntimeState();
-  const professionNodes = runtime
-    ? Object.values(runtime.nodeStates).map(n => ({
-        id: n.id,
-        title: n.skill,
-        state: n.state,
-        domain: typeof n.domain === 'string' ? n.domain : String(n.domain),
-      }))
-    : [];
 
-  const allNodesCompleted = runtime
-    ? Object.values(runtime.nodeStates).every(n => n.state === 'confidence')
-    : false;
+  const professionNodes = useMemo(() => {
+    if (!runtime) return [];
+    return Object.values(runtime.nodeStates);
+  }, [runtime]);
 
-  const handleTabChange = (tabId: string) => {
-    if (tabId === 'journey') window.location.hash = '';
-    else if (tabId === 'playbook') window.location.hash = '#playbook';
-    else if (tabId === 'notes') window.location.hash = '#notes';
-    else window.location.hash = `#${tabId}`;
-  };
+  const allNodesCompleted = useMemo(() => {
+    if (!runtime) return false;
+    return Object.values(runtime.nodeStates).every(n => n.state === 'confidence');
+  }, [runtime]);
 
-  const handleNodeSelect = (nodeId: string) => {
+  const activeNodeIndex = useMemo(() => {
+    return professionNodes.findIndex(n => n.id === ui.activeNodeId);
+  }, [professionNodes, ui.activeNodeId]);
+
+  const activeChapterDomain = useMemo(() => {
+    if (!node) return undefined;
+    return node.domain;
+  }, [node]);
+
+  const handleNodeSelect = useCallback((nodeId: string) => {
+    const clickedRuntime = getRuntimeState();
+    const clickedNodeState = clickedRuntime?.nodeStates[nodeId]?.state;
+    if (!clickedNodeState || clickedNodeState === 'locked') {
+      setLockedToast('Complete previous tasks to unlock this node.');
+      return;
+    }
+    if (nodeId === ui.activeNodeId) {
+      setMissionCardOpen(true);
+      return;
+    }
     setActiveNode(nodeId);
+    setMissionCardOpen(false);
     setSelectedTask(null);
     setTaskResult(null);
     setPhase('idle');
     setActiveStep(0);
     setShowHint(false);
-    const clickedRuntime = getRuntimeState();
-    const clickedNodeState = clickedRuntime?.nodeStates[nodeId]?.state;
-    if (clickedNodeState === 'locked') {
-      setLockedToast('Complete previous tasks to unlock this node.');
-      return;
-    }
-  };
+  }, [ui.activeNodeId]);
 
-  const startMission = () => {
+  const handleTabChange = useCallback((tabId: string) => {
+    if (tabId === 'journey') window.location.hash = '';
+    else if (tabId === 'playbook') window.location.hash = '#playbook';
+    else if (tabId === 'notes') window.location.hash = '#notes';
+    else window.location.hash = `#${tabId}`;
+  }, []);
+
+  const startMission = useCallback(() => {
     if (!node) return;
     const ti = Math.min(completedTaskIds.length, node.tasks.length - 1);
     const task = node.tasks[ti];
     setSelectedTask(task);
+    setMissionCardOpen(false);
     setPhase('mission');
     setActiveStep(0);
     setShowHint(false);
     setTaskResult(null);
-  };
+  }, [node, completedTaskIds]);
 
-  const handleStepComplete = () => {
+  const handleStepComplete = useCallback(() => {
     if (!selectedTask) return;
     if (activeStep >= selectedTask.instructions.length - 1) {
       setPhase('review');
     } else {
       setActiveStep(s => s + 1);
     }
-  };
+  }, [selectedTask, activeStep]);
 
-  const handleCompleteMission = () => {
+  const handleCompleteMission = useCallback(() => {
     if (!selectedTask || !node) return;
 
     const definition = loadTaskForNode(node.id);
@@ -134,9 +145,9 @@ export function JourneyScreen() {
     } catch (err) {
       console.error('[JourneyScreen] submitTask failed:', err);
     }
-  };
+  }, [selectedTask, node]);
 
-  const handleContinueJourney = () => {
+  const handleContinueJourney = useCallback(() => {
     setPhase('idle');
     setTaskResult(null);
     setSelectedTask(null);
@@ -145,57 +156,56 @@ export function JourneyScreen() {
     if (nav.hasNext && nav.nextNodeId) {
       handleNodeSelect(nav.nextNodeId);
     }
-  };
+  }, [nav, handleNodeSelect]);
 
-  const handleOpenPlaybook = () => {
+  const handleOpenPlaybook = useCallback(() => {
     window.location.hash = '#playbook';
-  };
-
-  if (trainerTask) {
-    return (
-      <InterviewTrainerScreen
-        task={trainerTask}
-        onComplete={() => { setTrainerTask(null); refresh(); }}
-        onClose={() => setTrainerTask(null)}
-      />
-    );
-  }
+  }, []);
 
   if (!node) {
-    return <div className="journey-screen"><h1>No active node</h1></div>;
+    return (
+      <div className="journey-screen">
+        <BackgroundLayer />
+        <JourneyHeader chapterTitle="" nodeIndex={0} totalNodes={0} readinessScore={0} />
+        <h1>No active node</h1>
+      </div>
+    );
   }
 
   if (allNodesCompleted) {
     return (
-      <div className="journey-screen journey-complete-screen">
-        <div className="confetti-container">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="confetti-particle"
-              style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                backgroundColor: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#45B7D1', '#96CEB4'][i % 5],
-              }}
-            />
-          ))}
-        </div>
-        <div className="journey-complete-content">
-          <div className="complete-icon">✅</div>
-          <h1>You're ready!</h1>
-          <p className="complete-subtitle">You've completed all nodes in your career journey.</p>
-          <div className="final-score">
-            <span className="score-label">Career Score</span>
-            <span className="score-value">{runtime?.readinessScore ?? 0}%</span>
+      <div className="journey-screen">
+        <BackgroundLayer chapterDomain={activeChapterDomain} />
+        <div className="journey-complete-screen">
+          <div className="confetti-container">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div
+                key={i}
+                className="confetti-particle"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  backgroundColor: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#45B7D1', '#96CEB4'][i % 5],
+                }}
+              />
+            ))}
           </div>
-          <div className="complete-actions">
-            <button className="primary" onClick={() => { window.location.hash = '#journey'; refresh(); }}>
-              Review Journey
-            </button>
-            <button onClick={() => { window.location.hash = '#onboarding'; }}>
-              Start New Profession
-            </button>
+          <div className="journey-complete-content">
+            <div className="complete-icon">✅</div>
+            <h1>You're ready!</h1>
+            <p className="complete-subtitle">You've completed all nodes in your career journey.</p>
+            <div className="final-score">
+              <span className="score-label">Career Score</span>
+              <span className="score-value">{runtime?.readinessScore ?? 0}%</span>
+            </div>
+            <div className="complete-actions">
+              <button className="primary" onClick={() => { window.location.hash = '#journey'; refresh(); }}>
+                Review Journey
+              </button>
+              <button onClick={() => { window.location.hash = '#onboarding'; }}>
+                Start New Profession
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -204,63 +214,77 @@ export function JourneyScreen() {
 
   const nextTaskIndex = node.tasks.findIndex(t => !completedTaskIds.includes(t.id));
   const displayTask = selectedTask || node.tasks[nextTaskIndex >= 0 ? nextTaskIndex : 0];
+  const isTaskActive = phase === 'mission' || phase === 'review' || phase === 'result';
 
   return (
-    <AppShell title="Journey" activeTab="journey" onTabChange={handleTabChange}>
-      <HeroCard
-        chapterTitle={ui.currentChapterTitle}
-        skillName={node.skill}
-        taskProgress={completedTaskIds.length > 0 ? `Task ${completedTaskIds.length} of ${node.tasks.length}` : `Task 1 of ${node.tasks.length}`}
-        readinessScore={runtime?.readinessScore ?? 0}
-        confidenceScore={runtime ? Math.round(runtime.confidenceScore * 100) : 0}
-        hasActiveTask={completedTaskIds.length > 0}
-        onAction={startMission}
-      />
+    <div className="journey-screen">
+      {/* Layer 1: Background */}
+      <BackgroundLayer chapterDomain={activeChapterDomain} />
 
-      <JourneyPath
-        nodes={professionNodes}
-        activeNodeId={ui.activeNodeId}
-        onNodeSelect={handleNodeSelect}
+      {/* Layer 2: Header */}
+      <JourneyHeader
+        chapterTitle={ui.currentChapterTitle || node.domain}
+        nodeIndex={activeNodeIndex + 1}
         totalNodes={professionNodes.length}
         readinessScore={runtime?.readinessScore ?? 0}
       />
 
-      {displayTask && phase === 'idle' && (
-        <MissionCard task={displayTask} onStart={startMission} />
-      )}
-
-      {phase === 'mission' && displayTask && (
+      {!isTaskActive && (
         <>
-          <MissionFlow
-            instructions={displayTask.instructions}
-            activeStep={activeStep}
-            totalSteps={displayTask.instructions.length}
-            onStepComplete={handleStepComplete}
-          />
-          <HelpBar
-            tips={displayTask.tips}
-            showHint={showHint}
-            onToggleHint={() => setShowHint(s => !s)}
-            onOpenPlaybook={handleOpenPlaybook}
-          />
+          {/* Layer 3: World Layer (Path) */}
+          <div className="journey-world">
+            <JourneyPath
+              nodes={professionNodes}
+              activeNodeId={ui.activeNodeId}
+              onNodeSelect={handleNodeSelect}
+            />
+          </div>
+
+          {/* Layer 4: Mission Card */}
+          {missionCardOpen && node && (
+            <FloatingMissionCard
+              node={node}
+              onContinue={startMission}
+              onClose={() => setMissionCardOpen(false)}
+            />
+          )}
+
+          {/* Layer 5: Bottom Navigation */}
+          <JourneyBottomNav activeTab="journey" onTabChange={handleTabChange} />
         </>
       )}
 
-      {phase === 'review' && (
-        <MissionReview onComplete={handleCompleteMission} />
-      )}
+      {/* Task flow overlay */}
+      {isTaskActive && (
+        <div className="journey-task-flow">
+          {displayTask && phase === 'mission' && (
+            <>
+              <MissionFlow
+                instructions={displayTask.instructions}
+                activeStep={activeStep}
+                totalSteps={displayTask.instructions.length}
+                onStepComplete={handleStepComplete}
+              />
+              <HelpBar
+                tips={displayTask.tips}
+                showHint={showHint}
+                onToggleHint={() => setShowHint(s => !s)}
+                onOpenPlaybook={handleOpenPlaybook}
+              />
+            </>
+          )}
 
-      {phase === 'result' && taskResult && (
-        <ResultCard result={taskResult} onContinue={handleContinueJourney} />
-      )}
+          {phase === 'review' && (
+            <MissionReview onComplete={handleCompleteMission} />
+          )}
 
-      <CollapsibleSidebar
-        advice={node.advice}
-        signals={node.signals}
-        nodeId={node.id}
-      />
+          {phase === 'result' && taskResult && (
+            <ResultCard result={taskResult} onContinue={handleContinueJourney} />
+          )}
+        </div>
+      )}
 
       {lockedToast && <div className="locked-toast">{lockedToast}</div>}
-    </AppShell>
+    </div>
   );
 }
