@@ -1,13 +1,7 @@
 import type { SkillNode } from '@/core/skill_state';
 import { SkillNodeCard, type NodeCardState } from './SkillNodeCard';
-
-const CHAPTER_ACCENT: Record<string, string> = {
-  resume: '#4A90D9',
-  linkedin: '#7B68EE',
-  applications: '#F6AD55',
-  interview: '#4A5568',
-  offer: '#48BB78',
-};
+import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { getWorldThemeOrDefault, getChapterAccent } from '@/core/world/world_theme';
 
 interface ChapterData {
   id: string;
@@ -43,6 +37,7 @@ export function ChapterHub({
   onNodeSelect,
 }: ChapterHubProps) {
   const hubDismissed = selectedChapter !== null;
+  const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? 'default');
 
   return (
     <div className="chapter-hub">
@@ -57,7 +52,7 @@ export function ChapterHub({
             onClick={() => !chapter.isLocked && onChapterSelect(chapter.id)}
             role="button"
             tabIndex={chapter.isLocked ? -1 : 0}
-            style={{ '--island-accent': CHAPTER_ACCENT[chapter.id.toLowerCase()] || '#4A90D9' } as React.CSSProperties}
+            style={{ '--island-accent': getChapterAccent(worldTheme, chapter.id) } as React.CSSProperties}
           >
             <div className="island-content">
               <div className="island-emblema">
@@ -75,7 +70,7 @@ export function ChapterHub({
               <span className="island-count">{chapter.completedCount}/{chapter.totalCount} skills</span>
 
               {(chapter.isCompleted || chapter.isActive) && (
-                <div className="island-glow" style={{ background: CHAPTER_ACCENT[chapter.id.toLowerCase()] }} />
+                <div className="island-glow" style={{ background: getChapterAccent(worldTheme, chapter.id) }} />
               )}
 
               {chapter.isLocked && (

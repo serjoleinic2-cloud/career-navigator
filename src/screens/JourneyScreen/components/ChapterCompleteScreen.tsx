@@ -1,6 +1,9 @@
 import { PrimaryButton } from '@/components/layout/PrimaryButton';
+import { useWorldCssStyle } from '@/core/world/useWorldCssStyle';
+import { useWorldConfettiColors } from '@/core/world/useWorldConfettiColors';
 
 interface ChapterCompleteScreenProps {
+  chapterId: string;
   chapterTitle: string;
   skillsCompleted: number;
   totalSkills: number;
@@ -10,6 +13,7 @@ interface ChapterCompleteScreenProps {
 }
 
 export function ChapterCompleteScreen({
+  chapterId,
   chapterTitle,
   skillsCompleted,
   totalSkills,
@@ -17,8 +21,11 @@ export function ChapterCompleteScreen({
   confidenceDelta,
   onContinue,
 }: ChapterCompleteScreenProps) {
+  const worldStyle = useWorldCssStyle(chapterId);
+  const confettiColors = useWorldConfettiColors();
+
   return (
-    <div className="chapter-complete-screen">
+    <div className="chapter-complete-screen" style={worldStyle}>
       <div className="confetti-container">
         {Array.from({ length: 20 }).map((_, i) => (
           <div
@@ -27,7 +34,7 @@ export function ChapterCompleteScreen({
             style={{
               left: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 2}s`,
-              backgroundColor: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#45B7D1', '#96CEB4'][i % 5],
+              backgroundColor: confettiColors[i % confettiColors.length],
             }}
           />
         ))}

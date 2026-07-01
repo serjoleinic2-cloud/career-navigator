@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useWorldCssStyle } from '@/core/world/useWorldCssStyle';
 import './IntroJourneyScreen.css';
 
 interface IntroJourneyScreenProps {
@@ -8,6 +9,7 @@ interface IntroJourneyScreenProps {
 export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComplete }) => {
   const [phase, setPhase] = useState(0);
   const [canSkip, setCanSkip] = useState(false);
+  const worldStyle = useWorldCssStyle();
 
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
@@ -37,7 +39,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
   }, [canSkip, onComplete]);
 
   return (
-    <div className="intro-screen" onClick={handleSkip}>
+    <div className="intro-screen" style={worldStyle} onClick={handleSkip}>
       {/* Phase 0: Dark screen, light appears */}
       <div className={`intro-light ${phase >= 0 ? 'visible' : ''}`} />
 

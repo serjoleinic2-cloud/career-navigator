@@ -18,7 +18,7 @@
   left: 50%;
   width: 0;
   height: 0;
-  background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(var(--w-glow-rgb, 102, 126, 234), 0.3) 0%, transparent 70%);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
@@ -55,7 +55,7 @@
 .intro-profession {
   font-size: 48px;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--w-primary, #667eea) 0%, var(--w-secondary, #764ba2) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -162,9 +162,9 @@
 }
 
 .resume-island.glowing .island-body {
-  border-color: #00b894;
-  box-shadow: 0 0 40px rgba(0, 184, 148, 0.3);
-  background: rgba(0, 184, 148, 0.1);
+  border-color: var(--w-chapter-accent, #00b894);
+  box-shadow: 0 0 40px var(--w-cel-glow, rgba(0, 184, 148, 0.3));
+  background: color-mix(in srgb, var(--w-chapter-accent, #00b894) 12%, transparent);
 }
 
 .island-icon {
@@ -213,13 +213,13 @@
 .destination-name {
   font-size: 32px;
   font-weight: 700;
-  color: #00b894;
+  color: var(--w-chapter-accent, #00b894);
 }
 
 .intro-begin-btn {
   margin-top: 16px;
   padding: 16px 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--w-primary, #667eea) 0%, var(--w-secondary, #764ba2) 100%);
   border: none;
   border-radius: 16px;
   color: #fff;
@@ -231,7 +231,7 @@
 
 .intro-begin-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 24px rgba(var(--w-glow-rgb, 102, 126, 234), 0.4);
 }
 
 /* Skip hint */
