@@ -1,215 +1,132 @@
-TITLE: CAREER NAVIGATOR — PHASE A (GAME DESIGN FOUNDATION)
-
-PRIORITY: CRITICAL
+TITLE: WORLD COMPOSITION LAYER — UNIFICATION OF WORLD SYSTEM
 
 GOAL
 
-Career Navigator must no longer look like a productivity app.
+Unify world rendering system so that:
 
-It must become an exploration game inspired by Monument Valley principles.
+- world_theme
+- WorldBackdrop
+- profession world modules
+- progress state
 
-IMPORTANT
-
-Do NOT copy Monument Valley assets or compositions.
-
-Use only its design philosophy:
-
-- calm
-- minimalism
-- impossible architecture
-- vertical progression
-- premium feeling
-- emotional journey
+become a single coherent system.
 
 ====================================================
 
-TASK 1 — CREATE DESIGN SYSTEM
-
-Create a new folder:
-
-src/design/
-
-Add:
-
-DesignSystem.ts
-WorldTheme.ts
-GameSpacing.ts
-GameTypography.ts
-GameColors.ts
-GameElevation.ts
-GameAnimation.ts
-
-These files become the ONLY source of visual constants.
-
-====================================================
-
-TASK 2 — DEFINE WORLD LANGUAGE
-
-Every visual element must belong to one universe.
-
-Rules:
-
-Platforms
-Bridges
-Stairs
-Floating islands
-Portals
-Light beams
-Clouds
-Water
-Fog
-Glow
-Stone
-Glass
-
-No modern flat UI.
-
-No material cards.
-
-No dashboard look.
-
-====================================================
-
-TASK 3 — DEFINE UI STYLE
-
-Buttons are not rectangles.
-
-Buttons feel like pieces of the world.
-
-Cards feel carved into architecture.
-
-Dialogs float above the world.
-
-Progress bars become illuminated paths.
-
-Checkboxes become glowing runes.
-
-Locked content becomes sleeping architecture.
-
-Completed content becomes illuminated architecture.
-
-====================================================
-
-TASK 4 — WORLD MAP PHILOSOPHY
-
-World Map is NOT navigation.
-
-World Map IS gameplay.
-
-Player never navigates menus.
-
-Player travels.
-
-The camera follows the journey.
-
-Future remains partially hidden.
-
-Destination is always above.
-
-====================================================
-
-TASK 5 — PROFESSION MODULE RULE
-
-Each profession is an independent world.
-
-Every profession module owns:
-
-world theme
-
-palette
-
-architecture
-
-decorations
-
-chapter icons
-
-ambient particles
-
-reward style
-
-victory scene
-
-No global art duplication.
-
-====================================================
-
-TASK 6 — DEFINE GAME COMPONENTS
-
-Specify visual language for:
-
-Primary Button
-
-Secondary Button
-
-Mission Card
-
-Dialog
-
-Progress Path
-
-Node
-
-Locked Node
-
-Completed Node
-
-Active Node
-
-Chapter Gate
-
-Reward Chest
-
-Profile Badge
-
-Achievement
-
-Tooltip
-
-Loading Screen
-
-====================================================
-
-TASK 7 — OUTPUT
+TASK 1 — CREATE WORLD COMPOSER
 
 Create:
 
-DESIGN_BIBLE.md
+src/core/world/world_composer.ts
 
-Include:
+Responsibilities:
 
-Visual philosophy
+- combine world_theme + profession module
+- resolve geometry + palette + ambient settings
+- output single WorldRenderConfig
 
-Composition rules
+DO NOT render anything here.
 
-Lighting rules
-
-Geometry rules
-
-Scale rules
-
-Color hierarchy
-
-Animation philosophy
-
-Interaction philosophy
-
-Profession world rules
-
-Component rules
-
-Do NOT implement visuals yet.
-
-This document becomes the visual constitution of Career Navigator.
+ONLY assemble data.
 
 ====================================================
 
-IMPORTANT
+TASK 2 — DEFINE WORLD RENDER CONFIG
 
-No new functionality.
+Create type:
 
+WorldRenderConfig:
+
+- palette
+- geometry
+- atmosphere
+- lighting
+- camera
+- backdrop
+- particles (optional future)
+- animation profile
+
+====================================================
+
+TASK 3 — MOVE RESPONSIBILITY OUT OF JOURNEYSCREEN
+
+JourneyScreen must NOT:
+
+- calculate world theme
+- decide geometry
+- manage world styling
+
+It should ONLY:
+
+- consume WorldRenderConfig
+- pass it to WorldRenderer / WorldBackdrop
+
+====================================================
+
+TASK 4 — UNIFY WORLD BACKDROP INPUT
+
+Modify:
+
+WorldBackdrop.tsx
+
+It must accept:
+
+WorldRenderConfig
+
+NOT hardcoded theme logic inside component.
+
+====================================================
+
+TASK 5 — PROFESSION MODULE STANDARDIZATION
+
+Ensure:
+
+Each profession exports:
+
+world.ts:
+
+- theme
+- geometry
+- ambient rules
+- name
+- unlock conditions (optional metadata only)
+
+====================================================
+
+TASK 6 — SINGLE SOURCE OF WORLD TRUTH
+
+After this change:
+
+ONLY world_composer decides final world state.
+
+No duplication between:
+
+- theme system
+- backdrop system
+- screen logic
+
+====================================================
+
+OUTPUT
+
+Create:
+
+WORLD_COMPOSITION_REPORT.md
+
+Include:
+
+- old architecture issues
+- new data flow
+- module boundaries
+- risks
+- migration notes
+
+====================================================
+
+CONSTRAINTS
+
+No new screens.
+No UI redesign.
 No gameplay changes.
 
-No screen redesign.
-
-Only establish the permanent visual language for the entire project.
+ONLY architecture unification of world system.

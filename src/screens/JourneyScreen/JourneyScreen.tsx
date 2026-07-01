@@ -4,6 +4,9 @@ import { setActiveNode, getActiveNode, getRuntimeState } from '@/core/runtime/ru
 import { subscribe } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
 import type { SkillNode } from '@/core/skill_state';
+import { WorldBackdrop } from '@/components/WorldBackdrop';
+import { getWorldThemeOrDefault } from '@/core/world/world_theme';
+import { getActiveProfessionId } from '@/core/profession_loader';
 import { BackgroundLayer } from './components/BackgroundLayer';
 import { JourneyHeader } from './components/JourneyHeader';
 import { ChapterHub } from './components/ChapterHub';
@@ -74,6 +77,14 @@ export function JourneyScreen() {
     if (!runtime) return false;
     return Object.values(runtime.nodeStates).every(n => n.state === 'confidence');
   }, [runtime]);
+
+  const professionId = runtime?.professionId ?? getActiveProfessionId() ?? 'default';
+  const completedCount = runtime
+    ? Object.values(runtime.nodeStates).filter(n => n.state === 'confidence' || n.state === 'execution').length
+    : 0;
+  const totalCount = runtime ? Object.keys(runtime.nodeStates).length : 0;
+  const progressRatio = totalCount > 0 ? completedCount / totalCount : 0;
+  const worldTheme = getWorldThemeOrDefault(professionId);
 
   const activeChapterDomain = useMemo(() => {
     if (!node) return undefined;
@@ -151,6 +162,7 @@ export function JourneyScreen() {
   if (!node) {
     return (
       <div className="journey-screen">
+        <WorldBackdrop theme={worldTheme} progressRatio={progressRatio} />
         <BackgroundLayer />
         <JourneyHeader chapterTitle="" nodeIndex={0} totalNodes={0} readinessScore={0} />
         <h1>No active node</h1>
@@ -161,6 +173,7 @@ export function JourneyScreen() {
   if (allNodesCompleted) {
     return (
       <div className="journey-screen">
+        <WorldBackdrop theme={worldTheme} progressRatio={progressRatio} />
         <BackgroundLayer />
         <JourneyCompleteScreen
           totalSkills={professionNodes.length}
@@ -176,6 +189,7 @@ export function JourneyScreen() {
 
   return (
     <div className="journey-screen">
+      <WorldBackdrop theme={worldTheme} progressRatio={progressRatio} />
       <BackgroundLayer chapterDomain={activeChapterDomain} />
 
       <JourneyHeader
