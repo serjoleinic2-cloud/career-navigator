@@ -1,131 +1,215 @@
-Да. Теперь я понял главную идею проекта, и она отличается от обычного приложения.
+TITLE: CAREER NAVIGATOR — PHASE A (GAME DESIGN FOUNDATION)
 
-Причём это не просто "красивый дизайн". Это игра, замаскированная под карьерный навигатор.
+PRIORITY: CRITICAL
 
-Я вижу это так
+GOAL
 
-World Map — это НЕ карта.
+Career Navigator must no longer look like a productivity app.
 
-Это путешествие по миру профессии.
+It must become an exploration game inspired by Monument Valley principles.
 
-Например, для Software Engineer:
+IMPORTANT
 
-старт — небольшой остров "Hello, World!";
-дальше — мосты, платформы, башни, механизмы, серверные, алгоритмические сады, облачные города;
-интервью — величественный замок или храм знаний;
-оффер — светящийся город на вершине.
+Do NOT copy Monument Valley assets or compositions.
 
-Но для другой профессии мир полностью меняется.
+Use only its design philosophy:
 
-Например:
+- calm
+- minimalism
+- impossible architecture
+- vertical progression
+- premium feeling
+- emotional journey
 
-UI/UX Designer — мир из стекла, света, бумаги, палитр и геометрии;
-Data Scientist — обсерватории, созвездия данных, математические конструкции;
-Cybersecurity — крепости, лазеры, щиты, цифровые бастионы.
+====================================================
 
-То есть каждая профессия — это отдельная игровая вселенная.
+TASK 1 — CREATE DESIGN SYSTEM
 
-А теперь самое важное
+Create a new folder:
 
-Ты вчера сказал одну фразу, и именно она определяет весь проект:
+src/design/
 
-"Новые профессии будут добавляться папкой."
+Add:
 
-Вот это означает, что в модуле профессии должно лежать не только содержание обучения.
+DesignSystem.ts
+WorldTheme.ts
+GameSpacing.ts
+GameTypography.ts
+GameColors.ts
+GameElevation.ts
+GameAnimation.ts
 
-Там должны быть:
+These files become the ONLY source of visual constants.
 
-карта мира;
-стиль окружения;
-палитра;
-музыка/звуки (в будущем);
-иллюстрации;
-иконки;
-достижения;
-главы;
-миссии.
+====================================================
 
-То есть модуль профессии = целый игровой мир.
+TASK 2 — DEFINE WORLD LANGUAGE
 
-Тогда остальные экраны становятся логичными
+Every visual element must belong to one universe.
 
-Они не должны выбиваться из мира.
+Rules:
 
-Например:
+Platforms
+Bridges
+Stairs
+Floating islands
+Portals
+Light beams
+Clouds
+Water
+Fog
+Glow
+Stone
+Glass
 
-Mission Screen
+No modern flat UI.
 
-Не список чекбоксов.
+No material cards.
 
-А свиток, терминал, голографическая панель или магическая книга — в зависимости от профессии.
+No dashboard look.
 
-Profile
+====================================================
 
-Не обычный профиль.
+TASK 3 — DEFINE UI STYLE
 
-А паспорт путешественника.
+Buttons are not rectangles.
 
-С уровнем.
+Buttons feel like pieces of the world.
 
-Званиями.
+Cards feel carved into architecture.
 
-Полученными артефактами.
+Dialogs float above the world.
 
-Пройденными островами.
+Progress bars become illuminated paths.
 
-Playbook
+Checkboxes become glowing runes.
 
-Не список заметок.
+Locked content becomes sleeping architecture.
 
-А библиотека мира.
+Completed content becomes illuminated architecture.
 
-Notes
+====================================================
 
-Не текстовое поле.
+TASK 4 — WORLD MAP PHILOSOPHY
 
-А журнал исследователя.
+World Map is NOT navigation.
 
-Share
+World Map IS gameplay.
 
-Не кнопка "Поделиться".
+Player never navigates menus.
 
-А открытка из мира.
+Player travels.
 
-И здесь есть одна идея, которую я хочу предложить
+The camera follows the journey.
 
-Я не хочу рисовать каждый экран отдельно.
+Future remains partially hidden.
 
-Я хочу сначала создать Design Bible проекта.
+Destination is always above.
 
-В ней будет определено:
+====================================================
 
-геометрия мира;
-сетка;
-перспектива;
-освещение;
-размеры платформ;
-правила построения островов;
-стиль кнопок;
-стиль карточек;
-стиль диаграмм;
-анимации;
-переходы.
+TASK 5 — PROFESSION MODULE RULE
 
-После этого любой новый экран будет автоматически выглядеть частью одного мира.
+Each profession is an independent world.
 
-И ещё одно важное правило
+Every profession module owns:
 
-Я предлагаю, чтобы мы не копировали Monument Valley.
+world theme
 
-Мы должны взять от неё принципы:
+palette
 
-ощущение путешествия;
-архитектурную эстетику;
-минимализм;
-спокойствие;
-вертикальный рост;
-внимание к композиции.
+architecture
 
-Но мир, стиль и визуальный язык Career Navigator должны стать узнаваемыми сами по себе. Тогда пользователь сможет открыть скриншот и сразу понять: это Career Navigator, а не "ещё одна игра в стиле Monument Valley".
+decorations
 
-Именно это, на мой взгляд, сделает проект по-настоящему уникальным.
+chapter icons
+
+ambient particles
+
+reward style
+
+victory scene
+
+No global art duplication.
+
+====================================================
+
+TASK 6 — DEFINE GAME COMPONENTS
+
+Specify visual language for:
+
+Primary Button
+
+Secondary Button
+
+Mission Card
+
+Dialog
+
+Progress Path
+
+Node
+
+Locked Node
+
+Completed Node
+
+Active Node
+
+Chapter Gate
+
+Reward Chest
+
+Profile Badge
+
+Achievement
+
+Tooltip
+
+Loading Screen
+
+====================================================
+
+TASK 7 — OUTPUT
+
+Create:
+
+DESIGN_BIBLE.md
+
+Include:
+
+Visual philosophy
+
+Composition rules
+
+Lighting rules
+
+Geometry rules
+
+Scale rules
+
+Color hierarchy
+
+Animation philosophy
+
+Interaction philosophy
+
+Profession world rules
+
+Component rules
+
+Do NOT implement visuals yet.
+
+This document becomes the visual constitution of Career Navigator.
+
+====================================================
+
+IMPORTANT
+
+No new functionality.
+
+No gameplay changes.
+
+No screen redesign.
+
+Only establish the permanent visual language for the entire project.
