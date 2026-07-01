@@ -1,22 +1,25 @@
-export type WorldTimeOfDay = 'dawn' | 'night';
-
 export type WorldNodeVisual = {
   id: string;
-  level: number;
-  position3D: {
-    x: number;
-    y: number;
-    z: number;
-  };
+  x: number;
+  y: number;
+  chapterId: string;
+  status: 'completed' | 'active' | 'locked';
   glowIntensity: number;
-  isActive: boolean;
-  isCompleted: boolean;
-  isLocked: boolean;
+  scale: number;
+  opacity: number;
+  label: string;
 };
 
 export type WorldState = {
   nodes: WorldNodeVisual[];
-  cameraFocusId: string;
-  fogIntensity: number;
-  timeOfDay: WorldTimeOfDay;
+  connections: Array<{ from: string; to: string }>;
+  camera: {
+    x: number;
+    y: number;
+    zoom: number;
+  };
+  atmosphere: {
+    timeOfDay: string;
+    fogDensity: number;
+  };
 };

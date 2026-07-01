@@ -1,75 +1,52 @@
-import type { WorldNodeVisual } from '../visual_world_contract';
+import type { WorldState } from '../visual_world_contract';
 
-export type CameraState = {
+export interface CameraState {
+  x: number;
+  y: number;
+  zoom: number;
   targetX: number;
   targetY: number;
-  targetZ: number;
-  currentX: number;
-  currentY: number;
-  currentZ: number;
-  zoom: number;
-};
+}
 
-export function createCamera(): CameraState {
+const CAMERA_OFFSET_Y = 200; // Active node in lower third
+const SMOOTHING = 0.1;
+
+export function createCamera(initialState: WorldState['camera']): CameraState {
   return {
-    targetX: 0,
-    targetY: 0,
-    targetZ: 100,
-    currentX: 0,
-    currentY: -200,
-    currentZ: 100,
-    zoom: 1,
+    x: initialState.x,
+    y: initialState.y,
+    zoom: initialState.zoom,
+    targetX: initialState.x,
+    targetY: initialState.y,
   };
 }
 
-export function focusOnNode(
-  camera: CameraState,
-  node: WorldNodeVisual
-): CameraState {
+export function focusOnNode(camera: CameraState, nodeX: number, nodeY: number): CameraState {
   return {
     ...camera,
-    targetX: node.position3D.x,
-    targetY: node.position3D.y - 50,
-    targetZ: node.position3D.z + 150,
+    targetX: nodeX,
+    targetY: nodeY - CAMERA_OFFSET_Y,
   };
 }
 
-export function updateCamera(
-  camera: CameraState,
-  _deltaTime: number,
-  smoothness: number = 0.05,
-  noiseLevel: number = 0
-): CameraState {
-  let updated = {
-    ...camera,
-    currentX: camera.currentX + (camera.targetX - camera.currentX) * smoothness,
-    currentY: camera.currentY + (camera.targetY - camera.currentY) * smoothness,
-    currentZ: camera.currentZ + (camera.targetZ - camera.currentZ) * smoothness,
-  };
-
-  if (noiseLevel > 0) {
-    updated = applyCameraNoise(updated, noiseLevel);
+export function updateCamera(camera: CameraState): CameraState {
+  const dx = camera.targetX - camera.x;
+  const dy = camera.targetY - camera.y;
+  
+  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+    return { ...camera, x: camera.targetX, y: camera.targetY };
   }
 
-  return updated;
-}
-
-export function applyCameraNoise(
-  camera: CameraState,
-  noiseLevel: number
-): CameraState {
-  if (noiseLevel <= 0) return camera;
-
-  const jitterX = (Math.random() - 0.5) * 2 * noiseLevel;
-  const jitterY = (Math.random() - 0.5) * 2 * noiseLevel;
-
   return {
     ...camera,
-    currentX: camera.currentX + jitterX,
-    currentY: camera.currentY + jitterY,
+    x: camera.x + dx * SMOOTHING,
+    y: camera.y + dy * SMOOTHING,
   };
 }
 
-export function getCameraTransform(camera: CameraState): string {
-  return `translate3d(${-camera.currentX}px, ${-camera.currentY}px, ${-camera.currentZ}px) scale(${camera.zoom})`;
+export function moveCameraUp(camera: CameraState, distance: number): CameraState {
+  return {
+    ...camera,
+    targetY: camera.targetY - distance,
+  };
 }

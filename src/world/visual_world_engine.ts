@@ -21,9 +21,12 @@ export function buildVisualWorld(config: VisualWorldConfig): WorldState {
 
   return {
     nodes: terrainNodes,
-    cameraFocusId: terrainNodes.find(n => n.isActive)?.id ?? terrainNodes[0]?.id ?? '',
-    fogIntensity: 1.0 - brightness,
-    timeOfDay: brightness > 0.75 ? 'dawn' : 'night',
+    connections: [],
+    camera: { x: 0, y: 0, zoom: 1 },
+    atmosphere: {
+      timeOfDay: brightness > 0.75 ? 'day' : 'night',
+      fogDensity: 1.0 - brightness,
+    },
   };
 }
 

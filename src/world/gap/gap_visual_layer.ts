@@ -22,7 +22,7 @@ export function buildGapVisualState(
 
   const nodeFlickerMap: Record<string, number> = {};
   for (const node of world.nodes) {
-    nodeFlickerMap[node.id] = node.isLocked ? intensity : intensity * 0.5;
+    nodeFlickerMap[node.id] = node.status === 'locked' ? intensity : intensity * 0.5;
   }
 
   return {

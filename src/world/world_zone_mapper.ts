@@ -53,6 +53,6 @@ export function applyReadinessToTerrain(
 ): WorldNodeVisual[] {
   return nodes.map(node => ({
     ...node,
-    isLocked: readinessScore < 30 ? true : node.isLocked,
+    status: readinessScore < 30 && node.status === 'active' ? 'locked' : node.status,
   }));
 }

@@ -15,7 +15,7 @@ export {
 export type { UserAction, MissionResult } from './skill_engine';
 
 /* ── Main screen ── */
-export { WorldRendererScreen } from '@/world/world_renderer';
+export { WorldRenderer } from '@/world/world_renderer';
 
 /* ── Profession system ── */
 export type { ProfessionModule } from './profession_contract';

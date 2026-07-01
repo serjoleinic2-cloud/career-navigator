@@ -1,135 +1,134 @@
-import { getUIState } from '@/core/ui_bridge/ui_bridge';
-import { getCareerState } from '@/core/skill_engine';
-import { buildWorldFromUI } from './world_builder';
-import { EnvironmentGenerator } from './EnvironmentGenerator';
-import { LevelRenderer } from './LevelRenderer';
-import type { CareerLevel } from './types';
+import React, { useEffect, useRef, useState } from 'react';
 import type { WorldState } from './visual_world_contract';
-import type { CameraState } from './camera/world_camera_controller';
-import { calculateGlow, getGlowColor } from './effects/glow_system';
-import { getCameraTransform } from './camera/world_camera_controller';
+import { buildWorldStateFromRuntime } from './world_builder';
+import { createCamera, focusOnNode, updateCamera } from './camera/world_camera_controller';
+import type { JourneyRuntimeState } from '../core/runtime/journey_runtime';
+import { getRuntimeState } from '../core/runtime/runtime_controller';
+import { subscribe } from '../core/events/system_event_bus';
 
-export type RenderFrame = {
-  nodes: RenderedNode[];
-  cameraTransform: string;
-  fogIntensity: number;
-  timeOfDay: string;
-};
-
-export type RenderedNode = {
-  id: string;
-  transform: string;
-  glow: number;
-  glowColor: string;
-  size: number;
-  opacity: number;
-};
-
-export function renderWorld(
-  worldState: WorldState,
-  camera: CameraState,
-  time: number
-): RenderFrame {
-  const nodes: RenderedNode[] = worldState.nodes.map(node => {
-    const glow = calculateGlow(node, time);
-    const glowColor = getGlowColor(node);
-
-    const isoX = node.position3D.x - node.position3D.z;
-    const isoY = node.position3D.y + (node.position3D.x + node.position3D.z) * 0.5;
-
-    return {
-      id: node.id,
-      transform: `translate(${isoX}px, ${isoY}px)`,
-      glow,
-      glowColor,
-      size: node.isActive ? 24 : node.isCompleted ? 18 : 14,
-      opacity: node.isLocked ? 0.4 : 1,
-    };
-  });
-
-  return {
-    nodes,
-    cameraTransform: getCameraTransform(camera),
-    fogIntensity: worldState.fogIntensity,
-    timeOfDay: worldState.timeOfDay,
-  };
+interface WorldRendererProps {
+  runtimeState?: JourneyRuntimeState;
 }
 
-export function WorldRendererScreen(): JSX.Element {
-  const uiState = getUIState();
+export const WorldRenderer: React.FC<WorldRendererProps> = ({ runtimeState: runtimeStateProp }) => {
+  const runtimeState = runtimeStateProp ?? getRuntimeState()!;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [worldState, setWorldState] = useState<WorldState>(() => 
+    buildWorldStateFromRuntime(runtimeState)
+  );
+  const cameraRef = useRef(createCamera(worldState.camera));
 
-  const worldNodes = buildWorldFromUI(uiState.nodes);
-  const careerState = getCareerState();
-  const completedCount = Object.values(careerState?.nodeStates ?? {}).filter(
-    n => n.state === 'confidence' || n.state === 'execution'
-  ).length;
-  const totalCount = Object.values(careerState?.nodeStates ?? {}).length;
+  useEffect(() => {
+    const unsubNodeChanged = subscribe('NODE_CHANGED', () => {
+      const newState = buildWorldStateFromRuntime(runtimeState);
+      setWorldState(newState);
+      
+      const activeNode = newState.nodes.find(n => n.status === 'active');
+      if (activeNode) {
+        cameraRef.current = focusOnNode(cameraRef.current, activeNode.x, activeNode.y);
+      }
+    });
 
-  const levels: CareerLevel[] = worldNodes.map((wn, i) => ({
-    index: i,
-    title: uiState.nodes[i]?.title ?? `Skill ${i + 1}`,
-    description: '',
-    status: wn.isCompleted ? 'completed' : wn.isActive ? 'current' : 'locked',
-    theme: 'learning',
-    leftEnvironment: 'skill-lab',
-    rightEnvironment: 'startup-office',
-    skillsRequired: [],
-    outcome: '',
-    estimatedHours: 0,
-    resources: [],
-  }));
+    const unsubMissionResult = subscribe('MISSION_RESULT', (event) => {
+      const payload = event.payload as { success: boolean };
+      if (payload.success) {
+        // Trigger upward camera movement after mission complete
+        setTimeout(() => {
+          const newState = buildWorldStateFromRuntime(runtimeState);
+          setWorldState(newState);
+          const activeNode = newState.nodes.find(n => n.status === 'active');
+          if (activeNode) {
+            cameraRef.current = focusOnNode(cameraRef.current, activeNode.x, activeNode.y);
+          }
+        }, 100);
+      }
+    });
+
+    return () => {
+      unsubNodeChanged();
+      unsubMissionResult();
+    };
+  }, [runtimeState]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+
+    const render = () => {
+      cameraRef.current = updateCamera(cameraRef.current);
+      const cam = cameraRef.current;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.translate(canvas.width / 2 - cam.x, canvas.height / 2 - cam.y);
+      ctx.scale(cam.zoom, cam.zoom);
+
+      // Draw connections (upward only)
+      ctx.strokeStyle = 'rgba(100, 200, 255, 0.3)';
+      ctx.lineWidth = 2;
+      worldState.connections.forEach(conn => {
+        const from = worldState.nodes.find(n => n.id === conn.from);
+        const to = worldState.nodes.find(n => n.id === conn.to);
+        if (from && to) {
+          ctx.beginPath();
+          ctx.moveTo(from.x, from.y);
+          ctx.lineTo(to.x, to.y);
+          ctx.stroke();
+        }
+      });
+
+      // Draw nodes
+      worldState.nodes.forEach(node => {
+        ctx.globalAlpha = node.opacity;
+        
+        // Glow for active/completed
+        if (node.glowIntensity > 0) {
+          const gradient = ctx.createRadialGradient(
+            node.x, node.y, 0,
+            node.x, node.y, 30 * node.scale
+          );
+          gradient.addColorStop(0, `rgba(100, 200, 255, ${node.glowIntensity})`);
+          gradient.addColorStop(1, 'rgba(100, 200, 255, 0)');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 30 * node.scale, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Node body
+        ctx.fillStyle = node.status === 'active' ? '#4ade80' : 
+                        node.status === 'completed' ? '#60a5fa' : '#374151';
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 15 * node.scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Label
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(node.label, node.x, node.y - 25 * node.scale);
+      });
+
+      ctx.restore();
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => cancelAnimationFrame(animId);
+  }, [worldState]);
 
   return (
-    <div className="min-h-screen bg-[#050a1a] text-white overflow-x-hidden">
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a1628] via-[#071320] to-[#050a1a]" />
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-cyan-900/10 to-transparent" />
-      </div>
-
-      <header className="relative z-10 px-6 pt-8 pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white/90 tracking-tight">Career Navigator</h1>
-            <p className="text-sm text-white/40 mt-1">
-              {completedCount} / {totalCount} skills completed
-            </p>
-          </div>
-          <div className="flex gap-3 text-sm">
-            <div className="px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-              {Math.round(careerState?.readinessScore ?? 0)}%
-            </div>
-            <div className="px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400">
-              {Math.round((careerState?.confidenceScore ?? 0) * 100)}%
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="relative z-10 px-4 pb-32">
-        <div className="relative">
-          {levels.map((level, i) => (
-            <div key={i} className="relative flex items-center justify-center py-3">
-              <EnvironmentGenerator
-                side="left"
-                environmentType={level.leftEnvironment}
-                levelIndex={i}
-              />
-              <div className="flex-1 flex justify-center">
-                <LevelRenderer
-                  level={level}
-                  isCurrent={level.status === 'current'}
-                />
-              </div>
-              <EnvironmentGenerator
-                side="right"
-                environmentType={level.rightEnvironment}
-                levelIndex={i}
-              />
-            </div>
-          ))}
-        </div>
-      </main>
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={window.innerWidth}
+      height={window.innerHeight}
+      style={{ display: 'block', background: '#0f172a' }}
+    />
   );
-}
+};

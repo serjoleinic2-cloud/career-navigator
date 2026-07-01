@@ -1,8 +1,6 @@
-import type { UI_State } from '@/core/ui_bridge/ui_render_contract';
-import { buildWorldFromUI, getCameraFocusId, getFogIntensity } from './world_builder';
+import { buildWorldStateFromRuntime } from './world_builder';
 import { createCamera, focusOnNode, updateCamera } from './camera/world_camera_controller';
 import { createFogLayers, animateFogLayers } from './effects/fog_system';
-import { renderWorld, type RenderFrame } from './world_renderer';
 import type { WorldState } from './visual_world_contract';
 import { buildGapVisualState, applyGapOverlay } from './gap/gap_visual_layer';
 import type { GapState } from './gap/gap_visual_layer';
@@ -15,28 +13,18 @@ export type SceneState = {
   effects: { blur: number };
 };
 
-export function createScene(uiState: UI_State, gapState?: GapState): SceneState {
-  const worldNodes = buildWorldFromUI(uiState.nodes);
-  const focusId = getCameraFocusId(uiState.nodes);
-  const fogIntensity = getFogIntensity(uiState.nodes);
-
-  const world: WorldState = {
-    nodes: worldNodes,
-    cameraFocusId: focusId,
-    fogIntensity,
-    timeOfDay: 'dawn',
-  };
-
-  let camera = createCamera();
-  const focusNode = worldNodes.find(n => n.id === focusId);
-  if (focusNode) {
-    camera = focusOnNode(camera, focusNode);
+export function createScene(runtimeState: Parameters<typeof buildWorldStateFromRuntime>[0], gapState?: GapState): SceneState {
+  const world = buildWorldStateFromRuntime(runtimeState);
+  const activeNode = world.nodes.find(n => n.status === 'active');
+  let camera = createCamera(world.camera);
+  if (activeNode) {
+    camera = focusOnNode(camera, activeNode.x, activeNode.y);
   }
 
   const scene = {
     world,
     camera,
-    fogLayers: createFogLayers(fogIntensity),
+    fogLayers: createFogLayers(world.atmosphere.fogDensity),
     time: 0,
     effects: { blur: 0 },
   };
@@ -51,28 +39,20 @@ export function createScene(uiState: UI_State, gapState?: GapState): SceneState 
 
 export function updateScene(
   scene: SceneState,
-  uiState: UI_State,
+  runtimeState: Parameters<typeof buildWorldStateFromRuntime>[0],
   deltaTime: number,
   gapState?: GapState
 ): SceneState {
-  const worldNodes = buildWorldFromUI(uiState.nodes);
-  const focusId = getCameraFocusId(uiState.nodes);
-  const fogIntensity = getFogIntensity(uiState.nodes);
-
-  const focusNode = worldNodes.find(n => n.id === focusId);
+  const world = buildWorldStateFromRuntime(runtimeState);
+  const activeNode = world.nodes.find(n => n.status === 'active');
   let camera = scene.camera;
-  if (focusNode) {
-    camera = focusOnNode(camera, focusNode);
+  if (activeNode) {
+    camera = focusOnNode(camera, activeNode.x, activeNode.y);
   }
-  camera = updateCamera(camera, deltaTime);
+  camera = updateCamera(camera);
 
   const updatedScene = {
-    world: {
-      nodes: worldNodes,
-      cameraFocusId: focusId,
-      fogIntensity,
-      timeOfDay: scene.world.timeOfDay,
-    },
+    world,
     camera,
     fogLayers: animateFogLayers(scene.fogLayers, deltaTime),
     time: scene.time + deltaTime,
@@ -87,6 +67,9 @@ export function updateScene(
   return updatedScene;
 }
 
-export function renderScene(scene: SceneState): RenderFrame {
-  return renderWorld(scene.world, scene.camera, scene.time);
+export function renderScene(scene: SceneState): { nodes: any[]; cameraTransform: string } {
+  return {
+    nodes: scene.world.nodes,
+    cameraTransform: `translate(${-scene.camera.x}px, ${-scene.camera.y}px)`,
+  };
 }

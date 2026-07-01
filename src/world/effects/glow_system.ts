@@ -32,8 +32,8 @@ export function calculateGlow(
   node: WorldNodeVisual,
   time: number
 ): number {
-  const config = node.isActive ? GLOW_CONFIG.active
-    : node.isCompleted ? GLOW_CONFIG.completed
+  const config = node.status === 'active' ? GLOW_CONFIG.active
+    : node.status === 'completed' ? GLOW_CONFIG.completed
     : GLOW_CONFIG.locked;
 
   if (config.pulseSpeed === 0) return config.baseIntensity;
@@ -43,7 +43,7 @@ export function calculateGlow(
 }
 
 export function getGlowColor(node: WorldNodeVisual): string {
-  return node.isActive ? GLOW_CONFIG.active.color
-    : node.isCompleted ? GLOW_CONFIG.completed.color
+  return node.status === 'active' ? GLOW_CONFIG.active.color
+    : node.status === 'completed' ? GLOW_CONFIG.completed.color
     : GLOW_CONFIG.locked.color;
 }

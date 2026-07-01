@@ -29,9 +29,9 @@ export function filterVisibleNodes(
 
 export function shouldSkipNode(
   node: WorldNodeVisual,
-  maxDistance: number = 3
+  _maxDistance: number = 3
 ): boolean {
-  if (!node.isActive && !node.isCompleted && node.level > maxDistance) {
+  if (node.status !== 'active' && node.status !== 'completed') {
     return true;
   }
   return false;

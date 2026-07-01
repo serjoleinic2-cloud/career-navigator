@@ -1,6 +1,6 @@
-export type { WorldNodeVisual, WorldState, WorldTimeOfDay } from './visual_world_contract';
+export type { WorldNodeVisual, WorldState } from './visual_world_contract';
 
-export { buildWorldFromUI, getCameraFocusId, getFogIntensity } from './world_builder';
+export { buildWorldStateFromRuntime } from './world_builder';
 
 export type { JourneyNode, JourneyNodeType, JourneyNodeState } from './journey_node';
 export { createJourneyNode } from './journey_node';
@@ -21,12 +21,11 @@ export {
   createCamera,
   focusOnNode,
   updateCamera,
-  getCameraTransform,
+  moveCameraUp,
 } from './camera/world_camera_controller';
 export type { CameraState } from './camera/world_camera_controller';
 
-export { renderWorld } from './world_renderer';
-export type { RenderFrame, RenderedNode } from './world_renderer';
+export { WorldRenderer } from './world_renderer';
 
 export { createScene, updateScene, renderScene } from './world_scene';
 export type { SceneState } from './world_scene';

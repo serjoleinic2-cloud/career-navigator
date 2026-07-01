@@ -4,7 +4,7 @@ import { initializeRuntime, startJourney } from './core/runtime/runtime_controll
 import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
 import type { OnboardingState } from './screens/OnboardingScreen/OnboardingScreen';
 import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
-import { WorldRendererScreen } from './world/world_renderer';
+import { WorldRenderer } from './world/world_renderer';
 import { JourneyScreenDebug } from './screens/JourneyScreen/JourneyScreenDebug';
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
@@ -114,7 +114,7 @@ function App() {
 
     switch (screen) {
       case 'world':
-        return <div {...common}><WorldRendererScreen /></div>;
+        return <div {...common}><WorldRenderer /></div>;
       case 'playbook':
         return <div {...common}><PlaybookScreen /></div>;
       case 'notes':
