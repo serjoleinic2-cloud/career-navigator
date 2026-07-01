@@ -876,3 +876,39 @@ Only one active focus exists at any time:
 The app does not feel like an app.
 
 It feels like navigating a structured journey environment.
+
+---
+
+# THEME COMPLIANCE CHECKLIST
+
+Every profession is a self-contained world (see WORLD ARCHITECTURE / `WorldTheme`). A screen is only "done" if switching `src/professions/<profession>/world.ts` is enough to fully re-skin it — no `.tsx` or `.css` edits required.
+
+## Single source of truth
+
+- All color, gradient, glow, and shadow values used for atmosphere come from `WorldTheme` (`src/core/world/world_theme.ts`), never from a new hardcoded hex, a new tailwind color, or a new `:root` variable file.
+- Screens read the theme through `useWorldCssStyle(chapterId?)` and apply it as `style={...}` on their root element. CSS then consumes it via `var(--w-*)` with a safe fallback: `var(--w-primary, #667eea)`.
+- Confetti/sparkle color arrays come from `useWorldConfettiColors()`, not from an inline array literal.
+
+## Before marking a screen "theme-compliant", check it for:
+
+- [ ] Hardcoded colors (`#fff`, `rgb(...)`, named colors)
+- [ ] Hardcoded gradients (`linear-gradient`, `radial-gradient` with literal stops)
+- [ ] Hardcoded shadows (`box-shadow` with literal `rgba(...)`)
+- [ ] Hardcoded glow/light effects (radial glows, light rays, sparkle animations)
+- [ ] Hardcoded border colors
+- [ ] Hardcoded background colors
+- [ ] Opacity values that encode brand/atmosphere (not layout spacing)
+- [ ] Any second `:root` block or duplicated accent map (`CHAPTER_ACCENT`-style objects copy-pasted across files)
+
+## What stays local (not theme violations)
+
+- Layout constants: spacing, radius, timing/duration, easing curves.
+- Copy/content: profession name, stats, chapter titles.
+- Icons/emoji used as content rather than atmosphere (flag for future `WorldTheme.icons` if this changes).
+
+## Process
+
+1. New cinematic/celebration screen → wire `useWorldCssStyle()` on the root element from the first draft, not as a retrofit.
+2. New profession → add its `world.ts` (palette, `chapterAccents`, `chapterBackgrounds`, `celebration`) — zero screen edits.
+3. If a screen needs a new semantic value (e.g. a "warning" color) that doesn't exist on `WorldTheme` yet, add it to the theme contract first, then consume it — never hardcode "just this once."
+4. Periodically grep for legacy color literals (`#[0-9a-fA-F]{3,6}`, `rgba(`) inside screen `.css`/`.tsx` files outside of `world_theme.ts` itself — any hit is a candidate for the next audit.

@@ -212,6 +212,7 @@ export function JourneyScreen() {
 
       {view === 'chapterComplete' && selectedChapter && (
         <ChapterCompleteScreen
+          chapterId={selectedChapter}
           chapterTitle={selectedChapter}
           chapterId={selectedChapter}
           skillsCompleted={chapters.find(c => c.id === selectedChapter)?.completedCount ?? 0}

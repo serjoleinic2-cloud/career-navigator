@@ -21,6 +21,7 @@ export function JourneyCompleteScreen({
 }: JourneyCompleteScreenProps) {
   const worldStyle = useWorldCssStyle();
   const [celebrating, setCelebrating] = useState(false);
+  const worldStyle = useWorldCssStyle();
 
   return (
     <div className="journey-complete-overlay" style={worldStyle}>

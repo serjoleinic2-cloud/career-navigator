@@ -3,6 +3,7 @@ import { useWorldCssStyle } from '@/core/world/useWorldCssStyle';
 import { useWorldConfettiColors } from '@/core/world/useWorldConfettiColors';
 
 interface ChapterCompleteScreenProps {
+  chapterId: string;
   chapterTitle: string;
   chapterId: string;
   skillsCompleted: number;
@@ -13,6 +14,7 @@ interface ChapterCompleteScreenProps {
 }
 
 export function ChapterCompleteScreen({
+  chapterId,
   chapterTitle,
   chapterId,
   skillsCompleted,
@@ -23,6 +25,10 @@ export function ChapterCompleteScreen({
 }: ChapterCompleteScreenProps) {
   const worldStyle = useWorldCssStyle(chapterId);
   const confettiColors = useWorldConfettiColors();
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/feature/world-theme-system
   return (
     <div className="chapter-complete-screen" style={worldStyle}>
       <div className="confetti-container">
