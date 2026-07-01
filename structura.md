@@ -51,8 +51,7 @@ D:\career-navigator/
     │   │   └── TopBar.css
     │   │
     │   ├── BottomNav/                 — Навигация с Framer Motion анимацией
-    │   │   ├── BottomNav.tsx          — Анимированные табы (journey, tasks, progress, profile)
-    │   │   └── BottomNav.css
+    │   │   └── BottomNav.tsx          — Анимированные табы (journey, tasks, progress, profile)
     │   ├── FloatingOrb/               — Анимированная светящаяся сфера
     │   │   ├── FloatingOrb.tsx        — Режимы: idle/moving/arrived, уровни интенсивности
     │   │   ├── FloatingOrb.css
@@ -113,6 +112,12 @@ D:\career-navigator/
     │   │   ├── index.ts
     │   │   └── system_event_bus.ts    — Глобальная pub/sub шина (26+ типов, включая MISSION_SUBMIT)
     │   │
+    │   ├── export/                    — Экспорт данных
+    │   │   └── export_service.ts      — Экспорт состояния в JSON
+    │   │
+    │   ├── gap/                       — Баррель-реэкспорт gap_engine
+    │   │   └── index.ts               — Реэкспорт типов и функций gap_engine
+    │   │
     │   ├── onboarding/                — Онбординг пользователя
     │   │   ├── index.ts
     │   │   ├── onboarding_engine.ts   — Построение OnboardingState из ввода, расчёт readiness/confidence
@@ -134,6 +139,10 @@ D:\career-navigator/
     │   │   ├── index.ts
     │   │   ├── task_content_engine.ts — Библиотека определений задач (~684 строки)
     │   │   └── task_execution_engine.ts — Жизненный цикл задачи: begin, submit, complete, fail
+    │   │
+    │   ├── attempt/                   — Попытки выполнения задач
+    │   │   ├── index.ts
+    │   │   └── attempt_engine.ts      — Старт, завершение, оценка попытки
     │   │
     │   ├── bootstrap/                 — Инициализация системы
     │   │   ├── index.ts
@@ -314,6 +323,7 @@ D:\career-navigator/
     ├── screens/                       — Экраны приложения
     │   ├── JourneyScreen/            — Экран путешествия (debug fallback)
     │   │   ├── index.ts
+    │   │   ├── JourneyScreen.tsx      — Основной экран путешествия
     │   │   ├── JourneyScreenDebug.tsx — Debug-версия: список нод, открыть миссию (без бизнес-логики)
     │   │   ├── JourneyScreen.css
     │   │   ├── components/
