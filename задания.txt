@@ -1,20 +1,273 @@
-РЕАЛЬНОЕ СОСТОЯНИЕ (не assumptions):
-Table
-Файл	Что проверил	Результат
-skill_engine.ts	Есть ли on('MISSION_SUBMIT')? Есть ли emit('MISSION_RESULT')? Есть ли guards?	НЕТ — ни одного из трёх
-system_event_bus.ts	Есть ли duplicate protection?	НЕТ — emit вызывает все listeners без dedup
-world_renderer.tsx	Есть ли cached state?	ЧИСТО — только consume + render
-MissionScreen.tsx	Прямой вызов или event?	ПРЯМОЙ ВЫЗОВ applyMissionResult
-App.tsx	Правильный routing?	ЧИСТО
-5 КРИТИЧЕСКИХ БАГОВ:
-MissionScreen — прямой вызов applyMissionResult вместо emit('MISSION_SUBMIT')
-skill_engine — нет обработчика on('MISSION_SUBMIT')
-skill_engine — нет emit('MISSION_RESULT') после обработки
-MissionScreen — нет listener на MISSION_RESULT
-skill_engine — нет guard isProcessingMission (double submit возможен)
-Event flow НЕ работает как задумано. Сейчас:
-plain
-MissionScreen → applyMissionResult() [прямой вызов] → skill_engine → UI_REFRESH
-Должно быть:
-plain
-MissionScreen → emit('MISSION_SUBMIT') → skill_engine → emit('MISSION_RESULT') → MissionScreen
+TITLE: EVENT BUS HARDENING + EVENT FLOW AUDIT
+
+PRIORITY: CRITICAL
+
+GOAL
+
+Complete migration to a robust event-driven architecture.
+Eliminate duplicate event processing and verify there are no hidden bypasses around the event system.
+
+====================================================
+
+TASK 1 — EVENT BUS DUPLICATE PROTECTION
+
+FILE:
+src/core/system_event_bus.ts
+
+Implement protection against duplicate event processing.
+
+Requirements:
+
+- prevent duplicate listener registration
+- prevent same callback from being subscribed twice
+- add unsubscribe safety
+- support once() listeners
+- listener removal must be idempotent
+- event dispatch must never invoke the same callback twice
+
+Preferred implementation:
+Use Set instead of Array for listener storage.
+
+====================================================
+
+TASK 2 — EVENT BUS API
+
+Ensure event bus exposes:
+
+subscribe()
+unsubscribe()
+once()
+emit()
+
+No duplicate code.
+
+====================================================
+
+TASK 3 — FULL EVENT FLOW AUDIT
+
+Search entire repository.
+
+Find every location that:
+
+- mutates runtime state
+- changes node status
+- completes missions
+- advances progression
+- modifies career state
+
+Verify every mutation.
+
+Allowed:
+
+UI
+    → emit(EVENT)
+
+Engine
+    → mutate state
+
+Forbidden:
+
+UI
+    → mutate state directly
+
+Renderer
+    → mutate state
+
+Utility
+    → mutate state
+
+====================================================
+
+TASK 4 — RUNTIME CONTROLLER AUDIT
+
+Inspect:
+
+src/core/runtime_controller.ts
+
+If advanceNode(), submitTask(), completeMission() or similar methods bypass the event architecture incorrectly:
+
+DO NOT rewrite everything.
+
+Instead:
+
+- document every bypass
+- classify as:
+    CORE INTERNAL
+or
+    ARCHITECTURE VIOLATION
+
+Core-to-core calls are ALLOWED.
+
+UI-to-core bypasses are NOT allowed.
+
+====================================================
+
+TASK 5 — SINGLE SOURCE OF TRUTH CHECK
+
+Verify only one authority exists for:
+
+- node state
+- progression
+- confidence
+- readiness
+- unlocked content
+
+If duplicates exist:
+
+Report exact file and function.
+
+Do NOT silently merge.
+
+====================================================
+
+TASK 6 — FINAL REPORT
+
+Produce:
+
+ARCHITECTURE_AUDIT.md
+
+Include:
+
+1. Event flow diagram
+2. Remaining architecture violations
+3. Duplicate state locations
+4. Duplicate listeners
+5. Unsafe direct mutations
+6. Overall architecture score (0–100)
+7. Recommendation:
+   - READY FOR STABILIZATION
+   - NEEDS FIXES
+
+====================================================
+
+IMPORTANT
+
+Do NOT add features.
+Do NOT redesign UI.
+Do NOT change gameplay.
+
+This task is architecture stabilization only.
+
+
+
+
+TITLE: WORLD MAP ORIENTATION FIX (BOTTOM → TOP)
+
+PRIORITY: CRITICAL
+
+GOAL:
+The player must feel like they are climbing upward through the world.
+Current implementation scrolls and progresses from TOP to BOTTOM, which creates the wrong psychological effect.
+
+REQUIREMENTS
+
+1. Reverse world orientation.
+
+Player starts at the BOTTOM of the world.
+
+All progression moves UPWARD.
+
+Lowest node = first mission.
+
+Highest node = final destination.
+
+--------------------------------------------------
+
+2. Camera position.
+
+On entering WorldRenderer:
+
+- Camera must focus on the player's current node.
+- Player should appear in the lower third of the screen.
+- Show only a small part of the upcoming path.
+- Do NOT reveal the whole map.
+
+--------------------------------------------------
+
+3. Path direction.
+
+Every connection must visually lead upward.
+
+Allowed:
+↖ ↑ ↗
+
+Not allowed:
+↓
+↙
+↘
+
+--------------------------------------------------
+
+4. World scrolling.
+
+Scrolling toward higher progress moves upward.
+
+The world must never feel like descending.
+
+--------------------------------------------------
+
+5. Unlock animation.
+
+After completing a mission:
+
+- Unlock next node.
+- Camera smoothly moves upward.
+- Previous node remains below.
+- New node appears above.
+
+Animation:
+Duration: 700–900 ms
+Ease: easeOutCubic
+
+--------------------------------------------------
+
+6. Node positioning.
+
+All chapter nodes must have increasing Y coordinates.
+
+Example:
+
+START
+↓
+
+Chapter 1
+
+↓
+
+Chapter 2
+
+↓
+
+Interview
+
+↓
+
+Offer
+
+Internally Y values may increase or decrease depending on coordinate system, but VISUALLY the player always climbs upward.
+
+--------------------------------------------------
+
+7. Verify all calculations.
+
+Check:
+
+- node layout
+- camera offset
+- scroll direction
+- focus logic
+- active node positioning
+
+Remove any inversion that causes downward progression.
+
+--------------------------------------------------
+
+EXPECTED RESULT
+
+Player starts at the bottom.
+
+Career progression always feels like climbing.
+
+Camera follows upward movement.
+
+No screen should visually imply descending.
