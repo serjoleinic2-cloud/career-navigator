@@ -1,273 +1,166 @@
- TITLE: EVENT BUS HARDENING + EVENT FLOW AUDIT
+TITLE: STABILIZATION PASS #1 — WORLD MAP & RUNTIME
 
 PRIORITY: CRITICAL
 
 GOAL
 
-Complete migration to a robust event-driven architecture.
-Eliminate duplicate event processing and verify there are no hidden bypasses around the event system.
+Stabilize the application after architecture migration.
+Do NOT add new features.
+Do NOT refactor architecture.
+Do NOT redesign UI.
+
+Only fix runtime and gameplay issues.
 
 ====================================================
 
-TASK 1 — EVENT BUS DUPLICATE PROTECTION
+TASK 1 — WORLD ORIENTATION
 
-FILE:
-src/core/system_event_bus.ts
+Current problem:
+Career progression visually goes from TOP to BOTTOM.
 
-Implement protection against duplicate event processing.
+This is incorrect.
+
+Player must always climb upward.
 
 Requirements:
 
-- prevent duplicate listener registration
-- prevent same callback from being subscribed twice
-- add unsubscribe safety
-- support once() listeners
-- listener removal must be idempotent
-- event dispatch must never invoke the same callback twice
+- Start node must be located at the bottom of the world.
+- Final destination must be at the highest point.
+- Every connection should visually move upward.
+- Camera follows upward progression.
+- Scroll direction must reinforce climbing.
 
-Preferred implementation:
-Use Set instead of Array for listener storage.
-
-====================================================
-
-TASK 2 — EVENT BUS API
-
-Ensure event bus exposes:
-
-subscribe()
-unsubscribe()
-once()
-emit()
-
-No duplicate code.
+Check:
+- node layout
+- camera offset
+- focus logic
+- world translation
+- interpolation
 
 ====================================================
 
-TASK 3 — FULL EVENT FLOW AUDIT
+TASK 2 — WORLD CAMERA
 
-Search entire repository.
+Current camera behavior feels static.
 
-Find every location that:
+Requirements:
 
-- mutates runtime state
-- changes node status
-- completes missions
-- advances progression
-- modifies career state
+- Focus active node.
+- Player stays around lower 35% of screen.
+- Show only limited future path.
+- Never reveal the whole world.
 
-Verify every mutation.
+Camera movement:
 
-Allowed:
+Duration:
+700–900ms
 
-UI
-    → emit(EVENT)
-
-Engine
-    → mutate state
-
-Forbidden:
-
-UI
-    → mutate state directly
-
-Renderer
-    → mutate state
-
-Utility
-    → mutate state
+Easing:
+easeOutCubic
 
 ====================================================
 
-TASK 4 — RUNTIME CONTROLLER AUDIT
+TASK 3 — NODE POSITION VALIDATION
 
-Inspect:
+Audit all generated node coordinates.
 
-src/core/runtime_controller.ts
+Requirements:
 
-If advanceNode(), submitTask(), completeMission() or similar methods bypass the event architecture incorrectly:
+- No overlapping nodes.
+- No negative progression.
+- No inverted chapter order.
+- No impossible path crossings.
 
-DO NOT rewrite everything.
-
-Instead:
-
-- document every bypass
-- classify as:
-    CORE INTERNAL
-or
-    ARCHITECTURE VIOLATION
-
-Core-to-core calls are ALLOWED.
-
-UI-to-core bypasses are NOT allowed.
+If layout generator allows inversion,
+fix generator instead of hardcoding coordinates.
 
 ====================================================
 
-TASK 5 — SINGLE SOURCE OF TRUTH CHECK
+TASK 4 — RUNTIME ERROR PASS
 
-Verify only one authority exists for:
+Audit entire project.
 
-- node state
-- progression
-- confidence
-- readiness
-- unlocked content
+Fix:
 
-If duplicates exist:
+- TypeScript errors
+- React warnings
+- console.error
+- console.warn
+- undefined access
+- null access
+- stale references
+- invalid state updates
 
-Report exact file and function.
-
-Do NOT silently merge.
+Application must start without runtime exceptions.
 
 ====================================================
 
-TASK 6 — FINAL REPORT
+TASK 5 — STATE SYNCHRONIZATION
 
-Produce:
+Verify:
 
-ARCHITECTURE_AUDIT.md
+WorldRendererScreen
+
+MissionScreen
+
+skill_engine
+
+All screens must react to engine state only.
+
+Remove stale cached values.
+
+No duplicated runtime state.
+
+====================================================
+
+TASK 6 — PERFORMANCE
+
+Audit:
+
+- unnecessary rerenders
+- unnecessary intervals
+- duplicate subscriptions
+- missing cleanup
+- memory leaks
+
+====================================================
+
+TASK 7 — FINAL REPORT
+
+Create:
+
+STABILIZATION_REPORT.md
 
 Include:
 
-1. Event flow diagram
-2. Remaining architecture violations
-3. Duplicate state locations
-4. Duplicate listeners
-5. Unsafe direct mutations
-6. Overall architecture score (0–100)
-7. Recommendation:
-   - READY FOR STABILIZATION
-   - NEEDS FIXES
+✔ Fixed issues
+
+✔ Remaining issues
+
+✔ Runtime status
+
+✔ Build status
+
+✔ Performance observations
+
+✔ Recommendation:
+
+READY FOR UX POLISH
+
+or
+
+NEEDS ANOTHER STABILIZATION PASS
 
 ====================================================
 
 IMPORTANT
 
-Do NOT add features.
-Do NOT redesign UI.
-Do NOT change gameplay.
+No architecture changes.
 
-This task is architecture stabilization only.
+No new components.
 
+No new screens.
 
+No gameplay changes.
 
-
-TITLE: WORLD MAP ORIENTATION FIX (BOTTOM → TOP)
-
-PRIORITY: CRITICAL
-
-GOAL:
-The player must feel like they are climbing upward through the world.
-Current implementation scrolls and progresses from TOP to BOTTOM, which creates the wrong psychological effect.
-
-REQUIREMENTS
-
-1. Reverse world orientation.
-
-Player starts at the BOTTOM of the world.
-
-All progression moves UPWARD.
-
-Lowest node = first mission.
-
-Highest node = final destination.
-
---------------------------------------------------
-
-2. Camera position.
-
-On entering WorldRenderer:
-
-- Camera must focus on the player's current node.
-- Player should appear in the lower third of the screen.
-- Show only a small part of the upcoming path.
-- Do NOT reveal the whole map.
-
---------------------------------------------------
-
-3. Path direction.
-
-Every connection must visually lead upward.
-
-Allowed:
-↖ ↑ ↗
-
-Not allowed:
-↓
-↙
-↘
-
---------------------------------------------------
-
-4. World scrolling.
-
-Scrolling toward higher progress moves upward.
-
-The world must never feel like descending.
-
---------------------------------------------------
-
-5. Unlock animation.
-
-After completing a mission:
-
-- Unlock next node.
-- Camera smoothly moves upward.
-- Previous node remains below.
-- New node appears above.
-
-Animation:
-Duration: 700–900 ms
-Ease: easeOutCubic
-
---------------------------------------------------
-
-6. Node positioning.
-
-All chapter nodes must have increasing Y coordinates.
-
-Example:
-
-START
-↓
-
-Chapter 1
-
-↓
-
-Chapter 2
-
-↓
-
-Interview
-
-↓
-
-Offer
-
-Internally Y values may increase or decrease depending on coordinate system, but VISUALLY the player always climbs upward.
-
---------------------------------------------------
-
-7. Verify all calculations.
-
-Check:
-
-- node layout
-- camera offset
-- scroll direction
-- focus logic
-- active node positioning
-
-Remove any inversion that causes downward progression.
-
---------------------------------------------------
-
-EXPECTED RESULT
-
-Player starts at the bottom.
-
-Career progression always feels like climbing.
-
-Camera follows upward movement.
-
-No screen should visually imply descending.
+Goal is a stable build suitable for UX/Game Design work.
