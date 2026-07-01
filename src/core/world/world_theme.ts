@@ -61,3 +61,5 @@ export const DEFAULT_WORLD_THEME: WorldTheme = {
     pathStyle: 'bridge',
   },
 };
+
+export type { WorldRenderConfig } from './world_composer';

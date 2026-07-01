@@ -5,7 +5,8 @@ import { subscribe } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
 import type { SkillNode } from '@/core/skill_state';
 import { WorldBackdrop } from '@/components/WorldBackdrop';
-import { getWorldThemeOrDefault } from '@/core/world/world_theme';
+import { composeWorldRenderConfig } from '@/core/world/world_composer';
+import type { WorldRenderConfig } from '@/core/world/world_composer';
 import { getActiveProfessionId } from '@/core/profession_loader';
 import { BackgroundLayer } from './components/BackgroundLayer';
 import { JourneyHeader } from './components/JourneyHeader';
@@ -20,10 +21,10 @@ import './JourneyScreen.css';
 
 const CHAPTER_ICONS: Record<string, string> = {
   resume: '📄',
-  linkedin: '💼',
+  linkedin: '🔗',
   applications: '📨',
   interview: '🎤',
-  offer: '🏆',
+  offer: '💰',
 };
 
 const DEFAULT_ICON = '📄';
@@ -79,12 +80,12 @@ export function JourneyScreen() {
   }, [runtime]);
 
   const professionId = runtime?.professionId ?? getActiveProfessionId() ?? 'default';
-  const completedCount = runtime
-    ? Object.values(runtime.nodeStates).filter(n => n.state === 'confidence' || n.state === 'execution').length
-    : 0;
-  const totalCount = runtime ? Object.keys(runtime.nodeStates).length : 0;
-  const progressRatio = totalCount > 0 ? completedCount / totalCount : 0;
-  const worldTheme = getWorldThemeOrDefault(professionId);
+
+  // SINGLE SOURCE OF TRUTH — world_composer decides everything
+  const worldRenderConfig: WorldRenderConfig = useMemo(() =>
+    composeWorldRenderConfig(professionId, runtime),
+    [professionId, runtime]
+  );
 
   const activeChapterDomain = useMemo(() => {
     if (!node) return undefined;
@@ -162,7 +163,7 @@ export function JourneyScreen() {
   if (!node) {
     return (
       <div className="journey-screen">
-        <WorldBackdrop theme={worldTheme} progressRatio={progressRatio} />
+        <WorldBackdrop config={worldRenderConfig} />
         <BackgroundLayer />
         <JourneyHeader chapterTitle="" nodeIndex={0} totalNodes={0} readinessScore={0} />
         <h1>No active node</h1>
@@ -173,7 +174,7 @@ export function JourneyScreen() {
   if (allNodesCompleted) {
     return (
       <div className="journey-screen">
-        <WorldBackdrop theme={worldTheme} progressRatio={progressRatio} />
+        <WorldBackdrop config={worldRenderConfig} />
         <BackgroundLayer />
         <JourneyCompleteScreen
           totalSkills={professionNodes.length}
@@ -189,7 +190,7 @@ export function JourneyScreen() {
 
   return (
     <div className="journey-screen">
-      <WorldBackdrop theme={worldTheme} progressRatio={progressRatio} />
+      <WorldBackdrop config={worldRenderConfig} />
       <BackgroundLayer chapterDomain={activeChapterDomain} />
 
       <JourneyHeader

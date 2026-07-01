@@ -10,3 +10,5 @@ export type ProfessionModule = {
   entryNodeId: string;
   premiumConfig: PremiumConfig;
 };
+
+export type { WorldTheme, WorldPalette, WorldGeometry } from './world/world_theme';
