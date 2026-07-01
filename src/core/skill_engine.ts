@@ -72,10 +72,12 @@ subscribe('MISSION_SUBMIT', (event) => {
   if (isProcessingMission) return;
   isProcessingMission = true;
 
-  const payload = event.payload as unknown as MissionResult;
-  const result = applyMissionResult(payload);
+  try {
+    const payload = event.payload as unknown as MissionResult;
+    const result = applyMissionResult(payload);
 
-  emit('MISSION_RESULT', { success: result.success ?? false });
-
-  isProcessingMission = false;
+    emit('MISSION_RESULT', { success: result.success ?? false });
+  } finally {
+    isProcessingMission = false;
+  }
 });
