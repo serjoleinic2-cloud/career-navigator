@@ -11,18 +11,31 @@ interface WorldRendererProps {
 }
 
 export const WorldRenderer: React.FC<WorldRendererProps> = ({ runtimeState: runtimeStateProp }) => {
-  const runtimeState = runtimeStateProp ?? getRuntimeState()!;
+  const runtimeState = runtimeStateProp ?? getRuntimeState();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [worldState, setWorldState] = useState<WorldState>(() => 
-    buildWorldStateFromRuntime(runtimeState)
+  const [worldState, setWorldState] = useState<WorldState>(() =>
+    runtimeState ? buildWorldStateFromRuntime(runtimeState) : { nodes: [], connections: [], camera: { x: 0, y: 0, zoom: 1 }, atmosphere: { timeOfDay: 'day', fogDensity: 0 } }
   );
   const cameraRef = useRef(createCamera(worldState.camera));
+  const animFrameRef = useRef<number>(0);
 
+  // Rebuild world state when runtime changes
+  useEffect(() => {
+    if (!runtimeState) return;
+    const newState = buildWorldStateFromRuntime(runtimeState);
+    setWorldState(newState);
+    const activeNode = newState.nodes.find(n => n.status === 'active');
+    if (activeNode) {
+      cameraRef.current = focusOnNode(cameraRef.current, activeNode.x, activeNode.y);
+    }
+  }, [runtimeState?.activeNodeId, runtimeState?.activeChapterId]);
+
+  // Subscribe to events
   useEffect(() => {
     const unsubNodeChanged = subscribe('NODE_CHANGED', () => {
+      if (!runtimeState) return;
       const newState = buildWorldStateFromRuntime(runtimeState);
       setWorldState(newState);
-      
       const activeNode = newState.nodes.find(n => n.status === 'active');
       if (activeNode) {
         cameraRef.current = focusOnNode(cameraRef.current, activeNode.x, activeNode.y);
@@ -31,16 +44,13 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({ runtimeState: runt
 
     const unsubMissionResult = subscribe('MISSION_RESULT', (event) => {
       const payload = event.payload as { success: boolean };
-      if (payload.success) {
-        // Trigger upward camera movement after mission complete
-        setTimeout(() => {
-          const newState = buildWorldStateFromRuntime(runtimeState);
-          setWorldState(newState);
-          const activeNode = newState.nodes.find(n => n.status === 'active');
-          if (activeNode) {
-            cameraRef.current = focusOnNode(cameraRef.current, activeNode.x, activeNode.y);
-          }
-        }, 100);
+      if (payload.success && runtimeState) {
+        const newState = buildWorldStateFromRuntime(runtimeState);
+        setWorldState(newState);
+        const activeNode = newState.nodes.find(n => n.status === 'active');
+        if (activeNode) {
+          cameraRef.current = focusOnNode(cameraRef.current, activeNode.x, activeNode.y);
+        }
       }
     });
 
@@ -50,6 +60,7 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({ runtimeState: runt
     };
   }, [runtimeState]);
 
+  // Canvas render loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -57,18 +68,28 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({ runtimeState: runt
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId: number;
-
     const render = () => {
       cameraRef.current = updateCamera(cameraRef.current);
       const cam = cameraRef.current;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Resize canvas to match display size
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+      }
+
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.clearRect(0, 0, width, height);
       ctx.save();
-      ctx.translate(canvas.width / 2 - cam.x, canvas.height / 2 - cam.y);
+      ctx.translate(width / 2 - cam.x, height / 2 - cam.y);
       ctx.scale(cam.zoom, cam.zoom);
 
-      // Draw connections (upward only)
+      // Draw connections
       ctx.strokeStyle = 'rgba(100, 200, 255, 0.3)';
       ctx.lineWidth = 2;
       worldState.connections.forEach(conn => {
@@ -85,8 +106,7 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({ runtimeState: runt
       // Draw nodes
       worldState.nodes.forEach(node => {
         ctx.globalAlpha = node.opacity;
-        
-        // Glow for active/completed
+
         if (node.glowIntensity > 0) {
           const gradient = ctx.createRadialGradient(
             node.x, node.y, 0,
@@ -100,14 +120,12 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({ runtimeState: runt
           ctx.fill();
         }
 
-        // Node body
-        ctx.fillStyle = node.status === 'active' ? '#4ade80' : 
+        ctx.fillStyle = node.status === 'active' ? '#4ade80' :
                         node.status === 'completed' ? '#60a5fa' : '#374151';
         ctx.beginPath();
         ctx.arc(node.x, node.y, 15 * node.scale, 0, Math.PI * 2);
         ctx.fill();
 
-        // Label
         ctx.fillStyle = '#ffffff';
         ctx.font = '12px sans-serif';
         ctx.textAlign = 'center';
@@ -115,20 +133,18 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({ runtimeState: runt
       });
 
       ctx.restore();
-      animId = requestAnimationFrame(render);
+      animFrameRef.current = requestAnimationFrame(render);
     };
 
-    render();
+    animFrameRef.current = requestAnimationFrame(render);
 
-    return () => cancelAnimationFrame(animId);
+    return () => cancelAnimationFrame(animFrameRef.current);
   }, [worldState]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={window.innerWidth}
-      height={window.innerHeight}
-      style={{ display: 'block', background: '#0f172a' }}
+      style={{ display: 'block', width: '100%', height: '100%', background: '#0f172a' }}
     />
   );
 };

@@ -56,7 +56,10 @@ export function buildWorldStateFromRuntime(runtimeState: {
     y: maxY - n.y,
   }));
 
-  // Recalculate active node index after reversal
+  // Sort by Y ascending (bottom to top) for connection building
+  reversedNodes.sort((a, b) => a.y - b.y);
+
+  // Recalculate active node position
   const activeNode = reversedNodes.find(n => n.status === 'active');
   const activeNodeY = activeNode?.y ?? 0;
 
@@ -65,7 +68,7 @@ export function buildWorldStateFromRuntime(runtimeState: {
     connections: buildConnections(reversedNodes),
     camera: {
       x: 0,
-      y: activeNodeY - 200, // Focus active node in lower third
+      y: activeNodeY - 200,
       zoom: 1.0,
     },
     atmosphere: {
@@ -80,8 +83,8 @@ function buildConnections(nodes: WorldNodeVisual[]): Array<{ from: string; to: s
   for (let i = 0; i < nodes.length - 1; i++) {
     const current = nodes[i];
     const next = nodes[i + 1];
-    // Only connect upward (next has lower Y = higher visually)
-    if (next.y < current.y) {
+    // Only connect upward (next has higher Y = higher visually after reversal)
+    if (next.y > current.y) {
       connections.push({ from: current.id, to: next.id });
     }
   }

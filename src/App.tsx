@@ -1,18 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { loadRuntime } from './core/persistence/runtime_persistence';
 import { initializeRuntime, startJourney } from './core/runtime/runtime_controller';
-import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
-import type { OnboardingState } from './screens/OnboardingScreen/OnboardingScreen';
-import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
 import { WorldRenderer } from './world/world_renderer';
-import { JourneyScreenDebug } from './screens/JourneyScreen/JourneyScreenDebug';
+import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
+import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
 import { ShareScreen } from './screens/ShareScreen/ShareScreen';
+import { JourneyScreenDebug } from './screens/JourneyScreen/JourneyScreenDebug';
 import { AppShell } from './components/layout/AppShell';
-import './styles/layout.css';
-import './styles/theme.css';
-import './styles/animations.css';
+import './App.css';
 
 type Screen = 'world' | 'playbook' | 'notes' | 'share' | 'debug';
 
@@ -55,8 +52,8 @@ function App() {
   };
 
   const handleTabChange = (tabId: string) => {
-    if (tabId === 'world' || tabId === 'playbook' || tabId === 'notes') {
-      navigateTo(tabId);
+    if (tabId === 'world' || tabId === 'playbook' || tabId === 'notes' || tabId === 'share' || tabId === 'debug') {
+      navigateTo(tabId as Screen);
     }
   };
 
@@ -65,7 +62,7 @@ function App() {
   if (showOnboarding) {
     return (
       <OnboardingScreen
-        onComplete={(localState: OnboardingState) => {
+        onComplete={(localState) => {
           const coreState = {
             professionId: localState.profession,
             experienceLevel: localState.experience,
@@ -81,7 +78,7 @@ function App() {
             step: 7,
             isComplete: true,
           };
-          startJourney(coreState);
+          startJourney(coreState as any);
           setShowOnboarding(false);
           setShowIntro(true);
         }}
@@ -100,29 +97,27 @@ function App() {
   }
 
   const renderScreen = (screen: Screen, isPrev: boolean) => {
-    const common = {
-      key: screen + (isPrev ? '-prev' : ''),
-      style: {
-        position: 'absolute' as const,
-        inset: 0,
-        opacity: isPrev ? 0 : 1,
-        transform: isPrev ? 'translateX(-20px)' : 'translateX(0)',
-        transition: 'opacity 250ms ease, transform 250ms ease',
-        pointerEvents: isPrev ? ('none' as const) : ('auto' as const),
-      },
+    const key = screen + (isPrev ? '-prev' : '');
+    const style: React.CSSProperties = {
+      position: 'absolute',
+      inset: 0,
+      opacity: isPrev ? 0 : 1,
+      transform: isPrev ? 'translateX(-20px)' : 'translateX(0)',
+      transition: 'opacity 250ms ease, transform 250ms ease',
+      pointerEvents: isPrev ? 'none' : 'auto',
     };
 
     switch (screen) {
       case 'world':
-        return <div {...common}><WorldRenderer /></div>;
+        return <div key={key} style={style}><WorldRenderer /></div>;
       case 'playbook':
-        return <div {...common}><PlaybookScreen /></div>;
+        return <div key={key} style={style}><PlaybookScreen /></div>;
       case 'notes':
-        return <div {...common}><NotesScreen /></div>;
+        return <div key={key} style={style}><NotesScreen /></div>;
       case 'share':
-        return <div {...common}><ShareScreen /></div>;
+        return <div key={key} style={style}><ShareScreen /></div>;
       case 'debug':
-        return <div {...common}><JourneyScreenDebug /></div>;
+        return <div key={key} style={style}><JourneyScreenDebug /></div>;
     }
   };
 

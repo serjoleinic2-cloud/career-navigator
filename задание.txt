@@ -1,166 +1,131 @@
-TITLE: STABILIZATION PASS #1 — WORLD MAP & RUNTIME
+Да. Теперь я понял главную идею проекта, и она отличается от обычного приложения.
 
-PRIORITY: CRITICAL
+Причём это не просто "красивый дизайн". Это игра, замаскированная под карьерный навигатор.
 
-GOAL
+Я вижу это так
 
-Stabilize the application after architecture migration.
-Do NOT add new features.
-Do NOT refactor architecture.
-Do NOT redesign UI.
+World Map — это НЕ карта.
 
-Only fix runtime and gameplay issues.
+Это путешествие по миру профессии.
 
-====================================================
+Например, для Software Engineer:
 
-TASK 1 — WORLD ORIENTATION
+старт — небольшой остров "Hello, World!";
+дальше — мосты, платформы, башни, механизмы, серверные, алгоритмические сады, облачные города;
+интервью — величественный замок или храм знаний;
+оффер — светящийся город на вершине.
 
-Current problem:
-Career progression visually goes from TOP to BOTTOM.
+Но для другой профессии мир полностью меняется.
 
-This is incorrect.
+Например:
 
-Player must always climb upward.
+UI/UX Designer — мир из стекла, света, бумаги, палитр и геометрии;
+Data Scientist — обсерватории, созвездия данных, математические конструкции;
+Cybersecurity — крепости, лазеры, щиты, цифровые бастионы.
 
-Requirements:
+То есть каждая профессия — это отдельная игровая вселенная.
 
-- Start node must be located at the bottom of the world.
-- Final destination must be at the highest point.
-- Every connection should visually move upward.
-- Camera follows upward progression.
-- Scroll direction must reinforce climbing.
+А теперь самое важное
 
-Check:
-- node layout
-- camera offset
-- focus logic
-- world translation
-- interpolation
+Ты вчера сказал одну фразу, и именно она определяет весь проект:
 
-====================================================
+"Новые профессии будут добавляться папкой."
 
-TASK 2 — WORLD CAMERA
+Вот это означает, что в модуле профессии должно лежать не только содержание обучения.
 
-Current camera behavior feels static.
+Там должны быть:
 
-Requirements:
+карта мира;
+стиль окружения;
+палитра;
+музыка/звуки (в будущем);
+иллюстрации;
+иконки;
+достижения;
+главы;
+миссии.
 
-- Focus active node.
-- Player stays around lower 35% of screen.
-- Show only limited future path.
-- Never reveal the whole world.
+То есть модуль профессии = целый игровой мир.
 
-Camera movement:
+Тогда остальные экраны становятся логичными
 
-Duration:
-700–900ms
+Они не должны выбиваться из мира.
 
-Easing:
-easeOutCubic
+Например:
 
-====================================================
+Mission Screen
 
-TASK 3 — NODE POSITION VALIDATION
+Не список чекбоксов.
 
-Audit all generated node coordinates.
+А свиток, терминал, голографическая панель или магическая книга — в зависимости от профессии.
 
-Requirements:
+Profile
 
-- No overlapping nodes.
-- No negative progression.
-- No inverted chapter order.
-- No impossible path crossings.
+Не обычный профиль.
 
-If layout generator allows inversion,
-fix generator instead of hardcoding coordinates.
+А паспорт путешественника.
 
-====================================================
+С уровнем.
 
-TASK 4 — RUNTIME ERROR PASS
+Званиями.
 
-Audit entire project.
+Полученными артефактами.
 
-Fix:
+Пройденными островами.
 
-- TypeScript errors
-- React warnings
-- console.error
-- console.warn
-- undefined access
-- null access
-- stale references
-- invalid state updates
+Playbook
 
-Application must start without runtime exceptions.
+Не список заметок.
 
-====================================================
+А библиотека мира.
 
-TASK 5 — STATE SYNCHRONIZATION
+Notes
 
-Verify:
+Не текстовое поле.
 
-WorldRendererScreen
+А журнал исследователя.
 
-MissionScreen
+Share
 
-skill_engine
+Не кнопка "Поделиться".
 
-All screens must react to engine state only.
+А открытка из мира.
 
-Remove stale cached values.
+И здесь есть одна идея, которую я хочу предложить
 
-No duplicated runtime state.
+Я не хочу рисовать каждый экран отдельно.
 
-====================================================
+Я хочу сначала создать Design Bible проекта.
 
-TASK 6 — PERFORMANCE
+В ней будет определено:
 
-Audit:
+геометрия мира;
+сетка;
+перспектива;
+освещение;
+размеры платформ;
+правила построения островов;
+стиль кнопок;
+стиль карточек;
+стиль диаграмм;
+анимации;
+переходы.
 
-- unnecessary rerenders
-- unnecessary intervals
-- duplicate subscriptions
-- missing cleanup
-- memory leaks
+После этого любой новый экран будет автоматически выглядеть частью одного мира.
 
-====================================================
+И ещё одно важное правило
 
-TASK 7 — FINAL REPORT
+Я предлагаю, чтобы мы не копировали Monument Valley.
 
-Create:
+Мы должны взять от неё принципы:
 
-STABILIZATION_REPORT.md
+ощущение путешествия;
+архитектурную эстетику;
+минимализм;
+спокойствие;
+вертикальный рост;
+внимание к композиции.
 
-Include:
+Но мир, стиль и визуальный язык Career Navigator должны стать узнаваемыми сами по себе. Тогда пользователь сможет открыть скриншот и сразу понять: это Career Navigator, а не "ещё одна игра в стиле Monument Valley".
 
-✔ Fixed issues
-
-✔ Remaining issues
-
-✔ Runtime status
-
-✔ Build status
-
-✔ Performance observations
-
-✔ Recommendation:
-
-READY FOR UX POLISH
-
-or
-
-NEEDS ANOTHER STABILIZATION PASS
-
-====================================================
-
-IMPORTANT
-
-No architecture changes.
-
-No new components.
-
-No new screens.
-
-No gameplay changes.
-
-Goal is a stable build suitable for UX/Game Design work.
+Именно это, на мой взгляд, сделает проект по-настоящему уникальным.
