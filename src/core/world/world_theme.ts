@@ -23,6 +23,8 @@ export type WorldTheme = {
   endLabel: string;
   palette: WorldPalette;
   geometry: WorldGeometry;
+  chapterAccents: Record<string, string>;
+  chapterBackgrounds: Record<string, string>;
 };
 
 const registry = new Map<string, WorldTheme>();
@@ -60,6 +62,28 @@ export const DEFAULT_WORLD_THEME: WorldTheme = {
     platformStyle: 'stone',
     pathStyle: 'bridge',
   },
+  chapterAccents: {
+    resume: '#4A90D9',
+    linkedin: '#7B68EE',
+    applications: '#F6AD55',
+    interview: '#4A5568',
+    offer: '#48BB78',
+  },
+  chapterBackgrounds: {
+    resume: '#0a1628',
+    linkedin: '#1a0a2e',
+    applications: '#2a1408',
+    interview: '#0d1117',
+    offer: '#0a1f14',
+  },
 };
 
 export type { WorldRenderConfig } from './world_composer';
+
+export function getChapterAccent(theme: WorldTheme, chapterId: string): string {
+  return theme.chapterAccents[chapterId.toLowerCase()] ?? Object.values(theme.chapterAccents)[0];
+}
+
+export function getChapterBackground(theme: WorldTheme, chapterId: string): string {
+  return theme.chapterBackgrounds[chapterId.toLowerCase()] ?? Object.values(theme.chapterBackgrounds)[0];
+}
