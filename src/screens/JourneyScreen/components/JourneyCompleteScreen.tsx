@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PrimaryButton } from '@/components/layout/PrimaryButton';
+import { useWorldCssStyle } from '@/core/world/useWorldCssStyle';
 
 interface JourneyCompleteScreenProps {
   totalSkills: number;
@@ -18,10 +19,11 @@ export function JourneyCompleteScreen({
   confidenceScore,
   chapters,
 }: JourneyCompleteScreenProps) {
+  const worldStyle = useWorldCssStyle();
   const [celebrating, setCelebrating] = useState(false);
 
   return (
-    <div className="journey-complete-overlay">
+    <div className="journey-complete-overlay" style={worldStyle}>
       {!celebrating ? (
         <div className="journey-complete-final">
           <div className="journey-complete-light" />

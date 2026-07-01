@@ -8,6 +8,8 @@ export type WorldPalette = {
   nodeCompleted: string;
   nodeCurrent: string;
   nodeLocked: string;
+  success: string;
+  danger: string;
 };
 
 export type WorldGeometry = {
@@ -25,6 +27,12 @@ export type WorldTheme = {
   geometry: WorldGeometry;
   chapterAccents: Record<string, string>;
   chapterBackgrounds: Record<string, string>;
+  celebration: {
+    glowColor: string;
+    gradientFrom: string;
+    gradientTo: string;
+    confettiColors: string[];
+  };
 };
 
 const registry = new Map<string, WorldTheme>();
@@ -56,6 +64,8 @@ export const DEFAULT_WORLD_THEME: WorldTheme = {
     nodeCompleted: '#00e5e0',
     nodeCurrent: '#f59e0b',
     nodeLocked: '#2a2a4a',
+    success: '#48BB78',
+    danger: '#FF6B6B',
   },
   geometry: {
     islandShape: 'organic',
@@ -76,6 +86,12 @@ export const DEFAULT_WORLD_THEME: WorldTheme = {
     interview: '#0d1117',
     offer: '#0a1f14',
   },
+  celebration: {
+    glowColor: 'rgba(0, 229, 224, 0.15)',
+    gradientFrom: '#00e5e0',
+    gradientTo: '#a855f7',
+    confettiColors: ['#00e5e0', '#a855f7', '#f59e0b', '#48BB78'],
+  },
 };
 
 export type { WorldRenderConfig } from './world_composer';
@@ -86,4 +102,29 @@ export function getChapterAccent(theme: WorldTheme, chapterId: string): string {
 
 export function getChapterBackground(theme: WorldTheme, chapterId: string): string {
   return theme.chapterBackgrounds[chapterId.toLowerCase()] ?? Object.values(theme.chapterBackgrounds)[0];
+}
+
+export function getWorldCssVars(theme: WorldTheme, chapterId?: string): Record<string, string> {
+  const chapterAccent = chapterId
+    ? (theme.chapterAccents[chapterId.toLowerCase()] ?? theme.palette.primary)
+    : theme.palette.primary;
+  const chapterBg = chapterId
+    ? (theme.chapterBackgrounds[chapterId.toLowerCase()] ?? theme.palette.backgroundTo)
+    : theme.palette.backgroundTo;
+
+  return {
+    '--w-bg-from': theme.palette.backgroundFrom,
+    '--w-bg-to': theme.palette.backgroundTo,
+    '--w-primary': theme.palette.primary,
+    '--w-secondary': theme.palette.secondary,
+    '--w-accent': theme.palette.accent,
+    '--w-success': theme.palette.success,
+    '--w-danger': theme.palette.danger,
+    '--w-glow-rgb': theme.palette.glowRGB,
+    '--w-chapter-accent': chapterAccent,
+    '--w-chapter-bg': chapterBg,
+    '--w-cel-glow': theme.celebration.glowColor,
+    '--w-cel-from': theme.celebration.gradientFrom,
+    '--w-cel-to': theme.celebration.gradientTo,
+  };
 }

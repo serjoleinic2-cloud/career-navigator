@@ -16,6 +16,8 @@ registerWorldTheme({
     nodeCompleted: '#4f8cff',
     nodeCurrent: '#ff8a5c',
     nodeLocked: '#c9d3e0',
+    success: '#3ecf8e',
+    danger: '#ff6b6b',
   },
   geometry: {
     islandShape: 'geometric',
@@ -35,5 +37,11 @@ registerWorldTheme({
     applications: '#2a2013',
     interview: '#12161d',
     offer: '#0f1f18',
+  },
+  celebration: {
+    glowColor: 'rgba(255, 138, 92, 0.18)',
+    gradientFrom: '#4f8cff',
+    gradientTo: '#ff8a5c',
+    confettiColors: ['#4f8cff', '#f5b25c', '#ff8a5c', '#3ecf8e'],
   },
 });
