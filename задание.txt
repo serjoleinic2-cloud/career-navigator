@@ -1,132 +1,101 @@
-TITLE: WORLD COMPOSITION LAYER — UNIFICATION OF WORLD SYSTEM
+Моё решение — вариант №3
 
-GOAL
+Journey не должен быть ни светлым экраном, ни тёмным экраном.
 
-Unify world rendering system so that:
+Он должен стать игровым HUD (Heads-Up Display) поверх живого мира.
 
-- world_theme
-- WorldBackdrop
-- profession world modules
-- progress state
+То есть:
 
-become a single coherent system.
+Небо / WorldBackdrop
+        ↓
+Парящие острова
+        ↓
+Дорога
+        ↓
+Платформа игрока
+        ↓
+Полупрозрачные панели интерфейса
 
-====================================================
+Игрок должен чувствовать, что карточки не лежат на фоне, а парят над миром.
 
-TASK 1 — CREATE WORLD COMPOSER
+Что предлагаю Claude
+DECISION: Do NOT redesign Journey into a light screen.
 
-Create:
+Keep the World bright.
 
-src/core/world/world_composer.ts
+Keep the UI dark.
 
-Responsibilities:
+Treat Journey UI as an in-world HUD.
 
-- combine world_theme + profession module
-- resolve geometry + palette + ambient settings
-- output single WorldRenderConfig
+Rules:
 
-DO NOT render anything here.
+1. WorldBackdrop remains bright, atmospheric and pastel.
 
-ONLY assemble data.
+2. Journey panels become dark floating surfaces,
+   NOT black windows.
 
-====================================================
+3. Panel style:
 
-TASK 2 — DEFINE WORLD RENDER CONFIG
+background:
+rgba(18,22,30,0.55–0.70)
 
-Create type:
+backdrop-filter:
+blur(24px)
 
-WorldRenderConfig:
+border:
+1px solid rgba(255,255,255,0.10)
 
-- palette
-- geometry
-- atmosphere
-- lighting
-- camera
-- backdrop
-- particles (optional future)
-- animation profile
+soft shadow:
+0 12px 40px rgba(0,0,0,0.20)
 
-====================================================
+4. Text remains light.
 
-TASK 3 — MOVE RESPONSIBILITY OUT OF JOURNEYSCREEN
+5. Accent colors come ONLY from WorldTheme.
 
-JourneyScreen must NOT:
+6. Increase separation between world and HUD using
+subtle atmospheric fog instead of darkening the world.
 
-- calculate world theme
-- decide geometry
-- manage world styling
+7. World must always remain visible around the panels.
 
-It should ONLY:
+The user should feel that UI is floating above the world,
+not replacing it.
 
-- consume WorldRenderConfig
-- pass it to WorldRenderer / WorldBackdrop
+Goal:
 
-====================================================
+Journey becomes a premium game HUD rather than a settings screen.
+Почему я против полного светлого Journey
 
-TASK 4 — UNIFY WORLD BACKDROP INPUT
+Потому что человек будет смотреть на экран десятки часов.
 
-Modify:
+Светлый интерфейс с большим количеством текста быстрее утомляет.
 
-WorldBackdrop.tsx
+А вот светлый мир + тёмный HUD — это приём, который используют многие современные игры. Он даёт:
 
-It must accept:
+читаемость;
+контраст;
+ощущение глубины;
+возможность сделать мир "живым".
+Но есть ещё одна идея, которую я считаю ключевой
 
-WorldRenderConfig
+Карточки вообще должны постепенно исчезнуть.
 
-NOT hardcoded theme logic inside component.
+Сейчас они нужны, потому что MVP.
 
-====================================================
+Но конечная цель — чтобы большая часть взаимодействия происходила не через карточки, а через сам мир.
 
-TASK 5 — PROFESSION MODULE STANDARDIZATION
+Например:
 
-Ensure:
+глава — это остров;
+миссия — объект на острове;
+интервью — вход в храм;
+награда — открывающийся мост.
 
-Each profession exports:
+Тогда HUD останется только для информации и управления, а основное взаимодействие перейдёт в игровой мир.
 
-world.ts:
+Поэтому мой вердикт
 
-- theme
-- geometry
-- ambient rules
-- name
-- unlock conditions (optional metadata only)
+Не ломайте рабочий Journey.
 
-====================================================
+Сделайте его премиальным игровым HUD поверх светлого мира.
 
-TASK 6 — SINGLE SOURCE OF WORLD TRUTH
-
-After this change:
-
-ONLY world_composer decides final world state.
-
-No duplication between:
-
-- theme system
-- backdrop system
-- screen logic
-
-====================================================
-
-OUTPUT
-
-Create:
-
-WORLD_COMPOSITION_REPORT.md
-
-Include:
-
-- old architecture issues
-- new data flow
-- module boundaries
-- risks
-- migration notes
-
-====================================================
-
-CONSTRAINTS
-
-No new screens.
-No UI redesign.
-No gameplay changes.
-
-ONLY architecture unification of world system.
+Это минимальный риск, сохраняет уже протестированный UX и лучше соответствует вашей цели — чтобы Career Navigator ощущался как игра, а не как обычное приложение.
