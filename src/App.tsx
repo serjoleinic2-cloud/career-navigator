@@ -28,6 +28,12 @@ function App() {
   const [prevScreen, setPrevScreen] = useState<Screen | null>(null);
   const [transitioning, setTransitioning] = useState(false);
 
+  // Dev convenience only: ?debugWorld=1 shows WorldRenderer's debug overlay
+  // (circles/lines/labels). Production users never see this by default.
+  const worldRendererMode = new URLSearchParams(window.location.search).get('debugWorld') === '1'
+    ? 'debug'
+    : 'production';
+
   useEffect(() => {
     const saved = loadRuntime();
     if (saved) {
@@ -118,7 +124,7 @@ function App() {
           never unmounted between them, so the player never "leaves" the
           world (Feature Milestone #2, TASK 2/3). */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
-        <WorldRenderer />
+        <WorldRenderer mode={worldRendererMode} />
       </div>
 
       {showIntro ? (

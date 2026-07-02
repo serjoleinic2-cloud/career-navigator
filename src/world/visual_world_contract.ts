@@ -10,6 +10,10 @@ export type WorldNodeVisual = {
   label: string;
 };
 
+/** Preferred going forward — see WORLD ART PIPELINE terminology in
+ *  core/world/world_art_contract.ts. Node -> Island. */
+export type IslandVisual = WorldNodeVisual;
+
 export type WorldState = {
   nodes: WorldNodeVisual[];
   connections: Array<{ from: string; to: string }>;
@@ -23,3 +27,6 @@ export type WorldState = {
     fogDensity: number;
   };
 };
+
+/** Preferred going forward — Edge -> Bridge. */
+export type BridgeConnection = WorldState['connections'][number];
