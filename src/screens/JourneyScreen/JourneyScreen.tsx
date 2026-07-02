@@ -214,7 +214,6 @@ export function JourneyScreen() {
         <ChapterCompleteScreen
           chapterId={selectedChapter}
           chapterTitle={selectedChapter}
-          chapterId={selectedChapter}
           skillsCompleted={chapters.find(c => c.id === selectedChapter)?.completedCount ?? 0}
           totalSkills={chapters.find(c => c.id === selectedChapter)?.totalCount ?? 0}
           readinessDelta={12}
