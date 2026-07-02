@@ -1,5 +1,6 @@
 import type { SkillNode } from '@/core/skill_state';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { getActiveProfessionId } from '@/core/profession_loader';
 import { getWorldThemeOrDefault, getChapterAccent } from '@/core/world/world_theme';
 import { SkillNodeCard, type NodeCardState } from './SkillNodeCard';
 
@@ -37,7 +38,7 @@ export function ChapterHub({
   onNodeSelect,
 }: ChapterHubProps) {
   const hubDismissed = selectedChapter !== null;
-  const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? 'default');
+  const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'default');
 
   return (
     <div className="chapter-hub">

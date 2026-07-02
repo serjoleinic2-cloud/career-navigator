@@ -1,5 +1,6 @@
 import type { SkillNode } from '@/core/skill_state';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { getActiveProfessionId } from '@/core/profession_loader';
 import { getWorldThemeOrDefault, getChapterAccent } from '@/core/world/world_theme';
 
 const DIFFICULTY_MAP: Record<number, string> = {
@@ -21,7 +22,7 @@ interface SkillNodeCardProps {
 }
 
 export function SkillNodeCard({ node, state, index, progress, onSelect }: SkillNodeCardProps) {
-  const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? 'default');
+  const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'default');
   const accentColor = getChapterAccent(worldTheme, node.domain ?? '');
   const isLeft = index % 2 === 0;
 

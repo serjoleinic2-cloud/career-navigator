@@ -7,6 +7,7 @@ import {
   OFFER_SKILL_NODES,
 } from './skill_nodes';
 import { SOFTWARE_ENGINEER_CHAPTERS } from './chapters';
+import './world'; // side effect: registers this profession's WorldTheme
 
 export const SoftwareEngineerModule: ProfessionModule = {
   id: 'software_engineer',
