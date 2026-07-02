@@ -40,6 +40,25 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
 
   return (
     <div className="intro-screen" style={worldStyle} onClick={handleSkip}>
+      {/* Ambient sky: parting clouds + floating particles — always present, reacts to phase */}
+      <div className="intro-sky">
+        <div className={`intro-cloud intro-cloud--left ${phase >= 4 ? 'parted' : ''}`} />
+        <div className={`intro-cloud intro-cloud--right ${phase >= 4 ? 'parted' : ''}`} />
+        <div className="intro-particles">
+          {Array.from({ length: 14 }).map((_, i) => (
+            <span
+              key={i}
+              className="intro-particle"
+              style={{
+                left: `${(i * 37) % 100}%`,
+                animationDelay: `${(i * 0.6) % 6}s`,
+                animationDuration: `${6 + (i % 5)}s`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
       {/* Phase 0: Dark screen, light appears */}
       <div className={`intro-light ${phase >= 0 ? 'visible' : ''}`} />
 
@@ -69,19 +88,19 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
         </div>
       </div>
 
-      {/* Phase 4-7: Map with islands */}
-      <div className={`intro-map ${phase >= 4 ? 'visible' : ''}`}>
+      {/* Phase 4-7: Map with islands — camera "rises" into view */}
+      <div className={`intro-map ${phase >= 4 ? 'visible' : ''} ${phase >= 5 ? 'camera-risen' : ''}`}>
         <div className="map-container">
           {/* Resume Island */}
-          <div className={`island resume-island ${phase >= 6 ? 'glowing' : ''} ${phase >= 8 ? 'zoomed' : ''}`}>
+          <div className={`island resume-island ${phase >= 5 ? 'revealed' : ''} ${phase >= 6 ? 'glowing' : ''} ${phase >= 8 ? 'zoomed' : ''}`}>
             <div className="island-body">
               <span className="island-icon">📄</span>
               <span className="island-name">Resume</span>
             </div>
           </div>
 
-          {/* Path line */}
-          <div className="path-line" />
+          {/* Path line — lights up as the bridge "grows" */}
+          <div className={`path-line ${phase >= 6 ? 'lit' : ''}`} />
 
           {/* LinkedIn Island */}
           <div className="island linkedin-island">
@@ -128,7 +147,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
         <div className="destination-label">Your first destination</div>
         <div className="destination-name">Resume</div>
         <button className="intro-begin-btn" onClick={(e) => { e.stopPropagation(); handleBegin(); }}>
-          Begin
+          Begin your journey
         </button>
       </div>
 
