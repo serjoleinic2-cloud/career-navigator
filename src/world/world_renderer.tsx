@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { WorldState } from './visual_world_contract';
 import { buildWorldStateFromRuntime } from './world_builder';
-import { createCamera, focusOnNode, updateCamera } from './camera/world_camera_controller';
+import { createCamera, focusOnNode, focusOnAnchor, updateCamera } from './camera/world_camera_controller';
 import type { JourneyRuntimeState } from '../core/runtime/journey_runtime';
 import { getRuntimeState } from '../core/runtime/runtime_controller';
 import { getActiveProfessionId } from '../core/profession_loader';
 import { getWorldThemeOrDefault } from '../core/world/world_theme';
 import { getWorldArtOrDefault } from '../core/world/world_art_contract';
+import { getWorldLayout, getAnchorForIsland, clampToWorldBounds } from '../core/world/world_layout';
 import { subscribe } from '../core/events/system_event_bus';
 
 /**
@@ -45,6 +46,7 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({
   const professionId = runtimeState?.professionId ?? getActiveProfessionId() ?? 'default';
   const theme = getWorldThemeOrDefault(professionId);
   const art = getWorldArtOrDefault(professionId);
+  const layout = getWorldLayout(professionId);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [worldState, setWorldState] = useState<WorldState>(() =>
     runtimeState ? buildWorldStateFromRuntime(runtimeState) : { nodes: [], connections: [], camera: { x: 0, y: 0, zoom: 1 }, atmosphere: { timeOfDay: 'day', fogDensity: 0 } }
@@ -52,15 +54,33 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({
   const cameraRef = useRef(createCamera(worldState.camera));
   const animFrameRef = useRef<number>(0);
 
+  // TASK 2 (WORLD LAYOUT SYSTEM): prefer a predefined CameraAnchor for the
+  // active island's chapter when a WorldLayout is registered; otherwise
+  // fall back to focusing on the island's raw coordinates as before.
+  const focusOnActiveIsland = (state: WorldState) => {
+    const activeIsland = state.nodes.find(n => n.status === 'active');
+    if (!activeIsland) return;
+
+    if (layout) {
+      const matchingIsland = layout.islands.find(i => i.chapterId === activeIsland.chapterId);
+      const anchor = matchingIsland ? getAnchorForIsland(layout, matchingIsland.id) : undefined;
+      if (anchor) {
+        cameraRef.current = focusOnAnchor(cameraRef.current, anchor);
+        const clamped = clampToWorldBounds(cameraRef.current.targetX, cameraRef.current.targetY, layout.bounds);
+        cameraRef.current = { ...cameraRef.current, targetX: clamped.x, targetY: clamped.y };
+        return;
+      }
+    }
+
+    cameraRef.current = focusOnNode(cameraRef.current, activeIsland.x, activeIsland.y);
+  };
+
   // Rebuild world state when runtime changes
   useEffect(() => {
     if (!runtimeState) return;
     const newState = buildWorldStateFromRuntime(runtimeState);
     setWorldState(newState);
-    const activeIsland = newState.nodes.find(n => n.status === 'active');
-    if (activeIsland) {
-      cameraRef.current = focusOnNode(cameraRef.current, activeIsland.x, activeIsland.y);
-    }
+    focusOnActiveIsland(newState);
   }, [runtimeState?.activeNodeId, runtimeState?.activeChapterId]);
 
   // Subscribe to events
@@ -69,10 +89,7 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({
       if (!runtimeState) return;
       const newState = buildWorldStateFromRuntime(runtimeState);
       setWorldState(newState);
-      const activeIsland = newState.nodes.find(n => n.status === 'active');
-      if (activeIsland) {
-        cameraRef.current = focusOnNode(cameraRef.current, activeIsland.x, activeIsland.y);
-      }
+      focusOnActiveIsland(newState);
     };
 
     const unsubNodeChanged = subscribe('NODE_CHANGED', refreshAndFocus);
