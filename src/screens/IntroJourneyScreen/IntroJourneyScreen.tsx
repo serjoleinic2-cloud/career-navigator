@@ -27,7 +27,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
   }, []);
 
   const handleBegin = useCallback(() => {
-    setPhase(8); // Camera zoom to Resume
+    setPhase(8); // Camera zoom to Resume, overlay fades out (WorldRenderer stays mounted beneath)
     setTimeout(onComplete, 1500);
   }, [onComplete]);
 
@@ -40,6 +40,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
 
   return (
     <div className="intro-screen" style={worldStyle} onClick={handleSkip}>
+      <div className={`intro-overlay-content ${phase >= 8 ? 'leaving' : ''}`}>
       {/* Ambient sky: parting clouds + floating particles — always present, reacts to phase */}
       <div className="intro-sky">
         <div className={`intro-cloud intro-cloud--left ${phase >= 4 ? 'parted' : ''}`} />
@@ -155,6 +156,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
       {canSkip && phase < 7 && (
         <div className="skip-hint">Tap to skip</div>
       )}
+      </div>
     </div>
   );
 };

@@ -1,1 +1,1 @@
-export { JourneyScreen } from './JourneyScreen';
+export { JourneyHUD } from './JourneyHUD';

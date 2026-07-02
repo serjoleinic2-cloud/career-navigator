@@ -19,6 +19,17 @@
   overflow: hidden;
 }
 
+/* JourneyHUD variant: no own background — WorldRenderer (canvas) renders
+   the world beneath this layer. See задание.txt ARCHITECTURE DECISION. */
+.journey-hud {
+  background: transparent;
+  pointer-events: none;
+}
+
+.journey-hud > * {
+  pointer-events: auto;
+}
+
 /* Layer 1: Background */
 .background-layer {
   position: fixed;

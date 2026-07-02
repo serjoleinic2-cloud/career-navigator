@@ -1,1 +1,0 @@
-export { WorldBackdrop } from './WorldBackdrop';

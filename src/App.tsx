@@ -7,18 +7,17 @@ import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScr
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
 import { ShareScreen } from './screens/ShareScreen/ShareScreen';
-import { JourneyScreenDebug } from './screens/JourneyScreen/JourneyScreenDebug';
+import { JourneyHUD } from './screens/JourneyScreen';
 import { AppShell } from './components/layout/AppShell';
 import './App.css';
 
-type Screen = 'world' | 'playbook' | 'notes' | 'share' | 'debug';
+type Screen = 'world' | 'playbook' | 'notes' | 'share';
 
 const SCREEN_TITLES: Record<string, string> = {
   world: 'Career Navigator',
   playbook: 'Playbook',
   notes: 'My Journal',
   share: 'Share Progress',
-  debug: 'Debug',
 };
 
 function App() {
@@ -52,7 +51,7 @@ function App() {
   };
 
   const handleTabChange = (tabId: string) => {
-    if (tabId === 'world' || tabId === 'playbook' || tabId === 'notes' || tabId === 'share' || tabId === 'debug') {
+    if (tabId === 'world' || tabId === 'playbook' || tabId === 'notes' || tabId === 'share') {
       navigateTo(tabId as Screen);
     }
   };
@@ -86,16 +85,6 @@ function App() {
     );
   }
 
-  if (showIntro) {
-    return (
-      <IntroJourneyScreen
-        onComplete={() => {
-          setShowIntro(false);
-        }}
-      />
-    );
-  }
-
   const renderScreen = (screen: Screen, isPrev: boolean) => {
     const key = screen + (isPrev ? '-prev' : '');
     const style: React.CSSProperties = {
@@ -109,29 +98,52 @@ function App() {
 
     switch (screen) {
       case 'world':
-        return <div key={key} style={style}><WorldRenderer /></div>;
+        // JourneyHUD is UI-only (mission cards, header, nav) — the world
+        // itself is the persistent <WorldRenderer/> mounted below, once,
+        // outside this switch. See задание.txt ARCHITECTURE DECISION.
+        return <div key={key} style={style}><JourneyHUD /></div>;
       case 'playbook':
         return <div key={key} style={style}><PlaybookScreen /></div>;
       case 'notes':
         return <div key={key} style={style}><NotesScreen /></div>;
       case 'share':
         return <div key={key} style={style}><ShareScreen /></div>;
-      case 'debug':
-        return <div key={key} style={style}><JourneyScreenDebug /></div>;
     }
   };
 
   return (
-    <AppShell
-      title={SCREEN_TITLES[currentScreen] || 'Career Navigator'}
-      activeTab={currentScreen === 'debug' ? 'journey' : currentScreen}
-      onTabChange={handleTabChange}
-    >
-      <div style={{ position: 'relative', minHeight: '100%' }}>
-        {prevScreen && renderScreen(prevScreen, true)}
-        {renderScreen(currentScreen, false)}
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
+      {/* Permanent rendering engine — world, camera, atmosphere, islands,
+          particles, lighting. Mounted once for both Intro and Journey;
+          never unmounted between them, so the player never "leaves" the
+          world (Feature Milestone #2, TASK 2/3). */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
+        <WorldRenderer />
       </div>
-    </AppShell>
+
+      {showIntro ? (
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <IntroJourneyScreen
+            onComplete={() => {
+              setShowIntro(false);
+            }}
+          />
+        </div>
+      ) : (
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <AppShell
+            title={SCREEN_TITLES[currentScreen] || 'Career Navigator'}
+            activeTab={currentScreen}
+            onTabChange={handleTabChange}
+          >
+            <div style={{ position: 'relative', minHeight: '100%' }}>
+              {prevScreen && renderScreen(prevScreen, true)}
+              {renderScreen(currentScreen, false)}
+            </div>
+          </AppShell>
+        </div>
+      )}
+    </div>
   );
 }
 
