@@ -243,13 +243,31 @@
 }
 
 /* Empty state */
-.notes-empty {
+.notes-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
+}
+
+.notes-empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.notes-empty-state h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #f0f0f5;
+  margin: 0 0 8px;
+}
+
+.notes-empty-state p {
+  font-size: 14px;
+  color: rgba(240, 240, 245, 0.55);
+  margin: 0;
 }
 
 .notes-empty-icon {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getPlaybookByCategory } from '@/core/playbook/playbook_data';
 import type { PlaybookEntry, PlaybookCategory } from '@/core/playbook/playbook_types';
+import type { CSSProperties } from 'react';
 import './PlaybookScreen.css';
 
 const CATEGORIES: { id: PlaybookCategory; label: string; icon: string; color: string }[] = [
@@ -12,10 +13,10 @@ const CATEGORIES: { id: PlaybookCategory; label: string; icon: string; color: st
 ];
 
 interface Props {
-  missionTaskName?: string;
+  style?: CSSProperties;
 }
 
-export function PlaybookScreen({ missionTaskName }: Props) {
+export function PlaybookScreen({ style }: Props) {
   const [view, setView] = useState<'categories' | 'entries' | 'entry'>('categories');
   const [selectedCategory, setSelectedCategory] = useState<PlaybookCategory | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<PlaybookEntry | null>(null);
@@ -60,6 +61,25 @@ export function PlaybookScreen({ missionTaskName }: Props) {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const categories = CATEGORIES;
+  const hasContent = categories.length > 0 && (!view.startsWith('entry') || selectedEntry);
+
+  if (!hasContent) {
+    return (
+      <div className="playbook-screen" style={style}>
+        <div className="playbook-scroll">
+          <h1 className="playbook-main-title">Playbook</h1>
+          <p className="playbook-subtitle">Your career knowledge base</p>
+          <div className="playbook-empty-state">
+            <div className="playbook-empty-icon">📚</div>
+            <h2>No content yet</h2>
+            <p>Complete missions to unlock playbook entries.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (flipping) {
     return (
       <div className="playbook-flip-overlay">
@@ -70,7 +90,7 @@ export function PlaybookScreen({ missionTaskName }: Props) {
 
   if (view === 'entry' && selectedEntry) {
     return (
-      <div className="playbook-screen">
+      <div className="playbook-screen" style={style}>
         <button className="playbook-close-btn" onClick={goBack}>✕</button>
         <div className="playbook-scroll">
           <h2 className="playbook-entry-title">{selectedEntry.title}</h2>
@@ -159,14 +179,9 @@ export function PlaybookScreen({ missionTaskName }: Props) {
   if (view === 'entries' && selectedCategory) {
     const entries = getPlaybookByCategory(selectedCategory);
     return (
-      <div className="playbook-screen">
+      <div className="playbook-screen" style={style}>
         <button className="playbook-close-btn" onClick={goBack}>✕</button>
         <div className="playbook-scroll">
-          {missionTaskName && (
-            <div className="playbook-mission-banner">
-              Currently helping: {missionTaskName}
-            </div>
-          )}
 
           <h2 className="playbook-entries-title">
             {CATEGORIES.find(c => c.id === selectedCategory)?.label}
@@ -195,7 +210,7 @@ export function PlaybookScreen({ missionTaskName }: Props) {
   }
 
   return (
-    <div className="playbook-screen">
+    <div className="playbook-screen" style={style}>
       <button className="playbook-close-btn" onClick={goBack}>✕</button>
       <div className="playbook-scroll">
         <h1 className="playbook-main-title">Playbook</h1>

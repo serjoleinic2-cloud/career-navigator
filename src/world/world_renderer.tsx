@@ -34,6 +34,7 @@ export type WorldRendererMode = 'debug' | 'production';
 interface WorldRendererProps {
   runtimeState?: JourneyRuntimeState;
   mode?: WorldRendererMode;
+  style?: React.CSSProperties;
 }
 
 const DEFAULT_ATMOSPHERE_PARTICLE_COUNT = 18;
@@ -41,6 +42,7 @@ const DEFAULT_ATMOSPHERE_PARTICLE_COUNT = 18;
 export const WorldRenderer: React.FC<WorldRendererProps> = ({
   runtimeState: runtimeStateProp,
   mode = 'production',
+  style,
 }) => {
   const runtimeState = runtimeStateProp ?? getRuntimeState();
   const professionId = runtimeState?.professionId ?? getActiveProfessionId() ?? 'default';
@@ -202,7 +204,7 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({
   const fallbackGradient = `linear-gradient(180deg, ${theme.palette.backgroundFrom} 0%, ${theme.palette.backgroundTo} 100%)`;
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', ...style }}>
       {/* 1. WorldImage layer — artist art, or gradient fallback until it exists */}
       {art.worldImageUrl ? (
         <img

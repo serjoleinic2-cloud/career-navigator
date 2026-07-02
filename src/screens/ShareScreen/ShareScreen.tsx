@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import type { CSSProperties } from 'react';
 import { toPng } from 'html-to-image';
 import { getState } from '@/core/runtime/runtime_store';
 import { getUIState } from '@/core/ui_bridge/ui_bridge';
@@ -8,7 +9,7 @@ import { exportJSON, exportCSV } from '@/core/export/export_service';
 import type { ShareModel } from '@/core/share/share_model';
 import './ShareScreen.css';
 
-export function ShareScreen() {
+export function ShareScreen({ style }: { style?: CSSProperties }) {
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -55,7 +56,7 @@ export function ShareScreen() {
   }, []);
 
   return (
-    <div className="share-screen">
+    <div className="share-screen" style={style}>
       {/* Share Card for display and export */}
       <div className="share-card-container" ref={cardRef}>
         <div

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import type { CSSProperties } from 'react';
 import { getAllNotes, addNote, updateNote, deleteNote } from '@/core/user_data/notes/notes_controller';
 import { getActiveProfessionId } from '@/core/profession_loader';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
@@ -29,7 +30,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   salary: '#FF6B6B',
 };
 
-export function NotesScreen() {
+export function NotesScreen({ style }: { style?: CSSProperties }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -122,8 +123,25 @@ export function NotesScreen() {
 
   const hasNotes = sortedCategories.length > 0 && sortedCategories.some(c => grouped[c].length > 0);
 
+  if (!hasNotes && !showNewNote) {
+    return (
+      <div className="notes-screen" style={style}>
+        <button className="notes-close-btn" onClick={() => window.location.hash = ''}>✕</button>
+        <div className="notes-scroll">
+          <h1 className="notes-title">My Journal</h1>
+          <div className="notes-empty-state">
+            <div className="notes-empty-icon">📝</div>
+            <h2>No notes yet</h2>
+            <p>Tap + to create your first note.</p>
+          </div>
+        </div>
+        <button className="notes-fab" onClick={() => setShowNewNote(true)}>+</button>
+      </div>
+    );
+  }
+
   return (
-    <div className="notes-screen">
+    <div className="notes-screen" style={style}>
       <button className="notes-close-btn" onClick={() => window.location.hash = ''}>✕</button>
       <div className="notes-scroll">
       <h1 className="notes-title">My Journal</h1>

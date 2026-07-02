@@ -1,16 +1,21 @@
 import { motion } from 'framer-motion';
-import { Map, ListTodo, BarChart3, User } from 'lucide-react';
+import { Map, BookOpen, StickyNote, Share2 } from 'lucide-react';
 
-type TabId = 'journey' | 'tasks' | 'progress' | 'profile';
+type TabId = 'world' | 'playbook' | 'notes' | 'share';
 
 const tabs: { id: TabId; label: string; icon: React.ComponentType<{ className?: string; size?: number | string }> }[] = [
-  { id: 'journey', label: 'Journey', icon: Map },
-  { id: 'tasks', label: 'Tasks', icon: ListTodo },
-  { id: 'progress', label: 'Progress', icon: BarChart3 },
-  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'world', label: 'World', icon: Map },
+  { id: 'playbook', label: 'Playbook', icon: BookOpen },
+  { id: 'notes', label: 'Notes', icon: StickyNote },
+  { id: 'share', label: 'Share', icon: Share2 },
 ];
 
-export function BottomNav() {
+interface BottomNavProps {
+  currentTab: TabId;
+  onTabChange: (tabId: string) => void;
+}
+
+export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
   return (
     <motion.nav
       className="fixed bottom-0 left-0 right-0 z-50"
@@ -29,20 +34,26 @@ export function BottomNav() {
         <div className="max-w-md mx-auto flex items-center justify-around">
           {tabs.map((tab) => {
             const Icon = tab.icon;
+            const isActive = tab.id === currentTab;
 
             return (
               <motion.button
                 key={tab.id}
                 className="relative flex flex-col items-center gap-1 py-1.5 px-4 min-w-[64px]"
                 whileTap={{ scale: 0.92 }}
+                onClick={() => onTabChange(tab.id)}
               >
                 <div className="relative">
                   <Icon
                     size={22}
-                    className="text-black transition-colors duration-300"
+                    className={`transition-colors duration-300 ${
+                      isActive ? 'text-white' : 'text-black'
+                    }`}
                   />
                 </div>
-                <span className="text-[10px] font-medium text-black transition-colors duration-300">
+                <span className={`text-[10px] font-medium transition-colors duration-300 ${
+                  isActive ? 'text-white' : 'text-black'
+                }`}>
                   {tab.label}
                 </span>
               </motion.button>

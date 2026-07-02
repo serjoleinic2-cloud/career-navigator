@@ -120,12 +120,9 @@
 .journey-world {
   position: relative;
   z-index: 1;
-  padding-top: 116px;
-  min-height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
+  padding: 24px 20px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom) + 80px);
+  overflow-y: visible;
 }
 
 .journey-world::-webkit-scrollbar {
