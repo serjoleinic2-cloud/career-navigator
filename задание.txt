@@ -1,101 +1,220 @@
-Моё решение — вариант №3
+CAREER NAVIGATOR
+UX POLISH PASS #1
+(PRIORITY: CRITICAL)
 
-Journey не должен быть ни светлым экраном, ни тёмным экраном.
+Current architecture is considered stable.
 
-Он должен стать игровым HUD (Heads-Up Display) поверх живого мира.
+DO NOT perform any refactoring.
 
-То есть:
+DO NOT change EventBus.
 
-Небо / WorldBackdrop
-        ↓
-Парящие острова
-        ↓
-Дорога
-        ↓
-Платформа игрока
-        ↓
-Полупрозрачные панели интерфейса
+DO NOT change WorldRenderer.
 
-Игрок должен чувствовать, что карточки не лежат на фоне, а парят над миром.
+DO NOT change WorldTheme.
 
-Что предлагаю Claude
-DECISION: Do NOT redesign Journey into a light screen.
+Focus ONLY on visible UX issues.
 
-Keep the World bright.
+======================================================
+1. PLAYBOOK
+======================================================
 
-Keep the UI dark.
+Current problems:
 
-Treat Journey UI as an in-world HUD.
+• White text on light background.
+• Content readability is broken.
+• Long articles disappear under the bottom navigation.
+• No scroll.
+• User cannot exit naturally.
 
-Rules:
+Fix:
 
-1. WorldBackdrop remains bright, atmospheric and pastel.
+✓ Dark readable text on light surfaces.
+✓ Proper vertical scrolling.
+✓ Safe-area bottom padding.
+✓ Content never hidden behind Bottom Navigation.
+✓ Sticky Close button (X) in top-right.
+✓ "← Back" button at the end of every article.
 
-2. Journey panels become dark floating surfaces,
-   NOT black windows.
+Back button requirements:
 
-3. Panel style:
+- full width
+- easy to tap
+- always visible after scrolling to bottom
 
-background:
-rgba(18,22,30,0.55–0.70)
+======================================================
+2. RESUME
+======================================================
 
-backdrop-filter:
-blur(24px)
+Same fixes:
 
-border:
-1px solid rgba(255,255,255,0.10)
+✓ readable typography
+✓ proper scroll
+✓ bottom safe area
+✓ top close button
+✓ back button at end
 
-soft shadow:
-0 12px 40px rgba(0,0,0,0.20)
+======================================================
+3. NOTES
+======================================================
 
-4. Text remains light.
+Current state is confusing.
 
-5. Accent colors come ONLY from WorldTheme.
+There is a search field but no notes.
 
-6. Increase separation between world and HUD using
-subtle atmospheric fog instead of darkening the world.
+Implement MVP.
 
-7. World must always remain visible around the panels.
+Requirements:
 
-The user should feel that UI is floating above the world,
-not replacing it.
+Floating Action Button
 
-Goal:
++
 
-Journey becomes a premium game HUD rather than a settings screen.
-Почему я против полного светлого Journey
+Create Note
 
-Потому что человек будет смотреть на экран десятки часов.
+Each note:
 
-Светлый интерфейс с большим количеством текста быстрее утомляет.
+title
 
-А вот светлый мир + тёмный HUD — это приём, который используют многие современные игры. Он даёт:
+text
 
-читаемость;
-контраст;
-ощущение глубины;
-возможность сделать мир "живым".
-Но есть ещё одна идея, которую я считаю ключевой
+created date
 
-Карточки вообще должны постепенно исчезнуть.
+simple local persistence
 
-Сейчас они нужны, потому что MVP.
+Search filters notes.
 
-Но конечная цель — чтобы большая часть взаимодействия происходила не через карточки, а через сам мир.
+No cloud.
 
-Например:
+No sync.
 
-глава — это остров;
-миссия — объект на острове;
-интервью — вход в храм;
-награда — открывающийся мост.
+Offline only.
 
-Тогда HUD останется только для информации и управления, а основное взаимодействие перейдёт в игровой мир.
+Empty state:
 
-Поэтому мой вердикт
+"No notes yet"
 
-Не ломайте рабочий Journey.
+Button:
 
-Сделайте его премиальным игровым HUD поверх светлого мира.
+Create first note
 
-Это минимальный риск, сохраняет уже протестированный UX и лучше соответствует вашей цели — чтобы Career Navigator ощущался как игра, а не как обычное приложение.
+======================================================
+4. WORLD HUD
+======================================================
+
+Current problems:
+
+Mission cards do not scroll.
+
+Only first cards visible.
+
+LinkedIn chapter layout broken.
+
+Large empty space.
+
+Cards hidden below viewport.
+
+Fix:
+
+Vertical scrolling.
+
+Dynamic content height.
+
+Cards stack correctly.
+
+No clipping.
+
+No hidden content.
+
+======================================================
+5. MODALS
+======================================================
+
+Every full-screen content page MUST have:
+
+Top-right:
+
+✕
+
+Bottom:
+
+← Back
+
+This is mandatory.
+
+Applies to:
+
+Playbook
+
+Resume
+
+Notes
+
+Future Help
+
+Future Settings
+
+Future Achievements
+
+======================================================
+6. SAFE AREAS
+======================================================
+
+Every screen must respect:
+
+Status bar
+
+Bottom navigation
+
+Android gesture area
+
+No content under navigation.
+
+======================================================
+7. TYPOGRAPHY
+======================================================
+
+Audit every readable text.
+
+No white text on light backgrounds.
+
+Minimum contrast AA.
+
+Readable on phones outdoors.
+
+======================================================
+8. ACCEPTANCE CRITERIA
+======================================================
+
+User can:
+
+✓ Open Playbook
+✓ Read any article
+✓ Scroll to end
+✓ Press Back
+✓ Or press X
+
+User can:
+
+✓ Create notes
+✓ Search notes
+✓ Delete notes (optional MVP)
+
+User can:
+
+✓ Scroll every Journey chapter completely.
+
+No text hidden behind bottom navigation.
+
+No unreadable typography.
+
+======================================================
+
+Deliver:
+
+UX_POLISH_PASS_01_REPORT.md
+
+Include:
+
+• fixed files
+• screenshots before/after (if possible)
+• remaining UX issues
