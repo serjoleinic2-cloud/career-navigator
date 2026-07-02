@@ -1,4 +1,5 @@
 import type { WorldState } from '../visual_world_contract';
+import type { CameraAnchor } from '../../core/world/world_layout';
 
 export interface CameraState {
   x: number;
@@ -6,6 +7,7 @@ export interface CameraState {
   zoom: number;
   targetX: number;
   targetY: number;
+  targetZoom: number;
 }
 
 const CAMERA_OFFSET_Y = 280; // Active node in lower 35% of screen (assuming ~800px height)
@@ -19,6 +21,7 @@ export function createCamera(initialState: WorldState['camera']): CameraState {
     zoom: initialState.zoom,
     targetX: initialState.x,
     targetY: initialState.y,
+    targetZoom: initialState.zoom,
   };
 }
 
@@ -30,12 +33,31 @@ export function focusOnNode(camera: CameraState, nodeX: number, nodeY: number): 
   };
 }
 
+/**
+ * TASK 2 — the preferred way to move the camera going forward: to a
+ * predefined CameraAnchor, never to raw island coordinates. Artists can
+ * compose a scene knowing exactly which anchor(s) will frame it.
+ *
+ * cinematicOffset (if present) is intentionally not auto-applied here —
+ * callers decide whether this is a first-visit (cinematic) or repeat
+ * (direct) arrival. See WORLD_LAYOUT_GUIDE.md.
+ */
+export function focusOnAnchor(camera: CameraState, anchor: CameraAnchor): CameraState {
+  return {
+    ...camera,
+    targetX: anchor.x,
+    targetY: anchor.y,
+    targetZoom: anchor.zoom,
+  };
+}
+
 export function updateCamera(camera: CameraState): CameraState {
   const dx = camera.targetX - camera.x;
   const dy = camera.targetY - camera.y;
+  const dz = camera.targetZoom - camera.zoom;
 
-  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
-    return { ...camera, x: camera.targetX, y: camera.targetY };
+  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(dz) < 0.001) {
+    return { ...camera, x: camera.targetX, y: camera.targetY, zoom: camera.targetZoom };
   }
 
   // easeOutCubic approximation
@@ -46,6 +68,7 @@ export function updateCamera(camera: CameraState): CameraState {
     ...camera,
     x: camera.x + dx * ease,
     y: camera.y + dy * ease,
+    zoom: camera.zoom + dz * ease,
   };
 }
 
