@@ -67,7 +67,7 @@
 .intro-title {
   font-size: 28px;
   font-weight: 300;
-  color: #fff;
+  color: #f0f0f5;
   letter-spacing: 2px;
 }
 
@@ -105,7 +105,7 @@
 .stat-number {
   font-size: 36px;
   font-weight: 700;
-  color: #fff;
+  color: #f0f0f5;
 }
 
 .stat-label {
@@ -129,7 +129,7 @@
   width: 60%;
   height: 40%;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.55) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(240, 240, 245, 0.55) 0%, transparent 70%);
   filter: blur(30px);
   transition: transform 2.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 2.4s ease-out;
   opacity: 0.9;
@@ -276,7 +276,7 @@
 .island-name {
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: #f0f0f5;
 }
 
 /* Path line — grows and "lights up" like a bridge catching fire */

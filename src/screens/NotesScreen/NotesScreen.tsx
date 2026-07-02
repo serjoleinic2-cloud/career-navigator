@@ -35,6 +35,7 @@ export function NotesScreen() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
   const [newNoteContent, setNewNoteContent] = useState('');
+  const [newNoteTitle, setNewNoteTitle] = useState('');
   const [showNewNote, setShowNewNote] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const newNoteRef = useRef<HTMLTextAreaElement>(null);
@@ -103,9 +104,11 @@ export function NotesScreen() {
       professionId,
       chapterId: selectedCategory || runtime?.activeChapterId || '',
       nodeId: runtime?.activeNodeId || '',
+      title: newNoteTitle.trim() || 'Untitled Note',
       content: newNoteContent.trim(),
     });
     setNewNoteContent('');
+    setNewNoteTitle('');
     setShowNewNote(false);
   };
 
@@ -121,6 +124,8 @@ export function NotesScreen() {
 
   return (
     <div className="notes-screen">
+      <button className="notes-close-btn" onClick={() => window.location.hash = ''}>✕</button>
+      <div className="notes-scroll">
       <h1 className="notes-title">My Journal</h1>
 
       <input
@@ -182,6 +187,7 @@ export function NotesScreen() {
                     ✕
                   </button>
                 </div>
+                {note.title && <div className="notes-card-title">{note.title}</div>}
 
                 {editingId === note.id ? (
                   <div className="notes-edit-form">
@@ -217,11 +223,18 @@ export function NotesScreen() {
       >
         +
       </button>
+      </div>{/* notes-scroll */}
 
       {/* New note drawer */}
       {showNewNote && (
         <div className="notes-drawer-overlay" onClick={() => setShowNewNote(false)}>
           <div className="notes-drawer" onClick={e => e.stopPropagation()}>
+            <input
+              className="notes-drawer-title"
+              placeholder="Note title..."
+              value={newNoteTitle}
+              onChange={e => setNewNoteTitle(e.target.value)}
+            />
             <textarea
               ref={newNoteRef}
               value={newNoteContent}
@@ -232,7 +245,7 @@ export function NotesScreen() {
             <div className="notes-drawer-actions">
               <button
                 className="notes-drawer-cancel"
-                onClick={() => { setShowNewNote(false); setNewNoteContent(''); }}
+                onClick={() => { setShowNewNote(false); setNewNoteContent(''); setNewNoteTitle(''); }}
               >
                 Cancel
               </button>

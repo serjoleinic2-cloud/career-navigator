@@ -4,6 +4,7 @@ export interface Note {
   chapterId: string;
   nodeId: string;
   taskId?: string;
+  title: string;
   content: string;
   createdAt: number;
   updatedAt: number;

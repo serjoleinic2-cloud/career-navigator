@@ -70,86 +70,88 @@ export function PlaybookScreen({ missionTaskName }: Props) {
 
   if (view === 'entry' && selectedEntry) {
     return (
-      <div className="playbook-entry-view">
-        <button className="playbook-back-btn" onClick={goBack}>←</button>
+      <div className="playbook-screen">
+        <button className="playbook-close-btn" onClick={goBack}>✕</button>
+        <div className="playbook-scroll">
+          <h2 className="playbook-entry-title">{selectedEntry.title}</h2>
+          <span className="playbook-entry-cat">{selectedEntry.category}</span>
 
-        <h2 className="playbook-entry-title">{selectedEntry.title}</h2>
-        <span className="playbook-entry-cat">{selectedEntry.category}</span>
-
-        <div className="playbook-entry-sections">
-          <AccordionSection
-            title="Guide"
-            sectionKey="guide"
-            isOpen={!!expandedSections['guide']}
-            onToggle={toggleSection}
-          >
-            <div className="playbook-entry-content">
-              {selectedEntry.content.split('\n\n').map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </div>
-          </AccordionSection>
-
-          {selectedEntry.templates.length > 0 && (
+          <div className="playbook-entry-sections">
             <AccordionSection
-              title="Templates"
-              sectionKey="templates"
-              isOpen={!!expandedSections['templates']}
+              title="Guide"
+              sectionKey="guide"
+              isOpen={!!expandedSections['guide']}
               onToggle={toggleSection}
             >
-              <div className="playbook-templates">
-                {selectedEntry.templates.map((template, i) => (
-                  <div key={i} className="playbook-template-card">
-                    <pre>{template}</pre>
-                    <button
-                      className="playbook-copy-btn"
-                      onClick={() => navigator.clipboard.writeText(template)}
-                    >
-                      Copy
-                    </button>
-                  </div>
+              <div className="playbook-entry-content">
+                {selectedEntry.content.split('\n\n').map((para, i) => (
+                  <p key={i}>{para}</p>
                 ))}
               </div>
             </AccordionSection>
-          )}
 
-          {selectedEntry.examples.length > 0 && (
-            <AccordionSection
-              title="Examples"
-              sectionKey="examples"
-              isOpen={!!expandedSections['examples']}
-              onToggle={toggleSection}
-            >
-              <div className="playbook-examples">
-                {selectedEntry.examples.map((example, i) => (
-                  <div key={i} className="playbook-example-card">
-                    <p>{example}</p>
-                  </div>
-                ))}
-              </div>
-            </AccordionSection>
-          )}
+            {selectedEntry.templates.length > 0 && (
+              <AccordionSection
+                title="Templates"
+                sectionKey="templates"
+                isOpen={!!expandedSections['templates']}
+                onToggle={toggleSection}
+              >
+                <div className="playbook-templates">
+                  {selectedEntry.templates.map((template, i) => (
+                    <div key={i} className="playbook-template-card">
+                      <pre>{template}</pre>
+                      <button
+                        className="playbook-copy-btn"
+                        onClick={() => navigator.clipboard.writeText(template)}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </AccordionSection>
+            )}
 
-          {selectedEntry.checklist.length > 0 && (
-            <AccordionSection
-              title="Checklist"
-              sectionKey="checklist"
-              isOpen={!!expandedSections['checklist']}
-              onToggle={toggleSection}
-            >
-              <ul className="playbook-checklist">
-                {selectedEntry.checklist.map((item, i) => (
-                  <li key={i}>
-                    <input type="checkbox" id={`check-${i}`} />
-                    <label htmlFor={`check-${i}`}>{item}</label>
-                  </li>
-                ))}
-              </ul>
-            </AccordionSection>
-          )}
+            {selectedEntry.examples.length > 0 && (
+              <AccordionSection
+                title="Examples"
+                sectionKey="examples"
+                isOpen={!!expandedSections['examples']}
+                onToggle={toggleSection}
+              >
+                <div className="playbook-examples">
+                  {selectedEntry.examples.map((example, i) => (
+                    <div key={i} className="playbook-example-card">
+                      <p>{example}</p>
+                    </div>
+                  ))}
+                </div>
+              </AccordionSection>
+            )}
+
+            {selectedEntry.checklist.length > 0 && (
+              <AccordionSection
+                title="Checklist"
+                sectionKey="checklist"
+                isOpen={!!expandedSections['checklist']}
+                onToggle={toggleSection}
+              >
+                <ul className="playbook-checklist">
+                  {selectedEntry.checklist.map((item, i) => (
+                    <li key={i}>
+                      <input type="checkbox" id={`check-${i}`} />
+                      <label htmlFor={`check-${i}`}>{item}</label>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionSection>
+            )}
+          </div>
+
+          <button className="playbook-apply-btn">Apply to Current Task</button>
+          <button className="playbook-back-btn" onClick={goBack}>← Back</button>
         </div>
-
-        <button className="playbook-apply-btn">Apply to Current Task</button>
       </div>
     );
   }
@@ -157,57 +159,61 @@ export function PlaybookScreen({ missionTaskName }: Props) {
   if (view === 'entries' && selectedCategory) {
     const entries = getPlaybookByCategory(selectedCategory);
     return (
-      <div className="playbook-entries-view">
-        <button className="playbook-back-btn" onClick={goBack}>←</button>
+      <div className="playbook-screen">
+        <button className="playbook-close-btn" onClick={goBack}>✕</button>
+        <div className="playbook-scroll">
+          {missionTaskName && (
+            <div className="playbook-mission-banner">
+              Currently helping: {missionTaskName}
+            </div>
+          )}
 
-        {missionTaskName && (
-          <div className="playbook-mission-banner">
-            Currently helping: {missionTaskName}
+          <h2 className="playbook-entries-title">
+            {CATEGORIES.find(c => c.id === selectedCategory)?.label}
+          </h2>
+
+          <div className="playbook-entries-list">
+            {entries.map(entry => (
+              <button
+                key={entry.id}
+                className="playbook-entry-card"
+                onClick={() => openEntry(entry)}
+              >
+                <h3>{entry.title}</h3>
+                <p>{entry.content.slice(0, 100)}...</p>
+                <div className="playbook-entry-tags">
+                  {entry.tags.slice(0, 3).map(tag => (
+                    <span key={tag} className="playbook-tag">#{tag}</span>
+                  ))}
+                </div>
+              </button>
+            ))}
           </div>
-        )}
-
-        <h2 className="playbook-entries-title">
-          {CATEGORIES.find(c => c.id === selectedCategory)?.label}
-        </h2>
-
-        <div className="playbook-entries-list">
-          {entries.map(entry => (
-            <button
-              key={entry.id}
-              className="playbook-entry-card"
-              onClick={() => openEntry(entry)}
-            >
-              <h3>{entry.title}</h3>
-              <p>{entry.content.slice(0, 100)}...</p>
-              <div className="playbook-entry-tags">
-                {entry.tags.slice(0, 3).map(tag => (
-                  <span key={tag} className="playbook-tag">#{tag}</span>
-                ))}
-              </div>
-            </button>
-          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="playbook-categories-view">
-      <h1 className="playbook-main-title">Playbook</h1>
-      <p className="playbook-subtitle">Deep knowledge, templates, and strategies</p>
+    <div className="playbook-screen">
+      <button className="playbook-close-btn" onClick={goBack}>✕</button>
+      <div className="playbook-scroll">
+        <h1 className="playbook-main-title">Playbook</h1>
+        <p className="playbook-subtitle">Deep knowledge, templates, and strategies</p>
 
-      <div className="playbook-categories-grid">
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat.id}
-            className="playbook-category-card"
-            onClick={() => openCategory(cat.id)}
-            style={{ '--cat-color': cat.color } as React.CSSProperties}
-          >
-            <span className="playbook-category-icon">{cat.icon}</span>
-            <span className="playbook-category-label">{cat.label}</span>
-          </button>
-        ))}
+        <div className="playbook-categories-grid">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              className="playbook-category-card"
+              onClick={() => openCategory(cat.id)}
+              style={{ '--cat-color': cat.color } as React.CSSProperties}
+            >
+              <span className="playbook-category-icon">{cat.icon}</span>
+              <span className="playbook-category-label">{cat.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,220 +1,90 @@
-CAREER NAVIGATOR
-UX POLISH PASS #1
-(PRIORITY: CRITICAL)
+1. Исправить TS-ошибки обязательно
 
-Current architecture is considered stable.
+Особенно это:
 
-DO NOT perform any refactoring.
+world_theme.ts:97
 
-DO NOT change EventBus.
+import ./world_composer
 
-DO NOT change WorldRenderer.
+Это недопустимо.
 
-DO NOT change WorldTheme.
+Мы сами приняли решение, что:
 
-Focus ONLY on visible UX issues.
+world_composer удалён
 
-======================================================
-1. PLAYBOOK
-======================================================
+Если где-то остался импорт — это технический долг.
 
-Current problems:
+Его нужно убрать полностью.
 
-• White text on light background.
-• Content readability is broken.
-• Long articles disappear under the bottom navigation.
-• No scroll.
-• User cannot exit naturally.
+Вторая ошибка
 
-Fix:
+JourneyHUD.tsx
 
-✓ Dark readable text on light surfaces.
-✓ Proper vertical scrolling.
-✓ Safe-area bottom padding.
-✓ Content never hidden behind Bottom Navigation.
-✓ Sticky Close button (X) in top-right.
-✓ "← Back" button at the end of every article.
+activeChapterDomain
 
-Back button requirements:
+Если не используется —
 
-- full width
-- easy to tap
-- always visible after scrolling to bottom
+либо удалить,
 
-======================================================
-2. RESUME
-======================================================
+либо использовать.
 
-Same fixes:
+В проекте не должно оставаться "мёртвого" кода.
 
-✓ readable typography
-✓ proper scroll
-✓ bottom safe area
-✓ top close button
-✓ back button at end
+2. Перед коммитом сделать UX Audit
 
-======================================================
-3. NOTES
-======================================================
+Я бы дал Kimi ещё одно маленькое задание.
 
-Current state is confusing.
+PRE-COMMIT UX AUDIT
 
-There is a search field but no notes.
+Before commit, manually verify on Android device:
 
-Implement MVP.
+==================================================
 
-Requirements:
+PLAYBOOK
 
-Floating Action Button
+✓ Open article
+✓ Scroll works
+✓ Text readable
+✓ No content under Bottom Navigation
+✓ X closes page
+✓ Back button works
 
-+
+==================================================
 
-Create Note
+NOTES
 
-Each note:
+✓ Create note
+✓ Create title
+✓ Save
+✓ Search
+✓ Scroll
+✓ Close
+✓ Back button
 
-title
+==================================================
 
-text
+WORLD
 
-created date
+✓ Mission cards scroll
 
-simple local persistence
+✓ LinkedIn chapter has no empty space
 
-Search filters notes.
+✓ No hidden cards
 
-No cloud.
+==================================================
 
-No sync.
+GLOBAL
 
-Offline only.
+✓ No white text on light backgrounds
 
-Empty state:
+✓ No layout overflow
 
-"No notes yet"
+✓ No clipped buttons
 
-Button:
+==================================================
 
-Create first note
+Only after all checks pass:
 
-======================================================
-4. WORLD HUD
-======================================================
+Commit.
 
-Current problems:
-
-Mission cards do not scroll.
-
-Only first cards visible.
-
-LinkedIn chapter layout broken.
-
-Large empty space.
-
-Cards hidden below viewport.
-
-Fix:
-
-Vertical scrolling.
-
-Dynamic content height.
-
-Cards stack correctly.
-
-No clipping.
-
-No hidden content.
-
-======================================================
-5. MODALS
-======================================================
-
-Every full-screen content page MUST have:
-
-Top-right:
-
-✕
-
-Bottom:
-
-← Back
-
-This is mandatory.
-
-Applies to:
-
-Playbook
-
-Resume
-
-Notes
-
-Future Help
-
-Future Settings
-
-Future Achievements
-
-======================================================
-6. SAFE AREAS
-======================================================
-
-Every screen must respect:
-
-Status bar
-
-Bottom navigation
-
-Android gesture area
-
-No content under navigation.
-
-======================================================
-7. TYPOGRAPHY
-======================================================
-
-Audit every readable text.
-
-No white text on light backgrounds.
-
-Minimum contrast AA.
-
-Readable on phones outdoors.
-
-======================================================
-8. ACCEPTANCE CRITERIA
-======================================================
-
-User can:
-
-✓ Open Playbook
-✓ Read any article
-✓ Scroll to end
-✓ Press Back
-✓ Or press X
-
-User can:
-
-✓ Create notes
-✓ Search notes
-✓ Delete notes (optional MVP)
-
-User can:
-
-✓ Scroll every Journey chapter completely.
-
-No text hidden behind bottom navigation.
-
-No unreadable typography.
-
-======================================================
-
-Deliver:
-
-UX_POLISH_PASS_01_REPORT.md
-
-Include:
-
-• fixed files
-• screenshots before/after (if possible)
-• remaining UX issues
+Otherwise fix first.
