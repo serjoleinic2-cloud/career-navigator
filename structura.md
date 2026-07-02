@@ -19,7 +19,7 @@ D:\career-navigator/
 │
 └── src/
     ├── main.tsx                       — Точка входа: регистрация профессий, рендер App
-    ├── App.tsx                        — Корневой компонент: роутинг (world/playbook/notes/share/debug), default = WorldRendererScreen
+    ├── App.tsx                        — Корневой компонент: AppShell + fade-слайд переход (journey/playbook/notes/share)
     ├── App.css                        — Легаси стили Vite (почти не используется)
     ├── index.css                      — Tailwind layers: glass-panel, glow, atmosphere, hide-scrollbar
     │
@@ -52,6 +52,9 @@ D:\career-navigator/
     │   │
     │   ├── BottomNav/                 — Навигация с Framer Motion анимацией
     │   │   └── BottomNav.tsx          — Анимированные табы (journey, tasks, progress, profile)
+    │   ├── WorldBackdrop/             — Фоновый мир с isometric-платформами
+    │   │   ├── WorldBackdrop.tsx      — Принимает WorldRenderConfig, рендерит градиент + SVG платформы
+    │   │   └── index.ts
     │   ├── FloatingOrb/               — Анимированная светящаяся сфера
     │   │   ├── FloatingOrb.tsx        — Режимы: idle/moving/arrived, уровни интенсивности
     │   │   ├── FloatingOrb.css
@@ -312,6 +315,7 @@ D:\career-navigator/
     │       ├── chapters.ts            — 5 глав: resume, linkedin, applications, interviews, offer
     │       ├── skill_nodes.ts         — Полный граф навыков (~1173 строки)
     │       ├── styles.css             — Стили профессии
+    │       ├── world.ts               — Тема мира: palette, geometry, chapterAccents, celebration
     │       └── tasks/
     │           ├── index.ts           — Реэкспорт всех задач
     │           ├── resume.ts          — Задачи главы Resume (~477 строк)
@@ -329,8 +333,8 @@ D:\career-navigator/
     │   │   ├── components/
     │   │   │   ├── BackgroundLayer.tsx     — Фоновый цвет по главе
     │   │   │   ├── ChapterHub.tsx          — Карточки глав
-    │   │   │   ├── ChapterCompleteScreen.tsx — Завершение главы
-    │   │   │   ├── JourneyCompleteScreen.tsx — Завершение всего пути
+    │   │   │   ├── ChapterCompleteScreen.tsx — Завершение главы (CSS-переменные темы через useWorldCssStyle + useWorldConfettiColors)
+    │   │   │   ├── JourneyCompleteScreen.tsx — Завершение всего пути (CSS-переменные темы через useWorldCssStyle)
     │   │   │   ├── JourneyHeader.tsx       — Заголовок: глава, readiness
     │   │   │   ├── JourneyBottomNav.tsx    — Нижняя навигация
     │   │   │   ├── JourneyPath.tsx         — Скролл-путь (заменён на ChapterHub)
@@ -373,7 +377,7 @@ D:\career-navigator/
     │   │   ├── OnboardingScreen.tsx
     │   │   └── OnboardingScreen.css
     │   │
-    │   ├── IntroJourneyScreen/        — Киноинтро (8-12 сек)
+    │   ├── IntroJourneyScreen/        — Киноинтро (8-12 сек, CSS-переменные темы через useWorldCssStyle)
     │   │   ├── IntroJourneyScreen.tsx
     │   │   └── IntroJourneyScreen.css
     │   │
@@ -405,7 +409,13 @@ D:\career-navigator/
     │   ├── useJourneyCamera.ts        — Плавный скролл к активной ноде
     │   └── useScrollToCurrent.ts      — Алиас useJourneyCamera
     │
-    ├── world/                         — Визуальный мир / 3D
+    ├── core/world/                    — World Theme System (единый источник)
+    │   ├── world_theme.ts             — WorldPalette, WorldTheme, WorldGeometry типы + реестр + getWorldCssVars
+    │   ├── world_composer.ts          — composeWorldRenderConfig: тема + runtime → WorldRenderConfig
+    │   ├── useWorldCssStyle.ts        — Хук: CSS-переменные --w-* на React.CSSProperties
+    │   └── useWorldConfettiColors.ts  — Хук: массив цветов конфетти из темы профессии
+    │
+    ├── world/                         — Визуальный мир / 3D (легаси)
     │   ├── index.ts
     │   ├── types.ts                   — LevelStatus, VisualTheme, CareerLevel, PathSegment
     │   ├── visual_world_contract.ts   — WorldNodeVisual, WorldState, WorldTimeOfDay
@@ -420,7 +430,6 @@ D:\career-navigator/
     │   ├── WorldFlowConnector.ts      — Career option → world state
     │   ├── EnvironmentGenerator.tsx   — React: окружение (градиенты) под уровень
     │   ├── LevelRenderer.tsx          — React: карточка уровня с glow
-    │   ├── progressStore.ts           — Zustand store прогресса мира
     │   ├── useWorldProgression.ts     — Hook: move to next level
     │   ├── camera/
     │   │   └── world_camera_controller.ts — 3D камера: create, focus, update
