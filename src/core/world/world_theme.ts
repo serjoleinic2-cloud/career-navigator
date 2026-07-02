@@ -94,8 +94,6 @@ export const DEFAULT_WORLD_THEME: WorldTheme = {
   },
 };
 
-export type { WorldRenderConfig } from './world_composer';
-
 export function getChapterAccent(theme: WorldTheme, chapterId: string): string {
   return theme.chapterAccents[chapterId.toLowerCase()] ?? Object.values(theme.chapterAccents)[0];
 }

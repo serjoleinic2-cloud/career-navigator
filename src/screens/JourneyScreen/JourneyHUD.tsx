@@ -91,11 +91,6 @@ export function JourneyHUD() {
     return Object.values(runtime.nodeStates).every(n => n.state === 'confidence');
   }, [runtime]);
 
-  const activeChapterDomain = useMemo(() => {
-    if (!node) return undefined;
-    return node.domain;
-  }, [node]);
-
   const chapters = useMemo(() => {
     if (!runtime) return [];
     const domainMap: Record<string, SkillNode[]> = {};
