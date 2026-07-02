@@ -114,7 +114,11 @@ export function JourneyHUD() {
 
   const handleNodeSelect = useCallback((nodeId: string) => {
     const clickedRuntime = getRuntimeState();
-    const clickedNodeState = clickedRuntime?.nodeStates[nodeId]?.state;
+    if (!clickedRuntime?.nodeStates[nodeId]) {
+      setLockedToast('Node not found.');
+      return;
+    }
+    const clickedNodeState = clickedRuntime.nodeStates[nodeId].state;
     if (!clickedNodeState || clickedNodeState === 'locked') {
       setLockedToast('Complete previous tasks to unlock this node.');
       return;

@@ -16,7 +16,8 @@
   min-height: 100vh;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* JourneyHUD variant: no own background — WorldRenderer (canvas) renders

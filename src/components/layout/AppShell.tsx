@@ -29,7 +29,7 @@ export function AppShell({
         onBack={onBack}
         rightAction={rightAction}
       />
-      <main className="app-shell-content">
+      <main className="app-shell-content app-shell-scrollable">
         {children}
       </main>
       {onTabChange && activeTab && (

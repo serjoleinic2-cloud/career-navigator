@@ -39,10 +39,10 @@ export function BottomNav() {
                 <div className="relative">
                   <Icon
                     size={22}
-                    className="text-white/30 transition-colors duration-300"
+                    className="text-black transition-colors duration-300"
                   />
                 </div>
-                <span className="text-[10px] font-medium text-white/30 transition-colors duration-300">
+                <span className="text-[10px] font-medium text-black transition-colors duration-300">
                   {tab.label}
                 </span>
               </motion.button>
