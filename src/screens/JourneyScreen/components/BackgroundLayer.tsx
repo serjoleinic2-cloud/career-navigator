@@ -6,8 +6,14 @@ interface BackgroundLayerProps {
   chapterDomain?: string;
 }
 
+/**
+ * Atmospheric fog layer, NOT an opaque background fill.
+ * The light WorldBackdrop must always remain visible through this layer —
+ * per product decision: "Journey is a HUD floating over a bright world,
+ * not a dark screen." (see WORLD_COMPOSITION_REPORT.md / задание.txt decision #3)
+ */
 export function BackgroundLayer({ chapterDomain }: BackgroundLayerProps) {
-  const bgColor = useMemo(() => {
+  const fogColor = useMemo(() => {
     const professionId = getRuntimeState()?.professionId ?? 'default';
     const theme = getWorldThemeOrDefault(professionId);
     if (!chapterDomain) return theme.palette.backgroundTo;
@@ -17,7 +23,9 @@ export function BackgroundLayer({ chapterDomain }: BackgroundLayerProps) {
   return (
     <div
       className="background-layer"
-      style={{ backgroundColor: bgColor }}
+      style={{
+        background: `linear-gradient(180deg, transparent 0%, ${fogColor} 100%)`,
+      }}
     />
   );
 }
