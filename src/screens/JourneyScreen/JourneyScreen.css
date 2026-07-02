@@ -510,6 +510,11 @@
   overflow: hidden;
 }
 
+.chapter-island:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.2);
+  outline-offset: 2px;
+}
+
 .chapter-island:hover:not(.island-locked) {
   transform: scale(1.02);
 }
@@ -692,6 +697,11 @@
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, box-shadow 0.3s ease;
   z-index: 1;
   animation: node-card-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.skill-node-card:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.2);
+  outline-offset: 2px;
 }
 
 @keyframes node-card-enter {
@@ -1219,11 +1229,19 @@
   }
 }
 
+/* === Mission containers — padding above bottom nav === */
+.journey-mission-container,
+.chapter-missions {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
 /* === Mission Trigger Button (above bottom nav) === */
-.journey-mission-trigger {
+.journey-mission-trigger,
+.mission-trigger-button,
+.start-mission-btn {
   position: fixed;
   bottom: calc(80px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 50;
+  z-index: 100;
 }

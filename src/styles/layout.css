@@ -13,12 +13,12 @@
   flex: 1;
   overflow-x: hidden;
   padding-top: 80px;
-  padding-bottom: calc(100px + env(safe-area-inset-bottom));
 }
 
 .app-shell-scrollable {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
 }
 
 /* Screen transition */

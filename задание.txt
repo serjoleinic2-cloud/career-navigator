@@ -1,90 +1,187 @@
-1. Исправить TS-ошибки обязательно
+CAREER NAVIGATOR
+STABILIZATION SPRINT #1
 
-Особенно это:
+IMPORTANT
 
-world_theme.ts:97
+STOP ADDING FEATURES.
 
-import ./world_composer
+STOP REFACTORING.
 
-Это недопустимо.
+STOP REDESIGNING.
 
-Мы сами приняли решение, что:
+Current priority is APPLICATION STABILITY.
 
-world_composer удалён
+The goal is to return the application to a fully usable state before any further development.
 
-Если где-то остался импорт — это технический долг.
+====================================================
+STEP 1 — BUILD MUST PASS
+====================================================
 
-Его нужно убрать полностью.
+Application must compile with:
 
-Вторая ошибка
+0 TypeScript errors.
 
-JourneyHUD.tsx
+0 missing imports.
 
-activeChapterDomain
+0 broken routes.
 
-Если не используется —
+====================================================
+STEP 2 — GLOBAL NAVIGATION
+====================================================
 
-либо удалить,
+Verify EVERY bottom navigation item.
 
-либо использовать.
+Journey
 
-В проекте не должно оставаться "мёртвого" кода.
+✓ opens
+✓ responds to tap
+✓ active state works
 
-2. Перед коммитом сделать UX Audit
+Playbook
 
-Я бы дал Kimi ещё одно маленькое задание.
+✓ opens
+✓ content visible
 
-PRE-COMMIT UX AUDIT
+Notes
 
-Before commit, manually verify on Android device:
+✓ opens
+✓ content visible
 
-==================================================
+Profile
 
-PLAYBOOK
+✓ opens
+✓ responds
 
-✓ Open article
-✓ Scroll works
-✓ Text readable
-✓ No content under Bottom Navigation
-✓ X closes page
-✓ Back button works
+Nothing may silently fail.
 
-==================================================
+====================================================
+STEP 3 — HAMBURGER MENU
+====================================================
 
-NOTES
+Top-left menu must respond.
 
-✓ Create note
-✓ Create title
-✓ Save
-✓ Search
-✓ Scroll
-✓ Close
-✓ Back button
+If functionality is unfinished:
 
-==================================================
+show placeholder panel
 
-WORLD
+instead of doing nothing.
 
-✓ Mission cards scroll
+No dead buttons anywhere.
 
-✓ LinkedIn chapter has no empty space
+====================================================
+STEP 4 — PLAYBOOK
+====================================================
 
-✓ No hidden cards
+If no content exists:
 
-==================================================
+show proper Empty State.
 
-GLOBAL
+Never blank screen.
 
-✓ No white text on light backgrounds
+Example:
 
-✓ No layout overflow
+Playbook is coming soon.
 
-✓ No clipped buttons
+or
 
-==================================================
+No articles available.
 
-Only after all checks pass:
+====================================================
+STEP 5 — NOTES
+====================================================
 
-Commit.
+If database is empty:
 
-Otherwise fix first.
+show
+
+"No notes yet"
+
++
+
+Create first note
+
+Never blank screen.
+
+====================================================
+STEP 6 — WORLD
+====================================================
+
+Mission list must scroll.
+
+Every chapter visible.
+
+Resume
+
+LinkedIn
+
+remaining missions
+
+must all be reachable.
+
+No clipped cards.
+
+No hidden content.
+
+====================================================
+STEP 7 — SAFE AREA
+====================================================
+
+Nothing may be hidden behind
+
+Bottom Navigation
+
+Status Bar
+
+Gesture Area
+
+====================================================
+STEP 8 — DEAD UI AUDIT
+====================================================
+
+Search entire project.
+
+Find every clickable element.
+
+If it does nothing:
+
+either
+
+implement minimal behaviour
+
+or
+
+disable it visually.
+
+Never leave fake buttons.
+
+====================================================
+STEP 9 — REPORT
+====================================================
+
+Create
+
+STABILIZATION_REPORT.md
+
+For every screen:
+
+Working
+
+Partially working
+
+Broken
+
+Include file names.
+
+====================================================
+
+DO NOT
+
+Do not redesign UI.
+
+Do not change architecture.
+
+Do not improve WorldRenderer.
+
+Do not add animations.
+
+Return the application to a stable MVP state.
