@@ -1,9 +1,3 @@
-Как это использовать
-
-Ты просто:
-
-Загружаешь все свои .md файлы
-Добавляешь этот prompt
-Пишешь:
-
-“Generate full architecture now”
+CAREER_NAVIGATOR_MASTER_CHECKPOINT.md
+PROJECT_STATUS.md
+CORE_MAP.md
