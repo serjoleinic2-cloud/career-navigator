@@ -78,6 +78,44 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-04 — Claude (четырнадцатая сессия)
+
+**Критический баг:** на узле "Positioning Clarity" (World tab), нажатие
+"Complete Mission" всегда выдавало "Something went wrong. Try again." —
+миссию нельзя было пройти вообще.
+
+**Причина:** `MissionScreen` рендерился для активного узла, но нигде — ни
+сам экран, ни `JourneyHUD` — не вызывал `loadTaskForNode`/
+`createTaskFromDefinition` для старта задачи. Модуль `runtime_controller.ts`
+хранит `activeTask` как приватную переменную уровня модуля; она оставалась
+`null`. По нажатию Complete Mission `submitTask()` (в `runtime_controller.ts`)
+бросает `throw new Error('No active task')`, если `activeTask` не установлен
+— это перехватывается в `skill_engine.ts` (`MISSION_SUBMIT` handler) и
+превращается в `MISSION_RESULT { success: false, error }`, которое
+`MissionScreen.tsx` показывает как "Something went wrong. Try again."
+**Это не редкий баг — он гарантированно воспроизводится на любой первой
+попытке пройти любую миссию**, поскольку задача никогда не стартовала.
+
+Исправлено: `MissionScreen.tsx` теперь при монтировании/смене
+`activeNodeId` явно вызывает `loadTaskForNode(activeNodeId)` →
+`createTaskFromDefinition(definition)`, если для этого узла ещё нет
+активной задачи (`getActiveTask()?.nodeId !== activeNodeId`) — тот же
+паттерн, что уже использовался в legacy-пути `advanceNode()` в том же
+файле. Файлы: `src/screens/MissionScreen/MissionScreen.tsx`.
+
+`npx tsc --noEmit` / `npx vite build` — чисто.
+
+**Не проверено вживую на телефоне** — фикс сделан по анализу кода (путь
+"submit без предварительного start"), не воспроизводился локально пошагово
+через UI в этой сессии из-за ограничений окружения. Следующий шаг —
+пользователь проверяет на устройстве: открыть World → Positioning Clarity →
+пройти задачу до конца → Complete Mission. Если ошибка всё ещё
+воспроизводится — прислать точный текст любой ошибки в консоли/logcat,
+не только сообщение на экране, так как "Something went wrong" — это общий
+catch-all, реальная причина может быть другой (см. `error: String(err)`
+в `MISSION_RESULT`, эта деталь никуда не выводится в UI, только гасится).
+
+
 ### 2026-07-04 — Claude (тринадцатая сессия — Stabilization Sprint Final)
 
 Задача от ChatGPT (`задание.txt`): закрыть фазу Stabilization. Правило

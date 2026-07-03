@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import './MissionScreen.css';
 import type { JourneyRuntimeState } from '../../core/runtime/journey_runtime';
 import { emit, subscribe } from '../../core/events/system_event_bus';
+import { loadTaskForNode, createTaskFromDefinition, getActiveTask } from '../../core/runtime/runtime_controller';
 
 interface MissionScreenProps {
   runtimeState: JourneyRuntimeState;
@@ -23,6 +24,20 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   const nodeStates = runtimeState.nodeStates;
   const activeNode = nodeStates[activeNodeId];
   const activeTask = activeNode?.tasks?.[0];
+
+  // Ensure the runtime's task-lifecycle state machine (runtime_controller's
+  // module-level `activeTask`) actually has a task loaded for this node
+  // before the user can submit. Without this, submitTask() always threw
+  // 'No active task', which surfaced to the user as
+  // 'Something went wrong. Try again.' on every mission, every time.
+  useEffect(() => {
+    if (!activeNodeId) return;
+    if (getActiveTask()?.nodeId === activeNodeId) return;
+    const definition = loadTaskForNode(activeNodeId);
+    if (definition) {
+      createTaskFromDefinition(definition);
+    }
+  }, [activeNodeId]);
 
   useEffect(() => {
     setTaskView('active');
