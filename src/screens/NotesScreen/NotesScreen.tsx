@@ -63,6 +63,30 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
     }
   }, [showNewNote]);
 
+  // Robust keyboard-safe height, independent of whether the native
+  // android:windowSoftInputMode="adjustResize" actually took effect on
+  // this build/device. visualViewport.height shrinks to the REAL visible
+  // area when the keyboard opens (widely supported in Android WebView);
+  // we use it to cap the drawer instead of trusting `100vh`/`inset:0`,
+  // which can still reference the full layout viewport (behind the
+  // keyboard) on some WebViews even with adjustResize set.
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const updateHeight = () => setViewportHeight(vv.height);
+    updateHeight();
+    vv.addEventListener('resize', updateHeight);
+    vv.addEventListener('scroll', updateHeight);
+
+    return () => {
+      vv.removeEventListener('resize', updateHeight);
+      vv.removeEventListener('scroll', updateHeight);
+    };
+  }, []);
+
   const filtered = searchQuery
     ? notes.filter(n => n.content.toLowerCase().includes(searchQuery.toLowerCase()))
     : notes;
@@ -248,8 +272,16 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
 
       {/* New note drawer */}
       {showNewNote && (
-        <div className="notes-drawer-overlay" onClick={() => setShowNewNote(false)}>
-          <div className="notes-drawer" onClick={e => e.stopPropagation()}>
+        <div
+          className="notes-drawer-overlay"
+          style={viewportHeight ? { height: viewportHeight } : undefined}
+          onClick={() => setShowNewNote(false)}
+        >
+          <div
+            className="notes-drawer"
+            style={viewportHeight ? { maxHeight: viewportHeight * 0.9 } : undefined}
+            onClick={e => e.stopPropagation()}
+          >
             <input
               className="notes-drawer-title"
               placeholder="Note title..."
