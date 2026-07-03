@@ -1,187 +1,37 @@
-CAREER NAVIGATOR
-STABILIZATION SPRINT #1
+И ещё одна вещь.
+Убрать слово Resume из карточки.
 
-IMPORTANT
+Вместо этого:
 
-STOP ADDING FEATURES.
+🏝 First Step
 
-STOP REFACTORING.
+Learn to present yourself
 
-STOP REDESIGNING.
+Continue
 
-Current priority is APPLICATION STABILITY.
+Когда пользователь открывает остров — только тогда он понимает, что это резюме.
 
-The goal is to return the application to a fully usable state before any further development.
+Самое важное изменение проекта
 
-====================================================
-STEP 1 — BUILD MUST PASS
-====================================================
-
-Application must compile with:
-
-0 TypeScript errors.
-
-0 missing imports.
-
-0 broken routes.
-
-====================================================
-STEP 2 — GLOBAL NAVIGATION
-====================================================
-
-Verify EVERY bottom navigation item.
-
-Journey
-
-✓ opens
-✓ responds to tap
-✓ active state works
-
-Playbook
-
-✓ opens
-✓ content visible
-
-Notes
-
-✓ opens
-✓ content visible
-
-Profile
-
-✓ opens
-✓ responds
-
-Nothing may silently fail.
-
-====================================================
-STEP 3 — HAMBURGER MENU
-====================================================
-
-Top-left menu must respond.
-
-If functionality is unfinished:
-
-show placeholder panel
-
-instead of doing nothing.
-
-No dead buttons anywhere.
-
-====================================================
-STEP 4 — PLAYBOOK
-====================================================
-
-If no content exists:
-
-show proper Empty State.
-
-Never blank screen.
-
-Example:
-
-Playbook is coming soon.
-
-or
-
-No articles available.
-
-====================================================
-STEP 5 — NOTES
-====================================================
-
-If database is empty:
-
-show
-
-"No notes yet"
-
-+
-
-Create first note
-
-Never blank screen.
-
-====================================================
-STEP 6 — WORLD
-====================================================
-
-Mission list must scroll.
-
-Every chapter visible.
+Я бы вообще убрал эти названия:
 
 Resume
-
 LinkedIn
+Applications
+Interviews
+Offer
 
-remaining missions
+из главного мира.
 
-must all be reachable.
+Они должны жить внутри миссий, а не на карте.
 
-No clipped cards.
+На карте должны жить игровые названия.
 
-No hidden content.
+Например:
 
-====================================================
-STEP 7 — SAFE AREA
-====================================================
-
-Nothing may be hidden behind
-
-Bottom Navigation
-
-Status Bar
-
-Gesture Area
-
-====================================================
-STEP 8 — DEAD UI AUDIT
-====================================================
-
-Search entire project.
-
-Find every clickable element.
-
-If it does nothing:
-
-either
-
-implement minimal behaviour
-
-or
-
-disable it visually.
-
-Never leave fake buttons.
-
-====================================================
-STEP 9 — REPORT
-====================================================
-
-Create
-
-STABILIZATION_REPORT.md
-
-For every screen:
-
-Working
-
-Partially working
-
-Broken
-
-Include file names.
-
-====================================================
-
-DO NOT
-
-Do not redesign UI.
-
-Do not change architecture.
-
-Do not improve WorldRenderer.
-
-Do not add animations.
-
-Return the application to a stable MVP state.
+Игровое название	Реальная цель
+The First Step	Resume
+Enter the Network	LinkedIn
+Reach the Companies	Applications
+Face the Gatekeepers	Interviews
+Claim the Summit	Job Offer
