@@ -63,18 +63,19 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
       {/* Phase 0: Dark screen, light appears */}
       <div className={`intro-light ${phase >= 0 ? 'visible' : ''}`} />
 
-      {/* Phase 1: Title */}
-      <div className={`intro-text intro-title ${phase >= 1 ? 'visible' : ''}`}>
+      {/* Phase 1: Title — visible only before the map takes over */}
+      <div className={`intro-text intro-title ${phase >= 1 && phase < 4 ? 'visible' : ''}`}>
         Your journey begins.
       </div>
 
       {/* Phase 2: Profession */}
-      <div className={`intro-text intro-profession ${phase >= 2 ? 'visible' : ''}`}>
+      <div className={`intro-text intro-profession ${phase >= 2 && phase < 4 ? 'visible' : ''}`}>
         Software Engineer
       </div>
 
-      {/* Phase 3: Stats */}
-      <div className={`intro-stats ${phase >= 3 ? 'visible' : ''}`}>
+      {/* Phase 3: Stats — fade out as soon as the map starts appearing so the
+          numbers never sit on top of the islands (was: stayed forever). */}
+      <div className={`intro-stats ${phase >= 3 && phase < 4 ? 'visible' : ''}`}>
         <div className="stat-item">
           <span className="stat-number">38</span>
           <span className="stat-label">Skills</span>
