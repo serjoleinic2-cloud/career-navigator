@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Enforces the project rule: any commit that changes real code/content
+# must also update PROJECT_STATUS.md in the same commit.
+#
+# Why this exists: Career Navigator is worked on by several different AI
+# agents (Claude / ChatGPT / OpenCode / Kimi) across different accounts,
+# often in separate sessions that never see each other's chat history.
+# PROJECT_STATUS.md is the only shared memory between them. In the past,
+# fixes were diagnosed and made in one session but never written down,
+# so the next agent re-diagnosed the same bug from scratch. This hook
+# makes forgetting to log a change impossible to do silently.
+#
+# Setup (once per clone):
+#   git config core.hooksPath .githooks
+#
+# Bypass (only for trivial commits like formatting a single doc typo):
+#   git commit --no-verify
+
+STATUS_FILE="PROJECT_STATUS.md"
+
+# Files that don't count as "real changes" needing a status update.
+IGNORE_REGEX='^(PROJECT_STATUS\.md|CORE_MAP\.md|CAREER_NAVIGATOR_MASTER_CHECKPOINT\.md|\.gitignore|package-lock\.json)$'
+
+CHANGED_FILES=$(git diff --cached --name-only)
+
+if [ -z "$CHANGED_FILES" ]; then
+  exit 0
+fi
+
+MEANINGFUL_CHANGE=false
+while IFS= read -r f; do
+  if [[ ! "$f" =~ $IGNORE_REGEX ]]; then
+    MEANINGFUL_CHANGE=true
+    break
+  fi
+done <<< "$CHANGED_FILES"
+
+if [ "$MEANINGFUL_CHANGE" = false ]; then
+  exit 0
+fi
+
+if echo "$CHANGED_FILES" | grep -qx "$STATUS_FILE"; then
+  exit 0
+fi
+
+echo ""
+echo "❌ Commit blocked: you changed project files but did not update $STATUS_FILE."
+echo ""
+echo "   Project rule (see $STATUS_FILE header): every commit that changes"
+echo "   code/behavior must add an entry under 'История изменений' — this is"
+echo "   the only shared memory between AI agents working on this repo across"
+echo "   different sessions and accounts."
+echo ""
+echo "   Add a short entry (date, agent name, what changed) to $STATUS_FILE,"
+echo "   'git add' it, and commit again."
+echo ""
+echo "   Genuinely trivial commit (typo, formatting)? Bypass with:"
+echo "     git commit --no-verify"
+echo ""
+exit 1
