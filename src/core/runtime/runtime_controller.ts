@@ -249,12 +249,38 @@ function applyTaskResultToRuntime(result: TaskResult, originalNode: SkillNode): 
       state: result.skillTransition.current,
       nextState: getNextState(result.skillTransition.current),
     };
+    let nodeStates = {
+      ...runtimeState.nodeStates,
+      [result.nodeId]: updatedNode,
+    };
+
+    // Symmetric unlock: when a node reaches 'confidence', unlock the next
+    // node WITHIN THE SAME CHAPTER (if it exists and is still 'locked').
+    // Without this, every node in a chapter after the first was reachable
+    // in the skill graph definition but never actually unlocked through
+    // play — only the chapter's entry node (unlocked in
+    // initializeJourneyRuntime) and the chapter's first node (unlocked in
+    // advanceChapter) ever left the 'locked' state. Same pattern as both
+    // of those call sites: flip 'locked' -> 'awareness'.
+    if (updatedNode.state === 'confidence') {
+      const chapters = getActiveChapters();
+      const chapter = chapters.find(ch => ch.nodeIds.includes(result.nodeId));
+      if (chapter) {
+        const idx = chapter.nodeIds.indexOf(result.nodeId);
+        const nextNodeId = chapter.nodeIds[idx + 1];
+        const nextNode = nextNodeId ? nodeStates[nextNodeId] : undefined;
+        if (nextNode && nextNode.state === 'locked') {
+          nodeStates = {
+            ...nodeStates,
+            [nextNodeId]: { ...nextNode, state: 'awareness', nextState: 'understanding' },
+          };
+        }
+      }
+    }
+
     runtimeState = {
       ...runtimeState,
-      nodeStates: {
-        ...runtimeState.nodeStates,
-        [result.nodeId]: updatedNode,
-      },
+      nodeStates,
     };
   }
 
