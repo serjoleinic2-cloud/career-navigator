@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getUIState } from '@/core/ui_bridge/ui_bridge';
-import { setActiveNode, getActiveNode, getRuntimeState } from '@/core/runtime/runtime_controller';
+import { setActiveNode, getActiveNode, getRuntimeState, advanceChapter } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
 import type { SkillNode } from '@/core/skill_state';
@@ -8,6 +8,7 @@ import { JourneyHeader } from './components/JourneyHeader';
 import { ChapterHub } from './components/ChapterHub';
 import type { ChapterData } from './components/ChapterHub';
 import { ChapterCompleteScreen } from './components/ChapterCompleteScreen';
+import { BridgeRestoreScreen } from './components/BridgeRestoreScreen';
 import { JourneyCompleteScreen } from './components/JourneyCompleteScreen';
 import { useCamera } from './hooks/useCamera';
 import { useChapterHub } from './hooks/useChapterHub';
@@ -24,6 +25,16 @@ import './JourneyScreen.css';
  *   itself (no WorldBackdrop, no BackgroundLayer, no world_composer) —
  *   it only renders mission cards, header, progress, and navigation,
  *   meant to be mounted ON TOP of a persistent WorldRenderer instance.
+ *
+ * WORLD PROGRESSION REWORK (this session):
+ * - The HUD shows exactly one chapter card at a time — the active one.
+ *   Future chapters are never rendered as cards here; they only exist as
+ *   world objects in WorldRenderer. Locked-chapter cards were removed.
+ * - When the active chapter's last node reaches 'confidence' on all its
+ *   nodes: ChapterCompleteScreen (celebration) -> BridgeRestoreScreen
+ *   (bridge-restore animation) -> HUD camera rises (useCamera.moveUp) ->
+ *   advanceChapter() unlocks + activates the next chapter's first node ->
+ *   its card fades in. See useChapterHub for the phase state machine.
  *
  * Formerly `JourneyScreen` — renamed conceptually, kept file-adjacent
  * for minimal diff. See App.tsx for how this is composed with
@@ -44,8 +55,10 @@ export function JourneyHUD() {
   const [, setTick] = useState(0);
   const [showMission, setShowMission] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
-  const { view, selectedChapter, selectChapter, dismissComplete } = useChapterHub();
-  const { cameraStyle, zoomOut } = useCamera();
+  const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
+  const { phase, startCelebration, startBridge, finishBridge } = useChapterHub();
+  const { cameraStyle, moveUp, zoomOut } = useCamera();
+  const prevChapterCompletedRef = useRef<string | null>(null);
 
   const refresh = useCallback(() => {
     setTick(t => t + 1);
@@ -111,6 +124,30 @@ export function JourneyHUD() {
     } as ChapterData));
   }, [runtime]);
 
+  const activeChapterIndex = chapters.findIndex(c => c.isActive);
+  const activeChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex] : null;
+  const nextChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex + 1] : undefined;
+
+  // Detect the active chapter finishing all its nodes and kick off the
+  // celebrate -> bridge -> advance sequence exactly once per chapter.
+  useEffect(() => {
+    if (!activeChapter) return;
+    if (
+      activeChapter.isCompleted &&
+      phase === 'active' &&
+      !showMission &&
+      prevChapterCompletedRef.current !== activeChapter.id
+    ) {
+      prevChapterCompletedRef.current = activeChapter.id;
+      if (nextChapter) {
+        setNextChapterTitle(nextChapter.title);
+        startCelebration();
+      }
+      // If there's no next chapter, allNodesCompleted (below) already
+      // takes over and shows JourneyCompleteScreen instead.
+    }
+  }, [activeChapter, phase, showMission, nextChapter, startCelebration]);
+
   const handleNodeSelect = useCallback((nodeId: string) => {
     const clickedRuntime = getRuntimeState();
     if (!clickedRuntime?.nodeStates[nodeId]) {
@@ -129,21 +166,27 @@ export function JourneyHUD() {
     setActiveNode(nodeId);
   }, [ui.activeNodeId]);
 
-  const handleChapterSelect = useCallback((chapterId: string) => {
-    selectChapter(chapterId);
-  }, [selectChapter]);
+  const handleCelebrationContinue = useCallback(() => {
+    startBridge();
+  }, [startBridge]);
 
-  const handleDismissComplete = useCallback(() => {
-    zoomOut();
-    setTimeout(() => dismissComplete(), 400);
-  }, [zoomOut, dismissComplete]);
+  const handleBridgeDone = useCallback(() => {
+    // Bridge finished restoring — camera rises to reveal the next chapter,
+    // then the runtime actually advances (unlocks + activates the next
+    // chapter's first node), then we're back to normal HUD interaction.
+    moveUp();
+    setTimeout(() => {
+      advanceChapter();
+      zoomOut();
+      finishBridge();
+      refresh();
+    }, 650);
+  }, [moveUp, zoomOut, finishBridge, refresh]);
 
   const handleMissionComplete = useCallback(() => {
     setShowMission(false);
     refresh();
   }, [refresh]);
-
-  const isChaptersView = view === 'chapter' || view === 'chapterComplete';
 
   if (showMission && runtime) {
     return (
@@ -183,31 +226,37 @@ export function JourneyHUD() {
   return (
     <div className="journey-screen journey-hud">
       <JourneyHeader
-        chapterTitle={isChaptersView && selectedChapter ? selectedChapter : (ui.currentChapterTitle || node.domain)}
+        chapterTitle={ui.currentChapterTitle || node.domain}
         nodeIndex={0}
         totalNodes={professionNodes.length}
         readinessScore={runtime?.readinessScore ?? 0}
       />
 
-      <div className="journey-world" style={view === 'chapter' ? cameraStyle : undefined}>
+      <div className="journey-world" style={cameraStyle}>
         <ChapterHub
-          chapters={chapters}
+          chapter={activeChapter}
           activeNodeId={ui.activeNodeId}
-          selectedChapter={selectedChapter}
-          onChapterSelect={handleChapterSelect}
           onNodeSelect={handleNodeSelect}
         />
       </div>
 
-      {view === 'chapterComplete' && selectedChapter && (
+      {phase === 'celebrate' && activeChapter && (
         <ChapterCompleteScreen
-          chapterId={selectedChapter}
-          chapterTitle={selectedChapter}
-          skillsCompleted={chapters.find(c => c.id === selectedChapter)?.completedCount ?? 0}
-          totalSkills={chapters.find(c => c.id === selectedChapter)?.totalCount ?? 0}
+          chapterId={activeChapter.id}
+          chapterTitle={activeChapter.title}
+          skillsCompleted={activeChapter.completedCount}
+          totalSkills={activeChapter.totalCount}
           readinessDelta={12}
           confidenceDelta={8}
-          onContinue={handleDismissComplete}
+          onContinue={handleCelebrationContinue}
+        />
+      )}
+
+      {phase === 'bridge' && activeChapter && (
+        <BridgeRestoreScreen
+          fromChapterTitle={activeChapter.title}
+          toChapterTitle={nextChapterTitle}
+          onDone={handleBridgeDone}
         />
       )}
 
