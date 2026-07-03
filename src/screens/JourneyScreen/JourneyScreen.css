@@ -509,21 +509,29 @@
      without this, the color-mix() background below is silently dropped
      entirely and the card renders with no fill at all — the "flat gray"
      look this was meant to fix. Plain rgba first, color-mix() overrides
-     it on capable browsers. */
+     it on capable browsers.
+     Intensity was raised from an earlier, too-subtle pass (16%/22%/20%):
+     at low opacity on a near-black card the accent read as "still gray"
+     even when technically present — bumped to levels that are
+     unmistakably colored on a phone screen in daylight. */
   background:
-    radial-gradient(120% 100% at 50% 0%, rgba(102, 126, 234, 0.16) 0%, transparent 60%),
-    linear-gradient(165deg, rgba(38, 44, 58, 0.72) 0%, rgba(16, 19, 27, 0.78) 100%);
+    radial-gradient(120% 100% at 50% 0%, rgba(102, 126, 234, 0.40) 0%, transparent 65%),
+    linear-gradient(165deg, rgba(44, 50, 68, 0.60) 0%, rgba(14, 17, 26, 0.72) 100%);
   background:
-    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 16%, transparent) 0%, transparent 60%),
-    linear-gradient(165deg, rgba(38, 44, 58, 0.72) 0%, rgba(16, 19, 27, 0.78) 100%);
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 42%, transparent) 0%, transparent 65%),
+    linear-gradient(165deg, rgba(44, 50, 68, 0.60) 0%, rgba(14, 17, 26, 0.72) 100%);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(102, 126, 234, 0.32);
-  border: 1px solid color-mix(in srgb, var(--island-accent, #4A90D9) 22%, rgba(240, 240, 245, 0.10));
+  border: 1px solid rgba(102, 126, 234, 0.55);
+  border: 1px solid color-mix(in srgb, var(--island-accent, #4A90D9) 55%, rgba(240, 240, 245, 0.10));
   box-shadow:
     0 16px 44px rgba(0, 0, 0, 0.30),
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+    0 0 28px rgba(102, 126, 234, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.30),
+    0 0 28px color-mix(in srgb, var(--island-accent, #4A90D9) 22%, transparent),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
   cursor: pointer;
   outline: none;
   transition: opacity 0.35s ease, transform 0.35s ease-out, min-height 0.35s ease, box-shadow 0.35s ease;
@@ -537,21 +545,21 @@
   top: 0;
   left: 12%;
   right: 12%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(118, 137, 234, 0.75) 50%, transparent 100%);
-  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 70%, white 10%) 50%, transparent 100%);
-  opacity: 0.8;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(140, 156, 240, 0.95) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 85%, white 15%) 50%, transparent 100%);
+  opacity: 1;
 }
 
 .chapter-island:hover:not(.island-locked) {
   box-shadow:
     0 20px 56px rgba(0, 0, 0, 0.34),
-    0 0 32px rgba(102, 126, 234, 0.20),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+    0 0 40px rgba(102, 126, 234, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.10) inset;
   box-shadow:
     0 20px 56px rgba(0, 0, 0, 0.34),
-    0 0 32px color-mix(in srgb, var(--island-accent, #4A90D9) 20%, transparent),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+    0 0 40px color-mix(in srgb, var(--island-accent, #4A90D9) 35%, transparent),
+    0 1px 0 rgba(255, 255, 255, 0.10) inset;
 }
 
 .chapter-island:focus-visible {
@@ -607,12 +615,12 @@
   align-items: center;
   justify-content: center;
   font-size: 36px;
-  background: radial-gradient(circle at 35% 30%, rgba(102, 126, 234, 0.22) 0%, rgba(240, 240, 245, 0.05) 70%);
-  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--island-accent, #4A90D9) 24%, transparent) 0%, rgba(240, 240, 245, 0.05) 70%);
-  border: 2px solid rgba(102, 126, 234, 0.4);
-  border: 2px solid color-mix(in srgb, var(--island-accent, #4A90D9) 35%, rgba(240, 240, 245, 0.12));
-  box-shadow: 0 0 24px rgba(102, 126, 234, 0.16);
-  box-shadow: 0 0 24px color-mix(in srgb, var(--island-accent, #4A90D9) 18%, transparent);
+  background: radial-gradient(circle at 35% 30%, rgba(102, 126, 234, 0.45) 0%, rgba(240, 240, 245, 0.06) 70%);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--island-accent, #4A90D9) 48%, transparent) 0%, rgba(240, 240, 245, 0.06) 70%);
+  border: 2px solid rgba(102, 126, 234, 0.6);
+  border: 2px solid color-mix(in srgb, var(--island-accent, #4A90D9) 60%, rgba(240, 240, 245, 0.12));
+  box-shadow: 0 0 28px rgba(102, 126, 234, 0.30);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--island-accent, #4A90D9) 32%, transparent);
   position: relative;
 }
 
