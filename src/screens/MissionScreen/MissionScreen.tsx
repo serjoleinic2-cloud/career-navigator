@@ -7,11 +7,12 @@ interface MissionScreenProps {
   runtimeState: JourneyRuntimeState;
   chapterTitle?: string;
   onComplete: () => void;
+  onClose?: () => void;
 }
 
 type TaskView = 'active' | 'completing' | 'completed';
 
-export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chapterTitle, onComplete }) => {
+export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chapterTitle, onComplete, onClose }) => {
   const [taskView, setTaskView] = useState<TaskView>('active');
   const [textInput, setTextInput] = useState('');
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
@@ -74,6 +75,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   if (!activeTask) {
     return (
       <div className="mission-screen mission-empty">
+        {onClose && <button className="mission-close-btn" onClick={onClose}>✕</button>}
         <div className="mission-empty-text">No active mission</div>
         <button className="mission-primary-btn" onClick={onComplete}>
           Return to Journey
@@ -103,6 +105,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
             {Math.round(runtimeState.confidenceScore * 100)}%
           </div>
         </div>
+        {onClose && <button className="mission-close-btn" onClick={onClose} aria-label="Close">✕</button>}
       </div>
 
       <div className={`mission-card ${taskView === 'completing' ? 'mission-pulse' : ''}`}>
@@ -212,6 +215,10 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           >
             Complete Mission
           </button>
+        )}
+
+        {taskView === 'active' && onClose && (
+          <button className="mission-back-btn" onClick={onClose}>← Назад</button>
         )}
 
         {taskView === 'completing' && (

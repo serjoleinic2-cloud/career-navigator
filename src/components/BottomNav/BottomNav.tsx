@@ -47,12 +47,12 @@ export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
                   <Icon
                     size={22}
                     className={`transition-colors duration-300 ${
-                      isActive ? 'text-white' : 'text-black'
+                      isActive ? 'text-white' : 'text-white/40'
                     }`}
                   />
                 </div>
                 <span className={`text-[10px] font-medium transition-colors duration-300 ${
-                  isActive ? 'text-white' : 'text-black'
+                  isActive ? 'text-white' : 'text-white/40'
                 }`}>
                   {tab.label}
                 </span>

@@ -30,7 +30,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   salary: '#FF6B6B',
 };
 
-export function NotesScreen({ style }: { style?: CSSProperties }) {
+export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose?: () => void }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -126,7 +126,7 @@ export function NotesScreen({ style }: { style?: CSSProperties }) {
   if (!hasNotes && !showNewNote) {
     return (
       <div className="notes-screen" style={style}>
-        <button className="notes-close-btn" onClick={() => window.location.hash = ''}>✕</button>
+        <button className="notes-close-btn" onClick={onClose}>✕</button>
         <div className="notes-scroll">
           <h1 className="notes-title">My Journal</h1>
           <div className="notes-empty-state">
@@ -134,6 +134,7 @@ export function NotesScreen({ style }: { style?: CSSProperties }) {
             <h2>No notes yet</h2>
             <p>Tap + to create your first note.</p>
           </div>
+          <button className="notes-back-btn" onClick={onClose}>← Назад</button>
         </div>
         <button className="notes-fab" onClick={() => setShowNewNote(true)}>+</button>
       </div>
@@ -142,7 +143,7 @@ export function NotesScreen({ style }: { style?: CSSProperties }) {
 
   return (
     <div className="notes-screen" style={style}>
-      <button className="notes-close-btn" onClick={() => window.location.hash = ''}>✕</button>
+      <button className="notes-close-btn" onClick={onClose}>✕</button>
       <div className="notes-scroll">
       <h1 className="notes-title">My Journal</h1>
 
@@ -232,6 +233,8 @@ export function NotesScreen({ style }: { style?: CSSProperties }) {
           </div>
         ))}
       </div>
+
+      <button className="notes-back-btn" onClick={onClose}>← Назад</button>
 
       {/* New note floating button */}
       <button

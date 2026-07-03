@@ -9,7 +9,6 @@ import { ChapterHub } from './components/ChapterHub';
 import type { ChapterData } from './components/ChapterHub';
 import { ChapterCompleteScreen } from './components/ChapterCompleteScreen';
 import { JourneyCompleteScreen } from './components/JourneyCompleteScreen';
-import { JourneyBottomNav } from './components/JourneyBottomNav';
 import { useCamera } from './hooks/useCamera';
 import { useChapterHub } from './hooks/useChapterHub';
 import './JourneyScreen.css';
@@ -139,13 +138,6 @@ export function JourneyHUD() {
     setTimeout(() => dismissComplete(), 400);
   }, [zoomOut, dismissComplete]);
 
-  const handleTabChange = useCallback((tabId: string) => {
-    if (tabId === 'journey') window.location.hash = '';
-    else if (tabId === 'playbook') window.location.hash = '#playbook';
-    else if (tabId === 'notes') window.location.hash = '#notes';
-    else window.location.hash = `#${tabId}`;
-  }, []);
-
   const handleMissionComplete = useCallback(() => {
     setShowMission(false);
     refresh();
@@ -159,6 +151,7 @@ export function JourneyHUD() {
         runtimeState={runtime}
         chapterTitle={ui.currentChapterTitle}
         onComplete={handleMissionComplete}
+        onClose={() => setShowMission(false)}
       />
     );
   }
@@ -217,8 +210,6 @@ export function JourneyHUD() {
           onContinue={handleDismissComplete}
         />
       )}
-
-      <JourneyBottomNav activeTab="journey" onTabChange={handleTabChange} />
 
       {lockedToast && <div className="locked-toast">{lockedToast}</div>}
     </div>

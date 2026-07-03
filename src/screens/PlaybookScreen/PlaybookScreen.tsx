@@ -14,9 +14,10 @@ const CATEGORIES: { id: PlaybookCategory; label: string; icon: string; color: st
 
 interface Props {
   style?: CSSProperties;
+  onClose?: () => void;
 }
 
-export function PlaybookScreen({ style }: Props) {
+export function PlaybookScreen({ style, onClose }: Props) {
   const [view, setView] = useState<'categories' | 'entries' | 'entry'>('categories');
   const [selectedCategory, setSelectedCategory] = useState<PlaybookCategory | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<PlaybookEntry | null>(null);
@@ -67,6 +68,7 @@ export function PlaybookScreen({ style }: Props) {
   if (!hasContent) {
     return (
       <div className="playbook-screen" style={style}>
+        <button className="playbook-close-btn" onClick={onClose}>✕</button>
         <div className="playbook-scroll">
           <h1 className="playbook-main-title">Playbook</h1>
           <p className="playbook-subtitle">Your career knowledge base</p>
@@ -75,6 +77,7 @@ export function PlaybookScreen({ style }: Props) {
             <h2>No content yet</h2>
             <p>Complete missions to unlock playbook entries.</p>
           </div>
+          <button className="playbook-back-btn" onClick={onClose}>← Назад</button>
         </div>
       </div>
     );
@@ -91,7 +94,7 @@ export function PlaybookScreen({ style }: Props) {
   if (view === 'entry' && selectedEntry) {
     return (
       <div className="playbook-screen" style={style}>
-        <button className="playbook-close-btn" onClick={goBack}>✕</button>
+        <button className="playbook-close-btn" onClick={onClose}>✕</button>
         <div className="playbook-scroll">
           <h2 className="playbook-entry-title">{selectedEntry.title}</h2>
           <span className="playbook-entry-cat">{selectedEntry.category}</span>
@@ -170,7 +173,7 @@ export function PlaybookScreen({ style }: Props) {
           </div>
 
           <button className="playbook-apply-btn">Apply to Current Task</button>
-          <button className="playbook-back-btn" onClick={goBack}>← Back</button>
+          <button className="playbook-back-btn" onClick={goBack}>← Назад</button>
         </div>
       </div>
     );
@@ -180,7 +183,7 @@ export function PlaybookScreen({ style }: Props) {
     const entries = getPlaybookByCategory(selectedCategory);
     return (
       <div className="playbook-screen" style={style}>
-        <button className="playbook-close-btn" onClick={goBack}>✕</button>
+        <button className="playbook-close-btn" onClick={onClose}>✕</button>
         <div className="playbook-scroll">
 
           <h2 className="playbook-entries-title">
@@ -204,6 +207,8 @@ export function PlaybookScreen({ style }: Props) {
               </button>
             ))}
           </div>
+
+          <button className="playbook-back-btn" onClick={goBack}>← Назад</button>
         </div>
       </div>
     );
@@ -211,7 +216,7 @@ export function PlaybookScreen({ style }: Props) {
 
   return (
     <div className="playbook-screen" style={style}>
-      <button className="playbook-close-btn" onClick={goBack}>✕</button>
+      <button className="playbook-close-btn" onClick={onClose}>✕</button>
       <div className="playbook-scroll">
         <h1 className="playbook-main-title">Playbook</h1>
         <p className="playbook-subtitle">Deep knowledge, templates, and strategies</p>
@@ -229,6 +234,8 @@ export function PlaybookScreen({ style }: Props) {
             </button>
           ))}
         </div>
+
+        <button className="playbook-back-btn" onClick={onClose}>← Назад</button>
       </div>
     </div>
   );

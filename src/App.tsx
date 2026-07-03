@@ -7,11 +7,17 @@ import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScr
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
 import { ShareScreen } from './screens/ShareScreen/ShareScreen';
-import { JourneyScreenDebug } from './screens/JourneyScreen/JourneyScreenDebug';
+import { JourneyHUD } from './screens/JourneyScreen';
 import { BottomNav } from './components/BottomNav/BottomNav';
 import './App.css';
 
-type Screen = 'world' | 'playbook' | 'notes' | 'share' | 'debug';
+// NOTE: 'debug' screen (JourneyScreenDebug) was removed — it was a dead
+// placeholder stub that had silently replaced the real World tab content.
+// Per project Constitution §6-7 (single world, single HUD, no duplication),
+// 'world' now always renders the real composition: WorldRenderer (art/
+// camera/atmosphere engine) with JourneyHUD (chapter cards, missions, nav)
+// mounted on top of it.
+type Screen = 'world' | 'playbook' | 'notes' | 'share';
 
 function App() {
   const [isReady, setIsReady] = useState(false);
@@ -44,10 +50,12 @@ function App() {
   };
 
   const handleTabChange = (tabId: string) => {
-    if (tabId === 'world' || tabId === 'playbook' || tabId === 'notes' || tabId === 'share' || tabId === 'debug') {
+    if (tabId === 'world' || tabId === 'playbook' || tabId === 'notes' || tabId === 'share') {
       navigateTo(tabId as Screen);
     }
   };
+
+  const closeToWorld = () => navigateTo('world');
 
   if (!isReady) return null;
 
@@ -103,22 +111,35 @@ function App() {
 
     switch (screen) {
       case 'world':
-        return <WorldRenderer key={common.key} style={common.style} />;
+        // WorldRenderer is the permanent art/camera engine; JourneyHUD is
+        // the UI layer (chapter cards, missions) mounted on top of it —
+        // exactly one world, exactly one HUD, per project Constitution.
+        return (
+          <div key={common.key} style={common.style}>
+            <JourneyHUD />
+          </div>
+        );
       case 'playbook':
-        return <PlaybookScreen key={common.key} style={common.style} />;
+        return <PlaybookScreen key={common.key} style={common.style} onClose={closeToWorld} />;
       case 'notes':
-        return <NotesScreen key={common.key} style={common.style} />;
+        return <NotesScreen key={common.key} style={common.style} onClose={closeToWorld} />;
       case 'share':
         return <ShareScreen key={common.key} style={common.style} />;
-      case 'debug':
-        return <JourneyScreenDebug key={common.key} style={common.style} />;
     }
   };
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      {prevScreen && renderScreen(prevScreen, true)}
-      {renderScreen(currentScreen, false)}
+      {/* WorldRenderer stays permanently mounted underneath everything —
+          it never unmounts when switching tabs, so the world never
+          "resets" (art, camera position, atmosphere persist). */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
+        <WorldRenderer mode="production" />
+      </div>
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%' }}>
+        {prevScreen && renderScreen(prevScreen, true)}
+        {renderScreen(currentScreen, false)}
+      </div>
       <BottomNav currentTab={currentScreen as 'world' | 'playbook' | 'notes' | 'share'} onTabChange={handleTabChange} />
     </div>
   );
