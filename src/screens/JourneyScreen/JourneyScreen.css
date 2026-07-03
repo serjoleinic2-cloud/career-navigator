@@ -13,7 +13,14 @@
 /* === LAYER STACK === */
 .journey-screen {
   position: relative;
-  min-height: 100vh;
+  /* Must be a fixed height (not min-height) for overflow-y:auto to create
+     an actual internal scroll region. With min-height, this box just grows
+     to fit its content (all chapter cards), so nothing overflows *inside*
+     it — the excess gets clipped instead by the outer App.tsx wrapper
+     (position:relative/absolute, overflow:hidden), which has no scroll of
+     its own. That's why only ~2.5 chapter cards were reachable and no
+     scrolling was possible. */
+  height: 100vh;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-y: auto;
@@ -498,11 +505,20 @@
   min-height: 220px;
   padding: 32px 20px;
   border-radius: 32px;
+  /* Fallback for WebViews without color-mix() support (~Chrome <111):
+     without this, the color-mix() background below is silently dropped
+     entirely and the card renders with no fill at all — the "flat gray"
+     look this was meant to fix. Plain rgba first, color-mix() overrides
+     it on capable browsers. */
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(102, 126, 234, 0.16) 0%, transparent 60%),
+    linear-gradient(165deg, rgba(38, 44, 58, 0.72) 0%, rgba(16, 19, 27, 0.78) 100%);
   background:
     radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 16%, transparent) 0%, transparent 60%),
     linear-gradient(165deg, rgba(38, 44, 58, 0.72) 0%, rgba(16, 19, 27, 0.78) 100%);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(102, 126, 234, 0.32);
   border: 1px solid color-mix(in srgb, var(--island-accent, #4A90D9) 22%, rgba(240, 240, 245, 0.10));
   box-shadow:
     0 16px 44px rgba(0, 0, 0, 0.30),
@@ -522,11 +538,16 @@
   left: 12%;
   right: 12%;
   height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(118, 137, 234, 0.75) 50%, transparent 100%);
   background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 70%, white 10%) 50%, transparent 100%);
   opacity: 0.8;
 }
 
 .chapter-island:hover:not(.island-locked) {
+  box-shadow:
+    0 20px 56px rgba(0, 0, 0, 0.34),
+    0 0 32px rgba(102, 126, 234, 0.20),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
   box-shadow:
     0 20px 56px rgba(0, 0, 0, 0.34),
     0 0 32px color-mix(in srgb, var(--island-accent, #4A90D9) 20%, transparent),
@@ -586,8 +607,11 @@
   align-items: center;
   justify-content: center;
   font-size: 36px;
+  background: radial-gradient(circle at 35% 30%, rgba(102, 126, 234, 0.22) 0%, rgba(240, 240, 245, 0.05) 70%);
   background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--island-accent, #4A90D9) 24%, transparent) 0%, rgba(240, 240, 245, 0.05) 70%);
+  border: 2px solid rgba(102, 126, 234, 0.4);
   border: 2px solid color-mix(in srgb, var(--island-accent, #4A90D9) 35%, rgba(240, 240, 245, 0.12));
+  box-shadow: 0 0 24px rgba(102, 126, 234, 0.16);
   box-shadow: 0 0 24px color-mix(in srgb, var(--island-accent, #4A90D9) 18%, transparent);
   position: relative;
 }
