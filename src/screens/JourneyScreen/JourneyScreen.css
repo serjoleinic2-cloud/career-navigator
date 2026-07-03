@@ -1032,6 +1032,84 @@
   letter-spacing: 0.5px;
 }
 
+/* === BRIDGE RESTORE (WORLD PROGRESSION REWORK) ===
+   Transitional beat between ChapterCompleteScreen and the camera rising
+   into the next chapter. Placeholder SVG bridge — see BridgeRestoreScreen.tsx
+   for why this isn't final art yet. */
+.bridge-restore-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  animation: chapter-complete-fade 0.35s ease;
+}
+
+.bridge-restore-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+}
+
+.bridge-restore-svg {
+  width: min(320px, 80vw);
+  height: auto;
+  overflow: visible;
+}
+
+.bridge-pillar {
+  fill: var(--w-chapter-accent, #4A90D9);
+  opacity: 0.35;
+}
+
+.bridge-path {
+  stroke: var(--w-chapter-accent, #4A90D9);
+  stroke-dasharray: 340;
+  stroke-dashoffset: 340;
+  animation: bridge-draw 1.1s ease-out forwards;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--w-chapter-accent, #4A90D9) 55%, transparent));
+}
+
+@keyframes bridge-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.bridge-plank {
+  fill: #f0f0f5;
+  opacity: 0;
+  animation: bridge-plank-appear 0.3s ease forwards;
+}
+
+@keyframes bridge-plank-appear {
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: 0.9; transform: scale(1); }
+}
+
+.bridge-restore-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f0f0f5;
+  margin: 0;
+  text-align: center;
+}
+
+.bridge-restore-arrow {
+  color: var(--w-chapter-accent, #4A90D9);
+  font-size: 18px;
+}
+
+.bridge-restore-from {
+  color: var(--text-secondary);
+}
+
 /* === JOURNEY COMPLETE (TASK 60) === */
 .journey-complete-overlay {
   position: fixed;

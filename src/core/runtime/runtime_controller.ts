@@ -331,7 +331,17 @@ export function advanceChapter(): JourneyRuntimeState {
   if (!nextNodeId) {
     throw new Error('Next chapter has no nodes');
   }
-  runtimeState = { ...runtimeState, activeNodeId: nextNodeId };
+  // Same unlock pattern used for the entry node in initializeJourneyRuntime:
+  // a fresh chapter's first node starts out 'locked' in the skill graph
+  // definition (see professions/*/skill_nodes.ts). Without this, advancing
+  // into the chapter would make it "active" in the UI but clicking its node
+  // would still show "Complete previous tasks to unlock this node" —
+  // the node itself must be explicitly unlocked, not just made active.
+  const nextNode = runtimeState.nodeStates[nextNodeId];
+  const unlockedNodeStates = nextNode && nextNode.state === 'locked'
+    ? { ...runtimeState.nodeStates, [nextNodeId]: { ...nextNode, state: 'awareness' as const, nextState: 'understanding' as const } }
+    : runtimeState.nodeStates;
+  runtimeState = { ...runtimeState, activeNodeId: nextNodeId, nodeStates: unlockedNodeStates };
   saveRuntime(runtimeState);
   emit('CHAPTER_CHANGED', { chapterId: next.id });
   emit('NODE_CHANGED', { nodeId: nextNodeId });

@@ -1,38 +1,36 @@
 import { useState, useCallback } from 'react';
 
-export type HubView = 'hub' | 'chapter' | 'chapterComplete';
+/**
+ * Phase of the single-chapter progression flow (WORLD PROGRESSION REWORK).
+ *
+ * 'active'     — normal state. The current chapter's card + its nodes are
+ *                shown, mounted over WorldRenderer. This is the only phase
+ *                where the player interacts with mission nodes.
+ * 'celebrate'  — chapter just finished all its nodes. ChapterCompleteScreen
+ *                (confetti/stats) is shown; player taps Continue.
+ * 'bridge'     — BridgeRestoreScreen plays (short animation: the bridge to
+ *                the next chapter "restores"), then the HUD camera rises.
+ *
+ * There is no more a "hub" of multiple chapter cards to pick from — the
+ * player always works with exactly one chapter at a time. Future/locked
+ * chapters are not represented as HUD cards at all (they only exist as
+ * world objects in WorldRenderer, once real art exists for them).
+ */
+export type ChapterFlowPhase = 'active' | 'celebrate' | 'bridge';
 
 interface UseChapterHubReturn {
-  view: HubView;
-  selectedChapter: string | null;
-  selectChapter: (chapterId: string) => void;
-  backToHub: () => void;
-  completeChapter: () => void;
-  dismissComplete: () => void;
+  phase: ChapterFlowPhase;
+  startCelebration: () => void;
+  startBridge: () => void;
+  finishBridge: () => void;
 }
 
 export function useChapterHub(): UseChapterHubReturn {
-  const [view, setView] = useState<HubView>('hub');
-  const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
+  const [phase, setPhase] = useState<ChapterFlowPhase>('active');
 
-  const selectChapter = useCallback((chapterId: string) => {
-    setSelectedChapter(chapterId);
-    setView('chapter');
-  }, []);
+  const startCelebration = useCallback(() => setPhase('celebrate'), []);
+  const startBridge = useCallback(() => setPhase('bridge'), []);
+  const finishBridge = useCallback(() => setPhase('active'), []);
 
-  const backToHub = useCallback(() => {
-    setSelectedChapter(null);
-    setView('hub');
-  }, []);
-
-  const completeChapter = useCallback(() => {
-    setView('chapterComplete');
-  }, []);
-
-  const dismissComplete = useCallback(() => {
-    setSelectedChapter(null);
-    setView('hub');
-  }, []);
-
-  return { view, selectedChapter, selectChapter, backToHub, completeChapter, dismissComplete };
+  return { phase, startCelebration, startBridge, finishBridge };
 }
