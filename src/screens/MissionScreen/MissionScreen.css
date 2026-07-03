@@ -330,7 +330,12 @@
 
 /* Bottom */
 .mission-bottom {
-  padding: 20px 24px 32px;
+  /* MissionScreen fills 100vh in normal flow, but the floating BottomNav
+     capsule is position:fixed on top of everything (z-50) — without this
+     extra clearance the Complete Mission button sits partly underneath it.
+     80px matches the convention used for .journey-mission-container /
+     .start-mission-btn in JourneyScreen.css. */
+  padding: 20px 24px calc(32px + 80px + env(safe-area-inset-bottom, 0px));
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
 }
