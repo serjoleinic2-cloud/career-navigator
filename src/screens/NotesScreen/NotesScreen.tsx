@@ -63,30 +63,6 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
     }
   }, [showNewNote]);
 
-  // Robust keyboard-safe height, independent of whether the native
-  // android:windowSoftInputMode="adjustResize" actually took effect on
-  // this build/device. visualViewport.height shrinks to the REAL visible
-  // area when the keyboard opens (widely supported in Android WebView);
-  // we use it to cap the drawer instead of trusting `100vh`/`inset:0`,
-  // which can still reference the full layout viewport (behind the
-  // keyboard) on some WebViews even with adjustResize set.
-  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
-
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    const updateHeight = () => setViewportHeight(vv.height);
-    updateHeight();
-    vv.addEventListener('resize', updateHeight);
-    vv.addEventListener('scroll', updateHeight);
-
-    return () => {
-      vv.removeEventListener('resize', updateHeight);
-      vv.removeEventListener('scroll', updateHeight);
-    };
-  }, []);
-
   const filtered = searchQuery
     ? notes.filter(n => n.content.toLowerCase().includes(searchQuery.toLowerCase()))
     : notes;
@@ -195,6 +171,49 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
         ))}
       </div>
 
+      {/* New note inline form — deliberately NOT a fixed bottom-sheet
+         overlay. The existing edit-note form below never had keyboard
+         overlap issues specifically because it's plain document flow
+         inside .notes-scroll, letting the WebView's native
+         focus-scroll-into-view behavior handle the keyboard correctly.
+         Two rounds of viewport-math fixes on the old fixed drawer didn't
+         fully resolve it on-device, so this adopts the same
+         already-proven-safe pattern instead of fighting the keyboard. */}
+      {showNewNote && (
+        <div className="notes-card notes-new-form">
+          <div className="notes-edit-form">
+            <input
+              className="notes-drawer-title"
+              placeholder="Note title..."
+              value={newNoteTitle}
+              onChange={e => setNewNoteTitle(e.target.value)}
+            />
+            <textarea
+              ref={newNoteRef}
+              value={newNoteContent}
+              onChange={e => setNewNoteContent(e.target.value)}
+              placeholder="Write a new note..."
+              rows={4}
+            />
+            <div className="notes-edit-actions">
+              <button
+                className="notes-save-btn"
+                onClick={handleSaveNewNote}
+                disabled={!newNoteContent.trim()}
+              >
+                Save
+              </button>
+              <button
+                className="notes-cancel-btn"
+                onClick={() => { setShowNewNote(false); setNewNoteContent(''); setNewNoteTitle(''); }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Notes grouped by category */}
       <div className="notes-groups">
         {!hasNotes && (
@@ -269,50 +288,6 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
         +
       </button>
       </div>{/* notes-scroll */}
-
-      {/* New note drawer */}
-      {showNewNote && (
-        <div
-          className="notes-drawer-overlay"
-          style={viewportHeight ? { height: viewportHeight } : undefined}
-          onClick={() => setShowNewNote(false)}
-        >
-          <div
-            className="notes-drawer"
-            style={viewportHeight ? { maxHeight: viewportHeight * 0.9 } : undefined}
-            onClick={e => e.stopPropagation()}
-          >
-            <input
-              className="notes-drawer-title"
-              placeholder="Note title..."
-              value={newNoteTitle}
-              onChange={e => setNewNoteTitle(e.target.value)}
-            />
-            <textarea
-              ref={newNoteRef}
-              value={newNoteContent}
-              onChange={e => setNewNoteContent(e.target.value)}
-              placeholder="Write a new note..."
-              rows={4}
-            />
-            <div className="notes-drawer-actions">
-              <button
-                className="notes-drawer-cancel"
-                onClick={() => { setShowNewNote(false); setNewNoteContent(''); setNewNoteTitle(''); }}
-              >
-                Cancel
-              </button>
-              <button
-                className="notes-drawer-save"
-                onClick={handleSaveNewNote}
-                disabled={!newNoteContent.trim()}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

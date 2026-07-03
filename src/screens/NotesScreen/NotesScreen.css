@@ -152,6 +152,11 @@
   background: rgba(255, 107, 107, 0.04);
 }
 
+.notes-new-form {
+  border-color: rgba(255, 107, 107, 0.25);
+  background: rgba(255, 107, 107, 0.05);
+}
+
 .notes-card-meta {
   display: flex;
   justify-content: space-between;
@@ -325,93 +330,3 @@
 }
 
 /* New note drawer */
-.notes-drawer-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  animation: notesOverlayIn 200ms ease;
-}
-
-.notes-drawer {
-  padding: 24px 20px calc(20px + env(safe-area-inset-bottom));
-  background: #0F1A2E;
-  border-radius: 24px 24px 0 0;
-  animation: notesDrawerUp 300ms ease;
-  /* Safety net alongside AndroidManifest windowSoftInputMode="adjustResize":
-     even if a specific device/WebView still resizes the viewport oddly
-     when the keyboard opens, the drawer itself caps its height and
-     scrolls internally, so title/textarea/Save never get pushed out of
-     reach under the bottom nav. */
-  max-height: 80vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  display: flex;
-  flex-direction: column;
-}
-
-.notes-drawer textarea {
-  width: 100%;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(240, 240, 245, 0.08);
-  background: rgba(240, 240, 245, 0.04);
-  color: #f0f0f5;
-  font-size: 15px;
-  line-height: 1.6;
-  resize: none;
-  box-sizing: border-box;
-  font-family: inherit;
-  outline: none;
-  min-height: 100px;
-}
-
-.notes-drawer textarea::placeholder {
-  color: rgba(240, 240, 245, 0.3);
-}
-
-.notes-drawer-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.notes-drawer-cancel,
-.notes-drawer-save {
-  flex: 1;
-  padding: 14px;
-  border-radius: 14px;
-  border: none;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  min-height: 50px;
-}
-
-.notes-drawer-cancel {
-  background: rgba(240, 240, 245, 0.06);
-  color: rgba(240, 240, 245, 0.6);
-}
-
-.notes-drawer-save {
-  background: #FF6B6B;
-  color: #fff;
-}
-
-.notes-drawer-save:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-@keyframes notesOverlayIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes notesDrawerUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
