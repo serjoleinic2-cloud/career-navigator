@@ -18,20 +18,21 @@ interface BottomNavProps {
 export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
   return (
     <motion.nav
-      className="fixed bottom-0 left-0 right-0 z-50"
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
+      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-4 pb-6 pointer-events-none"
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', damping: 25, stiffness: 200, delay: 0.5 }}
     >
       <div
-        className="absolute bottom-full left-0 right-0 h-12 pointer-events-none"
+        className="pointer-events-auto w-full max-w-md rounded-full border border-white/[0.08] px-2 py-2"
         style={{
-          background: 'linear-gradient(to top, rgba(10,10,15,0.9) 0%, transparent 100%)',
+          background: 'rgba(22, 26, 36, 0.55)',
+          backdropFilter: 'blur(28px)',
+          WebkitBackdropFilter: 'blur(28px)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255,255,255,0.03) inset, 0 1px 0 rgba(255,255,255,0.06) inset',
         }}
-      />
-
-      <div className="glass-panel border-t border-white/[0.04] px-2 pb-6 pt-2">
-        <div className="max-w-md mx-auto flex items-center justify-around">
+      >
+        <div className="flex items-center justify-around">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = tab.id === currentTab;
@@ -47,7 +48,7 @@ export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
                   <Icon
                     size={22}
                     className={`transition-colors duration-300 ${
-                      isActive ? 'text-glow-cyan' : 'text-white/30'
+                      isActive ? 'text-glow-cyan' : 'text-white/45'
                     }`}
                   />
                   {isActive && (
@@ -59,7 +60,7 @@ export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
                   )}
                 </div>
                 <span className={`text-[10px] font-medium transition-colors duration-300 ${
-                  isActive ? 'text-glow-cyan' : 'text-white/30'
+                  isActive ? 'text-glow-cyan' : 'text-white/45'
                 }`}>
                   {tab.label}
                 </span>

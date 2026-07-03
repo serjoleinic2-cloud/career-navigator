@@ -52,11 +52,12 @@
 
 /* Text animations */
 .intro-text {
-  position: absolute;
+  position: relative;
   text-align: center;
   opacity: 0;
   transform: translateY(20px);
   transition: all 1s ease-out;
+  margin: 0;
 }
 
 .intro-text.visible {
@@ -69,6 +70,7 @@
   font-weight: 300;
   color: #f0f0f5;
   letter-spacing: 2px;
+  margin-bottom: 12px;
 }
 
 .intro-profession {
@@ -78,11 +80,12 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin-bottom: 40px;
 }
 
 /* Stats */
 .intro-stats {
-  position: absolute;
+  position: relative;
   display: flex;
   gap: 40px;
   opacity: 0;

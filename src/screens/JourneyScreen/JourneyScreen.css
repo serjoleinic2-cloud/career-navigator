@@ -53,7 +53,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  background: transparent;
+  /* Scrim, not a hard panel: keeps light header text readable no matter
+     how bright the world art underneath is, without looking like a bar. */
+  background: linear-gradient(180deg, rgba(4, 8, 14, 0.55) 0%, rgba(4, 8, 14, 0.28) 55%, transparent 100%);
   pointer-events: none;
 }
 
@@ -496,15 +498,39 @@
   min-height: 220px;
   padding: 32px 20px;
   border-radius: 32px;
-  background: rgba(18, 22, 30, 0.62);
+  background:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 16%, transparent) 0%, transparent 60%),
+    linear-gradient(165deg, rgba(38, 44, 58, 0.72) 0%, rgba(16, 19, 27, 0.78) 100%);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(240, 240, 245, 0.10);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.20);
+  border: 1px solid color-mix(in srgb, var(--island-accent, #4A90D9) 22%, rgba(240, 240, 245, 0.10));
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.30),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
   cursor: pointer;
   outline: none;
-  transition: opacity 0.35s ease, transform 0.35s ease-out, min-height 0.35s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease-out, min-height 0.35s ease, box-shadow 0.35s ease;
   overflow: hidden;
+}
+
+/* Glowing top edge — the "premium card" signature */
+.chapter-island::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 70%, white 10%) 50%, transparent 100%);
+  opacity: 0.8;
+}
+
+.chapter-island:hover:not(.island-locked) {
+  box-shadow:
+    0 20px 56px rgba(0, 0, 0, 0.34),
+    0 0 32px color-mix(in srgb, var(--island-accent, #4A90D9) 20%, transparent),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
 }
 
 .chapter-island:focus-visible {
@@ -560,8 +586,9 @@
   align-items: center;
   justify-content: center;
   font-size: 36px;
-  background: rgba(240, 240, 245, 0.06);
-  border: 2px solid rgba(240, 240, 245, 0.1);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--island-accent, #4A90D9) 24%, transparent) 0%, rgba(240, 240, 245, 0.05) 70%);
+  border: 2px solid color-mix(in srgb, var(--island-accent, #4A90D9) 35%, rgba(240, 240, 245, 0.12));
+  box-shadow: 0 0 24px color-mix(in srgb, var(--island-accent, #4A90D9) 18%, transparent);
   position: relative;
 }
 
