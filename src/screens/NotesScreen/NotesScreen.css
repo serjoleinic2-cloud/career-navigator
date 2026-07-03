@@ -341,6 +341,16 @@
   background: #0F1A2E;
   border-radius: 24px 24px 0 0;
   animation: notesDrawerUp 300ms ease;
+  /* Safety net alongside AndroidManifest windowSoftInputMode="adjustResize":
+     even if a specific device/WebView still resizes the viewport oddly
+     when the keyboard opens, the drawer itself caps its height and
+     scrolls internally, so title/textarea/Save never get pushed out of
+     reach under the bottom nav. */
+  max-height: 80vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
 }
 
 .notes-drawer textarea {
