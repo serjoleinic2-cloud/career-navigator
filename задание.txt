@@ -1,37 +1,141 @@
-И ещё одна вещь.
-Убрать слово Resume из карточки.
+STABILIZATION SPRINT — FINAL
 
-Вместо этого:
+This task closes the Stabilization phase.
 
-🏝 First Step
+No new features.
 
-Learn to present yourself
+No refactoring.
 
-Continue
+No redesign.
 
-Когда пользователь открывает остров — только тогда он понимает, что это резюме.
+No architecture changes.
 
-Самое важное изменение проекта
+Goal:
 
-Я бы вообще убрал эти названия:
+Application must become stable.
 
-Resume
-LinkedIn
-Applications
-Interviews
-Offer
+Checklist:
 
-из главного мира.
+1. Every bottom navigation item works.
 
-Они должны жить внутри миссий, а не на карте.
+Journey
 
-На карте должны жить игровые названия.
+World
 
-Например:
+Playbook
 
-Игровое название	Реальная цель
-The First Step	Resume
-Enter the Network	LinkedIn
-Reach the Companies	Applications
-Face the Gatekeepers	Interviews
-Claim the Summit	Job Offer
+Notes
+
+Profile
+
+2. Every button reacts.
+
+No dead UI.
+
+3. Every screen has readable typography.
+
+4. Every scroll works.
+
+5. Nothing is hidden behind Bottom Navigation.
+
+6. No clipped content.
+
+7. No placeholder that blocks navigation.
+
+8. No TypeScript errors.
+
+9. No broken imports.
+
+10. Test full user flow:
+
+Onboarding
+
+↓
+
+Intro
+
+↓
+
+World
+
+↓
+
+Complete Resume mission
+
+↓
+
+Bridge animation
+
+↓
+
+LinkedIn unlock
+
+↓
+
+Open Playbook
+
+↓
+
+Open Notes
+
+↓
+
+Return to World
+
+If any step fails,
+
+fix it.
+
+Only after all 10 items pass:
+
+Update PROJECT_STATUS.md
+
+Set
+
+Development Phase:
+
+WORLD DESIGN
+
+This officially closes Stabilization.
+
+И ещё одно правило, которое я предлагаю ввести с сегодняшнего дня.
+
+В `PROJECT_STATUS.md` должна появиться строка:
+
+
+
+```
+
+
+
+```
+
+
+
+
+
+```
+
+CURRENT DEVELOPMENT PHASE
+
+
+
+☑ Stabilization
+
+
+
+☐ World Design
+
+
+
+☐ Motion Polish
+
+
+
+☐ Art Production
+
+```
+
+
+
+И никто (ни я, ни Claude, ни Kimi) не имеет права давать задания из следующей фазы, пока текущая не отмечена как завершённая.
