@@ -47,15 +47,30 @@ export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
                   <Icon
                     size={22}
                     className={`transition-colors duration-300 ${
-                      isActive ? 'text-white' : 'text-white/40'
+                      isActive ? 'text-glow-cyan' : 'text-white/30'
                     }`}
                   />
+                  {isActive && (
+                    <motion.div
+                      className="absolute -inset-2 rounded-full bg-glow-cyan/10"
+                      layoutId="navGlow"
+                      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                    />
+                  )}
                 </div>
                 <span className={`text-[10px] font-medium transition-colors duration-300 ${
-                  isActive ? 'text-white' : 'text-white/40'
+                  isActive ? 'text-glow-cyan' : 'text-white/30'
                 }`}>
                   {tab.label}
                 </span>
+
+                {isActive && (
+                  <motion.div
+                    className="absolute -bottom-1 w-1 h-1 rounded-full bg-glow-cyan"
+                    layoutId="navIndicator"
+                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  />
+                )}
               </motion.button>
             );
           })}
