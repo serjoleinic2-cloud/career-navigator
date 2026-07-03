@@ -114,6 +114,8 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
   };
 
   const handleDelete = (id: string) => {
+    const confirmed = window.confirm('Delete this note permanently? This cannot be undone.');
+    if (!confirmed) return;
     deleteNote(id);
     if (editingId === id) {
       setEditingId(null);
@@ -244,7 +246,7 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
                   </span>
                   <button
                     className="notes-card-delete"
-                    onClick={() => handleDelete(note.id)}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(note.id); }}
                   >
                     ✕
                   </button>
