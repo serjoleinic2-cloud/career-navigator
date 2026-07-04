@@ -34,13 +34,30 @@ function getNodeCardState(node: SkillNode, activeNodeId: string | null): NodeCar
   return 'locked';
 }
 
+/**
+ * Явный маппинг chapter.id -> имя файла острова.
+ * НЕ полагаемся на `island-${chapter.id}.png`: id главы и имя файла арта
+ * не всегда совпадают один в один (пример реального бага: глава
+ * "interviews" (мн.ч.) искала island-interviews.png, а файл художника
+ * называется island-interview.png (ед.ч.) — картинка никогда не грузилась).
+ * Главы без готового арта (например offer_preparation) сюда не добавляются —
+ * для них штатно сработает onError → иконка-плейсхолдер ниже.
+ */
+const CHAPTER_ART_FILENAME: Record<string, string> = {
+  resume: 'island-resume.png',
+  linkedin: 'island-linkedin.png',
+  applications: 'island-applications.png',
+  interviews: 'island-interview.png',
+  offer: 'island-offer.png',
+};
+
 export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubProps) {
   if (!chapter) return null;
 
   const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'default');
   const accent = getChapterAccent(worldTheme, chapter.id);
-  const artSrc = `art/software_engineer/island-${chapter.id.toLowerCase()}.png`;
-  console.log('[ChapterHub] chapter.id =', JSON.stringify(chapter.id), '| artSrc =', artSrc);
+  const artFilename = CHAPTER_ART_FILENAME[chapter.id];
+  const artSrc = artFilename ? `art/software_engineer/${artFilename}` : '';
 
   return (
     <div
@@ -53,23 +70,25 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
           Если файла нет — автоматически показывается иконка-плейсхолдер. */}
       <div className="island-art-slot">
         <div className="island-art-glow" style={{ background: accent }} />
-        <img
-          className="island-art-img"
-          src={artSrc}
-          alt={chapter.title}
-          onLoad={(e) => {
-            const fallback = (e.currentTarget as HTMLImageElement).nextElementSibling as HTMLElement | null;
-            if (fallback) fallback.style.display = 'none';
-          }}
-          onError={(e) => {
-            const img = e.currentTarget as HTMLImageElement;
-            console.warn('[ChapterHub] island art not found:', img.src);
-            img.style.display = 'none';
-            const fallback = img.nextElementSibling as HTMLElement | null;
-            if (fallback) fallback.style.display = 'flex';
-          }}
-        />
-        <div className="island-art-placeholder" style={{ display: 'none' }}>
+        {artSrc && (
+          <img
+            className="island-art-img"
+            src={artSrc}
+            alt={chapter.title}
+            onLoad={(e) => {
+              const fallback = (e.currentTarget as HTMLImageElement).nextElementSibling as HTMLElement | null;
+              if (fallback) fallback.style.display = 'none';
+            }}
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              console.warn('[ChapterHub] island art not found:', img.src);
+              img.style.display = 'none';
+              const fallback = img.nextElementSibling as HTMLElement | null;
+              if (fallback) fallback.style.display = 'flex';
+            }}
+          />
+        )}
+        <div className="island-art-placeholder" style={{ display: artSrc ? 'none' : 'flex' }}>
           <span className="island-art-icon">{chapter.icon}</span>
         </div>
       </div>

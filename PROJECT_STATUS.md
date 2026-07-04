@@ -1024,3 +1024,32 @@ node-progression engine) — **следующая сессия должна ре
   визуально сверить тайминги (не рвётся ли, не мелькает ли) на реальном
   устройстве, не только по коду.
 
+### 2026-07-04 — Claude (сессия — картинки островов не грузились для главы Interviews)
+
+Пользователь добавил PNG-арт для всех глав software_engineer в
+`public/art/software_engineer/`, но глава Interviews в `ChapterHub`
+всё равно показывала иконку-плейсхолдер вместо картинки.
+
+**Найдено:** `ChapterHub.tsx` строил путь к файлу как
+`island-${chapter.id}.png`, где `chapter.id` для этой главы — `interviews`
+(множественное число, см. `src/professions/software_engineer/chapters.ts`).
+Реальный файл художника называется `island-interview.png` (единственное
+число) — путь никогда не совпадал, `<img>` всегда падал в `onError` →
+плейсхолдер. Заодно у главы `offer_preparation` файла арта нет вообще
+(только `island-offer.png` для отдельной главы `offer`) — это не баг, а
+ожидаемое отсутствие ассета, `onError`-плейсхолдер и так корректно
+подхватывал этот случай.
+
+**Исправлено:** `src/screens/JourneyScreen/components/ChapterHub.tsx` —
+угадывание имени файла по `chapter.id` заменено на явный словарь
+`CHAPTER_ART_FILENAME` (resume/linkedin/applications/interviews→interview/
+offer). Для глав без записи в словаре (`offer_preparation`) `<img>` теперь
+вообще не рендерится — сразу показывается иконка-плейсхолдер, без лишнего
+запроса и console-warning об ошибке загрузки. Убран отладочный
+`console.log` с логированием chapter.id/artSrc на каждый рендер.
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Не проверено вживую на устройстве** — нужно открыть главу Interviews и
+убедиться, что теперь показывается `island-interview.png`, а не
+плейсхолдер-иконка 🎤.
+
