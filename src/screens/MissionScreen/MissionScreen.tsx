@@ -148,6 +148,15 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   // of it, matching what the hint text under the textarea already says.
   const canSubmit = textInput.trim().length > 0;
 
+  // BUGFIX (2026-07-05): `new Array(n)` throws "Invalid array length" for
+  // any non-integer n (e.g. Array(1.5)) — it only accepts a non-negative
+  // integer. Some task content has fractional `difficulty` values (e.g.
+  // achievement-framing's first task is 1.5), which crashed this whole
+  // screen the instant it opened — no error UI existed at the time, so it
+  // showed as a black screen requiring an app restart. Clamp + round to a
+  // safe 1-5 integer before building the dot rating.
+  const difficultyLevel = Math.min(5, Math.max(1, Math.round(activeTask.difficulty || 1)));
+
   return (
     <div className={`mission-screen ${taskView === 'active' ? 'mission-enter' : ''}`}>
       <div className="mission-header">
@@ -178,8 +187,8 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           <div className="mission-card-meta-item">
             <span className="mission-card-meta-label">Difficulty</span>
             <span className="mission-card-meta-value">
-              {Array(activeTask.difficulty).fill('●').join('')}
-              {Array(Math.max(0, 5 - activeTask.difficulty)).fill('○').join('')}
+              {Array(difficultyLevel).fill('●').join('')}
+              {Array(Math.max(0, 5 - difficultyLevel)).fill('○').join('')}
             </span>
           </div>
           <div className="mission-card-meta-item">

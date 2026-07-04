@@ -42,7 +42,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
           'The statement matches at least three real job postings.'
         ],
         estimatedMinutes: 25,
-        difficulty: 1.0,
+        difficulty: 1,
         tips: [
           'Avoid generic titles like "Software Engineer" when a more specific title fits.',
           'Mirror the wording used in the job descriptions.'
@@ -65,7 +65,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
           'Top five technical skills are clearly identified.'
         ],
         estimatedMinutes: 35,
-        difficulty: 1.3,
+        difficulty: 1,
         tips: [
           'Use postings published within the last three months.',
           'Group similar technologies together where appropriate.'
@@ -88,7 +88,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
           'Irrelevant content has been identified.'
         ],
         estimatedMinutes: 30,
-        difficulty: 1.4,
+        difficulty: 1,
         tips: [
           'Pretend you are a recruiter reviewing the resume for the first time.',
           'Focus on relevance rather than document length.'
@@ -111,7 +111,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
           'Both reviewers correctly identify the intended role.'
         ],
         estimatedMinutes: 20,
-        difficulty: 1.2,
+        difficulty: 1,
         tips: [
           'Use mentors, experienced developers, or hiring managers if available.',
           'If feedback conflicts, prioritize clarity over creativity.'
@@ -120,7 +120,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
       }
     ],
     estimatedMinutes: 110,
-    difficulty: 1.2
+    difficulty: 1
   },
   {
     id: 'achievement-framing',
@@ -165,7 +165,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
           'Every bullet describes a measurable or observable outcome.'
         ],
         estimatedMinutes: 45,
-        difficulty: 1.5,
+        difficulty: 2,
         tips: [
           'Use verbs like Built, Improved, Automated, Reduced, Designed, Optimized.',
           'If exact numbers are unavailable, describe qualitative impact honestly.'
@@ -190,7 +190,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
           'Evidence document is saved for interview preparation.'
         ],
         estimatedMinutes: 35,
-        difficulty: 1.5,
+        difficulty: 2,
         tips: [
           'GitHub commit history is valid evidence of contribution.',
           'Screenshots of deployed applications help demonstrate completed work.'
@@ -215,7 +215,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
           'No exaggerated or unverifiable claims remain.'
         ],
         estimatedMinutes: 40,
-        difficulty: 2.0,
+        difficulty: 2,
         tips: [
           'Examples include response time, bundle size, Lighthouse score, test coverage, deployment frequency, or issue resolution time.',
           'When uncertain, use approximate wording such as "reduced", "improved", or "simplified" instead of inventing percentages.'
@@ -240,7 +240,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
           'Each explanation fits within one minute.'
         ],
         estimatedMinutes: 30,
-        difficulty: 1.5,
+        difficulty: 2,
         tips: [
           'Interviewers often ask about the first project they see on your resume.',
           'If you cannot defend a claim, remove it rather than risk losing credibility.'
@@ -250,7 +250,7 @@ export const RESUME_SKILL_NODES: SkillNode[] = [
       }
     ],
     estimatedMinutes: 150,
-    difficulty: 1.6
+    difficulty: 2
   },
   {
     id: 'resume-structure',
@@ -1005,7 +1005,7 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
           'Numbers are specific and market-aligned',
         ],
         estimatedMinutes: 20,
-        difficulty: 2.0,
+        difficulty: 2,
         tips: ['Junior roles at startups often pay less but offer more equity upside'],
         expectedOutcome: 'A clear salary range to use in negotiations.',
       },
@@ -1025,13 +1025,13 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
           'Non-salary negotiation items identified',
         ],
         estimatedMinutes: 25,
-        difficulty: 2.5,
+        difficulty: 2,
         tips: ['Use phrases like "based on market data" instead of "I need"'],
         expectedOutcome: 'A practiced negotiation script ready for real conversations.',
       },
     ],
     estimatedMinutes: 45,
-    difficulty: 2.5,
+    difficulty: 2,
   },
   {
     id: 'offer_review',
@@ -1069,7 +1069,7 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
           'A final ranking or decision reached',
         ],
         estimatedMinutes: 30,
-        difficulty: 2.0,
+        difficulty: 2,
         tips: ['Use the same columns for every offer to normalize comparison'],
         expectedOutcome: 'A complete offer comparison sheet with a clear winner.',
       },
@@ -1089,13 +1089,13 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
           'Benefits reviewed and valued',
         ],
         estimatedMinutes: 20,
-        difficulty: 2.5,
+        difficulty: 2,
         tips: ['Equity at startups is risky but can be very valuable long-term'],
         expectedOutcome: 'Clear understanding of your offer equity and benefits.',
       },
     ],
     estimatedMinutes: 50,
-    difficulty: 2.3,
+    difficulty: 2,
   },
   {
     id: 'resignation_letter',
@@ -1133,7 +1133,7 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
           'Transition offer included',
         ],
         estimatedMinutes: 15,
-        difficulty: 1.0,
+        difficulty: 1,
         tips: ['Keep it short. Save detailed feedback for an exit interview if offered.'],
         expectedOutcome: 'A professional resignation letter ready for use.',
       },
@@ -1153,13 +1153,13 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
           'Last week schedule planned',
         ],
         estimatedMinutes: 25,
-        difficulty: 1.0,
+        difficulty: 1,
         tips: ['A smooth transition is remembered long after you leave'],
         expectedOutcome: 'A complete transition plan for your departure.',
       },
     ],
     estimatedMinutes: 40,
-    difficulty: 1.0,
+    difficulty: 1,
   },
 ];
 
