@@ -1,3 +1,5 @@
+Уже есть в папке docs файлы :master_guide, product_bible, UX_bible, Career_engine, Content_bible, Interview_trainer, Playbook, monetization, Tech_spec, CAREER_NAVIGATOR_ART_DIRECTION
+
 # PROJECT: CAREER NAVIGATOR
 
 ## Offline Career Readiness & Interview Preparation System
