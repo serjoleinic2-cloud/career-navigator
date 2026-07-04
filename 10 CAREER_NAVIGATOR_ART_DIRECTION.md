@@ -505,3 +505,21 @@ Every profession has its own visual identity.
 Every screen must feel like the same universe.
 
 The user should recognize Career Navigator from a single screenshot.
+
+Golden Rule №1
+
+The World always owns the screen.
+
+Никогда не должно существовать большого контейнера, который визуально отделяет интерфейс от мира.
+
+Golden Rule №2
+
+The player scrolls through the world, not through a panel.
+
+Любое вертикальное движение должно восприниматься как путешествие камеры, а не прокрутка списка.
+
+Golden Rule №3
+
+Mission cards belong to the active island.
+
+Карточки заданий никогда не существуют сами по себе. Они появляются только возле текущего острова, визуально принадлежат ему и исчезают после завершения главы.
