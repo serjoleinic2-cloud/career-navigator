@@ -279,6 +279,11 @@
   transition: border-color 0.2s ease;
   font-family: inherit;
   background: #f8f9fa;
+  color: #2d3436;
+}
+
+.task-textarea::placeholder {
+  color: #b2bec3;
 }
 
 .task-textarea:focus {
