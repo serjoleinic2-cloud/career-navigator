@@ -195,6 +195,11 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
               onChange={(e) => setTextInput(e.target.value)}
               rows={4}
             />
+            <div className={`text-quality-hint ${textInput.trim().length >= 40 ? 'text-quality-hint-ready' : ''}`}>
+              {textInput.trim().length >= 40
+                ? '✓ Detailed enough for full credit on this mission.'
+                : `Write at least 2–3 full sentences (${textInput.trim().length}/40 characters) for full credit. Checklist and star rating below are for your own reflection and don't affect whether this mission counts as a full pass.`}
+            </div>
           </div>
 
           <div className="task-section">

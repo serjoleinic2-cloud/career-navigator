@@ -69,7 +69,14 @@ const VALIDATION_RULES: Record<TaskType, (payload: unknown) => { valid: boolean;
   },
   TEXT_TASK: (payload) => {
     // Any non-empty response = valid. Length drives quality but not pass/fail.
-    const text = String(payload || '').trim();
+    // MissionScreen submits a combined { text, checked, score } object, not
+    // a raw string — unwrap .text when present so quality reflects what the
+    // user actually wrote instead of String()-ifying the whole object into
+    // the literal text "[object Object]".
+    const raw = payload && typeof payload === 'object' && 'text' in (payload as Record<string, unknown>)
+      ? (payload as Record<string, unknown>).text
+      : payload;
+    const text = String(raw || '').trim();
     if (!text || text === 'false' || text === 'null') {
       // User explicitly didn't respond — still pass, just lower quality
       return { valid: true, quality: 0.5 };
@@ -77,7 +84,13 @@ const VALIDATION_RULES: Record<TaskType, (payload: unknown) => { valid: boolean;
     return { valid: true, quality: Math.min(text.length / 50, 1.0) };
   },
   SELF_ASSESSMENT: (payload) => {
-    const score = Number(payload) || 3;
+    // Same unwrap as TEXT_TASK: MissionScreen sends { text, checked, score },
+    // not a raw number — Number() on the whole object was always NaN,
+    // silently defaulting every submission to a flat score of 3/5.
+    const raw = payload && typeof payload === 'object' && 'score' in (payload as Record<string, unknown>)
+      ? (payload as Record<string, unknown>).score
+      : payload;
+    const score = Number(raw) || 3;
     return { valid: true, quality: score / 5 };
   },
   MULTIPLE_CHOICE: (payload) => {

@@ -286,6 +286,18 @@
   color: #b2bec3;
 }
 
+.text-quality-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b2bec3;
+}
+
+.text-quality-hint-ready {
+  color: #00b894;
+  font-weight: 600;
+}
+
 .task-textarea:focus {
   outline: none;
   border-color: #667eea;
@@ -454,6 +466,6 @@
     font-size: 20px;
   }
   .mission-bottom {
-    padding: 16px 16px 24px;
+    padding: 16px 16px calc(24px + 80px + env(safe-area-inset-bottom, 0px));
   }
 }

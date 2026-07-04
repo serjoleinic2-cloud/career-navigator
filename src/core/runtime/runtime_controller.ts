@@ -254,6 +254,8 @@ function applyTaskResultToRuntime(result: TaskResult, originalNode: SkillNode): 
       [result.nodeId]: updatedNode,
     };
 
+    let nextActiveNodeId: string | null = null;
+
     // Symmetric unlock: when a node reaches 'confidence', unlock the next
     // node WITHIN THE SAME CHAPTER (if it exists and is still 'locked').
     // Without this, every node in a chapter after the first was reachable
@@ -274,6 +276,12 @@ function applyTaskResultToRuntime(result: TaskResult, originalNode: SkillNode): 
             ...nodeStates,
             [nextNodeId]: { ...nextNode, state: 'awareness', nextState: 'understanding' },
           };
+          // Also move the "active" pointer to the newly unlocked node —
+          // same as advanceChapter does at chapter boundaries — so World
+          // immediately shows it as current and a single tap opens its
+          // mission, instead of requiring one tap to focus camera and a
+          // second tap to actually open the mission.
+          nextActiveNodeId = nextNodeId;
         }
       }
     }
@@ -281,6 +289,7 @@ function applyTaskResultToRuntime(result: TaskResult, originalNode: SkillNode): 
     runtimeState = {
       ...runtimeState,
       nodeStates,
+      ...(nextActiveNodeId ? { activeNodeId: nextActiveNodeId } : {}),
     };
   }
 
