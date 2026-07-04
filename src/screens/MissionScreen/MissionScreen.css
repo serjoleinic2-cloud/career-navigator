@@ -441,6 +441,29 @@
   color: #00b894;
 }
 
+.mission-outcome-feedback,
+.mission-outcome-recommendation {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #e6e6e6;
+  text-align: center;
+  max-width: 320px;
+  margin: 0;
+}
+
+.mission-outcome-recommendation {
+  color: #b3b3b3;
+  font-style: italic;
+}
+
+.mission-retry .completed-icon {
+  background: #f5a623;
+}
+
+.mission-retry .completed-text {
+  color: #f5a623;
+}
+
 /* Empty state */
 .mission-empty {
   align-items: center;

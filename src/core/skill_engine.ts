@@ -75,7 +75,12 @@ subscribe('MISSION_SUBMIT', (event) => {
   try {
     const payload = event.payload as unknown as MissionResult;
     const result = applyMissionResult(payload);
-    emit('MISSION_RESULT', { success: result.success ?? false });
+    emit('MISSION_RESULT', {
+      success: result.success ?? false,
+      advanced: !!result.skillTransition?.changed,
+      feedback: result.feedback,
+      recommendation: result.recommendation,
+    });
   } catch (err) {
     emit('MISSION_RESULT', { success: false, error: String(err) });
   } finally {

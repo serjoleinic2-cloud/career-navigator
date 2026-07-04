@@ -11,7 +11,13 @@ interface MissionScreenProps {
   onClose?: () => void;
 }
 
-type TaskView = 'active' | 'completing' | 'completed';
+type TaskView = 'active' | 'completing' | 'completed' | 'retry';
+
+interface MissionOutcome {
+  advanced: boolean;
+  feedback?: string;
+  recommendation?: string;
+}
 
 export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chapterTitle, onComplete, onClose }) => {
   const [taskView, setTaskView] = useState<TaskView>('active');
@@ -19,6 +25,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
   const [reflectionScore, setReflectionScore] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [outcome, setOutcome] = useState<MissionOutcome | null>(null);
 
   const activeNodeId = runtimeState.activeNodeId;
   const nodeStates = runtimeState.nodeStates;
@@ -45,11 +52,18 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
     setCheckedItems(new Set());
     setReflectionScore(0);
     setErrorMessage(null);
+    setOutcome(null);
   }, [activeNodeId]);
 
   useEffect(() => {
     const unsub = subscribe('MISSION_RESULT', (event) => {
-      const payload = event.payload as { success: boolean; error?: string };
+      const payload = event.payload as {
+        success: boolean;
+        error?: string;
+        advanced?: boolean;
+        feedback?: string;
+        recommendation?: string;
+      };
       if (payload.error) {
         // A real exception was thrown during submission — this is the only
         // case that should surface as "Something went wrong".
@@ -57,14 +71,22 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         setErrorMessage(`Something went wrong. Try again. (${payload.error})`);
         return;
       }
-      // payload.success === false here just means the submission was
-      // graded as "partial" or "fail" (e.g. a short note) — that's a normal
-      // business outcome, not a system error. The task was still processed
-      // and the mission should still be considered complete; it simply
-      // didn't advance the underlying skill to the next stage. Previously
-      // ANY non-'success' grade was shown as a fatal error and blocked
-      // progression entirely.
-      setTaskView('completed');
+      // BUGFIX (2026-07-04): this used to always jump to 'completed' and
+      // show "Mission Complete!" regardless of whether the node actually
+      // advanced (payload.advanced === skillTransition.changed). Under the
+      // current "1 success = node done" model, a partial/fail grade means
+      // the node did NOT progress, chapter % was not awarded, and the next
+      // node stays locked — but the user saw the same success screen and
+      // had no idea anything was missing. Now: only a real advance shows
+      // the success panel; anything else shows what's missing and lets the
+      // user try again with more detail, using the same feedback text the
+      // grading engine already computes (task_content_engine.ts).
+      setOutcome({
+        advanced: !!payload.advanced,
+        feedback: payload.feedback,
+        recommendation: payload.recommendation,
+      });
+      setTaskView(payload.advanced ? 'completed' : 'retry');
     });
     return unsub;
   }, []);
@@ -95,6 +117,11 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   const handleContinue = useCallback(() => {
     onComplete();
   }, [onComplete]);
+
+  const handleTryAgain = useCallback(() => {
+    setTaskView('active');
+    setOutcome(null);
+  }, []);
 
   if (!activeTask) {
     return (
@@ -268,8 +295,27 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           <div className="mission-completed">
             <div className="completed-icon">✓</div>
             <div className="completed-text">Mission Complete!</div>
+            {outcome?.feedback && (
+              <p className="mission-outcome-feedback">{outcome.feedback}</p>
+            )}
             <button className="mission-primary-btn" onClick={handleContinue}>
               Continue Journey
+            </button>
+          </div>
+        )}
+
+        {taskView === 'retry' && (
+          <div className="mission-completed mission-retry">
+            <div className="completed-icon">✎</div>
+            <div className="completed-text">Not quite there yet</div>
+            {outcome?.feedback && (
+              <p className="mission-outcome-feedback">{outcome.feedback}</p>
+            )}
+            {outcome?.recommendation && (
+              <p className="mission-outcome-recommendation">{outcome.recommendation}</p>
+            )}
+            <button className="mission-primary-btn" onClick={handleTryAgain}>
+              Try Again
             </button>
           </div>
         )}
