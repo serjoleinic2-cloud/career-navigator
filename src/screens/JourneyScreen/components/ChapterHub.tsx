@@ -53,7 +53,7 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
         <div className="island-art-glow" style={{ background: accent }} />
         <img
           className="island-art-img"
-          src={`/art/software_engineer/island-${chapter.id}.png`}
+          src={`art/software_engineer/island-${chapter.id}.png`}
           alt={chapter.title}
           onLoad={(e) => {
             const fallback = (e.currentTarget as HTMLImageElement).nextElementSibling as HTMLElement | null;
