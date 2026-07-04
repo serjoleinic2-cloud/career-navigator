@@ -1,141 +1,162 @@
-STABILIZATION SPRINT — FINAL
+TASK — WORLD SCREEN REDESIGN (NO CSS PATCHES)
+Цель
 
-This task closes the Stabilization phase.
+Полностью отказаться от концепции "список внутри контейнера".
 
-No new features.
+Экран World должен ощущаться как единый игровой мир, а не как приложение со списком карточек.
 
-No refactoring.
+1. Screen Ownership
 
-No redesign.
+Удалить визуальную концепцию центрального контейнера.
 
-No architecture changes.
+Запрещается:
 
-Goal:
+большой белый контейнер;
+отдельная область со своим скроллом;
+ощущение "экран внутри экрана".
 
-Application must become stable.
+Рабочая область должна использовать практически весь экран устройства.
 
-Checklist:
+Допустимые боковые отступы:
 
-1. Every bottom navigation item works.
+16–20dp.
+2. World Owns The Screen
 
-Journey
+Фон мира должен занимать 100% экрана.
 
-World
+HUD накладывается поверх мира.
 
-Playbook
+Карточки не отделяют пользователя от окружения.
 
-Notes
+Игрок всегда чувствует, что находится внутри мира профессии.
 
-Profile
+3. Camera Scroll
 
-2. Every button reacts.
+Сейчас прокручивается список карточек.
 
-No dead UI.
+Это неверная модель.
 
-3. Every screen has readable typography.
+Необходимо перейти к модели:
 
-4. Every scroll works.
+Camera moves through the world.
 
-5. Nothing is hidden behind Bottom Navigation.
+При вертикальном движении пользователь должен ощущать перемещение камеры, а не прокрутку списка.
 
-6. No clipped content.
+4. Active Island Layout
 
-7. No placeholder that blocks navigation.
+На экране существует только одна активная глава.
 
-8. No TypeScript errors.
-
-9. No broken imports.
-
-10. Test full user flow:
-
-Onboarding
-
-↓
-
-Intro
-
-↓
+Структура:
 
 World
 
 ↓
 
-Complete Resume mission
+Current Island
 
 ↓
 
-Bridge animation
+Island Title
 
 ↓
 
-LinkedIn unlock
+Mission Cards
 
 ↓
 
-Open Playbook
+Bottom Navigation
+
+Никаких карточек других глав.
+
+Никаких скрытых списков.
+
+Никаких блоков "Resume / LinkedIn / Applications" одновременно.
+
+5. Mission Cards
+
+Карточки являются частью острова.
+
+Не частью отдельного контейнера.
+
+После завершения главы карточки исчезают.
+
+Камера переходит выше.
+
+Появляется следующий остров.
+
+6. Vertical Composition
+
+Композиция строится сверху вниз:
+
+Sky
 
 ↓
 
-Open Notes
+Environment
 
 ↓
 
-Return to World
+Current Island
 
-If any step fails,
+↓
 
-fix it.
+Mission Cards
 
-Only after all 10 items pass:
+↓
 
-Update PROJECT_STATUS.md
+Safe Bottom Area
 
-Set
+↓
 
-Development Phase:
+Bottom Navigation
 
-WORLD DESIGN
+Никаких центральных прямоугольников.
 
-This officially closes Stabilization.
+7. Safe Area
 
-И ещё одно правило, которое я предлагаю ввести с сегодняшнего дня.
+Bottom Navigation никогда не перекрывает карточки.
 
-В `PROJECT_STATUS.md` должна появиться строка:
+Последняя карточка должна полностью отображаться.
 
+Добавить нижний Safe Padding.
 
+8. Scrolling
 
-```
+Прокручивается весь экран.
 
+Не внутренний контейнер.
 
+Никаких nested scroll.
 
-```
+Один вертикальный scroll.
 
+9. Remove Temporary UI
 
+Удалить всё, что осталось от старой архитектуры списков:
 
+контейнер Resume;
+белый фон;
+отдельные scroll-area;
+лишние wrapper'ы, созданные для старого JourneyScreen.
 
+WorldHUD должен быть максимально плоским.
 
-```
+10. Acceptance Criteria
 
-CURRENT DEVELOPMENT PHASE
+После открытия World пользователь должен видеть:
 
+весь экран принадлежит игровому миру;
+нет ощущения приложения внутри приложения;
+текущий остров расположен в центре внимания;
+задания визуально принадлежат острову;
+весь экран скроллится как единое пространство;
+последняя карточка не уходит под Bottom Navigation;
+нет лишних контейнеров и внутренних областей прокрутки.
 
+ВАЖНО
 
-☑ Stabilization
+Не исправлять это CSS-костылями.
 
+Если текущая архитектура WorldHUD построена вокруг контейнера со своим scroll, её необходимо упростить.
 
-
-☐ World Design
-
-
-
-☐ Motion Polish
-
-
-
-☐ Art Production
-
-```
-
-
-
-И никто (ни я, ни Claude, ни Kimi) не имеет права давать задания из следующей фазы, пока текущая не отмечена как завершённая.
+Приоритет — правильная композиция экрана, а не сохранение существующей структуры компонентов.
