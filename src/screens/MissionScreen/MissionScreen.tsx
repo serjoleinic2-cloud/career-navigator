@@ -49,13 +49,22 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
 
   useEffect(() => {
     const unsub = subscribe('MISSION_RESULT', (event) => {
-      const payload = event.payload as { success: boolean };
-      if (payload.success) {
-        setTaskView('completed');
-      } else {
+      const payload = event.payload as { success: boolean; error?: string };
+      if (payload.error) {
+        // A real exception was thrown during submission — this is the only
+        // case that should surface as "Something went wrong".
         setTaskView('active');
-        setErrorMessage('Something went wrong. Try again.');
+        setErrorMessage(`Something went wrong. Try again. (${payload.error})`);
+        return;
       }
+      // payload.success === false here just means the submission was
+      // graded as "partial" or "fail" (e.g. a short note) — that's a normal
+      // business outcome, not a system error. The task was still processed
+      // and the mission should still be considered complete; it simply
+      // didn't advance the underlying skill to the next stage. Previously
+      // ANY non-'success' grade was shown as a fatal error and blocked
+      // progression entirely.
+      setTaskView('completed');
     });
     return unsub;
   }, []);
