@@ -3,7 +3,7 @@ import type { Note } from './note';
 let notes: Note[] = [];
 
 export function getNotes(): Note[] {
-  return notes;
+  return [...notes];
 }
 
 export function setNotes(data: Note[]): void {
