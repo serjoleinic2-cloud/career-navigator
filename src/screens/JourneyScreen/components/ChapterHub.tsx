@@ -39,6 +39,8 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
 
   const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'default');
   const accent = getChapterAccent(worldTheme, chapter.id);
+  const artSrc = `art/software_engineer/island-${chapter.id}.png`;
+  console.log('[ChapterHub] chapter.id =', JSON.stringify(chapter.id), '| artSrc =', artSrc);
 
   return (
     <div
@@ -53,7 +55,7 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
         <div className="island-art-glow" style={{ background: accent }} />
         <img
           className="island-art-img"
-          src={`art/software_engineer/island-${chapter.id}.png`}
+          src={artSrc}
           alt={chapter.title}
           onLoad={(e) => {
             const fallback = (e.currentTarget as HTMLImageElement).nextElementSibling as HTMLElement | null;
