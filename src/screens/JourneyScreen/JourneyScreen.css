@@ -461,330 +461,190 @@
   font-weight: 500;
 }
 
-/* === CHAPTER HUB (TASK 57) === */
+/* =====================================================================
+   CHAPTER HUB — FLAT WORLD COMPOSITION
+   Вертикальный стек без фонового прямоугольника:
+     island-art-slot   → 280×200px место под арт художника
+     island-label-row  → название + счётчик, только текст
+     island-missions   → плоские строки с тонкими разделителями
+   Фон мира (WorldRenderer) виден вокруг и между элементами.
+   ===================================================================== */
+
 .chapter-hub {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 60px;
-  padding: 40px 20px 120px;
+  padding: 112px 20px calc(100px + env(safe-area-inset-bottom));
   width: 100%;
 }
 
-.chapter-island {
+/* === ISLAND ART SLOT ===
+   Место под PNG/WebP от художника. Размер: 280×200px.
+   Когда арт готов — заменить .island-art-placeholder на <img>.
+   .island-art-glow остаётся поверх арта как постоянный атмосферный эффект. */
+.island-art-slot {
   position: relative;
+  width: 280px;
+  height: 200px;
+  margin-bottom: 4px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  width: 100%;
-  max-width: 360px;
-  min-height: 220px;
-  padding: 32px 20px;
-  border-radius: 32px;
-  /* Fallback for WebViews without color-mix() support (~Chrome <111):
-     without this, the color-mix() background below is silently dropped
-     entirely and the card renders with no fill at all — the "flat gray"
-     look this was meant to fix. Plain rgba first, color-mix() overrides
-     it on capable browsers.
-     Intensity was raised from an earlier, too-subtle pass (16%/22%/20%):
-     at low opacity on a near-black card the accent read as "still gray"
-     even when technically present — bumped to levels that are
-     unmistakably colored on a phone screen in daylight. */
-  background:
-    radial-gradient(120% 100% at 50% 0%, rgba(102, 126, 234, 0.40) 0%, transparent 65%),
-    linear-gradient(165deg, rgba(44, 50, 68, 0.60) 0%, rgba(14, 17, 26, 0.72) 100%);
-  background:
-    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 42%, transparent) 0%, transparent 65%),
-    linear-gradient(165deg, rgba(44, 50, 68, 0.60) 0%, rgba(14, 17, 26, 0.72) 100%);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(102, 126, 234, 0.55);
-  border: 1px solid color-mix(in srgb, var(--island-accent, #4A90D9) 55%, rgba(240, 240, 245, 0.10));
-  box-shadow:
-    0 16px 44px rgba(0, 0, 0, 0.30),
-    0 0 28px rgba(102, 126, 234, 0.18),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
-  box-shadow:
-    0 16px 44px rgba(0, 0, 0, 0.30),
-    0 0 28px color-mix(in srgb, var(--island-accent, #4A90D9) 22%, transparent),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
-  cursor: pointer;
-  outline: none;
-  transition: opacity 0.35s ease, transform 0.35s ease-out, min-height 0.35s ease, box-shadow 0.35s ease;
-  overflow: hidden;
+  justify-content: center;
+  animation: island-slot-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Glowing top edge — the "premium card" signature */
-.chapter-island::before {
-  content: '';
+@keyframes island-slot-enter {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Атмосферное свечение под островом — остаётся и с реальным артом */
+.island-art-glow {
   position: absolute;
-  top: 0;
-  left: 12%;
-  right: 12%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(140, 156, 240, 0.95) 50%, transparent 100%);
-  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--island-accent, #4A90D9) 85%, white 15%) 50%, transparent 100%);
-  opacity: 1;
-}
-
-.chapter-island:hover:not(.island-locked) {
-  box-shadow:
-    0 20px 56px rgba(0, 0, 0, 0.34),
-    0 0 40px rgba(102, 126, 234, 0.35),
-    0 1px 0 rgba(255, 255, 255, 0.10) inset;
-  box-shadow:
-    0 20px 56px rgba(0, 0, 0, 0.34),
-    0 0 40px color-mix(in srgb, var(--island-accent, #4A90D9) 35%, transparent),
-    0 1px 0 rgba(255, 255, 255, 0.10) inset;
-}
-
-.chapter-island:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.2);
-  outline-offset: 2px;
-}
-
-.chapter-island:hover:not(.island-locked) {
-  transform: scale(1.02);
-}
-
-.island-locked {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.island-hidden {
-  opacity: 0;
-  transform: translateY(40px) scale(0.9);
-  pointer-events: none;
-  min-height: 0;
-  padding: 0;
-  margin: -30px 0;
-  border: none;
-}
-
-.island-expanded {
-  min-height: 300px;
-  background: rgba(240, 240, 245, 0.06);
-  border-color: var(--island-accent);
-  border-width: 1px;
-  cursor: default;
-}
-
-.island-expanded:hover {
-  transform: none;
-}
-
-.island-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-  z-index: 1;
-}
-
-.island-emblema {
-  width: 80px;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
   height: 80px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  background: radial-gradient(circle at 35% 30%, rgba(102, 126, 234, 0.45) 0%, rgba(240, 240, 245, 0.06) 70%);
-  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--island-accent, #4A90D9) 48%, transparent) 0%, rgba(240, 240, 245, 0.06) 70%);
-  border: 2px solid rgba(102, 126, 234, 0.6);
-  border: 2px solid color-mix(in srgb, var(--island-accent, #4A90D9) 60%, rgba(240, 240, 245, 0.12));
-  box-shadow: 0 0 28px rgba(102, 126, 234, 0.30);
-  box-shadow: 0 0 28px color-mix(in srgb, var(--island-accent, #4A90D9) 32%, transparent);
-  position: relative;
+  filter: blur(32px);
+  opacity: 0.28;
+  pointer-events: none;
+  animation: island-breathe 4s ease-in-out infinite;
 }
 
-.island-complete-badge {
+@keyframes island-breathe {
+  0%, 100% { opacity: 0.22; transform: translateX(-50%) scaleX(1); }
+  50%       { opacity: 0.36; transform: translateX(-50%) scaleX(1.12); }
+}
+
+/* Плейсхолдер до прихода арта.
+   TODO: заменить на <img src="public/art/<profId>/island-<chapterId>.png">
+   Размер файла: 280×200px. Стиль: парящий остров, прозрачный фон (PNG). */
+.island-art-placeholder {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  background: var(--island-accent, #48BB78);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: island-check-pop 0.4s ease;
+  border: 1px dashed rgba(240, 240, 245, 0.12);
+  border-radius: 24px;
+  background: rgba(240, 240, 245, 0.03);
 }
 
-@keyframes island-check-pop {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+.island-art-icon {
+  font-size: 52px;
+  filter: drop-shadow(0 0 16px var(--island-accent, #4A90D9));
+  animation: icon-float 3.5s ease-in-out infinite;
 }
 
-.island-icon {
-  line-height: 1;
+@keyframes icon-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
 }
 
-.island-title {
-  font-size: 20px;
+/* === ISLAND LABEL — название без рамки === */
+.island-label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 20px;
+  animation: island-slot-enter 0.5s 0.1s both;
+}
+
+.island-label-title {
+  font-size: 22px;
   font-weight: 700;
-  margin: 4px 0 0;
   color: #f0f0f5;
+  letter-spacing: -0.3px;
 }
 
-.island-count {
+.island-label-count {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-weight: 500;
 }
 
-.island-completed .island-emblema {
-  border-color: var(--island-accent, #48BB78);
+/* === ISLAND MISSIONS (flat rows) === */
+.island-missions {
+  width: 100%;
+  max-width: 360px;
+  border-top: 1px solid rgba(240, 240, 245, 0.08);
+  animation: island-slot-enter 0.5s 0.18s both;
 }
 
-.island-active .island-emblema {
-  border-color: var(--island-accent, #4A90D9);
-  animation: island-pulse 2s ease-in-out infinite;
+/* === MISSION ROW — плоская строка без box === */
+.mission-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 4px;
+  border-bottom: 1px solid rgba(240, 240, 245, 0.07);
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-@keyframes island-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 240, 245, 0.15); }
-  50% { box-shadow: 0 0 0 16px rgba(240, 240, 245, 0); }
+.mission-row:last-child { border-bottom: none; }
+
+.mission-row:active:not(.mission-row--locked) {
+  background: rgba(240, 240, 245, 0.04);
 }
 
-.island-glow {
+/* Акцентная полоска слева у активной задачи */
+.mission-row-bar {
   position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  filter: blur(30px);
-  opacity: 0.15;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
+  left: -4px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 2px;
 }
 
-.island-completed .island-glow {
-  opacity: 0.3;
-  animation: island-complete-glow 2s ease-in-out infinite;
-}
-
-@keyframes island-complete-glow {
-  0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.2); }
-}
-
-.island-fog {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 32px;
+/* Иконка состояния */
+.mission-row-status {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(240, 240, 245, 0.2);
-  backdrop-filter: blur(2px);
 }
 
-/* Chapter nodes container (expanded view) */
-.chapter-nodes-container {
-  position: relative;
-  width: 100%;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(240, 240, 245, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  animation: nodes-appear 0.35s ease;
-}
-
-@keyframes nodes-appear {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.chapter-nodes-path {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.nodes-path-svg {
-  width: 100%;
-  height: 100%;
-}
-
-/* === SKILL NODE CARD (TASK 58) === */
-.skill-node-card {
-  position: relative;
-  width: 100%;
-  max-width: 280px;
-  border-radius: 16px;
-  background: rgba(18, 22, 30, 0.62);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(240, 240, 245, 0.10);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.20);
-  cursor: pointer;
-  outline: none;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, box-shadow 0.3s ease;
-  z-index: 1;
-  animation: node-card-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.skill-node-card:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.2);
-  outline-offset: 2px;
-}
-
-@keyframes node-card-enter {
-  from { opacity: 0; transform: scale(0.8) translateY(20px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.card-left {
-  align-self: flex-start;
-}
-
-.card-right {
-  align-self: flex-end;
-}
-
-.skill-node-card:hover:not(.skill-node-card--locked) {
-  transform: scale(1.05);
-}
-
-.skill-node-card-body {
+/* Пульс для текущей задачи */
+.mission-row-pulse {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  position: relative;
-  overflow: hidden;
+  justify-content: center;
+  animation: pulse-ring 2s ease-in-out infinite;
 }
 
-.skill-node-card-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+@keyframes pulse-ring {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+.mission-row-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* Текст */
+.mission-row-info {
   flex: 1;
   min-width: 0;
-}
-
-.skill-node-card-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.skill-node-card-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 0;
-  flex: 1;
 }
 
-.skill-node-card-title {
-  font-size: 14px;
+.mission-row-title {
+  font-size: 15px;
   font-weight: 600;
   color: #f0f0f5;
   white-space: nowrap;
@@ -792,97 +652,35 @@
   text-overflow: ellipsis;
 }
 
-.skill-node-card-meta {
+.mission-row-meta {
   font-size: 11px;
   color: var(--text-muted);
 }
 
-.skill-node-card-play {
-  font-size: 14px;
-  color: var(--text-secondary);
-  flex-shrink: 0;
-}
+/* Правая часть */
+.mission-row-action { flex-shrink: 0; }
 
-/* Completed state */
-.skill-node-card--completed {
-  border-color: var(--card-accent, #48BB78);
-  background: rgba(72, 187, 120, 0.06);
-}
+.mission-row-go   { font-size: 13px; font-weight: 600; }
+.mission-row-done { font-size: 12px; color: var(--text-muted); }
 
-.skill-node-card-bar {
+/* Состояния */
+.mission-row--completed .mission-row-title { opacity: 0.6; }
+.mission-row--locked { cursor: not-allowed; opacity: 0.38; }
+
+/* Прогресс-бар под активной строкой */
+.mission-row-progress {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  border-radius: 4px 0 0 4px;
-}
-
-.skill-node-card-check {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--card-accent, #48BB78);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: #f0f0f5;
-  animation: check-pop 0.3s ease;
-}
-
-/* Current state */
-.skill-node-card--current {
-  border-color: var(--card-accent, #4A90D9);
-  box-shadow: 0 0 20px rgba(74, 144, 217, 0.15);
-  animation: current-glow 2s ease-in-out infinite;
-}
-
-@keyframes current-glow {
-  0%, 100% { box-shadow: 0 0 12px rgba(74, 144, 217, 0.1); }
-  50% { box-shadow: 0 0 24px rgba(74, 144, 217, 0.25); }
-}
-
-.skill-node-card-progress {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0 16px 10px;
-}
-
-.skill-node-card-progress-track {
-  height: 3px;
-  background: rgba(240, 240, 245, 0.1);
-  border-radius: 2px;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgba(240, 240, 245, 0.07);
+  border-radius: 1px;
   overflow: hidden;
 }
 
-.skill-node-card-progress-fill {
+.mission-row-progress-fill {
   height: 100%;
-  border-radius: 2px;
-  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Locked state */
-.skill-node-card--locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: blur(0.5px);
-}
-
-.skill-node-card--locked:active {
-  animation: locked-shake 0.2s ease;
-}
-
-.skill-node-card-lock {
-  position: absolute;
-  right: 12px;
-  color: rgba(240, 240, 245, 0.2);
+  border-radius: 1px;
+  transition: width 0.4s ease;
 }
 
 /* === CHAPTER COMPLETE (TASK 59) === */

@@ -38,46 +38,44 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
   if (!chapter) return null;
 
   const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'default');
+  const accent = getChapterAccent(worldTheme, chapter.id);
 
   return (
-    <div className="chapter-hub chapter-hub-single">
-      <div
-        key={chapter.id}
-        className="chapter-island island-active island-expanded"
-        style={{ '--island-accent': getChapterAccent(worldTheme, chapter.id) } as React.CSSProperties}
-      >
-        <div className="island-content">
-          <div className="island-emblema">
-            <span className="island-icon">{chapter.icon}</span>
-          </div>
-          <h3 className="island-title">{chapter.title}</h3>
-          <span className="island-count">{chapter.completedCount}/{chapter.totalCount} skills</span>
-          <div className="island-glow" style={{ background: getChapterAccent(worldTheme, chapter.id) }} />
+    <div
+      className="chapter-hub chapter-hub-single"
+      style={{ '--island-accent': accent } as React.CSSProperties}
+    >
+      {/* === ISLAND ART SLOT ===
+          Место под картинку острова от художника. Размер: 280×200px.
+          Когда арт готов — передать PNG/WebP этого размера, заменить
+          <div className="island-art-placeholder"> на <img src="..." />.
+          Атмосферное свечение island-art-glow остаётся поверх арта. */}
+      <div className="island-art-slot">
+        <div className="island-art-glow" style={{ background: accent }} />
+        <div className="island-art-placeholder">
+          {/* TODO: заменить на <img src={worldImageUrl} alt={chapter.title} /> */}
+          <span className="island-art-icon">{chapter.icon}</span>
         </div>
+      </div>
 
-        <div className="chapter-nodes-container">
-          <div className="chapter-nodes-path">
-            <svg className="nodes-path-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path
-                d="M50 0 Q80 25 50 50 Q20 75 50 100"
-                stroke="rgba(255,255,255,0.15)"
-                strokeWidth="3"
-                fill="none"
-                strokeDasharray="6 4"
-              />
-            </svg>
-          </div>
-          {chapter.nodes.map((skillNode, idx) => (
-            <SkillNodeCard
-              key={skillNode.id}
-              node={skillNode}
-              state={getNodeCardState(skillNode, activeNodeId)}
-              index={idx}
-              progress={0}
-              onSelect={onNodeSelect}
-            />
-          ))}
-        </div>
+      {/* === ISLAND LABEL — просто текст, без рамки/фона === */}
+      <div className="island-label-row">
+        <span className="island-label-title">{chapter.title}</span>
+        <span className="island-label-count">{chapter.completedCount}/{chapter.totalCount}</span>
+      </div>
+
+      {/* === MISSION ROWS — плоские строки, разделены тонкой линией === */}
+      <div className="island-missions">
+        {chapter.nodes.map((skillNode, idx) => (
+          <SkillNodeCard
+            key={skillNode.id}
+            node={skillNode}
+            state={getNodeCardState(skillNode, activeNodeId)}
+            index={idx}
+            progress={0}
+            onSelect={onNodeSelect}
+          />
+        ))}
       </div>
     </div>
   );
