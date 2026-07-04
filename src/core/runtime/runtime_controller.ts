@@ -231,6 +231,15 @@ export function submitTask(userPayload: unknown): TaskResult {
 
   emit('UI_REFRESH', {});
 
+  // BUGFIX (2026-07-04): submitTask() updates nodeStates, confidenceScore,
+  // readinessScore and chapterProgress in memory but, unlike setActiveNode/
+  // advanceChapter/startJourney, never persisted the result. Every mission
+  // completion was lost on app restart (progress reset to 0%) and any node
+  // unlock (e.g. positioning-clarity -> achievement-framing) reverted back
+  // on next load, because the saved snapshot never reflected the mission
+  // that was just completed.
+  saveRuntime(runtimeState);
+
   // Check journey completion
   const allNodesCompleted = Object.values(runtimeState.nodeStates).every(
     n => n.state === 'confidence'
