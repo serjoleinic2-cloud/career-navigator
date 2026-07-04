@@ -46,14 +46,23 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
       style={{ '--island-accent': accent } as React.CSSProperties}
     >
       {/* === ISLAND ART SLOT ===
-          Место под картинку острова от художника. Размер: 280×200px.
-          Когда арт готов — передать PNG/WebP этого размера, заменить
-          <div className="island-art-placeholder"> на <img src="..." />.
-          Атмосферное свечение island-art-glow остаётся поверх арта. */}
+          Арт острова. Файл: public/art/software_engineer/island-<chapterId>.png
+          Размер: 280×200px, PNG с прозрачным фоном.
+          Если файла нет — автоматически показывается иконка-плейсхолдер. */}
       <div className="island-art-slot">
         <div className="island-art-glow" style={{ background: accent }} />
-        <div className="island-art-placeholder">
-          {/* TODO: заменить на <img src={worldImageUrl} alt={chapter.title} /> */}
+        <img
+          className="island-art-img"
+          src={`/art/software_engineer/island-${chapter.id}.png`}
+          alt={chapter.title}
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            img.style.display = 'none';
+            const fallback = img.nextElementSibling as HTMLElement | null;
+            if (fallback) fallback.style.display = 'flex';
+          }}
+        />
+        <div className="island-art-placeholder" style={{ display: 'none' }}>
           <span className="island-art-icon">{chapter.icon}</span>
         </div>
       </div>

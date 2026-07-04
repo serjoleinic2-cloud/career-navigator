@@ -518,9 +518,17 @@
   50%       { opacity: 0.36; transform: translateX(-50%) scaleX(1.12); }
 }
 
-/* Плейсхолдер до прихода арта.
-   TODO: заменить на <img src="public/art/<profId>/island-<chapterId>.png">
-   Размер файла: 280×200px. Стиль: парящий остров, прозрачный фон (PNG). */
+/* Реальный арт острова */
+.island-art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  border-radius: 16px;
+}
+
+/* Плейсхолдер до прихода арта */
 .island-art-placeholder {
   width: 100%;
   height: 100%;
