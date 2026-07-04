@@ -78,8 +78,13 @@ const VALIDATION_RULES: Record<TaskType, (payload: unknown) => { valid: boolean;
       : payload;
     const text = String(raw || '').trim();
     if (!text || text === 'false' || text === 'null') {
-      // User explicitly didn't respond — still pass, just lower quality
-      return { valid: true, quality: 0.5 };
+      // BUGFIX (2026-07-04): an empty note used to still "pass" (quality
+      // 0.5, i.e. partial success worth +5 chapter progress and +0.05
+      // confidence) — meaning the note was effectively optional even
+      // though the UI presents it as the actual deliverable of the task.
+      // An empty response is now a real fail: no progress, no confidence,
+      // and the node does not advance.
+      return { valid: false, quality: 0 };
     }
     return { valid: true, quality: Math.min(text.length / 50, 1.0) };
   },

@@ -112,7 +112,14 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
     n.state === 'confidence' || n.state === 'execution'
   ).length + 1;
 
-  const canSubmit = textInput.trim() || checkedItems.size > 0 || reflectionScore > 0;
+  // BUGFIX (2026-07-04): previously any one of note/checklist/star rating
+  // was enough to enable Complete Mission, so a mission could be finished
+  // without ever writing a note — checking a single checklist box or
+  // tapping one star was enough. The note is the actual deliverable every
+  // mission asks for ("Your Notes"), so it's now always required; the
+  // checklist and star rating remain optional self-reflection aids on top
+  // of it, matching what the hint text under the textarea already says.
+  const canSubmit = textInput.trim().length > 0;
 
   return (
     <div className={`mission-screen ${taskView === 'active' ? 'mission-enter' : ''}`}>

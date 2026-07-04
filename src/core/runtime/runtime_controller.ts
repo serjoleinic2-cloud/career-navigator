@@ -204,17 +204,30 @@ export function submitTask(userPayload: unknown): TaskResult {
     emit('CHAPTER_UNLOCKED', { chapterId: newChapterId });
   }
 
-  const newProgress = Math.min(
-    100,
-    (runtimeState.chapterProgress[activeTask.chapterId] ?? 0) + enrichedResult.chapterProgressDelta
-  );
-  runtimeState = {
-    ...runtimeState,
-    chapterProgress: {
-      ...runtimeState.chapterProgress,
-      [activeTask.chapterId]: newProgress,
-    },
-  };
+  // BUGFIX (2026-07-04): chapterProgress used to be incremented on every
+  // submitTask() call unconditionally, even when the node had already
+  // reached its final state before this submission (e.g. user re-opens an
+  // already-completed node's mission and hits Complete Mission again).
+  // That made "chapter progress %" grow without bound on replay, instead of
+  // reflecting how many *distinct* nodes are actually done. We now only
+  // award chapterProgressDelta when this submission caused a real skill
+  // state transition (enrichedResult.skillTransition.changed) — i.e. the
+  // node moved forward for the first time. Replaying a completed node's
+  // mission still gives feedback/self-reflection value to the user, but no
+  // longer double-counts progress.
+  if (enrichedResult.skillTransition?.changed) {
+    const newProgress = Math.min(
+      100,
+      (runtimeState.chapterProgress[activeTask.chapterId] ?? 0) + enrichedResult.chapterProgressDelta
+    );
+    runtimeState = {
+      ...runtimeState,
+      chapterProgress: {
+        ...runtimeState.chapterProgress,
+        [activeTask.chapterId]: newProgress,
+      },
+    };
+  }
 
   emit('UI_REFRESH', {});
 

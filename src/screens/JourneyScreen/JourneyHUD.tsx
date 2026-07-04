@@ -159,6 +159,18 @@ export function JourneyHUD() {
       setLockedToast('Complete previous tasks to unlock this node.');
       return;
     }
+    // BUGFIX (2026-07-04): an already-completed node (state 'confidence' /
+    // 'execution') could still be tapped back open and its mission
+    // resubmitted. Combined with the chapterProgress fix above this no
+    // longer inflates progress, but it also silently let users keep
+    // replaying e.g. "positioning-clarity" instead of moving on to the
+    // node that was actually unlocked next (e.g. "achievement-framing"),
+    // which read as "the next node never activates". Completed nodes are
+    // now shown as done instead of reopening their mission.
+    if (clickedNodeState === 'confidence' || clickedNodeState === 'execution') {
+      setLockedToast('This step is already complete.');
+      return;
+    }
     if (nodeId === ui.activeNodeId) {
       setShowMission(true);
       return;
