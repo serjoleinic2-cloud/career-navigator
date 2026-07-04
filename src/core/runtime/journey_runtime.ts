@@ -70,7 +70,7 @@ export function initializeJourneyRuntime(onboardingState: OnboardingState): Jour
     nodeMap[entryNodeId] = {
       ...nodeMap[entryNodeId],
       state: 'awareness',
-      nextState: 'understanding',
+      nextState: 'confidence',
     };
   }
 

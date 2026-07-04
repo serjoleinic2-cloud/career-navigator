@@ -2,7 +2,8 @@ import type { JourneyRuntimeState } from './journey_runtime';
 import { initializeJourneyRuntime } from './journey_runtime';
 import type { OnboardingState } from '../onboarding/onboarding_state';
 import type { UserAction } from '../skill_engine';
-import type { SkillNode, SkillState } from '../skill_state';
+import type { SkillNode } from '../skill_state';
+import { STATE_FLOW } from '../skill_state';
 import { getActiveChapters, getActiveProfession, setActiveProfession } from '../profession_loader';
 import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
@@ -247,7 +248,7 @@ function applyTaskResultToRuntime(result: TaskResult, originalNode: SkillNode): 
     const updatedNode: SkillNode = {
       ...originalNode,
       state: result.skillTransition.current,
-      nextState: getNextState(result.skillTransition.current),
+      nextState: STATE_FLOW[result.skillTransition.current] ?? null,
     };
     let nodeStates = {
       ...runtimeState.nodeStates,
@@ -274,7 +275,7 @@ function applyTaskResultToRuntime(result: TaskResult, originalNode: SkillNode): 
         if (nextNode && nextNode.state === 'locked') {
           nodeStates = {
             ...nodeStates,
-            [nextNodeId]: { ...nextNode, state: 'awareness', nextState: 'understanding' },
+            [nextNodeId]: { ...nextNode, state: 'awareness', nextState: 'confidence' },
           };
           // Also move the "active" pointer to the newly unlocked node —
           // same as advanceChapter does at chapter boundaries — so World
@@ -298,19 +299,6 @@ function applyTaskResultToRuntime(result: TaskResult, originalNode: SkillNode): 
     confidenceScore: clamp(runtimeState.confidenceScore + result.confidenceDelta, 0, 1),
     readinessScore: clamp(runtimeState.readinessScore + result.readinessDelta, 0, 100),
   };
-}
-
-function getNextState(state: SkillState): SkillState | null {
-  const flow: Record<SkillState, SkillState | null> = {
-    locked: 'awareness',
-    awareness: 'understanding',
-    understanding: 'application',
-    application: 'readiness',
-    readiness: 'execution',
-    execution: 'confidence',
-    confidence: null,
-  };
-  return flow[state] ?? null;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -374,7 +362,7 @@ export function advanceChapter(): JourneyRuntimeState {
   // the node itself must be explicitly unlocked, not just made active.
   const nextNode = runtimeState.nodeStates[nextNodeId];
   const unlockedNodeStates = nextNode && nextNode.state === 'locked'
-    ? { ...runtimeState.nodeStates, [nextNodeId]: { ...nextNode, state: 'awareness' as const, nextState: 'understanding' as const } }
+    ? { ...runtimeState.nodeStates, [nextNodeId]: { ...nextNode, state: 'awareness' as const, nextState: 'confidence' as const } }
     : runtimeState.nodeStates;
   runtimeState = { ...runtimeState, activeNodeId: nextNodeId, nodeStates: unlockedNodeStates };
   saveRuntime(runtimeState);

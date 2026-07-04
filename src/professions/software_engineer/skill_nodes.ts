@@ -355,7 +355,7 @@ export const LINKEDIN_SKILL_NODES: SkillNode[] = [
     skill: 'Headline Authority',
     domain: 'Linkedin',
     state: 'awareness',
-    nextState: 'understanding',
+    nextState: 'confidence',
     signals: ['Your headline is your job title only', 'Recruiters do not reach out'],
     advice: {
       awareness:
