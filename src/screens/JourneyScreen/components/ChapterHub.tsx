@@ -55,8 +55,13 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
           className="island-art-img"
           src={`/art/software_engineer/island-${chapter.id}.png`}
           alt={chapter.title}
+          onLoad={(e) => {
+            const fallback = (e.currentTarget as HTMLImageElement).nextElementSibling as HTMLElement | null;
+            if (fallback) fallback.style.display = 'none';
+          }}
           onError={(e) => {
             const img = e.currentTarget as HTMLImageElement;
+            console.warn('[ChapterHub] island art not found:', img.src);
             img.style.display = 'none';
             const fallback = img.nextElementSibling as HTMLElement | null;
             if (fallback) fallback.style.display = 'flex';
