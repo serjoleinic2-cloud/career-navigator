@@ -56,7 +56,7 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
 
   const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'default');
   const accent = getChapterAccent(worldTheme, chapter.id);
-  const artFilename = CHAPTER_ART_FILENAME[chapter.id];
+  const artFilename = CHAPTER_ART_FILENAME[chapter.id.toLowerCase()];
   const artSrc = artFilename ? `art/software_engineer/${artFilename}` : '';
 
   return (

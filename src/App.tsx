@@ -9,6 +9,7 @@ import { NotesScreen } from './screens/NotesScreen/NotesScreen';
 import { ShareScreen } from './screens/ShareScreen/ShareScreen';
 import { JourneyHUD } from './screens/JourneyScreen';
 import { BottomNav } from './components/BottomNav/BottomNav';
+import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import './App.css';
 
 // NOTE: 'debug' screen (JourneyScreenDebug) was removed — it was a dead
@@ -19,7 +20,7 @@ import './App.css';
 // mounted on top of it.
 type Screen = 'world' | 'playbook' | 'notes' | 'share';
 
-function App() {
+function AppInner() {
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
@@ -145,4 +146,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppInner />
+    </ErrorBoundary>
+  );
+}
