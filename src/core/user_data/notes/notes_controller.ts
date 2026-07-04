@@ -15,8 +15,7 @@ export function addNote(data: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Not
     createdAt: now,
     updatedAt: now,
   };
-  const all = getNotes();
-  all.push(note);
+  const all = [...getNotes(), note];
   setNotes(all);
   saveNotes(all);
   emit('NOTE_CREATED', { note });
@@ -24,21 +23,22 @@ export function addNote(data: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Not
 }
 
 export function updateNote(id: string, updates: Partial<Pick<Note, 'content'>>): Note | null {
-  const all = getNotes();
-  const idx = all.findIndex(n => n.id === id);
+  const existing = getNotes();
+  const idx = existing.findIndex(n => n.id === id);
   if (idx === -1) return null;
-  all[idx] = { ...all[idx], ...updates, updatedAt: Date.now() };
+  const updated: Note = { ...existing[idx], ...updates, updatedAt: Date.now() };
+  const all = existing.map(n => (n.id === id ? updated : n));
   setNotes(all);
   saveNotes(all);
-  emit('NOTE_UPDATED', { note: all[idx] });
-  return all[idx];
+  emit('NOTE_UPDATED', { note: updated });
+  return updated;
 }
 
 export function deleteNote(id: string): boolean {
-  const all = getNotes();
-  const idx = all.findIndex(n => n.id === id);
-  if (idx === -1) return false;
-  const removed = all.splice(idx, 1)[0];
+  const existing = getNotes();
+  const removed = existing.find(n => n.id === id);
+  if (!removed) return false;
+  const all = existing.filter(n => n.id !== id);
   setNotes(all);
   saveNotes(all);
   emit('NOTE_DELETED', { noteId: id, note: removed });
