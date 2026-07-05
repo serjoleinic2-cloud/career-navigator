@@ -72,8 +72,81 @@ export function setActiveNode(nodeId: string): JourneyRuntimeState {
 
 // ─── TASK LIFECYCLE WITH CONTENT ENGINE ─────────────────────
 
+// BUGFIX (2026-07-05): TASK_LIBRARY in task_content_engine.ts was authored
+// back when every chapter had exactly 4 nodes, and was never extended when
+// chapters grew (Resume has 7 nodes now, Interviews has 10, etc). For any
+// node with no matching TaskDefinition, loadTaskForNode() used to return
+// null WITHOUT updating `activeTaskDefinition` — so submitTask() silently
+// kept using whatever definition (and, critically, whatever `nodeId`) was
+// last loaded. Concretely: opening resume-ats's mission and hitting
+// "Complete Mission" would run submitTask() against the *previous* node
+// (resume-review, already at max state) instead of resume-ats — resume-ats
+// could never advance no matter how many times the user retried, with no
+// visible error. This builds a real, node-specific TaskDefinition on the
+// fly from the node's own already-authored TaskContent (title/objective/
+// difficulty) whenever a hand-authored one doesn't exist, so every node is
+// gradeable and advances correctly, and the "what's next" recommendation
+// is computed from the node's actual position in its chapter instead of
+// ever guessing.
+function buildFallbackTaskDefinition(nodeId: string): TaskDefinition | null {
+  if (!runtimeState) return null;
+  const node = runtimeState.nodeStates[nodeId];
+  const content = node?.tasks?.[0];
+  if (!node || !content) return null;
+
+  const chapters = getActiveChapters();
+  const chapterIndex = chapters.findIndex(c => c.nodeIds.includes(nodeId));
+  const chapter = chapterIndex >= 0 ? chapters[chapterIndex] : undefined;
+  const chapterId = chapter?.id ?? node.domain.toLowerCase();
+
+  let recommendationSuccess = 'Nice work — keep the momentum going.';
+  if (chapter) {
+    const nodeIdx = chapter.nodeIds.indexOf(nodeId);
+    const nextNodeId = chapter.nodeIds[nodeIdx + 1];
+    const nextNode = nextNodeId ? runtimeState.nodeStates[nextNodeId] : undefined;
+    if (nextNode) {
+      recommendationSuccess = `Move to ${nextNode.skill} next.`;
+    } else {
+      const nextChapter = chapters[chapterIndex + 1];
+      recommendationSuccess = nextChapter
+        ? `${chapter.title} chapter complete! Move to ${nextChapter.title}.`
+        : `${chapter.title} chapter complete — you've finished the journey!`;
+    }
+  }
+
+  const difficulty = Math.min(5, Math.max(1, Math.round(content.difficulty || 2))) as 1 | 2 | 3 | 4 | 5;
+
+  return {
+    id: `task-fallback-${nodeId}`,
+    chapterId,
+    nodeId,
+    title: content.title,
+    description: content.objective,
+    type: 'TEXT_TASK',
+    difficulty,
+    estimatedDuration: content.estimatedMinutes ?? 15,
+    validationType: { type: 'min_length', min: 40, placeholder: 'Write your notes here...' },
+    completionRule: 'partial_credit',
+    rewards: {
+      confidenceBonus: 0.10,
+      readinessBonus: 3,
+      chapterProgress: chapter ? Math.ceil(100 / chapter.nodeIds.length) : 8,
+    },
+    feedback: {
+      success: `Great work on "${content.title}". You're building real momentum.`,
+      partial: `Good progress on "${content.title}". Add a bit more detail for full credit.`,
+      fail: `"${content.title}" needs another pass — add specific detail before continuing.`,
+    },
+    recommendation: {
+      success: recommendationSuccess,
+      partial: 'Add more detail and try again.',
+      fail: 'Review the instructions above and give it another attempt.',
+    },
+  };
+}
+
 export function loadTaskForNode(nodeId: string): TaskDefinition | null {
-  const definition = getTaskByNodeId(nodeId);
+  const definition = getTaskByNodeId(nodeId) ?? buildFallbackTaskDefinition(nodeId);
   if (!definition) {
     return null;
   }

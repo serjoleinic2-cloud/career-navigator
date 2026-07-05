@@ -1161,3 +1161,55 @@ feedback/recommendation движка после отправки задания 
 что текст результата (что засчиталось и что рекомендуется дальше) виден
 и читаем.
 
+### 2026-07-05 — Claude (найден системный баг: узлы после 4-го в каждой главе не могли завершиться)
+
+Пользователь спросил: "как глава пройдена если ещё Professional Summary
+шаг и Skills inventory?" — правильно заметив, что `task-resume-review`
+писал "Resume chapter complete!" после всего 4-го из 7 узлов главы Resume.
+
+**Найдено — гораздо серьёзнее, чем неверный текст:** `TASK_LIBRARY` в
+`task_content_engine.ts` была написана, когда в каждой главе было ровно
+4 узла, и никогда не обновлялась при добавлении новых узлов. Реальная
+нехватка `TaskDefinition`:
+- `resume`: нет `resume-ats`, `resume-summary`, `resume-skills` (3 из 7)
+- `linkedin`: нет `profile-photo`, `featured-content`, `recommendations` (3 из 7)
+- `applications`: нет `company-research`, `application-tailoring`, `portfolio-submission`, `referral-strategy` (4 из 8)
+- `interviews`: нет `behavioral-prep`, `system-design-prep`, `on-site-prep`, `phone-screen`, `interview-followup`, `presentation-prep` (6 из 10)
+- `offer`: нет `equity-evaluation`, `start-transition` (2 из 6)
+- `offer_preparation` — покрыта полностью, без проблем.
+
+Итого 21 узел без своего `TaskDefinition`. Механизм поломки —
+`loadTaskForNode()` возвращал `null` для таких узлов **не обновляя**
+`activeTaskDefinition`; `submitTask()` при этом не проверяет, что
+`activeTask.nodeId` совпадает с узлом, который сейчас реально открыт —
+только что оба поля не `null`. Итог: открыв, например, `resume-ats` (узел
+без определения) и нажав "Complete Mission", система на самом деле
+пересчитывала **предыдущий** загруженный узел (например, уже завершённый
+`resume-review`) — который уже на максимальном состоянии, поэтому
+`skillTransition.changed` всегда `false`. `resume-ats` физически не мог
+продвинуться ни при каком количестве попыток, без единой видимой ошибки.
+Это, скорее всего, и есть первопричина ощущения "застревания" на поздних
+узлах глав, независимо от предыдущих фиксов сохранения runtime.
+
+**Исправлено:**
+- `task_content_engine.ts` — убраны 3 ложных "chapter complete!" сообщения
+  (`resume-review`→ теперь ссылается на ATS Optimization; `linkedin
+  quiz`→ на Profile Photo; `application-volume`→ на Company Research;
+  `interview-mindset`→ на Behavioral Preparation), так как ни один из этих
+  узлов на самом деле не последний в своей главе.
+- `runtime_controller.ts` — добавлена `buildFallbackTaskDefinition(nodeId)`:
+  строит полноценный `TaskDefinition` на лету из уже написанного
+  `TaskContent` узла (`node.tasks[0]` — title/objective/difficulty), когда
+  для узла нет записи в `TASK_LIBRARY`. Рекомендация "что дальше" считается
+  динамически по реальной позиции узла в `chapter.nodeIds` — следующий
+  узел той же главы, либо (если это правда последний узел) следующая
+  глава, а не захардкоженная строка. `loadTaskForNode()` теперь всегда
+  возвращает определение, привязанное к правильному `nodeId`, для любого
+  узла с непустым `tasks`.
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Не проверено вживую** — нужно пройти resume-ats, resume-summary,
+resume-skills (и в идеале ещё несколько ранее "непокрытых" узлов в других
+главах) и убедиться, что каждый реально продвигается и глава Resume
+доходит до 7/7, а не застревает на 4-м узле.
+

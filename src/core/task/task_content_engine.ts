@@ -140,7 +140,7 @@ export const TASK_LIBRARY: TaskDefinition[] = [
       fail: 'If you are not confident, recruiters will not be either. Revise before continuing.',
     },
     recommendation: {
-      success: 'Resume chapter complete! Move to LinkedIn Optimization.',
+      success: 'Move to ATS Optimization to make sure your resume passes automated screening.',
       partial: 'Spend 15 more minutes on the weakest section of your resume.',
       fail: 'Get peer feedback. Sometimes others see strengths we miss.',
     },
@@ -256,7 +256,7 @@ export const TASK_LIBRARY: TaskDefinition[] = [
       fail: 'Keyword optimization is the #1 way to get found by recruiters. Study job descriptions in your target role.',
     },
     recommendation: {
-      success: 'LinkedIn chapter complete! Move to Applications.',
+      success: 'Move to your Profile Photo next — first impressions matter before recruiters read a word.',
       partial: '',
       fail: 'Review the LinkedIn optimization guide before continuing.',
     },
@@ -362,7 +362,7 @@ export const TASK_LIBRARY: TaskDefinition[] = [
       fail: 'The job search is a numbers game. Set a minimum: 3 quality applications per week.',
     },
     recommendation: {
-      success: 'Applications chapter complete! You are ready for interviews.',
+      success: 'Move to Company Research next — targeted applications convert far better than generic ones.',
       partial: 'Block 2 hours every Tuesday and Thursday for focused application time.',
       fail: 'Start with 1 application today. Momentum builds momentum.',
     },
@@ -469,7 +469,7 @@ export const TASK_LIBRARY: TaskDefinition[] = [
       fail: 'If you are not ready, postpone. A bad interview is worse than no interview.',
     },
     recommendation: {
-      success: 'Interviews chapter complete! You are ready for offers.',
+      success: 'Move to Behavioral Preparation next — technical skill alone will not carry an interview.',
       partial: 'Do one more mock interview. Confidence comes from evidence, not hope.',
       fail: 'Revisit your STAR stories. Evidence of past success creates future confidence.',
     },
