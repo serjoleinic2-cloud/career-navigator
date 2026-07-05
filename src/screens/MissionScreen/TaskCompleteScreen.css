@@ -1,0 +1,283 @@
+/* =====================================================================
+   TASK COMPLETE SCREEN
+   Full-screen celebration shown right after a single mission is
+   completed (taskView === 'completed' in MissionScreen), replacing the
+   old inline "Mission Complete!" mini-panel. Modeled on the reference
+   design (obrazets.png): photo background, confetti (reused from
+   ChapterCompleteScreen), circular skill-progress ring, reward pills,
+   a stats card, a Continue Journey button and a "Coming next" teaser.
+   ===================================================================== */
+
+.task-complete-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  animation: chapter-complete-fade 0.35s ease;
+}
+
+/* === Background photo slot ===
+   Drop the real photo in via the `backgroundImage` prop. Until then, a
+   themed dark gradient fills the space so the screen never looks broken. */
+.task-complete-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+.task-complete-bg-fallback {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      circle at 50% 30%,
+      color-mix(in srgb, var(--w-chapter-accent, #f5a623) 22%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #2a1b3d 0%, #1a1030 45%, #0b0e14 100%);
+}
+
+.task-complete-bg-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 14, 20, 0.55) 0%,
+    rgba(11, 14, 20, 0.72) 45%,
+    rgba(11, 14, 20, 0.94) 100%
+  );
+}
+
+.task-complete-screen .confetti-container {
+  z-index: 1;
+}
+
+.task-complete-scroll {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.task-complete-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: calc(48px + env(safe-area-inset-top)) 20px calc(32px + env(safe-area-inset-bottom));
+  min-height: 100%;
+  box-sizing: border-box;
+  animation: complete-content-appear 0.5s ease 0.1s both;
+}
+
+.task-complete-banner {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #ffd58a;
+  margin-bottom: 8px;
+}
+
+.task-complete-heading {
+  font-size: 30px;
+  font-weight: 800;
+  color: #f0f0f5;
+  margin: 0 0 8px;
+}
+
+.task-complete-subtitle {
+  font-size: 15px;
+  color: rgba(240, 240, 245, 0.75);
+  max-width: 280px;
+  margin: 0 0 28px;
+  line-height: 1.4;
+}
+
+.task-complete-ring-wrap {
+  margin-bottom: 28px;
+}
+
+/* ProgressRing's default label colors are tuned for light cards; override
+   for this dark, photo-backed screen. */
+.task-complete-ring-wrap .progress-ring-percent {
+  color: #ffffff;
+  font-size: 30px;
+}
+
+.task-complete-ring-wrap .progress-ring-text {
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.5px;
+}
+
+.task-complete-rewards {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: 20px;
+}
+
+.task-complete-reward {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 6px;
+  background: rgba(240, 240, 245, 0.07);
+  border: 1px solid rgba(240, 240, 245, 0.1);
+  border-radius: 16px;
+}
+
+.task-complete-reward-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.task-complete-reward-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f0f0f5;
+}
+
+.task-complete-reward-label {
+  font-size: 10px;
+  color: rgba(240, 240, 245, 0.6);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.task-complete-stats-card {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(240, 240, 245, 0.06);
+  border: 1px solid rgba(240, 240, 245, 0.1);
+  border-radius: 18px;
+  padding: 6px 18px;
+  margin-bottom: 20px;
+}
+
+.task-complete-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(240, 240, 245, 0.08);
+}
+
+.task-complete-stats-row:last-child {
+  border-bottom: none;
+}
+
+.task-complete-stats-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.task-complete-stats-label {
+  flex: 1;
+  text-align: left;
+  font-size: 14px;
+  color: rgba(240, 240, 245, 0.8);
+}
+
+.task-complete-stats-value {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.task-complete-stats-value--amber { color: #f5a623; }
+.task-complete-stats-value--green { color: #48bb78; }
+.task-complete-stats-value--red   { color: #ff6b6b; }
+
+.task-complete-continue-btn {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 17px 20px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f5a623, #f57c23);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(245, 124, 35, 0.35);
+  margin-bottom: 20px;
+  transition: transform 0.15s ease;
+}
+
+.task-complete-continue-btn:active {
+  transform: scale(0.97);
+}
+
+.task-complete-continue-arrow {
+  font-size: 18px;
+}
+
+.task-complete-next-card {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(240, 240, 245, 0.06);
+  border: 1px solid rgba(240, 240, 245, 0.1);
+  border-radius: 18px;
+  padding: 16px 18px;
+}
+
+.task-complete-next-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+}
+
+.task-complete-next-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #b892f5;
+}
+
+.task-complete-next-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f0f0f5;
+}
+
+.task-complete-next-subtitle {
+  font-size: 13px;
+  color: rgba(240, 240, 245, 0.7);
+}
+
+.task-complete-next-time {
+  font-size: 12px;
+  color: rgba(240, 240, 245, 0.55);
+  margin-top: 2px;
+}
+
+.task-complete-next-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(184, 146, 245, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+@media (max-width: 380px) {
+  .task-complete-heading { font-size: 26px; }
+  .task-complete-reward-label { display: none; }
+}

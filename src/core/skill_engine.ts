@@ -1,6 +1,6 @@
 import type { SkillNode } from './skill_state';
 import { STATE_FLOW } from './skill_state';
-import { submitTask, getRuntimeState } from './runtime/runtime_controller';
+import { submitTask, getRuntimeState, getActiveTask } from './runtime/runtime_controller';
 import type { JourneyRuntimeState } from './runtime/journey_runtime';
 import { emit, subscribe } from './events/system_event_bus';
 
@@ -74,12 +74,16 @@ subscribe('MISSION_SUBMIT', (event) => {
 
   try {
     const payload = event.payload as unknown as MissionResult;
+    const chapterId = getActiveTask()?.chapterId;
     const result = applyMissionResult(payload);
     emit('MISSION_RESULT', {
       success: result.success ?? false,
       advanced: !!result.skillTransition?.changed,
       feedback: result.feedback,
       recommendation: result.recommendation,
+      readinessDelta: result.readinessDelta,
+      confidenceDelta: result.confidenceDelta,
+      skillProgressPercent: chapterId ? getRuntimeState()?.chapterProgress[chapterId] : undefined,
     });
   } catch (err) {
     emit('MISSION_RESULT', { success: false, error: String(err) });

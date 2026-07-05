@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import './MissionScreen.css';
+import './TaskCompleteScreen.css';
 import type { JourneyRuntimeState } from '../../core/runtime/journey_runtime';
 import { emit, subscribe } from '../../core/events/system_event_bus';
 import { loadTaskForNode, createTaskFromDefinition, getActiveTask } from '../../core/runtime/runtime_controller';
 import { addNote, updateNote, getNotesByTask } from '../../core/user_data/notes/notes_controller';
-import { getActiveProfessionId } from '../../core/profession_loader';
+import { getActiveProfessionId, getActiveChapters } from '../../core/profession_loader';
+import { TaskCompleteScreen, type TaskCompleteNextTask } from './TaskCompleteScreen';
 
 interface MissionScreenProps {
   runtimeState: JourneyRuntimeState;
@@ -19,6 +21,9 @@ interface MissionOutcome {
   advanced: boolean;
   feedback?: string;
   recommendation?: string;
+  readinessDelta?: number;
+  confidenceDelta?: number;
+  skillProgressPercent?: number;
 }
 
 export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chapterTitle, onComplete, onClose }) => {
@@ -65,6 +70,9 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         advanced?: boolean;
         feedback?: string;
         recommendation?: string;
+        readinessDelta?: number;
+        confidenceDelta?: number;
+        skillProgressPercent?: number;
       };
       if (payload.error) {
         // A real exception was thrown during submission — this is the only
@@ -87,6 +95,9 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         advanced: !!payload.advanced,
         feedback: payload.feedback,
         recommendation: payload.recommendation,
+        readinessDelta: payload.readinessDelta,
+        confidenceDelta: payload.confidenceDelta,
+        skillProgressPercent: payload.skillProgressPercent,
       });
       setTaskView(payload.advanced ? 'completed' : 'retry');
     });
@@ -188,6 +199,61 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   // showed as a black screen requiring an app restart. Clamp + round to a
   // safe 1-5 integer before building the dot rating.
   const difficultyLevel = Math.min(5, Math.max(1, Math.round(activeTask.difficulty || 1)));
+
+  // Data for the full-screen TaskCompleteScreen (taskView === 'completed').
+  // Derived from real runtime state — chapter node order/progress, current
+  // scores — not hardcoded placeholder numbers.
+  const chapters = getActiveChapters();
+  const currentChapter = chapters.find(c => c.id === runtimeState.activeChapterId);
+  const chapterNodeIds = currentChapter?.nodeIds ?? [];
+  const tasksCompletedInChapter = chapterNodeIds.filter(
+    id => nodeStates[id]?.state === 'confidence' || nodeStates[id]?.state === 'execution'
+  ).length;
+
+  let nextTaskInfo: TaskCompleteNextTask | null = null;
+  if (currentChapter) {
+    const currentIndex = chapterNodeIds.indexOf(activeNodeId);
+    const nextNodeId = chapterNodeIds[currentIndex + 1];
+    const nextNode = nextNodeId ? nodeStates[nextNodeId] : undefined;
+    const nextNodeTask = nextNode?.tasks?.[0];
+    if (nextNode && nextNodeTask) {
+      nextTaskInfo = {
+        title: nextNodeTask.title,
+        index: currentIndex + 2,
+        total: chapterNodeIds.length,
+        estimatedMinutes: nextNodeTask.estimatedMinutes,
+      };
+    }
+  }
+
+  // Reward numbers shown on the celebration screen. The engine (see
+  // task_content_engine.ts rewards) only tracks confidence (0-1 scale) and
+  // readiness (0-100 scale) deltas — there's no separate XP reward field in
+  // content data, so XP is derived from those two deltas with a simple,
+  // consistent formula rather than inventing unrelated numbers.
+  const readinessDeltaShown = Math.round(outcome?.readinessDelta ?? 0);
+  const confidenceDeltaShown = Math.round((outcome?.confidenceDelta ?? 0) * 100);
+  const xpGained = Math.max(5, readinessDeltaShown * 3 + confidenceDeltaShown * 2);
+
+  // Full-screen celebration takeover (see obrazets.png reference) — replaces
+  // the rest of the mission UI entirely while taskView === 'completed', the
+  // same way ChapterCompleteScreen takes over for a finished chapter.
+  if (taskView === 'completed') {
+    return (
+      <TaskCompleteScreen
+        skillProgressPercent={outcome?.skillProgressPercent ?? runtimeState.chapterProgress?.[runtimeState.activeChapterId] ?? 0}
+        xpGained={xpGained}
+        readinessDelta={readinessDeltaShown}
+        confidenceDelta={confidenceDeltaShown}
+        tasksCompleted={tasksCompletedInChapter}
+        totalTasks={chapterNodeIds.length || 1}
+        readinessScore={runtimeState.readinessScore}
+        confidenceScore={runtimeState.confidenceScore * 100}
+        nextTask={nextTaskInfo}
+        onContinue={handleContinue}
+      />
+    );
+  }
 
   return (
     <div className={`mission-screen ${taskView === 'active' ? 'mission-enter' : ''}`}>
@@ -329,19 +395,6 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           <div className="mission-completing">
             <div className="completing-spinner" />
             <span>Saving progress...</span>
-          </div>
-        )}
-
-        {taskView === 'completed' && (
-          <div className="mission-completed">
-            <div className="completed-icon">✓</div>
-            <div className="completed-text">Mission Complete!</div>
-            {outcome?.feedback && (
-              <p className="mission-outcome-feedback">{outcome.feedback}</p>
-            )}
-            <button className="mission-primary-btn" onClick={handleContinue}>
-              Continue Journey
-            </button>
           </div>
         )}
 
