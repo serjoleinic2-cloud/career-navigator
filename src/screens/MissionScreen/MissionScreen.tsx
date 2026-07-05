@@ -254,6 +254,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   // the rest of the mission UI entirely while taskView === 'completed', the
   // same way ChapterCompleteScreen takes over for a finished chapter.
   if (taskView === 'completed') {
+    const isChapterComplete = tasksCompletedInChapter >= chapterNodeIds.length && chapterNodeIds.length > 0;
     return (
       <TaskCompleteScreen
         skillProgressPercent={outcome?.skillProgressPercent ?? runtimeState.chapterProgress?.[runtimeState.activeChapterId] ?? 0}
@@ -262,9 +263,9 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         confidenceDelta={confidenceDeltaShown}
         tasksCompleted={tasksCompletedInChapter}
         totalTasks={chapterNodeIds.length || 1}
-        readinessScore={runtimeState.readinessScore}
-        confidenceScore={runtimeState.confidenceScore * 100}
-        nextTask={nextTaskInfo}
+        isChapterComplete={isChapterComplete}
+        chapterTitle={currentChapter?.title ?? chapterTitle ?? ''}
+        nextTask={isChapterComplete ? null : nextTaskInfo}
         onContinue={handleContinue}
       />
     );

@@ -203,7 +203,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
             )}
           </div>
 
-          <button className="playbook-apply-btn">Apply to Current Task</button>
+          <button className="playbook-apply-btn" onClick={onClose}>Apply to Current Task</button>
           <button className="playbook-back-btn" onClick={goBack}>← Назад</button>
         </div>
       </div>

@@ -290,3 +290,38 @@
   .task-complete-heading { font-size: 26px; }
   .task-complete-reward-label { display: none; }
 }
+
+/* Chapter-complete banner variant */
+.chapter-complete-banner {
+  background: linear-gradient(90deg, rgba(0,184,148,0.3), rgba(0,184,148,0.15)) !important;
+  border-color: rgba(0,184,148,0.5) !important;
+  color: #00b894 !important;
+}
+
+/* Chapter progress bar (replaces the old absolute-score stats card) */
+.task-complete-chapter-progress {
+  width: 100%;
+  margin: 0 0 18px;
+}
+.task-complete-chapter-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.task-complete-chapter-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.task-complete-chapter-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F5A623, #f5c842);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}

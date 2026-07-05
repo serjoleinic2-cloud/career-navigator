@@ -198,6 +198,34 @@ export function JourneyHUD() {
   const handleMissionComplete = useCallback(() => {
     setShowMission(false);
     refresh();
+    // The TaskCompleteScreen already showed the chapter-complete celebration
+    // when this was the last node in the chapter. Jump straight to the
+    // bridge animation and skip the ChapterCompleteScreen entirely so the
+    // user doesn't see two celebration screens back-to-back.
+    // We read the runtime directly (not via captured closure) to get the
+    // state AFTER submitTask() has already persisted the final node.
+    const rt = getRuntimeState();
+    if (!rt) return;
+    const nodeVals = Object.values(rt.nodeStates);
+    const domainMap: Record<string, typeof nodeVals> = {};
+    nodeVals.forEach(n => {
+      const d = n.domain || 'Unknown';
+      if (!domainMap[d]) domainMap[d] = [];
+      domainMap[d].push(n);
+    });
+    const activeChapterNodes = rt.activeChapterId ? domainMap[rt.activeChapterId] : undefined;
+    const chapterJustCompleted = activeChapterNodes?.every(n => n.state === 'confidence');
+    if (chapterJustCompleted) {
+      // Mark this chapter so the useEffect doesn't re-trigger celebrate
+      prevChapterCompletedRef.current = rt.activeChapterId;
+      // Auto-advance to the next chapter (unlock + activate its first node)
+      // after a short delay so the TaskCompleteScreen's "Next Chapter" button
+      // gives the user a moment to read it before the world updates.
+      setTimeout(() => {
+        advanceChapter();
+        refresh();
+      }, 300);
+    }
   }, [refresh]);
 
   if (showMission && runtime) {
@@ -211,11 +239,13 @@ export function JourneyHUD() {
     );
   }
 
-  if (!node) {
+  if (!node && !runtime) {
     return (
       <div className="journey-screen journey-hud">
         <JourneyHeader chapterTitle="" nodeIndex={0} totalNodes={0} readinessScore={0} />
-        <h1>No active node</h1>
+        <div style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginTop: 80, fontSize: 16 }}>
+          Loading journey...
+        </div>
       </div>
     );
   }
