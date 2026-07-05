@@ -278,10 +278,18 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           {chapterTitle || runtimeState.activeChapterId || 'Resume'}
         </div>
         <div className="header-scores">
-          <div className="score-badge readiness">
+          {/* These are journey-wide running totals, not per-chapter progress.
+              Readiness (0-100) measures how prepared you are for the job market;
+              Confidence (0-100%) grows with each completed mission. Both
+              accumulate across all chapters — reaching 100% here means you have
+              completed enough missions across all chapters to max out that score,
+              which is expected by the time you reach Interviews. */}
+          <div className="score-badge readiness" title="Career Readiness — your overall job-market preparedness score">
+            <span className="score-badge-label">Ready</span>
             {Math.round(runtimeState.readinessScore)}%
           </div>
-          <div className="score-badge confidence">
+          <div className="score-badge confidence" title="Confidence — how confident you feel across your career journey">
+            <span className="score-badge-label">Conf</span>
             {Math.round(runtimeState.confidenceScore * 100)}%
           </div>
         </div>

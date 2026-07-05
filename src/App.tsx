@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { loadRuntime } from './core/persistence/runtime_persistence';
 import { startJourney, initializeRuntime } from './core/runtime/runtime_controller';
+import { loadNotes } from './core/user_data/notes/notes_persistence';
+import { setNotes } from './core/user_data/notes/notes_store';
 import { WorldRenderer } from './core';
 import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
 import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
@@ -39,6 +41,13 @@ function AppInner() {
   const [playbookDeepLink, setPlaybookDeepLink] = useState<PlaybookCategory | null>(null);
 
   useEffect(() => {
+    // BUGFIX (2026-07-05): notes_store initialises to [] on every cold start.
+    // loadNotes() was defined but never called, so persisted notes were never
+    // restored — the store stayed empty until the user manually created a new
+    // note in the current session, at which point old notes were overwritten.
+    const savedNotes = loadNotes();
+    if (savedNotes) setNotes(savedNotes);
+
     const saved = loadRuntime();
     if (saved) {
       initializeRuntime(saved);
