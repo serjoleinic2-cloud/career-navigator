@@ -268,7 +268,7 @@ export function JourneyHUD() {
   return (
     <div className="journey-screen journey-hud">
       <JourneyHeader
-        chapterTitle={ui.currentChapterTitle || node.domain}
+        chapterTitle={ui.currentChapterTitle || node?.domain || ''}
         nodeIndex={0}
         totalNodes={professionNodes.length}
         readinessScore={runtime?.readinessScore ?? 0}
