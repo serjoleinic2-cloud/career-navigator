@@ -3,6 +3,8 @@ import './MissionScreen.css';
 import type { JourneyRuntimeState } from '../../core/runtime/journey_runtime';
 import { emit, subscribe } from '../../core/events/system_event_bus';
 import { loadTaskForNode, createTaskFromDefinition, getActiveTask } from '../../core/runtime/runtime_controller';
+import { addNote, updateNote, getNotesByTask } from '../../core/user_data/notes/notes_controller';
+import { getActiveProfessionId } from '../../core/profession_loader';
 
 interface MissionScreenProps {
   runtimeState: JourneyRuntimeState;
@@ -95,12 +97,42 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
     setTaskView('completing');
     setErrorMessage(null);
 
+    // BUGFIX (2026-07-05): the "Your Notes" textarea is the actual written
+    // deliverable of every mission (see canSubmit below), but it was only
+    // ever used as grading input for submitTask() — never persisted
+    // anywhere. Users wrote real reflections on every single mission and
+    // then watched them vanish the moment they hit Complete Mission,
+    // because nothing called addNote(). Now every submission with a
+    // non-empty note also saves a real Note, tagged with the same
+    // chapterId/nodeId the Notes screen already groups by (see
+    // NotesScreen.tsx CATEGORY_ORDER / grouped-by-chapterId), so it shows
+    // up under the right category (Resume/LinkedIn/etc) automatically.
+    const trimmed = textInput.trim();
+    if (trimmed && activeTask) {
+      // Retrying the same mission (e.g. after "Not quite there yet") should
+      // update the existing note for this task, not spawn a new duplicate
+      // every attempt.
+      const existing = getNotesByTask(activeTask.id);
+      if (existing.length > 0) {
+        updateNote(existing[0].id, { content: trimmed });
+      } else {
+        addNote({
+          professionId: getActiveProfessionId() || '',
+          chapterId: runtimeState.activeChapterId || '',
+          nodeId: activeNodeId,
+          taskId: activeTask.id,
+          title: activeTask.title,
+          content: trimmed,
+        });
+      }
+    }
+
     emit('MISSION_SUBMIT', {
       text: textInput,
       checked: Array.from(checkedItems),
       score: reflectionScore,
     });
-  }, [textInput, checkedItems, reflectionScore]);
+  }, [textInput, checkedItems, reflectionScore, activeTask, activeNodeId, runtimeState.activeChapterId]);
 
   const handleChecklistToggle = useCallback((index: number) => {
     setCheckedItems(prev => {

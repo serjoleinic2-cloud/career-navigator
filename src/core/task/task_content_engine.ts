@@ -230,25 +230,29 @@ export const TASK_LIBRARY: TaskDefinition[] = [
     },
   },
   {
+    // BUGFIX (2026-07-05): this was authored as type MULTIPLE_CHOICE with an
+    // exact_match validationType (correct: 'b'), but MissionScreen has no
+    // answer-selection UI for any task type — it only ever renders a
+    // textarea/checklist/stars and submits { text, checked, score }.
+    // VALIDATION_RULES.MULTIPLE_CHOICE also never actually checked the
+    // payload against validationType.correct; it just String()'d the whole
+    // payload object and compared it to the literal 'correct', which never
+    // matched. Net result: quality capped at 0.7, below the 0.8 success
+    // threshold — this node could NEVER succeed no matter what the user
+    // wrote or how long. Converted to TEXT_TASK (the pattern every other
+    // node already uses) so it's gradeable through the UI that actually
+    // exists; the prompt now asks the user to explain the concept in their
+    // own words instead of picking an unrendered option.
     id: 'task-linkedin-quiz',
     chapterId: 'linkedin',
     nodeId: 'linkedin-optimization',
     title: 'LinkedIn Best Practices',
-    description: 'Test your knowledge of LinkedIn optimization.',
-    type: 'MULTIPLE_CHOICE',
+    description: 'In your own words, explain the #1 way to get found by recruiters on LinkedIn, and how you applied it to your own headline and About section.',
+    type: 'TEXT_TASK',
     difficulty: 1,
     estimatedDuration: 3,
-    validationType: {
-      type: 'exact_match',
-      correct: 'b',
-      options: [
-        { value: 'a', label: 'Post your resume as a photo in the featured section' },
-        { value: 'b', label: 'Use keywords from target job descriptions in your headline and about' },
-        { value: 'c', label: 'Change your job title every week to appear in more searches' },
-        { value: 'd', label: 'Send connection requests to everyone in your city' },
-      ],
-    },
-    completionRule: 'all_or_nothing',
+    validationType: { type: 'min_length', min: 40, placeholder: 'Write your notes here...' },
+    completionRule: 'partial_credit',
     rewards: { confidenceBonus: 0.05, readinessBonus: 2, chapterProgress: 6 },
     feedback: {
       success: 'Correct! Keywords make you discoverable by recruiters searching for specific skills.',
