@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getUIState } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, getActiveNode, getRuntimeState, advanceChapter } from '@/core/runtime/runtime_controller';
+import { getActiveChapters } from '@/core/profession_loader';
 import { subscribe } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
 import type { SkillNode } from '@/core/skill_state';
@@ -206,18 +207,26 @@ export function JourneyHUD() {
     // state AFTER submitTask() has already persisted the final node.
     const rt = getRuntimeState();
     if (!rt) return;
-    const nodeVals = Object.values(rt.nodeStates);
-    const domainMap: Record<string, typeof nodeVals> = {};
-    nodeVals.forEach(n => {
-      const d = n.domain || 'Unknown';
-      if (!domainMap[d]) domainMap[d] = [];
-      domainMap[d].push(n);
-    });
-    const activeChapterNodes = rt.activeChapterId ? domainMap[rt.activeChapterId] : undefined;
-    const chapterJustCompleted = activeChapterNodes?.every(n => n.state === 'confidence');
+    // BUGFIX (2026-07-05): this used to group nodes by `n.domain` (e.g.
+    // 'Resume', capitalized as authored in skill_nodes.ts) and look that
+    // group up by `rt.activeChapterId` (e.g. 'resume', lowercase chapter id
+    // from chapters.ts). The casing never matched, so `activeChapterNodes`
+    // was always undefined, `chapterJustCompleted` was always falsy, and
+    // advanceChapter() was never called here — leaving the Journey view
+    // stuck showing a chapter whose nodes were all already 'confidence'.
+    // Group by the same chapter definitions advanceChapter()/getCurrentChapter()
+    // use instead of re-deriving groups from node.domain strings.
+    const chapters = getActiveChapters();
+    const currentChapter = chapters.find(ch => ch.nodeIds.includes(rt.activeNodeId));
+    const activeChapterNodes = currentChapter
+      ? currentChapter.nodeIds.map(id => rt.nodeStates[id]).filter(Boolean)
+      : undefined;
+    const chapterJustCompleted =
+      !!activeChapterNodes && activeChapterNodes.length > 0 &&
+      activeChapterNodes.every(n => n.state === 'confidence');
     if (chapterJustCompleted) {
       // Mark this chapter so the useEffect doesn't re-trigger celebrate
-      prevChapterCompletedRef.current = rt.activeChapterId;
+      prevChapterCompletedRef.current = currentChapter!.id;
       // Auto-advance to the next chapter (unlock + activate its first node)
       // after a short delay so the TaskCompleteScreen's "Next Chapter" button
       // gives the user a moment to read it before the world updates.

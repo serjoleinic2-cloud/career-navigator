@@ -459,7 +459,12 @@ export function advanceChapter(): JourneyRuntimeState {
   const unlockedNodeStates = nextNode && nextNode.state === 'locked'
     ? { ...runtimeState.nodeStates, [nextNodeId]: { ...nextNode, state: 'awareness' as const, nextState: 'confidence' as const } }
     : runtimeState.nodeStates;
-  runtimeState = { ...runtimeState, activeNodeId: nextNodeId, nodeStates: unlockedNodeStates };
+  runtimeState = {
+    ...runtimeState,
+    activeNodeId: nextNodeId,
+    activeChapterId: next.id,
+    nodeStates: unlockedNodeStates,
+  };
   saveRuntime(runtimeState);
   emit('CHAPTER_CHANGED', { chapterId: next.id });
   emit('NODE_CHANGED', { nodeId: nextNodeId });
