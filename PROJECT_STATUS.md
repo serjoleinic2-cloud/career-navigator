@@ -1548,3 +1548,22 @@ Serj сообщил четыре бага по результатам живог
 
 **Проверено:** `npx vite build` — чисто.
 **Не проверено вживую** — нужно: (а) нажать "Apply to Current Task" в Playbook — должен открыться Journey; (б) открыть Journey сразу после запуска — не должен быть пустым; (в) пройти последний узел главы — должен показаться TaskCompleteScreen с "🏆 CHAPTER COMPLETE!", нажать "Next Chapter" — следующая глава должна разблокироваться (НЕ должен появляться второй ChapterCompleteScreen после); (г) в наградах — проверить что показываются дельты (+X), а не 100/100.
+
+### 2026-07-05 — Claude (Journey всё ещё пустой после завершения главы — найдена и исправлена вторая, более глубокая причина)
+
+Предыдущее исправление (early return "Loading..." вместо "No active node") устраняло пустой экран только при первом запуске, но не решало реальный кейс: **Journey оставался пустым/залипшим после завершения главы**, потому что `ChapterHub` получал `chapter={null}`, когда ни одна глава не помечалась `isActive`.
+
+Найдены и исправлены два взаимосвязанных бага в `advanceChapter()` (`runtime_controller.ts`) и `handleMissionComplete()` (`JourneyHUD.tsx`):
+
+1. **`advanceChapter()` не обновлял `activeChapterId`.** Функция переключала `activeNodeId` на первый узел следующей главы, но `runtimeState.activeChapterId` оставался старым (обновлялся только внутри `submitTask()` через `getCurrentChapter()`). Runtime и UI расходились в том, какая глава активна.
+
+2. **Регистронесовпадение `domain` vs `chapter.id`.** В `handleMissionComplete()` узлы группировались по `n.domain` (например, `'Resume'` — с большой буквы, как задано в `skill_nodes.ts`), а поиск активной группы шёл по ключу `rt.activeChapterId` (например, `'resume'` — с маленькой буквы, id главы из `chapters.ts`). Регистр никогда не совпадал → `activeChapterNodes` всегда был `undefined` → `chapterJustCompleted` всегда `false` → `advanceChapter()` из `handleMissionComplete` никогда не вызывался. Пользователь дожимал последний узел главы, а Journey оставался на старой (уже полностью пройденной) главе без перехода — что выглядело как "пустое окно/зависание".
+
+**Исправлено:**
+- `runtime_controller.ts` → `advanceChapter()` теперь пишет `activeChapterId: next.id` вместе с `activeNodeId`.
+- `JourneyHUD.tsx` → `handleMissionComplete()` больше не строит `domainMap` по `node.domain`. Вместо этого текущая глава ищется через `getActiveChapters()` и `chapter.nodeIds.includes(rt.activeNodeId)` — тот же источник истины, что использует `advanceChapter()`/`getCurrentChapter()` в `chapter_engine.ts`. Устраняет рассинхронизацию casing между `domain` и `chapter.id` целиком, а не точечно.
+
+**Проверено:** `npx tsc --noEmit` — чисто (0 ошибок).
+**Не проверено вживую** — нужно: пройти все узлы главы до конца → должен показаться TaskCompleteScreen с "🏆 CHAPTER COMPLETE!" → после перехода следующая глава должна отрисоваться в Journey (не пустой экран), `ChapterHub` должен получить реальный `chapter`, а не `null`.
+
+Commit: `e2e95ee` в `main`.
