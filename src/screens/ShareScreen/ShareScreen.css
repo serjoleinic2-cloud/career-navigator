@@ -190,3 +190,41 @@
   border: none;
   font-weight: 600;
 }
+
+/* Close / Back buttons — added when ShareScreen is opened as a sub-screen
+   (from Profile) rather than mounted as its own permanent tab. Matches the
+   project-wide required pattern (see PlaybookScreen/NotesScreen). */
+.share-close-btn {
+  position: sticky;
+  top: calc(8px + env(safe-area-inset-top));
+  align-self: flex-end;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 240, 245, 0.1);
+  background: rgba(240, 240, 245, 0.08);
+  color: rgba(240, 240, 245, 0.8);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.share-back-btn {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(240, 240, 245, 0.1);
+  background: rgba(240, 240, 245, 0.06);
+  color: #f0f0f5;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  min-height: 44px;
+}

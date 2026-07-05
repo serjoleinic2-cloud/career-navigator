@@ -6,25 +6,28 @@ import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
 import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
 import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
-import { ShareScreen } from './screens/ShareScreen/ShareScreen';
+import { WorldMapScreen } from './screens/WorldMapScreen/WorldMapScreen';
+import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { JourneyHUD } from './screens/JourneyScreen';
 import { BottomNav } from './components/BottomNav/BottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import './App.css';
 
-// NOTE: 'debug' screen (JourneyScreenDebug) was removed — it was a dead
-// placeholder stub that had silently replaced the real World tab content.
-// Per project Constitution §6-7 (single world, single HUD, no duplication),
-// 'world' now always renders the real composition: WorldRenderer (art/
-// camera/atmosphere engine) with JourneyHUD (chapter cards, missions, nav)
-// mounted on top of it.
-type Screen = 'world' | 'playbook' | 'notes' | 'share';
+// Bottom nav restructured per +Window_functional.md (Serj/ChatGPT design
+// doc): 5 tabs instead of 4. The old 'world' tab (WorldRenderer +
+// JourneyHUD — the actual working screen with missions) is renamed
+// 'journey' here, since a *different*, new 'world' tab now exists: an
+// illustrated travel map (WorldMapScreen — intentionally left empty for
+// now, see that file). 'share' is no longer a tab; it moved into
+// ProfileScreen as an action button ("Share Progress"), per the doc's
+// "Share — это кнопка. Не экран." decision.
+type Screen = 'journey' | 'playbook' | 'notes' | 'world' | 'profile';
 
 function AppInner() {
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('world');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('journey');
   const [prevScreen, setPrevScreen] = useState<Screen | null>(null);
   const [transitioning, setTransitioning] = useState(false);
 
@@ -51,12 +54,12 @@ function AppInner() {
   };
 
   const handleTabChange = (tabId: string) => {
-    if (tabId === 'world' || tabId === 'playbook' || tabId === 'notes' || tabId === 'share') {
+    if (tabId === 'journey' || tabId === 'playbook' || tabId === 'notes' || tabId === 'world' || tabId === 'profile') {
       navigateTo(tabId as Screen);
     }
   };
 
-  const closeToWorld = () => navigateTo('world');
+  const closeToJourney = () => navigateTo('journey');
 
   if (!isReady) return null;
 
@@ -111,21 +114,25 @@ function AppInner() {
     };
 
     switch (screen) {
-      case 'world':
+      case 'journey':
         // WorldRenderer is the permanent art/camera engine; JourneyHUD is
         // the UI layer (chapter cards, missions) mounted on top of it —
         // exactly one world, exactly one HUD, per project Constitution.
+        // This is the tab formerly called 'world' (renamed, not rebuilt —
+        // see +Window_functional.md).
         return (
           <div key={common.key} style={common.style}>
             <JourneyHUD />
           </div>
         );
       case 'playbook':
-        return <PlaybookScreen key={common.key} style={common.style} onClose={closeToWorld} />;
+        return <PlaybookScreen key={common.key} style={common.style} onClose={closeToJourney} />;
       case 'notes':
-        return <NotesScreen key={common.key} style={common.style} onClose={closeToWorld} />;
-      case 'share':
-        return <ShareScreen key={common.key} style={common.style} />;
+        return <NotesScreen key={common.key} style={common.style} onClose={closeToJourney} />;
+      case 'world':
+        return <WorldMapScreen key={common.key} style={common.style} />;
+      case 'profile':
+        return <ProfileScreen key={common.key} style={common.style} onClose={closeToJourney} />;
     }
   };
 
@@ -141,7 +148,7 @@ function AppInner() {
         {prevScreen && renderScreen(prevScreen, true)}
         {renderScreen(currentScreen, false)}
       </div>
-      <BottomNav currentTab={currentScreen as 'world' | 'playbook' | 'notes' | 'share'} onTabChange={handleTabChange} />
+      <BottomNav currentTab={currentScreen as 'journey' | 'playbook' | 'notes' | 'world' | 'profile'} onTabChange={handleTabChange} />
     </div>
   );
 }

@@ -1,13 +1,18 @@
 import { motion } from 'framer-motion';
-import { Map, BookOpen, StickyNote, Share2 } from 'lucide-react';
+import { Compass, BookOpen, StickyNote, Map, User } from 'lucide-react';
 
-type TabId = 'world' | 'playbook' | 'notes' | 'share';
+// Per +Window_functional.md: 5 tabs, Journey first (was "World" — the
+// working screen with WorldRenderer+JourneyHUD, renamed here since a new,
+// different "World" screen now exists — the illustrated travel map).
+// Share is no longer its own tab; it moved into Profile as an action.
+type TabId = 'journey' | 'playbook' | 'notes' | 'world' | 'profile';
 
 const tabs: { id: TabId; label: string; icon: React.ComponentType<{ className?: string; size?: number | string }> }[] = [
-  { id: 'world', label: 'World', icon: Map },
+  { id: 'journey', label: 'Journey', icon: Compass },
   { id: 'playbook', label: 'Playbook', icon: BookOpen },
   { id: 'notes', label: 'Notes', icon: StickyNote },
-  { id: 'share', label: 'Share', icon: Share2 },
+  { id: 'world', label: 'World', icon: Map },
+  { id: 'profile', label: 'Profile', icon: User },
 ];
 
 interface BottomNavProps {
@@ -40,7 +45,7 @@ export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
             return (
               <motion.button
                 key={tab.id}
-                className="relative flex flex-col items-center gap-1 py-1.5 px-4 min-w-[64px]"
+                className="relative flex flex-col items-center gap-1 py-1.5 px-2 min-w-[56px]"
                 whileTap={{ scale: 0.92 }}
                 onClick={() => onTabChange(tab.id)}
               >

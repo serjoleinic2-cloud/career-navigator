@@ -9,7 +9,7 @@ import { exportJSON, exportCSV } from '@/core/export/export_service';
 import type { ShareModel } from '@/core/share/share_model';
 import './ShareScreen.css';
 
-export function ShareScreen({ style }: { style?: CSSProperties }) {
+export function ShareScreen({ style, onClose }: { style?: CSSProperties; onClose?: () => void }) {
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +57,7 @@ export function ShareScreen({ style }: { style?: CSSProperties }) {
 
   return (
     <div className="share-screen" style={style}>
+      {onClose && <button className="share-close-btn" onClick={onClose} aria-label="Close">✕</button>}
       {/* Share Card for display and export */}
       <div className="share-card-container" ref={cardRef}>
         <div
@@ -125,6 +126,8 @@ export function ShareScreen({ style }: { style?: CSSProperties }) {
           📊 Export CSV
         </button>
       </div>
+
+      {onClose && <button className="share-back-btn" onClick={onClose}>← Назад</button>}
     </div>
   );
 }
