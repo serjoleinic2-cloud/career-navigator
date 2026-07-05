@@ -236,6 +236,7 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
               <div
                 key={note.id}
                 className={`notes-card ${editingId === note.id ? 'editing' : ''}`}
+                style={{ '--note-color': CATEGORY_COLORS[cat] || '#888' } as React.CSSProperties}
               >
                 <div className="notes-card-meta">
                   <span className="notes-card-date">
@@ -243,6 +244,15 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
                       month: 'short',
                       day: 'numeric',
                     })}
+                  </span>
+                  {/* Explicit chapter label directly on the card — the
+                      left color bar (see .notes-card border-left) and the
+                      group header above already carry the same color, but
+                      when notes are viewed in a flat/filtered list this is
+                      the only in-card indicator of which chapter a note
+                      belongs to. */}
+                  <span className="notes-card-cat-label">
+                    {CATEGORY_ICONS[cat] || '📌'} {CATEGORY_LABELS[cat] || cat}
                   </span>
                   <button
                     className="notes-card-delete"

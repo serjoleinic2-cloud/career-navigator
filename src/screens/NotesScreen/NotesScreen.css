@@ -134,13 +134,23 @@
 }
 
 .notes-card {
-  padding: 16px;
+  padding: 16px 16px 16px 14px;
   border-radius: 16px;
   border: 1px solid rgba(240, 240, 245, 0.06);
+  /* Left color bar = which chapter this note belongs to, so it's visible
+     directly on the card, not only in the group header above it. Falls
+     back to a neutral tone via --note-color set inline per-card. */
+  border-left: 3px solid var(--note-color, rgba(240, 240, 245, 0.2));
   background: rgba(240, 240, 245, 0.03);
   margin-bottom: 8px;
   transition: all 200ms ease;
   position: relative;
+  /* Prevents flex/grid ancestors from letting long unbroken text (e.g. a
+     pasted URL) push the card wider than the screen. */
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .notes-card:active {
@@ -167,6 +177,17 @@
 .notes-card-date {
   font-size: 12px;
   color: rgba(240, 240, 245, 0.35);
+}
+
+.notes-card-cat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--note-color, rgba(240, 240, 245, 0.5));
+  background: color-mix(in srgb, var(--note-color, #888) 16%, transparent);
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
 }
 
 .notes-card-delete {
@@ -199,6 +220,12 @@
   line-height: 1.7;
   color: rgba(240, 240, 245, 0.8);
   white-space: pre-wrap;
+  /* BUGFIX: a note whose content had no spaces to wrap at (a long URL,
+     a pasted token, etc.) stayed on a single unbroken line and pushed
+     past the card's edge, reading as "text runs off the note". Force a
+     break inside long words instead of letting them overflow. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
   cursor: pointer;
   padding: 4px 0;
   min-height: 20px;

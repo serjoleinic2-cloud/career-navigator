@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { ProgressRing } from '@/components/layout/ProgressRing';
 import { useWorldConfettiColors } from '@/core/world/useWorldConfettiColors';
 
@@ -42,7 +43,21 @@ export function TaskCompleteScreen({
   // defined in JourneyScreen.css) — per request, no new confetti system.
   const confettiColors = useWorldConfettiColors();
 
-  return (
+  // BUGFIX (2026-07-05): this screen was mounted inline inside App.tsx's
+  // per-tab wrapper div, which sets `transform: translateX(...)` on every
+  // tab (even the active one, as `translateX(0)`). ANY transform value —
+  // including translateX(0) — makes that div the containing block for
+  // `position: fixed` descendants per the CSS spec, so this screen's
+  // `inset: 0` / `z-index: 200` stopped being relative to the real
+  // viewport/root stacking context. That div also carries an implicit
+  // z-index inside the app's root stacking context, which sits *below*
+  // BottomNav's explicit `z-index: 100` — so once the user scrolled this
+  // screen's content, its lower portion painted underneath the floating
+  // bottom-nav pill instead of above it. Rendering through a portal
+  // straight into `document.body` sidesteps the whole ancestor chain and
+  // guarantees this is a true full-viewport overlay above the nav, like a
+  // native modal.
+  return createPortal(
     <div className="task-complete-screen">
       {/* Background photo slot. If none is supplied yet, a themed dark
           gradient fills the space (see .task-complete-bg-fallback) so the
@@ -81,7 +96,7 @@ export function TaskCompleteScreen({
           <div className="task-complete-ring-wrap">
             <ProgressRing
               progress={Math.round(skillProgressPercent)}
-              size={168}
+              size={132}
               strokeColor="#F5A623"
               label="SKILL PROGRESS"
             />
@@ -149,6 +164,7 @@ export function TaskCompleteScreen({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

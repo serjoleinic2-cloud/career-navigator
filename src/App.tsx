@@ -11,6 +11,8 @@ import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { JourneyHUD } from './screens/JourneyScreen';
 import { BottomNav } from './components/BottomNav/BottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
+import { subscribe } from './core/events/system_event_bus';
+import type { PlaybookCategory } from './core/playbook/playbook_types';
 import './App.css';
 
 // Bottom nav restructured per +Window_functional.md (Serj/ChatGPT design
@@ -30,6 +32,11 @@ function AppInner() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('journey');
   const [prevScreen, setPrevScreen] = useState<Screen | null>(null);
   const [transitioning, setTransitioning] = useState(false);
+  // Deep-link target set by a mission's "Learn more" button (see
+  // MissionScreen.tsx) via the OPEN_PLAYBOOK event — lets a task jump
+  // straight to its matching Playbook category instead of the user
+  // having to navigate there manually and guess which one it was.
+  const [playbookDeepLink, setPlaybookDeepLink] = useState<PlaybookCategory | null>(null);
 
   useEffect(() => {
     const saved = loadRuntime();
@@ -40,6 +47,14 @@ function AppInner() {
       setShowOnboarding(true);
     }
     setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    return subscribe('OPEN_PLAYBOOK', (event) => {
+      const category = event.payload.category as PlaybookCategory | undefined;
+      if (category) setPlaybookDeepLink(category);
+      setCurrentScreen('playbook');
+    });
   }, []);
 
   const navigateTo = (screen: Screen) => {
@@ -126,7 +141,15 @@ function AppInner() {
           </div>
         );
       case 'playbook':
-        return <PlaybookScreen key={common.key} style={common.style} onClose={closeToJourney} />;
+        return (
+          <PlaybookScreen
+            key={common.key}
+            style={common.style}
+            onClose={closeToJourney}
+            initialCategory={playbookDeepLink}
+            onConsumeInitialCategory={() => setPlaybookDeepLink(null)}
+          />
+        );
       case 'notes':
         return <NotesScreen key={common.key} style={common.style} onClose={closeToJourney} />;
       case 'world':

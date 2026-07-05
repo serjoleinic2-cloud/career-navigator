@@ -3,6 +3,7 @@ import './MissionScreen.css';
 import './TaskCompleteScreen.css';
 import type { JourneyRuntimeState } from '../../core/runtime/journey_runtime';
 import { emit, subscribe } from '../../core/events/system_event_bus';
+import type { PlaybookCategory } from '../../core/playbook/playbook_types';
 import { loadTaskForNode, createTaskFromDefinition, getActiveTask } from '../../core/runtime/runtime_controller';
 import { addNote, updateNote, getNotesByTask } from '../../core/user_data/notes/notes_controller';
 import { getActiveProfessionId, getActiveChapters } from '../../core/profession_loader';
@@ -16,6 +17,20 @@ interface MissionScreenProps {
 }
 
 type TaskView = 'active' | 'completing' | 'completed' | 'retry';
+
+// Chapter/domain ids (see CHAPTER_ICONS in JourneyHUD) mapped to their
+// closest Playbook category, for the "Learn more" button below. Falls
+// back to 'resume' if a chapter id isn't in this map rather than
+// crashing or silently doing nothing.
+const CHAPTER_TO_PLAYBOOK_CATEGORY: Record<string, PlaybookCategory> = {
+  resume: 'resume',
+  linkedin: 'linkedin',
+  applications: 'networking',
+  interviews: 'interview',
+  interview: 'interview',
+  offer: 'salary',
+  offer_preparation: 'salary',
+};
 
 interface MissionOutcome {
   advanced: boolean;
@@ -280,6 +295,23 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
 
         <h2 className="task-title">{activeTask.title}</h2>
         <p className="task-description">{activeTask.objective}</p>
+
+        {/* Was completely missing before — +Window_functional.md requires
+            "Любое задание имеет кнопку Learn more которая открывает нужную
+            страницу Playbook", but no such button existed anywhere in the
+            app, so mission content and the Playbook were never linked.
+            Deep-links via OPEN_PLAYBOOK (App.tsx switches tabs and passes
+            the category straight to PlaybookScreen). */}
+        <button
+          type="button"
+          className="task-learn-more-btn"
+          onClick={() => {
+            const category = CHAPTER_TO_PLAYBOOK_CATEGORY[runtimeState.activeChapterId] || 'resume';
+            emit('OPEN_PLAYBOOK', { category });
+          }}
+        >
+          📖 Learn more
+        </button>
 
         <div className="mission-card-meta">
           <div className="mission-card-meta-item">

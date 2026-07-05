@@ -148,6 +148,27 @@
   margin-bottom: 20px;
 }
 
+.task-learn-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: -12px 0 20px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(123, 104, 238, 0.25);
+  background: rgba(123, 104, 238, 0.08);
+  color: #7B68EE;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.task-learn-more-btn:active {
+  transform: scale(0.97);
+  background: rgba(123, 104, 238, 0.16);
+}
+
 /* Card Meta (difficulty, time) */
 .mission-card-meta {
   display: flex;

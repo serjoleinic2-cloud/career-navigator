@@ -11,7 +11,11 @@
 .task-complete-screen {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  /* Must render above the bottom nav pill (z-index: 100, see
+     BottomNavigation.css) — this is a full-screen takeover, the nav
+     should never show through it, including once the user scrolls the
+     content and its bottom edge would otherwise pass under the nav. */
+  z-index: 200;
   overflow: hidden;
   animation: chapter-complete-fade 0.35s ease;
 }
@@ -66,37 +70,42 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: calc(48px + env(safe-area-inset-top)) 20px calc(32px + env(safe-area-inset-bottom));
+  /* This is now a portal into document.body (see TaskCompleteScreen.tsx),
+     so it's always a true full-viewport overlay above the bottom-nav
+     pill — but we still keep bottom padding so the last card/button
+     never sits flush against the nav's floating pill. */
+  padding: calc(20px + env(safe-area-inset-top)) 20px
+    calc(72px + 16px + 16px + env(safe-area-inset-bottom));
   min-height: 100%;
   box-sizing: border-box;
   animation: complete-content-appear 0.5s ease 0.1s both;
 }
 
 .task-complete-banner {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #ffd58a;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .task-complete-heading {
-  font-size: 30px;
+  font-size: 21px;
   font-weight: 800;
   color: #f0f0f5;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
 }
 
 .task-complete-subtitle {
-  font-size: 15px;
+  font-size: 12px;
   color: rgba(240, 240, 245, 0.75);
-  max-width: 280px;
-  margin: 0 0 28px;
-  line-height: 1.4;
+  max-width: 260px;
+  margin: 0 0 12px;
+  line-height: 1.35;
 }
 
 .task-complete-ring-wrap {
-  margin-bottom: 28px;
+  margin-bottom: 12px;
 }
 
 /* ProgressRing's default label colors are tuned for light cards; override
@@ -113,10 +122,10 @@
 
 .task-complete-rewards {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
   max-width: 360px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .task-complete-reward {
@@ -124,29 +133,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 14px 6px;
+  gap: 2px;
+  padding: 8px 6px;
   background: rgba(240, 240, 245, 0.07);
   border: 1px solid rgba(240, 240, 245, 0.1);
-  border-radius: 16px;
+  border-radius: 14px;
 }
 
 .task-complete-reward-icon {
-  font-size: 20px;
-  margin-bottom: 2px;
+  font-size: 15px;
+  margin-bottom: 0;
 }
 
 .task-complete-reward-value {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #f0f0f5;
 }
 
 .task-complete-reward-label {
-  font-size: 10px;
+  font-size: 9px;
   color: rgba(240, 240, 245, 0.6);
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .task-complete-stats-card {
@@ -154,16 +163,16 @@
   max-width: 360px;
   background: rgba(240, 240, 245, 0.06);
   border: 1px solid rgba(240, 240, 245, 0.1);
-  border-radius: 18px;
-  padding: 6px 18px;
-  margin-bottom: 20px;
+  border-radius: 16px;
+  padding: 0 16px;
+  margin-bottom: 10px;
 }
 
 .task-complete-stats-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 0;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(240, 240, 245, 0.08);
 }
 
@@ -199,16 +208,16 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 17px 20px;
+  padding: 13px 20px;
   border: none;
   border-radius: 999px;
   background: linear-gradient(135deg, #f5a623, #f57c23);
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(245, 124, 35, 0.35);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   transition: transform 0.15s ease;
 }
 

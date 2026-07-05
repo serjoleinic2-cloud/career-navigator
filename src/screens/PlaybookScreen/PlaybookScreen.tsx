@@ -1,28 +1,59 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getPlaybookByCategory } from '@/core/playbook/playbook_data';
 import type { PlaybookEntry, PlaybookCategory } from '@/core/playbook/playbook_types';
 import type { CSSProperties } from 'react';
 import './PlaybookScreen.css';
 
+// BUGFIX (2026-07-05): playbook_data.ts already has written entries for
+// 'communication' (Strong vs Weak Phrases), 'body_language' (Body
+// Language in Interviews), 'mistakes' (Common Interview Mistakes),
+// 'confidence' (Managing Interview Anxiety) and 'remote' (Remote
+// Interview Guide) — but this grid only ever listed 5 categories, so
+// those entries were permanently unreachable from the UI (dead content).
+// Per +Window_functional.md's required category list (Resume, LinkedIn,
+// Interview, Salary, Communication, Body language, Mistakes — STAR lives
+// inside Interview, not its own tile) plus the two extra categories that
+// already have real content, every category with entries now has a tile.
 const CATEGORIES: { id: PlaybookCategory; label: string; icon: string; color: string }[] = [
   { id: 'resume', label: 'Resume', icon: '📄', color: '#4A90D9' },
   { id: 'linkedin', label: 'LinkedIn', icon: '🔗', color: '#7B68EE' },
   { id: 'interview', label: 'Interview', icon: '🎤', color: '#F6AD55' },
   { id: 'networking', label: 'Networking', icon: '🤝', color: '#48BB78' },
   { id: 'salary', label: 'Salary', icon: '💰', color: '#FF6B6B' },
+  { id: 'communication', label: 'Communication', icon: '💬', color: '#4FD1C5' },
+  { id: 'body_language', label: 'Body Language', icon: '🧍', color: '#ED8936' },
+  { id: 'mistakes', label: 'Mistakes', icon: '⚠️', color: '#E53E3E' },
+  { id: 'confidence', label: 'Confidence', icon: '💪', color: '#D69E2E' },
+  { id: 'remote', label: 'Remote', icon: '🖥️', color: '#38B2AC' },
 ];
 
 interface Props {
   style?: CSSProperties;
   onClose?: () => void;
+  /** Category to jump straight into, set via a mission's "Learn more"
+   * button (OPEN_PLAYBOOK event, wired in App.tsx). Null/undefined means
+   * open on the normal category grid. */
+  initialCategory?: PlaybookCategory | null;
+  /** Called once the deep-link has been applied, so App.tsx can clear it
+   * and a later manual tab switch doesn't re-trigger the same jump. */
+  onConsumeInitialCategory?: () => void;
 }
 
-export function PlaybookScreen({ style, onClose }: Props) {
+export function PlaybookScreen({ style, onClose, initialCategory, onConsumeInitialCategory }: Props) {
   const [view, setView] = useState<'categories' | 'entries' | 'entry'>('categories');
   const [selectedCategory, setSelectedCategory] = useState<PlaybookCategory | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<PlaybookEntry | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [flipping, setFlipping] = useState(false);
+
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+      setView('entries');
+      onConsumeInitialCategory?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCategory]);
 
   const openCategory = (cat: PlaybookCategory) => {
     setFlipping(true);
