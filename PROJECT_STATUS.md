@@ -78,6 +78,34 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-06 — Claude (Journey visual fix + Playbook UX)
+
+**Journey tab fixes:**
+- `world_art.ts`: registered `worldImageUrl: '/art/software_engineer/journey.png'`.
+  Place your background image at **`public/art/software_engineer/journey.png`**
+  (recommended: 1080×2340px portrait PNG). Until the file is placed, WorldRenderer
+  falls back to the theme gradient (light sky blue → cream — defined in `world.ts`).
+- `world_renderer.tsx`: added `imgError` state + `onError` on the `<img>` so a
+  missing `journey.png` gracefully falls back to the gradient instead of broken-image.
+- `JourneyScreen.css`: all Journey HUD text changed to neon cyan `#00e5e0` (same color
+  as the bottom nav active indicator). Added `backdrop-filter: blur` dark glass backdrop
+  to `.island-label-row` and `.island-missions` so text is readable on any background
+  image (including the intended light-sky world art in `world.ts`).
+
+**Playbook "Apply to Current Task" UX:**
+- Added an inline explanation banner inside the Checklist accordion:
+  *"Use these checkboxes while working on your current mission. Tick items as you
+  complete them — then tap Apply & Return to Mission to go back."*
+- Button text changed to "Apply & Return to Mission ›" — clearer about what happens.
+- Button now shows "✓ Returning to mission..." confirmation for 1.1s before navigating,
+  so the user knows the action happened (previously it silently called `onClose()` with
+  zero feedback and no explanation, which caused the confusion).
+- NOTE: nothing is persisted when Apply is tapped — the Playbook is a reference/
+  knowledge tool, not a form. Checklist checkboxes are local UI helpers only.
+
+**Files:** `world_art.ts`, `world_renderer.tsx`, `JourneyScreen.css`,
+`PlaybookScreen.tsx`, `PlaybookScreen.css`, `PROJECT_STATUS.md`
+
 ### 2026-07-06 — Claude (Journey screen empty — two root-cause fixes)
 
 **Symptoms reported by Serj:** Journey tab appears completely empty on device.
