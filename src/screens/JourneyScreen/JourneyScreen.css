@@ -559,13 +559,13 @@
 .island-label-title {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #f0f0f5;
   letter-spacing: -0.3px;
 }
 
 .island-label-count {
   font-size: 13px;
-  color: #555570;
+  color: rgba(240, 240, 245, 0.6);
   font-weight: 500;
 }
 
@@ -573,7 +573,7 @@
 .island-missions {
   width: 100%;
   max-width: 360px;
-  border-top: 1px solid rgba(0, 0, 0, 0.10);
+  border-top: 1px solid rgba(240, 240, 245, 0.10);
   animation: island-slot-enter 0.5s 0.18s both;
 }
 
@@ -584,7 +584,7 @@
   align-items: center;
   gap: 14px;
   padding: 15px 4px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  border-bottom: 1px solid rgba(240, 240, 245, 0.08);
   cursor: pointer;
   transition: background 0.15s ease;
 }
@@ -650,7 +650,7 @@
 .mission-row-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: #f0f0f5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -658,14 +658,14 @@
 
 .mission-row-meta {
   font-size: 11px;
-  color: #555570;
+  color: rgba(240, 240, 245, 0.55);
 }
 
 /* Правая часть */
 .mission-row-action { flex-shrink: 0; }
 
 .mission-row-go   { font-size: 13px; font-weight: 600; }
-.mission-row-done { font-size: 12px; color: #555570; }
+.mission-row-done { font-size: 12px; color: rgba(240, 240, 245, 0.5); }
 
 /* Состояния */
 .mission-row--completed .mission-row-title { opacity: 0.6; }
