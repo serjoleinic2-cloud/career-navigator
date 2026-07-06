@@ -24,7 +24,7 @@
 > проверки, и агент должен соблюдать его вручную.
 
 **Последнее обновление:** 2026-07-06
-**Обновил:** Claude (сессия — unified chapter tracking; 0/7 progress, dup Chapter Complete screen, missing Offer Preparation, reward diagrams, Coming Next chapter fixed)
+**Обновил:** Claude (сессия — World tab: собственное фоновое изображение world.png вместо просвечивающего Journey-фона)
 **Последний коммит на момент записи:** будет создан этой сессией (main, до неё см. историю ниже)
 
 ---
@@ -1699,3 +1699,34 @@ Serj сообщил четыре бага по результатам живог
 **Не проверено вживую** — нужно: пройти все узлы главы до конца → должен показаться TaskCompleteScreen с "🏆 CHAPTER COMPLETE!" → после перехода следующая глава должна отрисоваться в Journey (не пустой экран), `ChapterHub` должен получить реальный `chapter`, а не `null`.
 
 Commit: `e2e95ee` в `main`.
+
+### 2026-07-06 — Claude (World tab gets its own background image)
+
+**Serj's report:** in the World tab, the background is the Journey chapter's
+art, dimmed by a scrim — not its own image.
+
+**Root cause:** `WorldRenderer` (Journey's art/camera engine) stays
+permanently mounted underneath every tab (see `App.tsx`), by design. The
+World tab (`WorldMapScreen.tsx`) had no opaque background of its own — just
+`radial-gradient(ellipse at 50% 30%, rgba(60, 80, 120, 0.25) 0%, rgba(8, 12,
+20, 0.95) 70%)`, which is only 25% opaque at its center. So the Journey art
+underneath showed through there, darkened by that same gradient.
+
+**Fix:** `WorldMapScreen` now renders its own fully opaque background image,
+covering the whole screen (with an `onError` fallback to a solid gradient
+if the file is missing — same pattern as `ChapterHub`/`WorldRenderer`'s
+island-art handling), so nothing from Journey can bleed through. The
+placeholder text now sits on a small blurred scrim card instead of a
+full-screen one, so the new image stays visible everywhere else.
+
+**PLACE THE IMAGE AT:** `public/art/software_engineer/world.png`
+(recommended 1080×2340px portrait PNG — it's cropped/covered to fill the
+screen, not stretched). Until the file is placed, falls back to a solid
+dark gradient (no broken-image icon).
+
+**Files:** `src/screens/WorldMapScreen/WorldMapScreen.tsx`,
+`src/screens/WorldMapScreen/WorldMapScreen.css`, `PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` and `npx vite build` pass clean. Not
+verified on-device this session — please drop `world.png` in the path
+above and check on your phone.
