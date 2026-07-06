@@ -482,5 +482,17 @@ export function resetRuntime(): void {
 }
 
 export function initializeRuntime(saved: JourneyRuntimeState): void {
+  // BUGFIX (2026-07-06): initializeRuntime was only restoring runtimeState
+  // but not calling setActiveProfession(), so profession_loader.activeState
+  // remained null for all returning users (cold start with saved runtime).
+  // Any code path that calls getActiveProfession() / getActiveChapters()
+  // (e.g. handleMissionComplete, advanceChapter, buildFallbackTaskDefinition)
+  // would throw 'No active profession set' the moment the user tapped a
+  // mission node — making the Journey tab non-interactive on reload.
+  try {
+    setActiveProfession(saved.professionId);
+  } catch (err) {
+    console.error('[initializeRuntime] setActiveProfession failed:', err);
+  }
   runtimeState = saved;
 }
