@@ -78,6 +78,30 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-06 — Claude (Journey screen empty — two root-cause fixes)
+
+**Symptoms reported by Serj:** Journey tab appears completely empty on device.
+
+**Root cause 1 (PRIMARY) — dark text on dark background (CSS):**
+`JourneyScreen.css` had `.island-label-title { color: #1a1a2e }`,
+`.mission-row-title { color: #1a1a2e }`, `.mission-row-meta / -done { color: #555570 }`,
+and `border rgba(0,0,0,…)` dividers. The Journey HUD is intentionally transparent
+(WorldRenderer canvas is the background — dark world art). Near-black text on a dark
+canvas = invisible. The "главное правило" (dark bg → light text) was violated directly
+in CSS. Fixed: all those dark-on-dark values replaced with `#f0f0f5` / `rgba(240,240,245,…)`.
+
+**Root cause 2 (SECONDARY) — `initializeRuntime` missing `setActiveProfession`:**
+`App.tsx` calls `initializeRuntime(saved)` for returning users (cold start with
+saved state). That function only set `runtimeState` but never called
+`setActiveProfession(saved.professionId)`, so `profession_loader.activeState`
+stayed `null`. First tap on any mission node → `getActiveChapters()` throws
+`'No active profession set'` → ErrorBoundary or silent crash → nothing advances.
+Fixed: `initializeRuntime` now calls `setActiveProfession` with a try/catch
+(same guard pattern as `startJourney`).
+
+**Files changed:** `src/screens/JourneyScreen/JourneyScreen.css`,
+`src/core/runtime/runtime_controller.ts`, `PROJECT_STATUS.md`
+
 ### 2026-07-05 — Claude (реструктуризация нижнего меню на 5 вкладок — +Window_functional.md)
 
 Задача от Serj/ChatGPT (`+Window_functional.md`): перейти с 4 вкладок
