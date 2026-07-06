@@ -5,9 +5,14 @@ interface ProgressRingProps {
   size?: number;
   strokeColor?: string;
   label?: string;
+  /** Overrides the percent readout in the center (e.g. "+3 XP"). Shown
+   *  regardless of `size`, unlike the default percent+label which only
+   *  renders at size >= 80 (small reward rings need their own compact
+   *  center text instead of a full percent + label stack). */
+  centerText?: string;
 }
 
-export function ProgressRing({ progress, size = 120, strokeColor = '#FF6B6B', label }: ProgressRingProps) {
+export function ProgressRing({ progress, size = 120, strokeColor = '#FF6B6B', label, centerText }: ProgressRingProps) {
   const strokeWidth = size >= 80 ? 8 : 4;
   const r = (size - strokeWidth) / 2;
   const c = 2 * Math.PI * r;
@@ -38,11 +43,18 @@ export function ProgressRing({ progress, size = 120, strokeColor = '#FF6B6B', la
           className="progress-ring-fill"
         />
       </svg>
-      {label && size >= 80 && (
-        <div className="progress-ring-label">
-          <span className="progress-ring-percent">{progress}%</span>
-          <span className="progress-ring-text">{label}</span>
+      {centerText ? (
+        <div className="progress-ring-label progress-ring-label-compact">
+          <span className="progress-ring-percent progress-ring-percent-compact">{centerText}</span>
+          {label && <span className="progress-ring-text">{label}</span>}
         </div>
+      ) : (
+        label && size >= 80 && (
+          <div className="progress-ring-label">
+            <span className="progress-ring-percent">{progress}%</span>
+            <span className="progress-ring-text">{label}</span>
+          </div>
+        )
       )}
     </div>
   );

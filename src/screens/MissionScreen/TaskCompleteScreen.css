@@ -133,22 +133,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 8px 6px;
+  gap: 4px;
+  padding: 8px 6px 10px;
   background: rgba(240, 240, 245, 0.07);
   border: 1px solid rgba(240, 240, 245, 0.1);
   border-radius: 14px;
 }
 
-.task-complete-reward-icon {
-  font-size: 15px;
-  margin-bottom: 0;
+/* Ring diagrams sit on the same dark glass card as everything else here —
+   ProgressRing's default center-text colors are dark-on-light (#2D3436 /
+   #636E72), which is invisible on this background. Override to light text
+   per the project's dark-bg -> light-text rule. */
+.task-complete-reward .progress-ring-percent {
+  color: #f0f0f5;
 }
 
-.task-complete-reward-value {
-  font-size: 13px;
-  font-weight: 700;
-  color: #f0f0f5;
+.task-complete-reward .progress-ring-text {
+  color: rgba(240, 240, 245, 0.75);
 }
 
 .task-complete-reward-label {

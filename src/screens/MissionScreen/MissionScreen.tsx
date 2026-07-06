@@ -7,6 +7,7 @@ import type { PlaybookCategory } from '../../core/playbook/playbook_types';
 import { loadTaskForNode, createTaskFromDefinition, getActiveTask } from '../../core/runtime/runtime_controller';
 import { addNote, updateNote, getNotesByTask } from '../../core/user_data/notes/notes_controller';
 import { getActiveProfessionId, getActiveChapters } from '../../core/profession_loader';
+import { getNextChapter } from '../../core/chapter_engine';
 import { TaskCompleteScreen, type TaskCompleteNextTask } from './TaskCompleteScreen';
 
 interface MissionScreenProps {
@@ -219,11 +220,23 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   // Derived from real runtime state — chapter node order/progress, current
   // scores — not hardcoded placeholder numbers.
   const chapters = getActiveChapters();
-  const currentChapter = chapters.find(c => c.id === runtimeState.activeChapterId);
+  // BUGFIX (2026-07-06): this used to look up the chapter via
+  // `runtimeState.activeChapterId`. But `submitTask()` (runtime_controller.ts)
+  // already advances `activeChapterId` to the NEXT chapter the instant the
+  // last node of the current chapter completes — before this screen ever
+  // renders. That made `currentChapter` resolve to the next (all-locked)
+  // chapter, so "Chapter progress" showed "0/7" instead of "7/7" on the
+  // exact screen meant to celebrate finishing it. `activeNodeId` does NOT
+  // get advanced until the user taps Continue, so looking the chapter up
+  // by which chapter actually contains the just-finished node is stable
+  // regardless of when the store's activeChapterId flips.
+  const currentChapter = chapters.find(c => c.nodeIds.includes(activeNodeId))
+    ?? chapters.find(c => c.id === runtimeState.activeChapterId);
   const chapterNodeIds = currentChapter?.nodeIds ?? [];
   const tasksCompletedInChapter = chapterNodeIds.filter(
     id => nodeStates[id]?.state === 'confidence' || nodeStates[id]?.state === 'execution'
   ).length;
+  const nextChapterTitle = currentChapter ? getNextChapter(chapters, currentChapter.id)?.title ?? null : null;
 
   let nextTaskInfo: TaskCompleteNextTask | null = null;
   if (currentChapter) {
@@ -266,6 +279,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         isChapterComplete={isChapterComplete}
         chapterTitle={currentChapter?.title ?? chapterTitle ?? ''}
         nextTask={isChapterComplete ? null : nextTaskInfo}
+        nextChapterTitle={isChapterComplete ? nextChapterTitle : null}
         onContinue={handleContinue}
       />
     );

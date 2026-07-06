@@ -21,8 +21,20 @@ interface TaskCompleteScreenProps {
   isChapterComplete?: boolean;
   chapterTitle?: string;
   nextTask?: TaskCompleteNextTask | null;
+  /** Title of the next chapter — shown as "Coming next" when this screen
+   *  is the chapter-complete variant (there is no next *task* to preview
+   *  in that case, only the next chapter). */
+  nextChapterTitle?: string | null;
   onContinue: () => void;
 }
+
+// Reference maximums used only to turn each reward delta into a ring
+// percentage — these are not hard caps on what a task can award, just a
+// realistic "out of" scale for the diagram (see task_content_engine.ts
+// rewards, which top out around these values for a single mission).
+const XP_REFERENCE_MAX = 25;
+const READINESS_REFERENCE_MAX = 10;
+const CONFIDENCE_REFERENCE_MAX = 20;
 
 export function TaskCompleteScreen({
   backgroundImage,
@@ -35,6 +47,7 @@ export function TaskCompleteScreen({
   isChapterComplete,
   chapterTitle,
   nextTask,
+  nextChapterTitle,
   onContinue,
 }: TaskCompleteScreenProps) {
   const confettiColors = useWorldConfettiColors();
@@ -96,21 +109,36 @@ export function TaskCompleteScreen({
             />
           </div>
 
-          {/* Earned this mission — always deltas (+N), never absolute scores */}
+          {/* Earned this mission — always deltas (+N), never absolute scores.
+              Shown as ring diagrams (value out of a realistic reference max)
+              instead of bare emoji, so each number has a name and a visual
+              sense of scale, not just a floating "+N". */}
           <div className="task-complete-rewards">
             <div className="task-complete-reward">
-              <span className="task-complete-reward-icon">⭐</span>
-              <span className="task-complete-reward-value">+{xpGained} XP</span>
-              <span className="task-complete-reward-label">Experience</span>
+              <ProgressRing
+                progress={Math.min(100, Math.round((xpGained / XP_REFERENCE_MAX) * 100))}
+                size={64}
+                strokeColor="#F5A623"
+                centerText={`+${xpGained}`}
+              />
+              <span className="task-complete-reward-label">Experience (XP)</span>
             </div>
             <div className="task-complete-reward">
-              <span className="task-complete-reward-icon">📈</span>
-              <span className="task-complete-reward-value">+{readinessDelta}</span>
+              <ProgressRing
+                progress={Math.min(100, Math.round((readinessDelta / READINESS_REFERENCE_MAX) * 100))}
+                size={64}
+                strokeColor="#00b894"
+                centerText={`+${readinessDelta}`}
+              />
               <span className="task-complete-reward-label">Readiness</span>
             </div>
             <div className="task-complete-reward">
-              <span className="task-complete-reward-icon">❤️</span>
-              <span className="task-complete-reward-value">+{confidenceDelta}%</span>
+              <ProgressRing
+                progress={Math.min(100, Math.round((confidenceDelta / CONFIDENCE_REFERENCE_MAX) * 100))}
+                size={64}
+                strokeColor="#e84393"
+                centerText={`+${confidenceDelta}%`}
+              />
               <span className="task-complete-reward-label">Confidence</span>
             </div>
           </div>
@@ -134,7 +162,10 @@ export function TaskCompleteScreen({
             <span className="task-complete-continue-arrow">{showChapterComplete ? '🗺️' : '→'}</span>
           </button>
 
-          {/* Only show "Coming next" when there is a next task in this chapter */}
+          {/* "Coming next" — a task preview mid-chapter, or the next
+              chapter's name once this chapter is done. Previously this
+              card only rendered for the mid-chapter case, so finishing a
+              chapter showed no preview of what's coming at all. */}
           {!showChapterComplete && nextTask && (
             <div className="task-complete-next-card">
               <div className="task-complete-next-text">
@@ -146,6 +177,17 @@ export function TaskCompleteScreen({
                 <span className="task-complete-next-time">🕐 {nextTask.estimatedMinutes} min</span>
               </div>
               <div className="task-complete-next-icon">📋</div>
+            </div>
+          )}
+
+          {showChapterComplete && nextChapterTitle && (
+            <div className="task-complete-next-card">
+              <div className="task-complete-next-text">
+                <span className="task-complete-next-label">COMING NEXT</span>
+                <span className="task-complete-next-title">{nextChapterTitle}</span>
+                <span className="task-complete-next-subtitle">New chapter unlocked</span>
+              </div>
+              <div className="task-complete-next-icon">🗺️</div>
             </div>
           )}
 
