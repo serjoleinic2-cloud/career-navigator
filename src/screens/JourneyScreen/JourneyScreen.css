@@ -554,18 +554,25 @@
   gap: 10px;
   margin-bottom: 20px;
   animation: island-slot-enter 0.5s 0.1s both;
+  /* Dark glass backdrop so neon text reads on the light world art */
+  background: rgba(5, 12, 25, 0.60);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 6px 14px;
 }
 
 .island-label-title {
   font-size: 22px;
   font-weight: 700;
-  color: #f0f0f5;
+  color: #00e5e0;
   letter-spacing: -0.3px;
+  text-shadow: 0 0 20px rgba(0, 229, 224, 0.45);
 }
 
 .island-label-count {
   font-size: 13px;
-  color: rgba(240, 240, 245, 0.6);
+  color: rgba(0, 229, 224, 0.65);
   font-weight: 500;
 }
 
@@ -573,8 +580,14 @@
 .island-missions {
   width: 100%;
   max-width: 360px;
-  border-top: 1px solid rgba(240, 240, 245, 0.10);
+  border-top: 1px solid rgba(0, 229, 224, 0.12);
   animation: island-slot-enter 0.5s 0.18s both;
+  /* Dark glass card — content stays readable on light world art bg */
+  background: rgba(5, 12, 25, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 4px 8px;
 }
 
 /* === MISSION ROW — плоская строка без box === */
@@ -584,7 +597,7 @@
   align-items: center;
   gap: 14px;
   padding: 15px 4px;
-  border-bottom: 1px solid rgba(240, 240, 245, 0.08);
+  border-bottom: 1px solid rgba(0, 229, 224, 0.08);
   cursor: pointer;
   transition: background 0.15s ease;
 }
@@ -650,7 +663,7 @@
 .mission-row-title {
   font-size: 15px;
   font-weight: 600;
-  color: #f0f0f5;
+  color: #00e5e0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -658,14 +671,14 @@
 
 .mission-row-meta {
   font-size: 11px;
-  color: rgba(240, 240, 245, 0.55);
+  color: rgba(0, 229, 224, 0.55);
 }
 
 /* Правая часть */
 .mission-row-action { flex-shrink: 0; }
 
 .mission-row-go   { font-size: 13px; font-weight: 600; }
-.mission-row-done { font-size: 12px; color: rgba(240, 240, 245, 0.5); }
+.mission-row-done { font-size: 12px; color: rgba(0, 229, 224, 0.5); }
 
 /* Состояния */
 .mission-row--completed .mission-row-title { opacity: 0.6; }
