@@ -23,8 +23,8 @@
 > через git напрямую) — правило всё равно действует, просто без автоматической
 > проверки, и агент должен соблюдать его вручную.
 
-**Последнее обновление:** 2026-07-05
-**Обновил:** Claude (сессия — новый полноэкранный TaskCompleteScreen после каждой миссии)
+**Последнее обновление:** 2026-07-06
+**Обновил:** Claude (сессия — unified chapter tracking; 0/7 progress, dup Chapter Complete screen, missing Offer Preparation, reward diagrams, Coming Next chapter fixed)
 **Последний коммит на момент записи:** будет создан этой сессией (main, до неё см. историю ниже)
 
 ---
@@ -78,7 +78,87 @@
 
 ## История изменений (снизу — новее)
 
-### 2026-07-06 — Claude (Journey visual fix + Playbook UX)
+### 2026-07-06 — Claude (unified chapter tracking — fixed 0/7, duplicate Chapter Complete screen, missing Offer Preparation)
+
+**Serj's bug reports and root causes:**
+
+1. **"Chapter progress 0/7" shown right when a chapter finishes.** Not a
+   checkbox issue. `submitTask()` (`runtime_controller.ts`) already flips
+   `runtimeState.activeChapterId` to the *next* chapter the instant the
+   last node completes — before `TaskCompleteScreen` renders. `MissionScreen`
+   was looking up the chapter to display via that same `activeChapterId`,
+   so it resolved to the next (all-locked, 0-done) chapter instead of the
+   one just finished. Fixed: `MissionScreen` now finds the chapter by
+   which chapter's `nodeIds` actually contains the just-completed
+   `activeNodeId` (stable — `activeNodeId` doesn't change until the user
+   taps Continue), falling back to `activeChapterId` only if that lookup
+   fails.
+
+2. **"Coming next" only showed a task preview mid-chapter, never a
+   chapter name when a chapter completed.** `TaskCompleteScreen` now takes
+   a `nextChapterTitle` prop (computed via `getNextChapter` in
+   `MissionScreen`) and shows a "COMING NEXT — <Chapter Title>" card on
+   the chapter-complete screen, instead of nothing.
+
+3. **Reward badges were bare emoji + number** (⭐ +3, 📈 +10, ❤️ +8%) with
+   no visual sense of scale and only a one-word label. Replaced with
+   small `ProgressRing` diagrams (XP / Readiness / Confidence), each
+   showing the delta as a filled ring against a realistic reference max
+   (see `XP_REFERENCE_MAX` / `READINESS_REFERENCE_MAX` /
+   `CONFIDENCE_REFERENCE_MAX` in `TaskCompleteScreen.tsx`) plus its name
+   underneath. `ProgressRing` gained a `centerText` prop for this (small
+   rings need compact custom center text like "+3", not a full percent).
+
+4. **Duplicate "Chapter Complete" screen right after the first one**
+   (e.g. "Interview Mastered" appearing twice with the same stats).
+   Root cause: `JourneyHUD` kept its own second, parallel chapter-tracking
+   system — grouping nodes by their `domain` string (e.g. `'Interviews'`,
+   `'Offer Preparation'`, capitalized, as authored in `skill_nodes.ts`)
+   instead of the canonical chapter list in `chapters.ts` (ids like
+   `'interviews'`, `'offer_preparation'`, lowercase/underscored, which
+   `submitTask`/`advanceChapter`/`chapter_engine`/`MissionScreen` all use).
+   The casing mismatch meant the "already celebrated this chapter" ref
+   check (`prevChapterCompletedRef`) never matched, so the old
+   `ChapterCompleteScreen` (a second celebration screen, separate from
+   `TaskCompleteScreen`'s own chapter-complete view) could fire again for
+   a chapter already handled — showing genuinely duplicate stats to the
+   user. Fixed at the root: `JourneyHUD`'s `chapters` list is now built
+   directly from `getActiveChapters()` (chapters.ts), same source as
+   everywhere else, eliminating the second bookkeeping system entirely.
+   `ChapterCompleteScreen` is retired (no longer imported/rendered) since
+   `TaskCompleteScreen` already shows the same celebration content — the
+   Journey view now goes straight to the bridge animation once a chapter
+   completes, no duplicate stats screen.
+
+5. **"Offer Preparation" chapter never appeared to the user.** Same root
+   cause as #4: because the celebration ref-check could fail to match
+   (id-casing mismatch), a chapter-complete could re-trigger
+   `advanceChapter()` a second time for the same transition, which — if
+   it landed while an id mismatch made the guard think the "Interviews"
+   completion hadn't been handled yet — could advance the chapter twice
+   in a row (`interviews → offer_preparation → offer`) before the user
+   ever saw the `offer_preparation` chapter's HUD card. Unifying chapter
+   tracking (fix #4) removes the double-fire, so `offer_preparation`
+   (3 nodes: salary negotiation, offer review, resignation letter) now
+   shows normally between Interviews and Offer.
+
+**Also fixed while unifying chapter tracking (cosmetic):**
+`ChapterHub.tsx`'s `CHAPTER_ART_FILENAME` map had a stray key
+`'offer preparation'` (space) that could never match the real chapter id
+`offer_preparation` (underscore) — corrected.
+
+**Files:** `src/screens/MissionScreen/MissionScreen.tsx`,
+`src/screens/MissionScreen/TaskCompleteScreen.tsx`,
+`src/screens/MissionScreen/TaskCompleteScreen.css`,
+`src/screens/JourneyScreen/JourneyHUD.tsx`,
+`src/screens/JourneyScreen/components/ChapterHub.tsx`,
+`src/components/layout/ProgressRing.tsx`,
+`src/components/layout/ProgressRing.css`, `PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` and `npx vite build` both pass clean.
+Not yet verified on a physical device this session — please retest all
+five items on-device and report back if anything still looks off.
+
 
 **Journey tab fixes:**
 - `world_art.ts`: registered `worldImageUrl: '/art/software_engineer/journey.png'`.

@@ -8,7 +8,6 @@ import type { SkillNode } from '@/core/skill_state';
 import { JourneyHeader } from './components/JourneyHeader';
 import { ChapterHub } from './components/ChapterHub';
 import type { ChapterData } from './components/ChapterHub';
-import { ChapterCompleteScreen } from './components/ChapterCompleteScreen';
 import { BridgeRestoreScreen } from './components/BridgeRestoreScreen';
 import { JourneyCompleteScreen } from './components/JourneyCompleteScreen';
 import { useCamera } from './hooks/useCamera';
@@ -46,7 +45,8 @@ const CHAPTER_ICONS: Record<string, string> = {
   resume: '📄',
   linkedin: '🔗',
   applications: '📨',
-  interview: '🎤',
+  interviews: '🎤',
+  offer_preparation: '📚',
   offer: '💰',
 };
 
@@ -57,7 +57,7 @@ export function JourneyHUD() {
   const [showMission, setShowMission] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
-  const { phase, startCelebration, startBridge, finishBridge } = useChapterHub();
+  const { phase, startBridge, finishBridge } = useChapterHub();
   const { cameraStyle, moveUp, zoomOut } = useCamera();
   const prevChapterCompletedRef = useRef<string | null>(null);
 
@@ -106,23 +106,36 @@ export function JourneyHUD() {
 
   const chapters = useMemo(() => {
     if (!runtime) return [];
-    const domainMap: Record<string, SkillNode[]> = {};
-    Object.values(runtime.nodeStates).forEach(n => {
-      const domain = n.domain || 'Unknown';
-      if (!domainMap[domain]) domainMap[domain] = [];
-      domainMap[domain].push(n);
+    // BUGFIX (2026-07-06): this used to group nodeStates by their `domain`
+    // string (e.g. 'Interviews', 'Offer Preparation' — capitalized, as
+    // authored in skill_nodes.ts) instead of using the canonical chapter
+    // list from chapters.ts (ids like 'interviews', 'offer_preparation' —
+    // lowercase/underscored). Every other part of the app (submitTask,
+    // advanceChapter, chapter_engine, MissionScreen) tracks chapters by
+    // that canonical id. The id-casing mismatch between the two systems
+    // caused two concrete bugs: the "already celebrated this chapter" ref
+    // check below never matched (so the ChapterCompleteScreen could fire
+    // twice for the same chapter, double-advancing and silently skipping
+    // the next chapter — this is how "Offer Preparation" could vanish),
+    // and this HUD's active/next chapter could disagree with what
+    // MissionScreen and the runtime considered current. Building `chapters`
+    // from getActiveChapters() (same source everyone else uses) removes
+    // the second, redundant bookkeeping system entirely.
+    const definitions = getActiveChapters();
+    return definitions.map((def) => {
+      const nodes = def.nodeIds.map(id => runtime.nodeStates[id]).filter(Boolean);
+      return {
+        id: def.id,
+        title: def.title,
+        icon: CHAPTER_ICONS[def.id.toLowerCase()] || DEFAULT_ICON,
+        nodes,
+        completedCount: nodes.filter(n => n.state === 'confidence' || n.state === 'execution').length,
+        totalCount: nodes.length,
+        isActive: nodes.some(n => n.id === runtime.activeNodeId),
+        isLocked: nodes.length > 0 && nodes.every(n => n.state === 'locked'),
+        isCompleted: nodes.length > 0 && nodes.every(n => n.state === 'confidence'),
+      } as ChapterData;
     });
-    return Object.entries(domainMap).map(([domain, nodes]) => ({
-      id: domain,
-      title: domain,
-      icon: CHAPTER_ICONS[domain.toLowerCase()] || DEFAULT_ICON,
-      nodes,
-      completedCount: nodes.filter(n => n.state === 'confidence' || n.state === 'execution').length,
-      totalCount: nodes.length,
-      isActive: nodes.some(n => n.id === runtime.activeNodeId),
-      isLocked: nodes.every(n => n.state === 'locked'),
-      isCompleted: nodes.every(n => n.state === 'confidence'),
-    } as ChapterData));
   }, [runtime]);
 
   const activeChapterIndex = chapters.findIndex(c => c.isActive);
@@ -130,7 +143,18 @@ export function JourneyHUD() {
   const nextChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex + 1] : undefined;
 
   // Detect the active chapter finishing all its nodes and kick off the
-  // celebrate -> bridge -> advance sequence exactly once per chapter.
+  // bridge -> advance sequence exactly once per chapter.
+  //
+  // BUGFIX (2026-07-06): this used to call startCelebration() and render
+  // ChapterCompleteScreen here — a second "Chapter Complete / X Mastered"
+  // screen with its own stats (skills/readiness/confidence), shown right
+  // after TaskCompleteScreen already showed the exact same celebration
+  // (see MissionScreen/TaskCompleteScreen.tsx isChapterComplete branch).
+  // That was a plain duplicate: same numbers, same message, twice in a
+  // row. TaskCompleteScreen is now the one and only chapter-complete
+  // celebration; this effect just moves straight to the bridge animation
+  // (visual transition to the next island) once the player is back on
+  // the Journey view.
   useEffect(() => {
     if (!activeChapter) return;
     if (
@@ -142,12 +166,12 @@ export function JourneyHUD() {
       prevChapterCompletedRef.current = activeChapter.id;
       if (nextChapter) {
         setNextChapterTitle(nextChapter.title);
-        startCelebration();
+        startBridge();
       }
       // If there's no next chapter, allNodesCompleted (below) already
       // takes over and shows JourneyCompleteScreen instead.
     }
-  }, [activeChapter, phase, showMission, nextChapter, startCelebration]);
+  }, [activeChapter, phase, showMission, nextChapter, startBridge]);
 
   const handleNodeSelect = useCallback((nodeId: string) => {
     const clickedRuntime = getRuntimeState();
@@ -178,10 +202,6 @@ export function JourneyHUD() {
     }
     setActiveNode(nodeId);
   }, [ui.activeNodeId]);
-
-  const handleCelebrationContinue = useCallback(() => {
-    startBridge();
-  }, [startBridge]);
 
   const handleBridgeDone = useCallback(() => {
     // Bridge finished restoring — camera rises to reveal the next chapter,
@@ -290,18 +310,6 @@ export function JourneyHUD() {
           onNodeSelect={handleNodeSelect}
         />
       </div>
-
-      {phase === 'celebrate' && activeChapter && (
-        <ChapterCompleteScreen
-          chapterId={activeChapter.id}
-          chapterTitle={activeChapter.title}
-          skillsCompleted={activeChapter.completedCount}
-          totalSkills={activeChapter.totalCount}
-          readinessDelta={12}
-          confidenceDelta={8}
-          onContinue={handleCelebrationContinue}
-        />
-      )}
 
       {phase === 'bridge' && activeChapter && (
         <BridgeRestoreScreen

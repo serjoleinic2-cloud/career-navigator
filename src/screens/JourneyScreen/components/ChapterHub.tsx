@@ -52,7 +52,7 @@ const CHAPTER_ART_FILENAME: Record<string, string> = {
   // Пока отдельного арта для Offer Preparation нет — переиспользуем
   // island-offer.png, чтобы не показывать плейсхолдер-иконку. Когда
   // появится отдельный файл — заменить эту строку.
-  'offer preparation': 'island-offer.png',
+  offer_preparation: 'island-offer.png',
 };
 
 export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubProps) {

@@ -29,3 +29,16 @@
   color: #636E72;
   margin-top: 2px;
 }
+
+/* Compact variant used by small reward rings (e.g. TaskCompleteScreen) —
+   center text is a short value like "+3", not a percent. */
+.progress-ring-label-compact .progress-ring-percent-compact {
+  font-size: 15px;
+}
+
+.progress-ring-label-compact .progress-ring-text {
+  font-size: 9px;
+  margin-top: 1px;
+  text-align: center;
+  max-width: 60px;
+}
