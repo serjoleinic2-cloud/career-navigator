@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getPlaybookByCategory } from '@/core/playbook/playbook_data';
 import type { PlaybookEntry, PlaybookCategory } from '@/core/playbook/playbook_types';
 import type { CSSProperties } from 'react';
@@ -45,6 +45,11 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
   const [selectedEntry, setSelectedEntry] = useState<PlaybookEntry | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [flipping, setFlipping] = useState(false);
+  // "Apply to Current Task" feedback state — shows a brief confirmation
+  // message before navigating back to Journey so the user knows the
+  // action happened (previously the button silently called onClose,
+  // with no feedback and no explanation of what "Apply" means).
+  const [applyConfirmed, setApplyConfirmed] = useState(false);
 
   useEffect(() => {
     if (initialCategory) {
@@ -54,6 +59,18 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCategory]);
+
+  // "Apply to Current Task" — takes the user back to their active mission
+  // in Journey so they can use the Playbook content (checklist, template,
+  // examples) while completing the mission. There is no data saved here:
+  // the Playbook is a reference/knowledge tool, not a form. The checklist
+  // checkboxes are visual helpers the user controls manually while working.
+  const handleApply = useCallback(() => {
+    setApplyConfirmed(true);
+    setTimeout(() => {
+      onClose?.();
+    }, 1100);
+  }, [onClose]);
 
   const openCategory = (cat: PlaybookCategory) => {
     setFlipping(true);
@@ -191,6 +208,13 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
                 isOpen={!!expandedSections['checklist']}
                 onToggle={toggleSection}
               >
+                {/* What this checklist is for: shown inline so the user
+                    always sees the explanation, not hidden behind a tooltip */}
+                <p className="playbook-checklist-hint">
+                  Use these checkboxes while working on your current mission.
+                  Tick items as you complete them — then tap
+                  <strong> Apply &amp; Return to Mission</strong> to go back.
+                </p>
                 <ul className="playbook-checklist">
                   {selectedEntry.checklist.map((item, i) => (
                     <li key={i}>
@@ -203,7 +227,18 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
             )}
           </div>
 
-          <button className="playbook-apply-btn" onClick={onClose}>Apply to Current Task</button>
+          {/* Apply button — navigates back to Journey after brief confirmation.
+               "Apply" here means "I've read/used this — take me back to my task."
+               Nothing is saved: the Playbook is a reference, not a form. */}
+          <button
+            className={`playbook-apply-btn${applyConfirmed ? ' applied' : ''}`}
+            onClick={handleApply}
+            disabled={applyConfirmed}
+          >
+            {applyConfirmed
+              ? '✓ Returning to mission...'
+              : 'Apply & Return to Mission ›'}
+          </button>
           <button className="playbook-back-btn" onClick={goBack}>← Назад</button>
         </div>
       </div>
