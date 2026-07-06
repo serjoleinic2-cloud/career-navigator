@@ -1,17 +1,16 @@
 // src/professions/software_engineer/world_art.ts
 //
-// Registers this profession's WORLD ART PIPELINE config.
-// No worldImageUrl yet — art has not been produced. WorldRenderer falls
-// back to the WorldTheme gradient until this is filled in:
+// BACKGROUND IMAGE — where to place the file:
+//   public/art/software_engineer/journey.png
 //
-//   registerWorldArt({
-//     professionId: 'software_engineer',
-//     worldImageUrl: '/worlds/software_engineer/world.png',
-//     worldImageSize: { width: 2048, height: 4096 },
-//   });
+// WorldRenderer loads it as the full-bleed background of the Journey tab.
+// Recommended size: 1080×2340px (full-screen portrait, any aspect works).
+// Until the file is placed, WorldRenderer falls back to the theme gradient
+// (light sky blue → warm cream, defined in world.ts — your art replaces it).
 //
 import { registerWorldArt } from '@/core/world/world_art_contract';
 
 registerWorldArt({
   professionId: 'software_engineer',
+  worldImageUrl: '/art/software_engineer/journey.png',
 });
