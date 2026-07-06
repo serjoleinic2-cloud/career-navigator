@@ -464,3 +464,26 @@
   color: rgba(240, 240, 245, 0.55);
   margin: 0;
 }
+
+/* Checklist usage hint — explains what "Apply to Current Task" means */
+.playbook-checklist-hint {
+  font-size: 13px;
+  color: rgba(240, 240, 245, 0.55);
+  line-height: 1.6;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  background: rgba(0, 229, 224, 0.05);
+  border-left: 2px solid rgba(0, 229, 224, 0.35);
+  border-radius: 0 8px 8px 0;
+}
+
+.playbook-checklist-hint strong {
+  color: rgba(0, 229, 224, 0.85);
+}
+
+/* Apply button confirmation state */
+.playbook-apply-btn.applied {
+  background: linear-gradient(135deg, #00b8a9, #00e5e0);
+  cursor: default;
+  opacity: 0.9;
+}
