@@ -55,6 +55,9 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({
   );
   const cameraRef = useRef(createCamera(worldState.camera));
   const animFrameRef = useRef<number>(0);
+  // imgError: if journey.png doesn't exist yet, fall back to the
+  // theme gradient so the screen is never blank waiting for art.
+  const [imgError, setImgError] = useState(false);
 
   // TASK 2 (WORLD LAYOUT SYSTEM): prefer a predefined CameraAnchor for the
   // active island's chapter when a WorldLayout is registered; otherwise
@@ -205,12 +208,15 @@ export const WorldRenderer: React.FC<WorldRendererProps> = ({
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', ...style }}>
-      {/* 1. WorldImage layer — artist art, or gradient fallback until it exists */}
-      {art.worldImageUrl ? (
+      {/* 1. WorldImage layer — artist art, or gradient fallback until it exists.
+          imgError guard: if journey.png is not placed yet the <img> fires onError
+          and we fall back to the theme gradient rather than showing a broken image. */}
+      {art.worldImageUrl && !imgError ? (
         <img
           src={art.worldImageUrl}
           alt=""
           aria-hidden="true"
+          onError={() => setImgError(true)}
           style={{
             position: 'absolute',
             inset: 0,
