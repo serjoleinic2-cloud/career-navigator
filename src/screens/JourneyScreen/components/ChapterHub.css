@@ -1,0 +1,9 @@
+@keyframes island-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.island-art-img {
+  animation: island-float 3.5s ease-in-out infinite;
+  will-change: transform;
+}

@@ -3,6 +3,7 @@ import { getRuntimeState } from '@/core/runtime/runtime_controller';
 import { getActiveProfessionId } from '@/core/profession_loader';
 import { getWorldThemeOrDefault, getChapterAccent } from '@/core/world/world_theme';
 import { SkillNodeCard, type NodeCardState } from './SkillNodeCard';
+import './ChapterHub.css';
 
 interface ChapterData {
   id: string;
