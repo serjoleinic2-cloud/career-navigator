@@ -9,6 +9,7 @@ import type { InterviewSession, InterviewResult } from '@/core/interview/intervi
 import { generateFeedback } from '@/core/voice/feedback_generator';
 import type { AnswerAnalysis } from '@/core/voice/interview_state_machine';
 import { useVoiceRecorder } from './hooks/useVoiceRecorder';
+import { InterviewResultsScreen } from './InterviewResultsScreen';
 import './InterviewTrainerScreen.css';
 
 import { SOFTWARE_ENGINEER_INTERVIEW_QUESTIONS } from '@/professions/software_engineer/interview/questions';
@@ -54,10 +55,11 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   const [prepareCount, setPrepareCount] = useState(PREPARE_SECONDS);
   const [selfAssessment, setSelfAssessment] = useState<Record<string, boolean>>({});
   const [currentResultId, setCurrentResultId] = useState<string>('');
-  const [sessionId] = useState(() => generateId());
+  const [sessionId, setSessionId] = useState(() => generateId());
   const [started, setStarted] = useState(false);
   const [micError, setMicError] = useState<ErrorType>(null);
   const [recordingToast, setRecordingToast] = useState<string | null>(null);
+  const [showResults, setShowResults] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const animFrameRef = useRef<number>(0);
@@ -132,13 +134,16 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     if (!ctx) return;
 
     const barCount = 30;
+    const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+    gradient.addColorStop(0, '#7B2D8E');
+    gradient.addColorStop(1, '#00F0FF');
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const barW = canvas.width / barCount;
       for (let i = 0; i < barCount; i++) {
         const h = Math.random() * canvas.height * 0.8 + canvas.height * 0.1;
         const x = i * barW + 1;
-        ctx.fillStyle = 'var(--w-primary, #00e5e0)';
+        ctx.fillStyle = gradient;
         ctx.globalAlpha = 0.6 + Math.random() * 0.4;
         ctx.fillRect(x, canvas.height - h, barW - 2, h);
       }
@@ -217,8 +222,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     if (isLast) {
       updateSession(sessionId, { completedAt: Date.now() });
       saveInterviewSessions(getSessions());
-      emit('INTERVIEW_SESSION_COMPLETE', { sessionId });
-      onClose();
+      setShowResults(true);
       return;
     }
 
@@ -271,6 +275,33 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
   const STAR_ITEMS = ['Situation', 'Task', 'Action', 'Result'] as const;
   const starChecked = selfAssessment.structure === true;
+
+  const session = getSessions().find(s => s.id === sessionId);
+  const handleRetry = useCallback(() => {
+    setShowResults(false);
+    setQuestionIndex(0);
+    setStarted(false);
+    setPhase('idle');
+    setSessionId(generateId());
+  }, []);
+  const handleResultsComplete = useCallback(() => {
+    const s = getSessions().find(s => s.id === sessionId);
+    if (s) {
+      emit('INTERVIEW_SESSION_COMPLETE', { session: s });
+    }
+    onClose();
+  }, [sessionId, onClose]);
+
+  if (showResults && session) {
+    return createPortal(
+      <InterviewResultsScreen
+        session={session}
+        onRetry={handleRetry}
+        onComplete={handleResultsComplete}
+      />,
+      document.body
+    );
+  }
 
   return createPortal(
     <div className="interview-trainer-overlay">

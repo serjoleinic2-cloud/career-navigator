@@ -79,6 +79,35 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-08 — OpenCode (Задания 40–43: Interview Results Screen, waveform gradient, results-before-cinematic flow)
+
+**Serj's reports:**
+
+1. **After Interview Trainer — no results table, jumps to animation.**
+   Expected: summary with scores and recommendations.
+   Fixed: added `InterviewResultsScreen` between Trainer and Journey flow.
+   Shows metrics table (Structure, Clarity, Confidence, No Fillers, No Pauses,
+   Overall) with score %, star ratings, and per-metric recommendations with
+   Playbook links for weak areas. "TRY AGAIN" (orange) resets the trainer;
+   "RETURN TO JOURNEY" (ghost) emits `INTERVIEW_SESSION_COMPLETE` and navigates.
+
+2. **Waveform black, needs gradient.**
+   Fixed: canvas `linearGradient(0, canvas.height, 0, 0)` — purple `#7B2D8E`
+   bottom → neon cyan `#00F0FF` top. CSS fallback: `background: linear-gradient(to top, #7B2D8E, #00F0FF)`.
+
+**Flow:** Interview Trainer (10 questions) → "Finish Session" →
+`InterviewResultsScreen` → "TRY AGAIN" (retry) / "RETURN TO JOURNEY"
+(→ `INTERVIEW_SESSION_COMPLETE` event → App.tsx navigates to `'journey'` →
+JourneyHUD shows FinalCinematicScreen if all chapters complete).
+
+**Files:** `src/screens/InterviewTrainerScreen/InterviewResultsScreen.tsx` (new),
+`src/screens/InterviewTrainerScreen/InterviewResultsScreen.css` (new),
+`src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx`,
+`src/screens/InterviewTrainerScreen/InterviewTrainerScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
 ### 2026-07-07 — OpenCode (Задания 37–39: Notes filters synced to 6 real chapters, 'Other' fallback)
 
 **Serj's report:** Notes filters showed Resume, LinkedIn, Interview, Networking,
