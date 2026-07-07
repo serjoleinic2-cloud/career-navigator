@@ -6,6 +6,14 @@ export function getNotes(): Note[] {
   return [...notes];
 }
 
+export function getAllNotes(): Note[] {
+  return [...notes];
+}
+
+export function getNotesByProfession(professionId: string): Note[] {
+  return notes.filter(n => n.professionId === professionId);
+}
+
 export function setNotes(data: Note[]): void {
   notes = data;
 }

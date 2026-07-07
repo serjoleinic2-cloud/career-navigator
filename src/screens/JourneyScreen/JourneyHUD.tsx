@@ -298,9 +298,13 @@ export function JourneyHUD() {
       if (next) {
         setNextChapterTitle(next.title);
         startBridge();
+      } else {
+        // Last chapter completed — no bridge to the next island,
+        // go straight to the cinematic finale.
+        startCinematic();
       }
     }
-  }, [refresh, startBridge]);
+  }, [refresh, startBridge, startCinematic]);
 
   if (showMission && runtime) {
     return (
@@ -342,7 +346,7 @@ export function JourneyHUD() {
             <JourneyCompleteScreen
               totalSkills={professionNodes.length}
               tasksCompleted={chapters.reduce((sum, c) => sum + c.completedCount, 0)}
-              hoursInvested={0}
+              hoursInvested={Math.round((runtime?.totalMinutesInvested ?? 0) / 60)}
               readinessScore={runtime?.readinessScore ?? 0}
               confidenceScore={runtime?.confidenceScore ?? 0}
               chapters={chapters.map(c => ({ title: c.title, completed: c.isCompleted }))}

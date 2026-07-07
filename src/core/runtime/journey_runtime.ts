@@ -14,6 +14,8 @@ export type JourneyRuntimeState = {
   readinessScore: number;
   confidenceScore: number;
   nodeStates: Record<string, SkillNode>;
+  totalMinutesInvested: number;
+  journeyStartedAt: number;
 };
 
 export function createEmptyRuntime(): JourneyRuntimeState {
@@ -41,6 +43,8 @@ export function createEmptyRuntime(): JourneyRuntimeState {
     readinessScore: 0,
     confidenceScore: 0,
     nodeStates: {},
+    totalMinutesInvested: 0,
+    journeyStartedAt: 0,
   };
 }
 
@@ -93,5 +97,7 @@ export function initializeJourneyRuntime(onboardingState: OnboardingState): Jour
     readinessScore: readiness.readinessScore,
     confidenceScore: readiness.confidenceScore,
     nodeStates: nodeMap,
+    totalMinutesInvested: 0,
+    journeyStartedAt: Date.now(),
   };
 }

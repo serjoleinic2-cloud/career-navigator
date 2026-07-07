@@ -78,6 +78,17 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
     setOutcome(null);
   }, [activeNodeId]);
 
+  // Safety timeout: if Saving Progress hangs for 5+ seconds, reset
+  // and show an error so the UI is never stuck on an infinite spinner.
+  useEffect(() => {
+    if (taskView !== 'completing') return;
+    const t = setTimeout(() => {
+      setTaskView('active');
+      setErrorMessage('Save timeout — please try again.');
+    }, 5000);
+    return () => clearTimeout(t);
+  }, [taskView]);
+
   useEffect(() => {
     const unsub = subscribe('MISSION_RESULT', (event) => {
       const payload = event.payload as {

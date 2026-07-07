@@ -277,6 +277,14 @@ export function submitTask(userPayload: unknown): TaskResult {
     emit('CHAPTER_UNLOCKED', { chapterId: newChapterId });
   }
 
+  // Track time invested (task estimated minutes)
+  if (enrichedResult.success && activeTaskDefinition.estimatedDuration) {
+    runtimeState = {
+      ...runtimeState,
+      totalMinutesInvested: (runtimeState.totalMinutesInvested ?? 0) + activeTaskDefinition.estimatedDuration,
+    };
+  }
+
   // BUGFIX (2026-07-04): chapterProgress used to be incremented on every
   // submitTask() call unconditionally, even when the node had already
   // reached its final state before this submission (e.g. user re-opens an
@@ -506,6 +514,17 @@ export function fastForwardJourney(): void {
     updatedChapterProgress[ch.id] = 100;
   }
 
+  // Compute total estimated minutes across all nodes
+  let totalEstimated = 0;
+  for (const ch of chapters) {
+    for (const nodeId of ch.nodeIds) {
+      const node = updatedNodeStates[nodeId];
+      if (node?.tasks?.[0]?.estimatedMinutes) {
+        totalEstimated += node.tasks[0].estimatedMinutes;
+      }
+    }
+  }
+
   runtimeState = {
     ...runtimeState,
     nodeStates: updatedNodeStates,
@@ -514,6 +533,8 @@ export function fastForwardJourney(): void {
     activeNodeId: lastNodeId ?? runtimeState.activeNodeId,
     readinessScore: 100,
     confidenceScore: 1,
+    totalMinutesInvested: totalEstimated,
+    journeyStartedAt: runtimeState.journeyStartedAt || Date.now(),
   };
 
   saveRuntime(runtimeState);

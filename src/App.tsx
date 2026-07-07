@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { loadRuntime, clearRuntime } from './core/persistence/runtime_persistence';
-import { startJourney, initializeRuntime } from './core/runtime/runtime_controller';
+import { startJourney, initializeRuntime, getRuntimeState } from './core/runtime/runtime_controller';
 import { loadNotes } from './core/user_data/notes/notes_persistence';
 import { setNotes } from './core/user_data/notes/notes_store';
 import { clearAll } from './core/events/system_event_bus';
@@ -183,7 +183,7 @@ function AppInner() {
           />
         );
       case 'notes':
-        return <NotesScreen key={common.key} style={common.style} onClose={closeToJourney} />;
+        return <NotesScreen key={common.key} style={common.style} onClose={closeToJourney} professionId={getRuntimeState()?.professionId || 'software_engineer'} />;
       case 'world':
         return <WorldMapScreen key={common.key} style={common.style} />;
       case 'profile':

@@ -1,36 +1,42 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { CSSProperties } from 'react';
-import { getAllNotes, addNote, updateNote, deleteNote } from '@/core/user_data/notes/notes_controller';
+import { getNotesByProfession, addNote, updateNote, deleteNote } from '@/core/user_data/notes/notes_controller';
 import { getActiveProfessionId } from '@/core/profession_loader';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
 import type { Note } from '@/core/user_data/notes/note';
 import './NotesScreen.css';
 
-const CATEGORY_ORDER = ['resume', 'linkedin', 'interview', 'networking', 'salary'] as const;
+const CATEGORY_ORDER = ['resume', 'linkedin', 'applications', 'interviews', 'offer_preparation', 'offer'] as const;
 const CATEGORY_LABELS: Record<string, string> = {
   resume: 'Resume',
   linkedin: 'LinkedIn',
-  interview: 'Interview',
-  networking: 'Networking',
-  salary: 'Salary',
+  applications: 'Applications',
+  interviews: 'Interviews',
+  offer_preparation: 'Offer Prep',
+  offer: 'Offer',
+  other: 'Other',
 };
 const CATEGORY_ICONS: Record<string, string> = {
   resume: '📄',
   linkedin: '🔗',
-  interview: '🎤',
-  networking: '🤝',
-  salary: '💰',
+  applications: '📨',
+  interviews: '🎤',
+  offer_preparation: '📋',
+  offer: '💼',
+  other: '📌',
 };
 const CATEGORY_COLORS: Record<string, string> = {
   resume: '#4A90D9',
   linkedin: '#7B68EE',
-  interview: '#F6AD55',
-  networking: '#48BB78',
-  salary: '#FF6B6B',
+  applications: '#48BB78',
+  interviews: '#F6AD55',
+  offer_preparation: '#9F7AEA',
+  offer: '#FF6B6B',
+  other: '#888',
 };
 
-export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose?: () => void }) {
+export function NotesScreen({ style, onClose, professionId }: { style?: CSSProperties; onClose?: () => void; professionId?: string }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -42,8 +48,8 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
   const newNoteRef = useRef<HTMLTextAreaElement>(null);
 
   const refresh = useCallback(() => {
-    setNotes(getAllNotes());
-  }, []);
+    setNotes(getNotesByProfession(professionId || getActiveProfessionId() || ''));
+  }, [professionId]);
 
   useEffect(() => {
     refresh();
@@ -68,7 +74,8 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
     : notes;
 
   const grouped = filtered.reduce<Record<string, Note[]>>((acc, note) => {
-    const cat = note.chapterId || 'other';
+    const raw = note.chapterId || 'other';
+    const cat = (CATEGORY_ORDER as readonly string[]).includes(raw) ? raw : 'other';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(note);
     return acc;
@@ -133,7 +140,7 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
           <h1 className="notes-title">My Journal</h1>
           <div className="notes-empty-state">
             <div className="notes-empty-icon">📝</div>
-            <h2>No notes yet</h2>
+            <h2>No notes for this journey yet</h2>
             <p>Tap + to create your first note.</p>
           </div>
           <button className="notes-back-btn" onClick={onClose}>← Назад</button>
@@ -221,7 +228,7 @@ export function NotesScreen({ style, onClose }: { style?: CSSProperties; onClose
         {!hasNotes && (
           <div className="notes-empty">
             <span className="notes-empty-icon">📝</span>
-            <p>No notes yet.</p>
+            <p>No notes for this journey yet.</p>
           </div>
         )}
 

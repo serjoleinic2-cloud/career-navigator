@@ -56,3 +56,7 @@ export function getNotesByTask(taskId: string): Note[] {
 export function getAllNotes(): Note[] {
   return getNotes();
 }
+
+export function getNotesByProfession(professionId: string): Note[] {
+  return getNotes().filter(n => n.professionId === professionId);
+}

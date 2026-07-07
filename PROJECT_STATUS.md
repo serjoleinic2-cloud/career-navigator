@@ -79,6 +79,79 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-07 — OpenCode (Задания 37–39: Notes filters synced to 6 real chapters, 'Other' fallback)
+
+**Serj's report:** Notes filters showed Resume, LinkedIn, Interview, Networking,
+Salary. But actual chapters are: Resume, LinkedIn, Applications, Interviews,
+Offer Preparation, Offer. Notes from Applications, Offer Preparation, Offer
+landed in a raw `chapterId` group (e.g. "offer_preparation") with no icon/label,
+and notes from Interviews didn't match the old "interview" filter key.
+
+**Fixes:**
+1. `CATEGORY_ORDER` updated to match the 6 real chapter IDs from
+   `chapters.ts`: `resume`, `linkedin`, `applications`, `interviews`,
+   `offer_preparation`, `offer`.
+2. `CATEGORY_LABELS`, `CATEGORY_ICONS`, `CATEGORY_COLORS` updated accordingly
+   (Offer Prep → 📋 #9F7AEA, Offer → 💼 #FF6B6B, etc.).
+3. Grouping logic now maps any `chapterId` not in `CATEGORY_ORDER` to `'other'`
+   (📌 #888), shown at the bottom with label "Other" — handles legacy/buggy notes.
+4. MissionScreen already uses `runtimeState.activeChapterId` which matches
+   chapters.ts IDs — no change needed.
+
+**Files:** `src/screens/NotesScreen/NotesScreen.tsx`, `PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
+### 2026-07-07 — OpenCode (Задания 34–36: Offer infinite Saving Progress fix, last-chapter cinematic, fastForwardJourney)
+
+**Serj's device testing report:**
+
+**Bug:** Tapping Continue in Offer mission shows "Saving Progress" spinner
+indefinitely. Journey never completes, no cinematic, no "You Did It".
+
+**Root causes found and fixed:**
+
+1. **MissionScreen.tsx** — No safety timeout on the 'completing' state. If
+   `MISSION_RESULT` event never fires (e.g. `skill_engine.ts` guard blocked by
+   stale `isProcessingMission`, or an uncaught path in `submitTask()`), the
+   spinner shows forever. Added a 5s `useEffect` timeout that resets to
+   `taskView='active'` with an error message.
+
+2. **JourneyHUD.tsx** — `handleMissionComplete()` for the last chapter
+   (no next chapter) fell through without calling `startCinematic()`. The
+   `allNodesCompleted` useEffect *should* catch it on the next render, but
+   if `showMission` closes and the component re-renders while `phase` is
+   still `'active'`, there's a flash of empty fragment (`<></>`) before the
+   cinematic starts. Added an explicit `else { startCinematic(); }` branch
+   in the chapter-just-completed handler when no next chapter exists.
+
+3. **fastForwardJourney()** — Already correctly sets all fields from
+   previous session (all nodes `'confidence'`, all chapters 100%,
+   `activeChapterId` last chapter, `activeNodeId` last node,
+   `readinessScore: 100`, `confidenceScore: 1`,
+   `totalMinutesInvested` computed from all node tasks,
+   `journeyStartedAt` preserved). No change needed.
+
+**Files:** `src/screens/MissionScreen/MissionScreen.tsx`,
+`src/screens/JourneyScreen/JourneyHUD.tsx`, `PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — needs retest with fastForwardJourney + manual Offer completion.
+
+### 2026-07-07 — OpenCode (Задания 27–33: notes profession-filter, totalMinutesInvested, JourneyCompleteScreen hours)
+
+**Сделано (Задания 27–33):**
+
+1. **notes_store.ts / notes_controller.ts** — добавлены `getNotesByProfession(professionId)` (фильтр по `professionId`) и `getAllNotes()` (alias для `getNotes()`).
+2. **NotesScreen.tsx** — добавлен проп `professionId`, `refresh()` использует `getNotesByProfession()`. Пустой стейт изменён с "No notes yet" на "No notes for this journey yet".
+3. **App.tsx** — в `case 'notes'` передаётся `professionId={getRuntimeState()?.professionId || 'software_engineer'}`.
+4. **runtime_controller.ts** — `submitTask()`: при `enrichedResult.success` добавляет `activeTaskDefinition.estimatedDuration` к `runtimeState.totalMinutesInvested`. `fastForwardJourney()`: теперь устанавливает `totalMinutesInvested` (сумма `estimatedMinutes` всех узлов) и `journeyStartedAt` (если не был установлен ранее).
+5. **JourneyHUD.tsx** — `hoursInvested` в `JourneyCompleteScreen` изменён с `{0}` на `{Math.round((runtime?.totalMinutesInvested ?? 0) / 60)}`.
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
+**Files:** `src/core/runtime/runtime_controller.ts`, `src/core/user_data/notes/notes_store.ts`, `src/core/user_data/notes/notes_controller.ts`, `src/screens/NotesScreen/NotesScreen.tsx`, `src/App.tsx`, `src/screens/JourneyScreen/JourneyHUD.tsx`, `PROJECT_STATUS.md`
+
 ### 2026-07-06 — Claude (unified chapter tracking — fixed 0/7, duplicate Chapter Complete screen, missing Offer Preparation)
 
 **Serj's bug reports and root causes:**
