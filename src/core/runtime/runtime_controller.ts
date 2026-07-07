@@ -481,6 +481,58 @@ export function resetRuntime(): void {
   emit('UI_REFRESH', {});
 }
 
+// ─── DEV TOOL ─────────────────────────────────────────────────────────────────
+// Marks all chapters except the last one as 100% complete and sets all their
+// nodes to 'confidence'. The last chapter is left untouched so the developer
+// can walk through it manually and test the completion animation.
+export function devCompleteAllChaptersExceptLast(): void {
+  if (!runtimeState) throw new Error('Runtime not initialized');
+
+  const chapters = getActiveChapters();
+  if (chapters.length < 2) return;
+
+  const chaptersToComplete = chapters.slice(0, chapters.length - 1);
+  const lastChapter = chapters[chapters.length - 1];
+
+  // Mark all nodes of completed chapters as 'confidence'
+  const updatedNodeStates = { ...runtimeState.nodeStates };
+  for (const ch of chaptersToComplete) {
+    for (const nodeId of ch.nodeIds) {
+      const node = updatedNodeStates[nodeId];
+      if (node) {
+        updatedNodeStates[nodeId] = { ...node, state: 'confidence', nextState: null };
+      }
+    }
+  }
+
+  // Unlock first node of last chapter (so it's enterable)
+  const lastFirstNodeId = lastChapter.nodeIds[0];
+  if (lastFirstNodeId) {
+    const lastFirstNode = updatedNodeStates[lastFirstNodeId];
+    if (lastFirstNode && lastFirstNode.state === 'locked') {
+      updatedNodeStates[lastFirstNodeId] = { ...lastFirstNode, state: 'awareness', nextState: 'confidence' };
+    }
+  }
+
+  // Build chapterProgress: completed chapters → 100, last chapter → 0
+  const updatedChapterProgress = { ...runtimeState.chapterProgress };
+  for (const ch of chaptersToComplete) {
+    updatedChapterProgress[ch.id] = 100;
+  }
+  updatedChapterProgress[lastChapter.id] = 0;
+
+  runtimeState = {
+    ...runtimeState,
+    nodeStates: updatedNodeStates,
+    chapterProgress: updatedChapterProgress,
+    activeChapterId: lastChapter.id,
+    activeNodeId: lastFirstNodeId ?? runtimeState.activeNodeId,
+  };
+
+  saveRuntime(runtimeState);
+  emit('UI_REFRESH', {});
+}
+
 export function initializeRuntime(saved: JourneyRuntimeState): void {
   // BUGFIX (2026-07-06): initializeRuntime was only restoring runtimeState
   // but not calling setActiveProfession(), so profession_loader.activeState

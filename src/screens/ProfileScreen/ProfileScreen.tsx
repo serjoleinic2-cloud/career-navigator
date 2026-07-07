@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { getRuntimeState, devCompleteAllChaptersExceptLast } from '@/core/runtime/runtime_controller';
 import { getActiveChapters, getActiveProfession } from '@/core/profession_loader';
 import { calculateCareerScore } from '@/core/scoring/career_score';
 import { ShareScreen } from '@/screens/ShareScreen/ShareScreen';
@@ -199,9 +199,18 @@ export function ProfileScreen({ style, onClose }: { style?: CSSProperties; onClo
                 theme switcher, notification permissions, JSZip backup/
                 restore already exists in Moodos and can be ported). */}
             <div className="profile-settings-list">
-              {['Language', 'Theme', 'Notifications', 'Backup', 'Restore', 'Privacy', 'About', 'Developer Mode'].map(item => (
+              {['Language', 'Theme', 'Notifications', 'Backup', 'Restore', 'Privacy', 'About'].map(item => (
                 <div key={item} className="profile-settings-item">{item}</div>
               ))}
+              <button
+                className="profile-settings-item profile-settings-dev-btn"
+                onClick={() => {
+                  devCompleteAllChaptersExceptLast();
+                  setShowSettings(false);
+                }}
+              >
+                🧪 Test 1: Complete all chapters except last
+              </button>
             </div>
             <button className="profile-back-btn" onClick={() => setShowSettings(false)}>← Назад</button>
           </div>
