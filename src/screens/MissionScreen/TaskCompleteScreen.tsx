@@ -107,12 +107,17 @@ export function TaskCompleteScreen({
               strokeColor={showChapterComplete ? '#00b894' : '#F5A623'}
               label="CHAPTER PROGRESS"
             />
+            <p className="task-complete-ring-explainer">% of this chapter's steps completed so far</p>
           </div>
 
           {/* Earned this mission — always deltas (+N), never absolute scores.
               Shown as ring diagrams (value out of a realistic reference max)
               instead of bare emoji, so each number has a name and a visual
               sense of scale, not just a floating "+N". */}
+          <p className="task-complete-rewards-explainer">
+            What you gained from this mission — each ring shows how much of a
+            typical mission's reward you earned:
+          </p>
           <div className="task-complete-rewards">
             <div className="task-complete-reward">
               <ProgressRing
@@ -122,6 +127,7 @@ export function TaskCompleteScreen({
                 centerText={`+${xpGained}`}
               />
               <span className="task-complete-reward-label">Experience (XP)</span>
+              <span className="task-complete-reward-meaning">Overall points earned toward your level</span>
             </div>
             <div className="task-complete-reward">
               <ProgressRing
@@ -131,6 +137,7 @@ export function TaskCompleteScreen({
                 centerText={`+${readinessDelta}`}
               />
               <span className="task-complete-reward-label">Readiness</span>
+              <span className="task-complete-reward-meaning">How prepared you are for this chapter's topic</span>
             </div>
             <div className="task-complete-reward">
               <ProgressRing
@@ -140,6 +147,7 @@ export function TaskCompleteScreen({
                 centerText={`+${confidenceDelta}%`}
               />
               <span className="task-complete-reward-label">Confidence</span>
+              <span className="task-complete-reward-meaning">How sure you feel putting this into practice</span>
             </div>
           </div>
 

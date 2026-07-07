@@ -23,8 +23,8 @@
 > через git напрямую) — правило всё равно действует, просто без автоматической
 > проверки, и агент должен соблюдать его вручную.
 
-**Последнее обновление:** 2026-07-06
-**Обновил:** Claude (сессия — World tab: собственное фоновое изображение world.png вместо просвечивающего Journey-фона)
+**Последнее обновление:** 2026-07-07
+**Обновил:** Claude (сессия — устранена гонка двух путей advanceChapter (вероятная причина пустого экрана на Offer Preparation), Readiness теперь по текущей главе, подписи-объяснения на экране Chapter Complete)
 **Последний коммит на момент записи:** будет создан этой сессией (main, до неё см. историю ниже)
 
 ---
@@ -1730,3 +1730,69 @@ dark gradient (no broken-image icon).
 **Verified:** `npx tsc --noEmit` and `npx vite build` pass clean. Not
 verified on-device this session — please drop `world.png` in the path
 above and check on your phone.
+
+### 2026-07-07 — Claude (Offer Preparation blank-screen race fix, per-chapter Readiness, reward diagram explanations)
+
+**Serj's reports this session:**
+1. Reaching the Offer Preparation chapter shows a blank screen.
+2. Readiness sitting at 100% for every chapter after the 2nd is not
+   informative — it should reflect the *current* chapter.
+3. The reward diagrams on the chapter-complete screen have no
+   explanation of what they mean.
+
+**1. Blank screen on Offer Preparation — likely root cause found and
+removed.** `JourneyHUD.handleMissionComplete` had its own direct
+`advanceChapter()` call on a bare `setTimeout(…, 300)`, completely
+separate from the *other* mechanism that already existed for the same
+purpose (the `activeChapter.isCompleted` `useEffect` → `startBridge` →
+`handleBridgeDone` → `advanceChapter`). Two independent call sites able
+to advance the same runtime is exactly the bug class that made "Offer
+Preparation" disappear before (see 2026-07-06 entry above) — if the
+timeout fired after `activeNodeId` had already moved on, "current
+chapter" could resolve against a stale/advanced id and either skip a
+whole chapter or leave `activeChapterIndex` at -1. `ChapterHub` renders
+`null` for a null chapter, i.e. a fully blank Journey screen with no
+console error, matching exactly what Serj described. Fixed: removed
+the direct `advanceChapter()` call from `handleMissionComplete`
+entirely. There is now exactly **one** place in the app that ever calls
+`advanceChapter()` — `handleBridgeDone`. `handleMissionComplete` now
+only marks the chapter as celebrated (`prevChapterCompletedRef`) and
+calls `startBridge()`, same as the effect-driven path, so the bridge
+animation always plays and the runtime is only ever mutated from one
+place.
+
+**2. Readiness now shown per-chapter, not as a lifetime cumulative
+number.** `runtime.readinessScore` is a single value that only ever
+adds `readinessDelta` per completed task, clamped 0-100, for the whole
+journey — it hits 100% around chapter 2-3 and then stays pinned there
+forever, telling the user nothing about their readiness for the
+chapter in front of them. The Journey HUD header now computes
+`chapterReadinessScore` fresh every render from the *active chapter's
+own nodes* (`calculateReadiness(activeChapter.nodes)` — same formula
+used elsewhere, averaging each node's skill-state value 0-100), so it
+starts low at the start of each new chapter and climbs as that
+chapter's own nodes are completed. `runtime.readinessScore` (the
+lifetime cumulative number) is untouched and still used for the
+end-of-journey `JourneyCompleteScreen` summary, where a lifetime score
+is the correct thing to show.
+
+**3. Chapter-complete reward diagrams now explain themselves.**
+`TaskCompleteScreen` already had a name under each ring ("Experience
+(XP)", "Readiness", "Confidence") but no explanation of what the ring
+fill or the number actually represents. Added: a one-line intro above
+the three reward rings ("What you gained from this mission — each ring
+shows how much of a typical mission's reward you earned"), a one-line
+meaning caption under each individual reward label (e.g. Readiness →
+"How prepared you are for this chapter's topic"), and a caption under
+the big CHAPTER PROGRESS ring ("% of this chapter's steps completed so
+far").
+
+**Files:** `src/screens/JourneyScreen/JourneyHUD.tsx`,
+`src/screens/MissionScreen/TaskCompleteScreen.tsx`,
+`src/screens/MissionScreen/TaskCompleteScreen.css`, `PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` and `npx vite build` both pass clean.
+Not yet verified on a physical device this session — please retest
+progressing into Offer Preparation, check the Readiness number resets
+at the start of each chapter, and check the new captions on the
+chapter-complete screen, then report back.

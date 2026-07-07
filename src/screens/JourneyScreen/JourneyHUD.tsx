@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getUIState } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, getActiveNode, getRuntimeState, advanceChapter } from '@/core/runtime/runtime_controller';
 import { getActiveChapters } from '@/core/profession_loader';
+import { getNextChapter } from '@/core/chapter_engine';
+import { calculateReadiness } from '@/core/readiness_engine';
 import { subscribe } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
 import type { SkillNode } from '@/core/skill_state';
@@ -142,6 +144,25 @@ export function JourneyHUD() {
   const activeChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex] : null;
   const nextChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex + 1] : undefined;
 
+  // BUGFIX (2026-07-07): the HUD used to show `runtime.readinessScore`,
+  // a single number that only ever accumulates (+readinessDelta per task,
+  // clamped 0-100) across the ENTIRE journey and never comes back down.
+  // In practice this means it hits 100% around chapter 2-3 and then
+  // stays pinned at 100% for every chapter after that — which isn't
+  // wrong exactly, but is useless as a readiness indicator: it tells the
+  // user nothing about how ready they are for the chapter in front of
+  // them right now. Readiness shown in the HUD is now computed fresh
+  // from the CURRENT chapter's own nodes each render (same formula as
+  // `calculateReadiness`, averaging each node's skill-state value), so
+  // it starts low at the beginning of every chapter and climbs back up
+  // as that chapter's nodes are completed — an actually informative,
+  // per-chapter number. The cumulative `runtime.readinessScore` is left
+  // untouched for the final journey-complete summary, where an overall
+  // lifetime score does make sense.
+  const chapterReadinessScore = activeChapter
+    ? calculateReadiness(activeChapter.nodes).readinessScore
+    : 0;
+
   // Detect the active chapter finishing all its nodes and kick off the
   // bridge -> advance sequence exactly once per chapter.
   //
@@ -244,18 +265,34 @@ export function JourneyHUD() {
     const chapterJustCompleted =
       !!activeChapterNodes && activeChapterNodes.length > 0 &&
       activeChapterNodes.every(n => n.state === 'confidence');
-    if (chapterJustCompleted) {
-      // Mark this chapter so the useEffect doesn't re-trigger celebrate
-      prevChapterCompletedRef.current = currentChapter!.id;
-      // Auto-advance to the next chapter (unlock + activate its first node)
-      // after a short delay so the TaskCompleteScreen's "Next Chapter" button
-      // gives the user a moment to read it before the world updates.
-      setTimeout(() => {
-        advanceChapter();
-        refresh();
-      }, 300);
+    if (chapterJustCompleted && currentChapter) {
+      // BUGFIX (2026-07-07): this used to call advanceChapter() itself on a
+      // bare setTimeout — a SECOND, independent path to the exact same
+      // "advance to the next chapter" operation that the activeChapter
+      // .isCompleted useEffect above also performs (via startBridge ->
+      // handleBridgeDone -> advanceChapter). Two separate call sites able
+      // to advance the same runtime is exactly the class of bug that
+      // previously made "Offer Preparation" vanish entirely (see the
+      // 2026-07-06 entry in PROJECT_STATUS.md): if this timeout fired
+      // after another render had already moved `activeNodeId` forward,
+      // "current chapter" here could resolve against a stale/advanced
+      // id and skip a whole chapter, or leave no chapter matching
+      // `isActive` at all — and ChapterHub renders nothing for a null
+      // chapter, i.e. a completely blank Journey screen with no error.
+      // Fixed by removing this direct advanceChapter() call. There is
+      // now exactly ONE place that ever calls advanceChapter():
+      // handleBridgeDone. This function's only job is to mark the
+      // chapter as celebrated (so the effect below doesn't also try to
+      // celebrate it) and kick off the same bridge animation the other
+      // path uses, instead of silently jumping chapters in the background.
+      prevChapterCompletedRef.current = currentChapter.id;
+      const next = getNextChapter(chapters, currentChapter.id);
+      if (next) {
+        setNextChapterTitle(next.title);
+        startBridge();
+      }
     }
-  }, [refresh]);
+  }, [refresh, startBridge]);
 
   if (showMission && runtime) {
     return (
@@ -300,7 +337,7 @@ export function JourneyHUD() {
         chapterTitle={ui.currentChapterTitle || node?.domain || ''}
         nodeIndex={0}
         totalNodes={professionNodes.length}
-        readinessScore={runtime?.readinessScore ?? 0}
+        readinessScore={chapterReadinessScore}
       />
 
       <div className="journey-world" style={cameraStyle}>
