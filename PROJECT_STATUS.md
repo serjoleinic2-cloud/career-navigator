@@ -1885,3 +1885,10 @@ committed) that all 6 chapters now report their full node count in
 — progress through Interviews into Offer Preparation and confirm the
 three mission cards (salary negotiation, offer review, resignation
 letter) now show up.
+
+### 2026-07-06 — Kimi | Фикс визуальных ассетов:
+- island-resume.png: путь теперь case-insensitive (`toLowerCase()`)
+- journey.png: синхронизация в `android/app/src/main/assets/public/art/`
+- ChapterHub.css: эффект парения `island-float` (3.5s, ±10px)
+
+### 2026-07-02 — Kimi | Фикс BottomNav: labels теперь `text-black` (были невидимы `text-white/30`)
