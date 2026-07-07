@@ -1796,3 +1796,33 @@ Not yet verified on a physical device this session — please retest
 progressing into Offer Preparation, check the Readiness number resets
 at the start of each chapter, and check the new captions on the
 chapter-complete screen, then report back.
+
+### 2026-07-07 (2) — Claude (captions weren't visible on-device; premium status check)
+
+**Why the captions weren't visible:** `TaskCompleteScreen.css` had a
+`@media (max-width: 380px)` rule that `display: none`'d the reward
+labels/captions entirely on narrow screens. Since this is an Android
+app, the physical device is almost certainly under that width, so not
+just the new explanation captions but the pre-existing reward labels
+("Experience (XP)" etc.) were already invisible on-device before this
+session too. Changed that breakpoint to shrink the font instead of
+hiding the text, for all four caption classes.
+
+**Premium gating — confirmed already fully off, nothing to disable.**
+Checked every call site of `getUIState()` (the only place `checkAccess`
+against `PremiumState` can run): `JourneyHUD`, `ShareScreen`, and
+`export_service` all call it as `getUIState()` with no argument. Inside
+`mapRuntimeToUI`, when `premiumState` is `undefined` the access check
+short-circuits to `{ allowed: true }` for every chapter. So although
+`SOFTWARE_ENGINEER_PROFESSION.premiumConfig` declares `freeChapters: 3`,
+nothing in the current app actually constructs a `PremiumState` or
+passes it in anywhere — the config is inert. All chapters are already
+unlocked for testing as-is; no change was needed or made here. When
+real purchases are wired in later, that will mean building a
+`PremiumState` (via `createPremiumState`) from actual purchase status
+and threading it into those three `getUIState()` call sites.
+
+**Files:** `src/screens/MissionScreen/TaskCompleteScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` and `npx vite build` pass clean.

@@ -317,10 +317,10 @@
 
 @media (max-width: 380px) {
   .task-complete-heading { font-size: 26px; }
-  .task-complete-reward-label { display: none; }
-  .task-complete-reward-meaning { display: none; }
-  .task-complete-rewards-explainer { display: none; }
-  .task-complete-ring-explainer { display: none; }
+  .task-complete-reward-label { font-size: 8px; }
+  .task-complete-reward-meaning { font-size: 7px; }
+  .task-complete-rewards-explainer { font-size: 11px; max-width: 280px; }
+  .task-complete-ring-explainer { font-size: 10px; }
 }
 
 /* Chapter-complete banner variant */
