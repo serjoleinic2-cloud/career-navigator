@@ -12,6 +12,7 @@ import { NotesScreen } from './screens/NotesScreen/NotesScreen';
 import { WorldMapScreen } from './screens/WorldMapScreen/WorldMapScreen';
 import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { JourneyHUD } from './screens/JourneyScreen';
+import { InterviewTrainerScreen } from './screens/InterviewTrainerScreen/InterviewTrainerScreen';
 import { BottomNav } from './components/BottomNav/BottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { subscribe } from './core/events/system_event_bus';
@@ -79,6 +80,12 @@ function AppInner() {
       clearAll();
       setCurrentScreen('journey');
       setShowOnboarding(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    return subscribe('INTERVIEW_SESSION_COMPLETE', () => {
+      setCurrentScreen('journey');
     });
   }, []);
 
@@ -183,21 +190,10 @@ function AppInner() {
         return <ProfileScreen key={common.key} style={common.style} onClose={closeToJourney} />;
       case 'interview':
         return (
-          <div key={common.key} style={{ ...common.style, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0f', color: '#f0f0f5', flexDirection: 'column', gap: 16, padding: 24 }}>
-            <div style={{ fontSize: 48 }}>🎤</div>
-            <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Interview Challenge</h2>
-            <p style={{ margin: 0, color: 'rgba(240,240,245,0.5)', textAlign: 'center', maxWidth: 300 }}>Coming Soon — practice interviews with AI feedback.</p>
-            <button
-              onClick={() => navigateTo('journey')}
-              style={{
-                marginTop: 12, padding: '12px 24px', borderRadius: 12,
-                background: 'rgba(240,240,245,0.08)', border: '1px solid rgba(240,240,245,0.12)',
-                color: '#f0f0f5', fontSize: 15, cursor: 'pointer',
-              }}
-            >
-              ← Back to Journey
-            </button>
-          </div>
+          <InterviewTrainerScreen
+            key={common.key}
+            onClose={() => navigateTo('journey')}
+          />
         );
     }
   };

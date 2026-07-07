@@ -29,7 +29,8 @@ export type SystemEventType =
   | 'OPEN_PLAYBOOK'
   | 'START_INTERVIEW_TRAINER'
   | 'OPEN_SHARE'
-  | 'RESET_JOURNEY';
+  | 'RESET_JOURNEY'
+  | 'INTERVIEW_SESSION_COMPLETE';
 
 export type SystemEvent = {
   type: SystemEventType;

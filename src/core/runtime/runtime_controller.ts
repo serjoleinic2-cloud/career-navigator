@@ -481,7 +481,45 @@ export function resetRuntime(): void {
   emit('UI_REFRESH', {});
 }
 
-// ─── DEV TOOL ─────────────────────────────────────────────────────────────────
+// ─── DEV TOOL: complete entire journey ────────────────────────────────────────
+export function fastForwardJourney(): void {
+  if (!runtimeState) throw new Error('Runtime not initialized');
+
+  const chapters = getActiveChapters();
+  if (chapters.length === 0) return;
+
+  const lastChapter = chapters[chapters.length - 1];
+  const lastNodeId = lastChapter.nodeIds[lastChapter.nodeIds.length - 1];
+
+  const updatedNodeStates = { ...runtimeState.nodeStates };
+  for (const ch of chapters) {
+    for (const nodeId of ch.nodeIds) {
+      const node = updatedNodeStates[nodeId];
+      if (node) {
+        updatedNodeStates[nodeId] = { ...node, state: 'confidence', nextState: null };
+      }
+    }
+  }
+
+  const updatedChapterProgress: Record<string, number> = {};
+  for (const ch of chapters) {
+    updatedChapterProgress[ch.id] = 100;
+  }
+
+  runtimeState = {
+    ...runtimeState,
+    nodeStates: updatedNodeStates,
+    chapterProgress: updatedChapterProgress,
+    activeChapterId: lastChapter.id,
+    activeNodeId: lastNodeId ?? runtimeState.activeNodeId,
+    readinessScore: 100,
+    confidenceScore: 1,
+  };
+
+  saveRuntime(runtimeState);
+}
+
+// ─── DEV TOOL: complete all but last chapter ──────────────────────────────────
 // Marks all chapters except the last one as 100% complete and sets all their
 // nodes to 'confidence'. The last chapter is left untouched so the developer
 // can walk through it manually and test the completion animation.

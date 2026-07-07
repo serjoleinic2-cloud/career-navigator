@@ -178,7 +178,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: center;
-  text-shadow: 0 0 40px rgba(255, 107, 107, 0.3);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8), 0 0 40px rgba(255, 107, 107, 0.3);
 }
 
 @keyframes cinematic-title-fade {

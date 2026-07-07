@@ -1170,3 +1170,48 @@
   transform: translateX(-50%);
   z-index: 100;
 }
+
+/* === DEV: Test → Interview button === */
+.dev-ffwd-btn {
+  position: fixed;
+  top: 70px;
+  left: 8px;
+  z-index: 200;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  min-width: 44px;
+  min-height: 44px;
+}
+.dev-ffwd-btn:hover {
+  opacity: 0.7;
+}
+
+.dev-interview-btn {
+  position: fixed;
+  bottom: calc(140px + env(safe-area-inset-bottom));
+  right: 16px;
+  z-index: 200;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #00e5e0;
+  background: rgba(0, 229, 224, 0.1);
+  border: 1px solid rgba(0, 229, 224, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s;
+}
+.dev-interview-btn:hover {
+  background: rgba(0, 229, 224, 0.2);
+  border-color: rgba(0, 229, 224, 0.6);
+}

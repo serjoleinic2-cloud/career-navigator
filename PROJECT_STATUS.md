@@ -33,6 +33,7 @@
 
 ```
 ☑ Stabilization
+☑ Interview Trainer MVP
 ☐ World Design
 ☐ Motion Polish
 ☐ Art Production
@@ -1886,14 +1887,6 @@ committed) that all 6 chapters now report their full node count in
 three mission cards (salary negotiation, offer review, resignation
 letter) now show up.
 
-<<<<<<< HEAD
-### 2026-07-06 — Kimi | Фикс визуальных ассетов:
-- island-resume.png: путь теперь case-insensitive (`toLowerCase()`)
-- journey.png: синхронизация в `android/app/src/main/assets/public/art/`
-- ChapterHub.css: эффект парения `island-float` (3.5s, ±10px)
-
-### 2026-07-02 — Kimi | Фикс BottomNav: labels теперь `text-black` (были невидимы `text-white/30`)
-=======
 ### 2026-07-07 (4) — Claude (docs-only: fixed outdated `core/*_v0.6` architecture docs)
 
 Compared `core/TRUTH_v0.6.md`, `core/PROJECT_SNAPSHOT_v0.6.md`,
@@ -1919,4 +1912,122 @@ archive). No code changed.
 **Files:** `core/TRUTH_v0.6.md`, `core/PROJECT_SNAPSHOT_v0.6.md`,
 `core/SESSION_START_v0.6.md`, `core/MASTER_LOADER_v0.6.txt`,
 `PROJECT_STATUS.md`
->>>>>>> e2511e04b5894f3d2d57f287cacc2cd302e94871
+
+### 2026-07-06 — Kimi | Фикс визуальных ассетов:
+- island-resume.png: путь теперь case-insensitive (`toLowerCase()`)
+- journey.png: синхронизация в `android/app/src/main/assets/public/art/`
+- ChapterHub.css: эффект парения `island-float` (3.5s, ±10px)
+
+### 2026-07-02 — Kimi | Фикс BottomNav: labels теперь `text-black` (были невидимы `text-white/30`)
+
+### 2026-07-07 (5) — Claude (Interview Trainer MVP + FinalCinematic + JourneyComplete)
+
+**Задание 10 — Cinematic + JourneyComplete:**
+- `FinalCinematicScreen.tsx` + `.css` — 12s profession-agnostic animation: 6 island PNGs + city emoji, SVG bridges, light beam, camera translateY/scale, "JOURNEY COMPLETE" title.
+- `JourneyCompleteScreen.tsx` + `.css` — rewritten with "BEGIN INTERVIEW CHALLENGE" (emits `START_INTERVIEW_TRAINER`), "NEW JOURNEY" (emits `RESET_JOURNEY`), Share icon.
+- `useChapterHub.ts` — added `'cinematic' | 'complete'` phases.
+- `JourneyHUD.tsx` — connected last-chapter-done → cinematic → journey-complete flow.
+- `system_event_bus.ts` — added `START_INTERVIEW_TRAINER`, `OPEN_SHARE`, `RESET_JOURNEY`, `INTERVIEW_SESSION_COMPLETE`.
+- `App.tsx` — added `'interview'` Screen type + handlers for `START_INTERVIEW_TRAINER` / `RESET_JOURNEY` / `INTERVIEW_SESSION_COMPLETE`.
+
+**Задание 11 — Interview Trainer MVP:**
+- `src/core/interview/interview_result.ts` — types with `// TODO: unify with voice/ module` note.
+- `src/core/interview/interview_store.ts` — module-level store with `addSession`, `getLatestSession`, `updateSession`.
+- `src/core/interview/interview_persistence.ts` — localStorage persistence (Blob excluded, only metadata).
+- `src/screens/InterviewTrainerScreen/hooks/useVoiceRecorder.ts` — MediaRecorder hook with `getUserMedia`, `audio/webm`, auto-stop at 60s, `isSupported` check.
+- `InterviewTrainerScreen.tsx` + `.css` — 3 phases (Prepare/Record/Review), 10 hardcoded questions, waveform canvas, 5-item self-assessment checklist, feedback via `generateFeedback` + `generateScoreBreakdown` (mapped from booleans via `selfAssessmentToAnswerAnalysis`).
+- Edge cases: no microphone → error + "Open Settings", unsupported → textarea fallback, `visibilitychange` auto-stop with toast, empty recording → "Try Again", Re-record button.
+- Dev button: "Test → Interview" in JourneyHUD when `import.meta.env.DEV`.
+
+**Задание 12 (partial) — madge:**
+- `npx madge --circular src/main.tsx` — found 2 pre-existing circular deps (not from these changes):
+  1. `core/skill_engine.ts > core/runtime/runtime_controller.ts`
+  2. `core/skill_engine.ts > core/runtime/runtime_controller.ts > core/task/task_content_engine.ts > core/task/task_execution_engine.ts`
+- These are pre-existing architecture patterns, not introduced by the Interview Trainer.
+
+**Файлы (созданы):**
+- `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`
+- `src/screens/JourneyScreen/components/FinalCinematicScreen.css`
+- `src/screens/JourneyScreen/components/JourneyCompleteScreen.css`
+- `src/core/interview/interview_result.ts`
+- `src/core/interview/interview_store.ts`
+- `src/core/interview/interview_persistence.ts`
+- `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx`
+- `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.css`
+- `src/screens/InterviewTrainerScreen/hooks/useVoiceRecorder.ts`
+- `src/vite-env.d.ts`
+
+**Файлы (изменены):**
+- `src/screens/JourneyScreen/components/ChapterHub.css` — island-float animation
+- `src/screens/JourneyScreen/components/JourneyCompleteScreen.tsx` — full rewrite
+- `src/screens/JourneyScreen/hooks/useChapterHub.ts` — added cinematic/complete phases
+- `src/screens/JourneyScreen/JourneyHUD.tsx` — connected FinalCinematic + JourneyComplete + dev button
+- `src/core/events/system_event_bus.ts` — added START_INTERVIEW_TRAINER, OPEN_SHARE, RESET_JOURNEY, INTERVIEW_SESSION_COMPLETE
+- `src/App.tsx` — added 'interview' Screen, handlers for START_INTERVIEW_TRAINER/RESET_JOURNEY/INTERVIEW_SESSION_COMPLETE
+- `src/screens/JourneyScreen/components/ChapterHub.tsx` — import ChapterHub.css
+- `src/screens/JourneyScreen/JourneyScreen.css` — dev-interview-btn styles
+- `PROJECT_STATUS.md` — resolved git conflict markers, added this entry
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Не проверено вживую** — нужно: (а) пройти все главы → cinematic → journey complete → "BEGIN INTERVIEW CHALLENGE"; (б) пройти интервью-сессию (recording, self-assessment, feedback); (в) проверить edge cases (no mic, minimize, empty recording).
+
+### 2026-07-07 (6) — Claude (Задания 13-17: test script, world dir, permissions, audit, docs)
+
+**Задание 13 — Test script:**
+- `scripts/test-interview-trainer.ts` — headless прогон с 3 mock-сессиями (все true, частично, все false).
+- `interview_store.ts` — добавлена `calculateInterviewReadiness()` — средний score по всем сессиям.
+- Проверена сериализация/десериализация localStorage (полифилл для Node.js).
+- **Результат:**
+  ```
+  Session #1: 10 questions, avg score 5.0/5
+  Session #2: 5 questions, avg score 3.6/5
+  Session #3: 3 questions, avg score 0.0/5
+  Overall Readiness: ★★★★☆ (3.8/5)
+  Persistence: OK (3 sessions saved and loaded)
+  AudioBlob stripping: OK
+  ```
+
+**Задание 14 — World design:**
+- Создана `src/professions/software_engineer/world/` (theme.ts, layout.ts, art.ts, camera.json).
+- `theme.ts` — регистрирует WorldTheme через `registerWorldTheme()` (цвета Code Archipelago).
+- `layout.ts` — регистрирует WorldLayout — 6 островов + 5 мостов + camera anchors.
+- `art.ts` — регистрирует WorldArtConfig (путь к `journey.png`, размер 1080×2340).
+- `camera.json` — пустой плейсхолдер для художника.
+- `src/professions/software_engineer/interview/questions.ts` — вынесены `SOFTWARE_ENGINEER_INTERVIEW_QUESTIONS` (10 вопросов).
+- `InterviewTrainerScreen.tsx` — теперь импортирует вопросы оттуда вместо хардкода.
+- `module.ts` и `index.ts` — импорты переведены на `./world/theme`/`./world/art`/`./world/layout`.
+- Старые файлы (`world.ts`, `world_art.ts`, `world_layout.ts`) оставлены для обратной совместимости (не импортируются).
+
+**Задание 15 — Capacitor permissions:**
+- `AndroidManifest.xml` — добавлены `RECORD_AUDIO` и `MODIFY_AUDIO_SETTINGS`.
+- iOS: добавить `NSMicrophoneUsageDescription` в `Info.plist` перед TestFlight.
+
+**Задание 16 — Bundle audit:**
+- `npx vite build` — 1979 modules, 600.38 KB JS (gzip 190.77 KB), 91.96 KB CSS.
+- Рост относительно предыдущей сессии: +0.05 KB JS gzip, +0.07 KB CSS gzip — незначительно.
+- MediaRecorder — нативный API, не добавляет вес.
+- Waveform canvas — лёгкий.
+- voice/ модуль уже был в бандле (добавлен в Задании 11), tree-shakeable.
+- **Вывод:** рост < 50 KB, приемлемо для MVP.
+
+**Задание 17 — Documentation:**
+- `docs/INTERVIEW_TRAINER.md` — архитектура, файлы, flow, известные ограничения, следующие шаги.
+
+**Файлы (созданы):**
+- `scripts/test-interview-trainer.ts`
+- `src/professions/software_engineer/world/theme.ts`
+- `src/professions/software_engineer/world/art.ts`
+- `src/professions/software_engineer/world/layout.ts`
+- `src/professions/software_engineer/world/camera.json`
+- `src/professions/software_engineer/interview/questions.ts`
+- `docs/INTERVIEW_TRAINER.md`
+
+**Файлы (изменены):**
+- `src/core/interview/interview_store.ts` — added `calculateInterviewReadiness()`
+- `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx` — import questions from new location
+- `src/professions/software_engineer/module.ts` — imports → `./world/theme`/`./world/art`/`./world/layout`
+- `src/professions/software_engineer/index.ts` — import → `./world/theme`
+- `android/app/src/main/AndroidManifest.xml` — +RECORD_AUDIO, +MODIFY_AUDIO_SETTINGS
+- `PROJECT_STATUS.md` — this entry
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто, `npx tsx scripts/test-interview-trainer.ts` — чисто (ожидаемый вывод).

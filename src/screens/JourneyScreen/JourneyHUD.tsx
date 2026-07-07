@@ -6,6 +6,7 @@ import { getNextChapter } from '@/core/chapter_engine';
 import { calculateReadiness } from '@/core/readiness_engine';
 import { subscribe, emit } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
+import { fastForwardJourney } from '@/core/runtime/runtime_controller';
 import type { SkillNode } from '@/core/skill_state';
 import { JourneyHeader } from './components/JourneyHeader';
 import { ChapterHub } from './components/ChapterHub';
@@ -380,6 +381,25 @@ export function JourneyHUD() {
       )}
 
       {lockedToast && <div className="locked-toast">{lockedToast}</div>}
+
+      {import.meta.env.DEV && (
+        <>
+          <button
+            className="dev-interview-btn"
+            onClick={() => emit('START_INTERVIEW_TRAINER', {})}
+            title="DEV: Skip to Interview Trainer"
+          >
+            Test → Interview
+          </button>
+          <button
+            className="dev-ffwd-btn"
+            onClick={() => { fastForwardJourney(); window.location.reload(); }}
+            title="DEV: Complete all chapters instantly"
+          >
+            Test: Complete Journey
+          </button>
+        </>
+      )}
     </div>
   );
 }

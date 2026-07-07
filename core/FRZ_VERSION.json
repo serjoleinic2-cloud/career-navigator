@@ -1,10 +1,10 @@
 {
-  "version": "v0.6",
+  "version": "v0.7",
   "mode": "FROZEN",
   "freeze_status": true,
-  "engine_status": "skill_state_machine",
-  "truth_file": "/core/TRUTH_v0.6.md",
-  "snapshot_file": "/core/PROJECT_SNAPSHOT_v0.6.md",
+  "engine_status": "interview_trainer",
+  "truth_file": "/core/TRUTH_v0.7.md",
+  "snapshot_file": "/core/PROJECT_SNAPSHOT_v0.7.md",
   "runtime_mode": "OFFLINE_DETERMINISTIC",
   "ai_dependency": false
 }
