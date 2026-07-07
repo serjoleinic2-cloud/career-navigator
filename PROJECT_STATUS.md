@@ -1885,3 +1885,29 @@ committed) that all 6 chapters now report their full node count in
 — progress through Interviews into Offer Preparation and confirm the
 three mission cards (salary negotiation, offer review, resignation
 letter) now show up.
+
+### 2026-07-07 (4) — Claude (docs-only: fixed outdated `core/*_v0.6` architecture docs)
+
+Compared `core/TRUTH_v0.6.md`, `core/PROJECT_SNAPSHOT_v0.6.md`,
+`core/SESSION_START_v0.6.md`, `core/MASTER_LOADER_v0.6.txt` against the
+actual current code (`src/App.tsx`,
+`src/professions/software_engineer/`, `CORE_MAP.md`, this file). All
+four described a superseded early architecture ("Skill State Machine",
+7 states, `src/core/skill_nodes.ts`, 4-tab nav, iOS light theme) that no
+longer exists in the codebase (`skill_nodes.ts` doesn't exist; nav is
+now 5 tabs per `+Window_functional.md`; progress is chapter-based via
+`chapters.ts`/`chapter_engine.ts`; state lives in
+`runtime_controller.ts`/`runtime_store.ts`).
+
+**Fix:** rewrote `core/TRUTH_v0.6.md` to match the real architecture
+(chapters, professions module, Runtime, 5-tab nav, current
+Stabilization phase, real next-tasks). Added warning headers to
+`PROJECT_SNAPSHOT_v0.6.md` (kept as v0.6-era archive, not updated
+further), `SESSION_START_v0.6.md` (redirected to
+`CAREER_NAVIGATOR_MASTER_CHECKPOINT.md`/`PROJECT_STATUS.md`/`CORE_MAP.md`
+as the real entry point) and `MASTER_LOADER_v0.6.txt` (flagged as
+archive). No code changed.
+
+**Files:** `core/TRUTH_v0.6.md`, `core/PROJECT_SNAPSHOT_v0.6.md`,
+`core/SESSION_START_v0.6.md`, `core/MASTER_LOADER_v0.6.txt`,
+`PROJECT_STATUS.md`
