@@ -4,6 +4,7 @@ import {
   LINKEDIN_SKILL_NODES,
   APPLICATION_SKILL_NODES,
   INTERVIEW_SKILL_NODES,
+  OFFER_PREPARATION_SKILL_NODES,
   OFFER_SKILL_NODES,
 } from './skill_nodes';
 import { SOFTWARE_ENGINEER_CHAPTERS } from './chapters';
@@ -20,6 +21,7 @@ export const SoftwareEngineerModule: ProfessionModule = {
     ...LINKEDIN_SKILL_NODES,
     ...APPLICATION_SKILL_NODES,
     ...INTERVIEW_SKILL_NODES,
+    ...OFFER_PREPARATION_SKILL_NODES,
     ...OFFER_SKILL_NODES,
   ],
   entryNodeId: 'positioning-clarity',

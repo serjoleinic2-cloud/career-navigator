@@ -1826,3 +1826,62 @@ and threading it into those three `getUIState()` call sites.
 `PROJECT_STATUS.md`
 
 **Verified:** `npx tsc --noEmit` and `npx vite build` pass clean.
+
+### 2026-07-07 (3) — Claude (ACTUAL root cause of Offer Preparation empty screen found and fixed)
+
+**Serj reported the Offer Preparation screen was still empty** ("no steps/
+tasks shown") even after the previous session's race-condition fix. That
+fix was a real improvement but not the actual cause — reproduced the bug
+headlessly (wrote a throwaway simulation script that registers the
+profession and steps through chapters/tasks exactly like the app does)
+and found the real bug:
+
+**There are two separate, near-identical "profession module" definitions
+for Software Engineer**, and they had drifted out of sync:
+- `src/professions/software_engineer/profession.ts` exports
+  `SOFTWARE_ENGINEER_PROFESSION`, built from `ALL_SKILL_NODES` (which
+  correctly includes `OFFER_PREPARATION_SKILL_NODES`) — **but this export
+  is dead code**, only re-exported from `index.ts` and never registered
+  or consumed anywhere in the app. Grepped every file; nothing imports it.
+- `src/professions/software_engineer/module.ts` exports
+  `SoftwareEngineerModule` — **this is the one actually used**, registered
+  by `profession_auto_loader.ts` at real app startup. Its `skillGraph` is
+  hand-built as its own spread list
+  (`...RESUME_SKILL_NODES, ...LINKEDIN_SKILL_NODES, ...APPLICATION_SKILL_NODES,
+  ...INTERVIEW_SKILL_NODES, ...OFFER_SKILL_NODES`) instead of importing
+  `ALL_SKILL_NODES`, and **it simply never had
+  `...OFFER_PREPARATION_SKILL_NODES` added to it** — presumably missed
+  when that chapter was added to `chapters.ts`/`skill_nodes.ts`.
+
+The practical effect: the *chapter definition* for `offer_preparation`
+(`salary_negotiation`, `offer_review`, `resignation_letter`) existed and
+was wired correctly everywhere else, but those three node ids never
+existed in the running app's actual `skillGraph` / `nodeStates` at all.
+So when a player's `activeNodeId` advanced into that chapter, `ChapterHub`
+built its node list as `chapter.nodeIds.map(id => nodeStates[id]).filter(
+Boolean)` — all three lookups came back `undefined`, got filtered out,
+and the chapter rendered with zero mission cards: exactly "no steps/tasks
+shown". Confirmed with the simulation: before the fix, `offer_preparation
+nodes found: 0 / 3`; after adding the missing spread, `3 / 3`.
+
+**Fix:** added `OFFER_PREPARATION_SKILL_NODES` to `module.ts`'s
+`skillGraph` array (one line + one import), so it matches `ALL_SKILL_NODES`.
+
+**Note for future sessions:** `profession.ts` (`SOFTWARE_ENGINEER_PROFESSION`)
+is unused dead code that happened to be *correct* while `module.ts` (the
+one that actually runs) was *wrong* — having two divergent definitions of
+the same profession is itself the underlying design problem, not just
+this one missing chapter. Worth eventually deleting `profession.ts` and
+making `module.ts` the single source of truth (or vice versa), so this
+class of "looks right in one file, wrong in the file that's actually
+used" bug can't happen again silently.
+
+**Files:** `src/professions/software_engineer/module.ts`, `PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` and `npx vite build` pass clean. Also
+verified headlessly end-to-end (temporary simulation script, not
+committed) that all 6 chapters now report their full node count in
+`nodeStates`, including `offer_preparation: 3/3`. Please retest on-device
+— progress through Interviews into Offer Preparation and confirm the
+three mission cards (salary negotiation, offer review, resignation
+letter) now show up.
