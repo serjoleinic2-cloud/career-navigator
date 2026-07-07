@@ -6,7 +6,7 @@ import { loadInterviewSessions, saveInterviewSessions } from '@/core/interview/i
 import type { InterviewSession, InterviewResult } from '@/core/interview/interview_result';
 // TODO: unify with voice/ module when Interview Trainer v2 — MVP uses self-assessment,
 // voice/ uses AnswerAnalysis from AI pipeline. Integrating feedback_generator as-is.
-import { generateFeedback, generateScoreBreakdown } from '@/core/voice/feedback_generator';
+import { generateFeedback } from '@/core/voice/feedback_generator';
 import type { AnswerAnalysis } from '@/core/voice/interview_state_machine';
 import { useVoiceRecorder } from './hooks/useVoiceRecorder';
 import './InterviewTrainerScreen.css';
@@ -32,11 +32,11 @@ const ASSESSMENT_ITEMS = [
 
 function selfAssessmentToAnswerAnalysis(sa: Record<string, boolean>): AnswerAnalysis {
   return {
-    clarity: sa.clearConclusion ? 80 : 40,
+    clarity: sa.clearConclusion ? 0.8 : 0.4,
     structure: sa.structure || false,
-    confidence: sa.confidence ? 80 : 40,
+    confidence: sa.confidence ? 0.8 : 0.4,
     fillerWords: sa.noFillers ? 2 : 8,
-    completeness: sa.clearConclusion ? 80 : 40,
+    completeness: sa.clearConclusion ? 0.8 : 0.4,
   };
 }
 
@@ -185,14 +185,6 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     });
   }, []);
 
-  const currentFeedback = useMemo(() => {
-    const analysis = selfAssessmentToAnswerAnalysis(selfAssessment);
-    return {
-      text: feedbackTextRef.current || generateFeedback(analysis),
-      breakdown: generateScoreBreakdown(analysis),
-    };
-  }, [selfAssessment]);
-
   const saveCurrentResult = useCallback(() => {
     const result: InterviewResult = {
       id: currentResultId,
@@ -259,14 +251,33 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     setPrepareCount(PREPARE_SECONDS);
   }, [resetRecording, recordingSupported]);
 
+  const handleClose = useCallback(() => {
+    const hasProgress = questionIndex > 0 || recordingDuration > 0;
+    if (hasProgress && !window.confirm('Exit Interview? Your progress will be lost.')) return;
+    emit('CLOSE_INTERVIEW_TRAINER', {});
+  }, [questionIndex, recordingDuration]);
+
   const recordProgress = recordingDuration / MAX_RECORD_SECONDS;
+
+  const clarityScore = selfAssessment.clearConclusion ? 80 : 40;
+  const structureScore = selfAssessment.structure ? 100 : 0;
+  const confidenceScore = selfAssessment.confidence ? 80 : 40;
+  const fillerScore = selfAssessment.noFillers ? 80 : 20;
+  const completenessScore = selfAssessment.clearConclusion ? 80 : 40;
+  const allScores = [clarityScore, structureScore, confidenceScore, fillerScore, completenessScore];
+  const overallScore = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
+  const star = (v: number) => Math.round(v / 20);
+  const stars = (v: number) => '★'.repeat(star(v)) + '☆'.repeat(5 - star(v));
+
+  const STAR_ITEMS = ['Situation', 'Task', 'Action', 'Result'] as const;
+  const starChecked = selfAssessment.structure === true;
 
   return createPortal(
     <div className="interview-trainer-overlay">
       <div className="interview-trainer-bg" />
 
       <div className="interview-trainer-header">
-        <button className="interview-trainer-close" onClick={onClose}>✕</button>
+        <button className="interview-trainer-close" onClick={handleClose}>✕</button>
         <span className="interview-trainer-header-title">Interview Challenge</span>
         <span className="interview-trainer-header-count">{questionIndex + 1} / {INTERVIEW_QUESTIONS.length}</span>
       </div>
@@ -424,16 +435,46 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
                 ))}
               </div>
 
-              {currentFeedback && (
-                <div className="interview-trainer-feedback">
-                  <p className="interview-trainer-feedback-text">{currentFeedback.text}</p>
-                  <div className="interview-trainer-feedback-scores">
-                    {currentFeedback.breakdown.map((score, i) => (
-                      <span key={i} className="interview-trainer-feedback-score">{score}</span>
-                    ))}
-                  </div>
+              <div className="review-metrics">
+                <div className="review-metric">
+                  <span className="review-label">Clarity</span>
+                  <span className="review-stars">{stars(clarityScore)}</span>
+                  <span className="review-value">{clarityScore}%</span>
                 </div>
-              )}
+                <div className="review-metric">
+                  <span className="review-label">Structure</span>
+                  <span className="review-stars">{stars(structureScore)}</span>
+                  <span className="review-value">{structureScore}%</span>
+                </div>
+                <div className="review-star-checklist">
+                  {STAR_ITEMS.map(item => (
+                    <span key={item} className="review-star-item">
+                      <span className="review-star-icon">{starChecked ? '✓' : '✗'}</span>
+                      <span>{item}</span>
+                    </span>
+                  ))}
+                </div>
+                <div className="review-metric">
+                  <span className="review-label">Confidence</span>
+                  <span className="review-stars">{stars(confidenceScore)}</span>
+                  <span className="review-value">{confidenceScore}%</span>
+                </div>
+                <div className="review-metric">
+                  <span className="review-label">Filler words</span>
+                  <span className="review-stars">{stars(fillerScore)}</span>
+                  <span className="review-value">{fillerScore}%</span>
+                </div>
+                <div className="review-metric review-metric-last">
+                  <span className="review-label">Completeness</span>
+                  <span className="review-stars">{stars(completenessScore)}</span>
+                  <span className="review-value">{completenessScore}%</span>
+                </div>
+                <div className="review-metric review-metric-overall">
+                  <span className="review-label">Overall</span>
+                  <span className="review-stars">{stars(overallScore)}</span>
+                  <span className="review-value">{overallScore}%</span>
+                </div>
+              </div>
 
               <div className="interview-trainer-actions">
                 <button className="interview-trainer-rerecord-btn" onClick={handleReRecord}>

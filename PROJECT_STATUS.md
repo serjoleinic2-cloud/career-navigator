@@ -2031,3 +2031,47 @@ archive). No code changed.
 - `PROJECT_STATUS.md` — this entry
 
 **Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто, `npx tsx scripts/test-interview-trainer.ts` — чисто (ожидаемый вывод).
+
+### 2026-07-07 — Claude (Interview Trainer UI polish — 4 fixes)
+
+**Serj's reports from device testing:**
+
+1. **Interview Review screen — data formatting broken.**
+   Values shown as "4000%" (40× overflow), labels concatenated without spaces
+   ("Clarity: 4000%Structure: Use STAR"). Fixed: `selfAssessmentToAnswerAnalysis`
+   now returns 0-1 values (was 0-100), so `generateScoreBreakdown` math is
+   correct. Entire feedback section rewritten to star-rating format per spec.
+
+2. **Interview Trainer close button — no progress warning.**
+   Tapping ✕ immediately closed the screen, losing session progress.
+   Fixed: new `handleClose` checks `questionIndex > 0 || recordingDuration > 0`,
+   shows native `confirm()` dialog if progress exists. Emits new
+   `CLOSE_INTERVIEW_TRAINER` event. Added to `system_event_bus.ts`.
+
+3. **JourneyCompleteScreen — "New Journey" button under BottomNav.**
+   Button not reachable on 720px devices. Fixed: padding-bottom →
+   `calc(24px + env(safe-area-inset-bottom) + 80px)`, subtitle margin 28→12px,
+   stats grid gap 10→8px, timeline margin 28→16px. All content fits without
+   scrolling on 720px screens.
+
+4. **WorldMapScreen — placeholder text visible over world art.**
+   "The Map... being drawn" card overlaid the actual world background.
+   Fixed: removed `.world-map-placeholder` and all content inside it.
+   Screen now shows only background image + `onError` fallback to gradient.
+   World speaks for itself.
+
+**Файлы (изменены):**
+- `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx` — fixed
+  selfAssessmentToAnswerAnalysis (0-1 scale), added handleClose with confirm(),
+  rewritten review section with star ratings + STAR checklist
+- `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.css` — added
+  .review-metrics, .review-metric, .review-star-checklist styles
+- `src/core/events/system_event_bus.ts` — added CLOSE_INTERVIEW_TRAINER
+- `src/screens/JourneyScreen/components/JourneyCompleteScreen.css` — safe
+  area padding, compact spacing
+- `src/screens/WorldMapScreen/WorldMapScreen.tsx` — removed placeholder content
+- `src/screens/WorldMapScreen/WorldMapScreen.css` — cleaned up styles
+- `PROJECT_STATUS.md` — this entry
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Не проверено вживую** — нужен ретест после следующей сборки Serj'ом.

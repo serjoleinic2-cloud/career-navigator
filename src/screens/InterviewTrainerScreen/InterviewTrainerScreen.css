@@ -385,6 +385,78 @@
 }
 
 /* === UNSUPPORTED === */
+.review-metrics {
+  width: 100%;
+  max-width: 360px;
+}
+
+.review-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(240, 240, 245, 0.1);
+}
+
+.review-metric-last {
+  border-bottom: none;
+}
+
+.review-metric-overall {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 2px solid rgba(240, 240, 245, 0.15);
+  border-bottom: none;
+}
+
+.review-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(240, 240, 245, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 100px;
+}
+
+.review-stars {
+  font-size: 14px;
+  color: #f5b25c;
+  letter-spacing: 1px;
+}
+
+.review-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f0f0f5;
+  min-width: 40px;
+  text-align: right;
+}
+
+.review-star-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 4px 0 8px 100px;
+}
+
+.review-star-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(240, 240, 245, 0.5);
+}
+
+.review-star-icon {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.review-star-icon:has(> :checked) {
+  color: #00e5e0;
+}
+
 .interview-trainer-unsupported {
   position: absolute;
   bottom: 20px;

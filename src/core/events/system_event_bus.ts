@@ -30,7 +30,8 @@ export type SystemEventType =
   | 'START_INTERVIEW_TRAINER'
   | 'OPEN_SHARE'
   | 'RESET_JOURNEY'
-  | 'INTERVIEW_SESSION_COMPLETE';
+  | 'INTERVIEW_SESSION_COMPLETE'
+  | 'CLOSE_INTERVIEW_TRAINER';
 
 export type SystemEvent = {
   type: SystemEventType;
