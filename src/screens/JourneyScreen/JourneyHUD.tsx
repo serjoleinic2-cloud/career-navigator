@@ -4,13 +4,14 @@ import { setActiveNode, getActiveNode, getRuntimeState, advanceChapter } from '@
 import { getActiveChapters } from '@/core/profession_loader';
 import { getNextChapter } from '@/core/chapter_engine';
 import { calculateReadiness } from '@/core/readiness_engine';
-import { subscribe } from '@/core/events/system_event_bus';
+import { subscribe, emit } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
 import type { SkillNode } from '@/core/skill_state';
 import { JourneyHeader } from './components/JourneyHeader';
 import { ChapterHub } from './components/ChapterHub';
 import type { ChapterData } from './components/ChapterHub';
 import { BridgeRestoreScreen } from './components/BridgeRestoreScreen';
+import { FinalCinematicScreen } from './components/FinalCinematicScreen';
 import { JourneyCompleteScreen } from './components/JourneyCompleteScreen';
 import { useCamera } from './hooks/useCamera';
 import { useChapterHub } from './hooks/useChapterHub';
@@ -59,7 +60,7 @@ export function JourneyHUD() {
   const [showMission, setShowMission] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
-  const { phase, startBridge, finishBridge } = useChapterHub();
+  const { phase, startBridge, finishBridge, startCinematic, finishCinematic } = useChapterHub();
   const { cameraStyle, moveUp, zoomOut } = useCamera();
   const prevChapterCompletedRef = useRef<string | null>(null);
 
@@ -194,6 +195,12 @@ export function JourneyHUD() {
     }
   }, [activeChapter, phase, showMission, nextChapter, startBridge]);
 
+  useEffect(() => {
+    if (allNodesCompleted && phase === 'active') {
+      startCinematic();
+    }
+  }, [allNodesCompleted, phase, startCinematic]);
+
   const handleNodeSelect = useCallback((nodeId: string) => {
     const clickedRuntime = getRuntimeState();
     if (!clickedRuntime?.nodeStates[nodeId]) {
@@ -316,18 +323,34 @@ export function JourneyHUD() {
     );
   }
 
-  if (allNodesCompleted) {
+  if (allNodesCompleted || phase === 'cinematic' || phase === 'complete') {
     return (
-      <div className="journey-screen journey-hud">
-        <JourneyCompleteScreen
-          totalSkills={professionNodes.length}
-          tasksCompleted={0}
-          hoursInvested={0}
-          readinessScore={runtime?.readinessScore ?? 0}
-          confidenceScore={runtime?.confidenceScore ?? 0}
-          chapters={chapters.map(c => ({ title: c.title, completed: c.isCompleted }))}
-        />
-      </div>
+      <>
+        {phase === 'cinematic' && (
+          <FinalCinematicScreen
+            professionId={runtime?.professionId ?? 'default'}
+            chapters={chapters.map(c => ({ id: c.id, title: c.title, completed: c.isCompleted }))}
+            onComplete={() => {
+              finishCinematic();
+              refresh();
+            }}
+          />
+        )}
+        {phase === 'complete' && (
+          <div className="journey-screen journey-hud">
+            <JourneyCompleteScreen
+              totalSkills={professionNodes.length}
+              tasksCompleted={chapters.reduce((sum, c) => sum + c.completedCount, 0)}
+              hoursInvested={0}
+              readinessScore={runtime?.readinessScore ?? 0}
+              confidenceScore={runtime?.confidenceScore ?? 0}
+              chapters={chapters.map(c => ({ title: c.title, completed: c.isCompleted }))}
+              onStartInterview={() => emit('START_INTERVIEW_TRAINER', {})}
+              onNewJourney={() => emit('RESET_JOURNEY', {})}
+            />
+          </div>
+        )}
+      </>
     );
   }
 

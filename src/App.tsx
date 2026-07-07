@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { loadRuntime } from './core/persistence/runtime_persistence';
+import { loadRuntime, clearRuntime } from './core/persistence/runtime_persistence';
 import { startJourney, initializeRuntime } from './core/runtime/runtime_controller';
 import { loadNotes } from './core/user_data/notes/notes_persistence';
 import { setNotes } from './core/user_data/notes/notes_store';
+import { clearAll } from './core/events/system_event_bus';
 import { WorldRenderer } from './core';
 import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
 import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
@@ -25,7 +26,7 @@ import './App.css';
 // now, see that file). 'share' is no longer a tab; it moved into
 // ProfileScreen as an action button ("Share Progress"), per the doc's
 // "Share — это кнопка. Не экран." decision.
-type Screen = 'journey' | 'playbook' | 'notes' | 'world' | 'profile';
+type Screen = 'journey' | 'playbook' | 'notes' | 'world' | 'profile' | 'interview';
 
 function AppInner() {
   const [isReady, setIsReady] = useState(false);
@@ -66,6 +67,21 @@ function AppInner() {
     });
   }, []);
 
+  useEffect(() => {
+    return subscribe('START_INTERVIEW_TRAINER', () => {
+      setCurrentScreen('interview');
+    });
+  }, []);
+
+  useEffect(() => {
+    return subscribe('RESET_JOURNEY', () => {
+      clearRuntime();
+      clearAll();
+      setCurrentScreen('journey');
+      setShowOnboarding(true);
+    });
+  }, []);
+
   const navigateTo = (screen: Screen) => {
     if (screen === currentScreen || transitioning) return;
     setPrevScreen(currentScreen);
@@ -78,7 +94,7 @@ function AppInner() {
   };
 
   const handleTabChange = (tabId: string) => {
-    if (tabId === 'journey' || tabId === 'playbook' || tabId === 'notes' || tabId === 'world' || tabId === 'profile') {
+    if (tabId === 'journey' || tabId === 'playbook' || tabId === 'notes' || tabId === 'world' || tabId === 'profile' || tabId === 'interview') {
       navigateTo(tabId as Screen);
     }
   };
@@ -165,6 +181,24 @@ function AppInner() {
         return <WorldMapScreen key={common.key} style={common.style} />;
       case 'profile':
         return <ProfileScreen key={common.key} style={common.style} onClose={closeToJourney} />;
+      case 'interview':
+        return (
+          <div key={common.key} style={{ ...common.style, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0f', color: '#f0f0f5', flexDirection: 'column', gap: 16, padding: 24 }}>
+            <div style={{ fontSize: 48 }}>🎤</div>
+            <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Interview Challenge</h2>
+            <p style={{ margin: 0, color: 'rgba(240,240,245,0.5)', textAlign: 'center', maxWidth: 300 }}>Coming Soon — practice interviews with AI feedback.</p>
+            <button
+              onClick={() => navigateTo('journey')}
+              style={{
+                marginTop: 12, padding: '12px 24px', borderRadius: 12,
+                background: 'rgba(240,240,245,0.08)', border: '1px solid rgba(240,240,245,0.12)',
+                color: '#f0f0f5', fontSize: 15, cursor: 'pointer',
+              }}
+            >
+              ← Back to Journey
+            </button>
+          </div>
+        );
     }
   };
 

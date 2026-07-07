@@ -1,0 +1,200 @@
+.cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #05080f;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cinematic-hud-fade {
+  position: absolute;
+  inset: 0;
+  background: #05080f;
+  z-index: 10;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+
+.cinematic-light-beam {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: 100px;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.cinematic-camera {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  will-change: transform;
+  z-index: 2;
+}
+
+.cinematic-islands-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 60px 0 200px;
+}
+
+.cinematic-island-pair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 180px;
+}
+
+.cinematic-island-wrap {
+  position: relative;
+  width: 200px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  animation: island-float 3.5s ease-in-out infinite;
+}
+
+.cinematic-island-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.cinematic-island-wrap.cinematic-island-revealed::after {
+  opacity: 0.35;
+  box-shadow: 0 0 40px 12px var(--island-accent), 0 0 80px 24px var(--island-accent);
+  filter: drop-shadow(0 0 20px var(--island-accent));
+}
+
+.cinematic-island-wrap.cinematic-island-revealed {
+  animation: island-glow-in 0.8s ease both, island-float 3.5s ease-in-out infinite;
+  animation-delay: var(--animation-delay, 0s), calc(var(--animation-delay, 0s) + 0.8s);
+}
+
+@keyframes island-glow-in {
+  from { opacity: 0; transform: scale(0.8); filter: brightness(0.3); }
+  to { opacity: 1; transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes island-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.cinematic-island-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  border-radius: 12px;
+  animation: island-float 3.5s ease-in-out infinite;
+}
+
+.cinematic-island-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(240, 240, 245, 0.12);
+  border-radius: 20px;
+  background: rgba(240, 240, 245, 0.03);
+  position: relative;
+  z-index: 1;
+}
+
+.cinematic-city-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  animation: island-float 3.5s ease-in-out infinite;
+}
+
+.cinematic-island-flash {
+  position: absolute;
+  inset: -4px;
+  border-radius: 24px;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.cinematic-island-label {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(240, 240, 245, 0.7);
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(0,0,0,0.8);
+  z-index: 4;
+}
+
+.cinematic-bridge {
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.cinematic-journey-complete-label {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  animation: cinematic-title-fade 1s ease both;
+  pointer-events: none;
+}
+
+.cinematic-journey-complete-label h1 {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #FF6B6B, #FFE66D, #48BB78);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  text-shadow: 0 0 40px rgba(255, 107, 107, 0.3);
+}
+
+@keyframes cinematic-title-fade {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 480px) {
+  .cinematic-island-wrap {
+    width: 160px;
+    height: 120px;
+  }
+  .cinematic-journey-complete-label h1 {
+    font-size: 28px;
+  }
+  .cinematic-city-icon span {
+    font-size: 40px !important;
+  }
+}

@@ -26,7 +26,10 @@ export type SystemEventType =
   | 'NOTE_DELETED'
   | 'MISSION_SUBMIT'
   | 'MISSION_RESULT'
-  | 'OPEN_PLAYBOOK';
+  | 'OPEN_PLAYBOOK'
+  | 'START_INTERVIEW_TRAINER'
+  | 'OPEN_SHARE'
+  | 'RESET_JOURNEY';
 
 export type SystemEvent = {
   type: SystemEventType;

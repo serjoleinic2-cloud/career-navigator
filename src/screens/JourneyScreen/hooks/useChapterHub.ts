@@ -4,25 +4,23 @@ import { useState, useCallback } from 'react';
  * Phase of the single-chapter progression flow (WORLD PROGRESSION REWORK).
  *
  * 'active'     — normal state. The current chapter's card + its nodes are
- *                shown, mounted over WorldRenderer. This is the only phase
- *                where the player interacts with mission nodes.
+ *                shown, mounted over WorldRenderer.
  * 'celebrate'  — chapter just finished all its nodes. ChapterCompleteScreen
  *                (confetti/stats) is shown; player taps Continue.
  * 'bridge'     — BridgeRestoreScreen plays (short animation: the bridge to
  *                the next chapter "restores"), then the HUD camera rises.
- *
- * There is no more a "hub" of multiple chapter cards to pick from — the
- * player always works with exactly one chapter at a time. Future/locked
- * chapters are not represented as HUD cards at all (they only exist as
- * world objects in WorldRenderer, once real art exists for them).
+ * 'cinematic'  — FinalCinematicScreen plays after ALL chapters completed.
+ * 'complete'   — JourneyCompleteScreen shown after cinematic ends.
  */
-export type ChapterFlowPhase = 'active' | 'celebrate' | 'bridge';
+export type ChapterFlowPhase = 'active' | 'celebrate' | 'bridge' | 'cinematic' | 'complete';
 
 interface UseChapterHubReturn {
   phase: ChapterFlowPhase;
   startCelebration: () => void;
   startBridge: () => void;
   finishBridge: () => void;
+  startCinematic: () => void;
+  finishCinematic: () => void;
 }
 
 export function useChapterHub(): UseChapterHubReturn {
@@ -31,6 +29,8 @@ export function useChapterHub(): UseChapterHubReturn {
   const startCelebration = useCallback(() => setPhase('celebrate'), []);
   const startBridge = useCallback(() => setPhase('bridge'), []);
   const finishBridge = useCallback(() => setPhase('active'), []);
+  const startCinematic = useCallback(() => setPhase('cinematic'), []);
+  const finishCinematic = useCallback(() => setPhase('complete'), []);
 
-  return { phase, startCelebration, startBridge, finishBridge };
+  return { phase, startCelebration, startBridge, finishBridge, startCinematic, finishCinematic };
 }
