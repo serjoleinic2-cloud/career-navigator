@@ -1,4 +1,11 @@
-CAREER NAVIGATOR — PROJECT SNAPSHOT v0.6
+> **⚠️ Устарело.** Снапшот описывает раннюю архитектуру (v0.6,
+> Skill State Machine, 4 таба) и не соответствует текущему коду —
+> сравнение см. в `core/TRUTH_v0.6.md` (обновлён 2026-07-07). Актуальное
+> состояние: `PROJECT_STATUS.md` и `CORE_MAP.md` в корне репозитория.
+> Оставлено здесь как исторический архив итерации v0.6, не как
+> действующий документ.
+
+CAREER NAVIGATOR — PROJECT SNAPSHOT v0.6 (АРХИВ, см. предупреждение выше)
 🎯 PROJECT TYPE
 
 Offline deterministic career readiness system with state-machine-driven skill progression.

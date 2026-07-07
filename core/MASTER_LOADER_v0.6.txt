@@ -1,4 +1,10 @@
-SYSTEM CONTEXT LOAD v0.6
+⚠️ УСТАРЕЛО: описывает раннюю архитектуру v0.6 (Skill State Machine,
+4 таба), не совпадающую с текущим кодом. Актуальный вход в проект —
+CAREER_NAVIGATOR_MASTER_CHECKPOINT.md / PROJECT_STATUS.md / CORE_MAP.md
+в корне репозитория. Подробное сравнение — в core/TRUTH_v0.6.md
+(исправлен 2026-07-07). Оставлено ниже как архив итерации v0.6.
+
+SYSTEM CONTEXT LOAD v0.6 (АРХИВ)
 
 Project: Career Navigator
 Type: Offline deterministic career readiness system
