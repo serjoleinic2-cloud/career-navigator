@@ -1,200 +1,294 @@
-.cinematic-overlay {
+/* ─────────────────────────────────────────────────────────
+   FinalCinematicScreen
+   Scenario:
+     Phase 1 — hud-fade (0.9s): interface fades, camera on Resume island
+     Phase 2 — building: bridge draws bottom→top per island, camera follows,
+                         labels appear, each island glows on arrival
+     Phase 3 — zoom-out (2.4s): camera pulls back, all islands visible
+     Phase 4 — crossfade (1.3s): world fades to black
+     Phase 5 — hero: island_software_engineer.png full screen, floating,
+                     "Перейти к интервью" + "Выбрать новую профессию"
+───────────────────────────────────────────────────────── */
+
+/* Root */
+.fc-root {
   position: fixed;
   inset: 0;
-  z-index: 300;
+  z-index: 400;
   background: #05080f;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.cinematic-hud-fade {
+/* ── World scene ── */
+.fc-world {
+  position: absolute;
+  inset: 0;
+}
+
+/* Blackout fades away at start */
+.fc-blackout {
   position: absolute;
   inset: 0;
   background: #05080f;
-  z-index: 10;
-  transition: opacity 1s ease;
-  pointer-events: none;
-}
-
-.cinematic-light-beam {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 100%;
-  width: 100px;
   z-index: 5;
   pointer-events: none;
-  opacity: 0.6;
 }
 
-.cinematic-camera {
+/* Camera container — JS drives transform */
+.fc-camera {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  will-change: transform;
+  z-index: 1;
+}
+
+/* Virtual column */
+.fc-col {
+  position: relative;
+  width: 100%;
+}
+
+/* Island slot: absolute, centred, fixed height = ISLAND_H (120px) */
+.fc-slot {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 120px;   /* = ISLAND_H constant in TSX */
+}
+
+/* Bridge SVG — above the island card
+   height (240px) = ISLAND_SPACING constant in TSX
+   bottom: 120px  = ISLAND_H, so bridge top aligns with bottom of upper island */
+.fc-bridge {
+  position: absolute;
+  bottom: 120px;     /* sits above the 120px island card */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 240px;     /* = ISLAND_SPACING */
+  overflow: visible;
+  pointer-events: none;
+  display: block;
+}
+
+/* Island card */
+.fc-island {
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  will-change: transform;
-  z-index: 2;
-}
-
-.cinematic-islands-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  padding: 60px 0 200px;
-}
-
-.cinematic-island-pair {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 180px;
-}
-
-.cinematic-island-wrap {
-  position: relative;
-  width: 200px;
-  height: 150px;
-  display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 20px;
-  animation: island-float 3.5s ease-in-out infinite;
+  border-radius: 16px;
+  transition: opacity 0.5s ease;
+  animation: fc-float 3.5s ease-in-out infinite;
 }
 
-.cinematic-island-wrap::after {
+.fc-island--lit {
+  animation:
+    fc-glow-in 0.7s ease both,
+    fc-float 3.5s ease-in-out 0.7s infinite;
+}
+
+.fc-island--lit::after {
   content: '';
   position: absolute;
-  inset: 0;
-  border-radius: 20px;
+  inset: -8px;
+  border-radius: 24px;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.6s ease;
+  box-shadow:
+    0 0 28px 8px var(--acc, #00e5e0),
+    0 0 56px 20px var(--acc, #00e5e0);
+  opacity: 0.5;
+  animation: fc-glow-pulse 2s ease-in-out infinite;
 }
 
-.cinematic-island-wrap.cinematic-island-revealed::after {
-  opacity: 0.35;
-  box-shadow: 0 0 40px 12px var(--island-accent), 0 0 80px 24px var(--island-accent);
-  filter: drop-shadow(0 0 20px var(--island-accent));
+@keyframes fc-glow-in {
+  from { filter: brightness(0.35) saturate(0.4); transform: scale(0.88); }
+  to   { filter: brightness(1) saturate(1); transform: scale(1); }
+}
+@keyframes fc-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-9px); }
+}
+@keyframes fc-glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.75; }
 }
 
-.cinematic-island-wrap.cinematic-island-revealed {
-  animation: island-glow-in 0.8s ease both, island-float 3.5s ease-in-out infinite;
-  animation-delay: var(--animation-delay, 0s), calc(var(--animation-delay, 0s) + 0.8s);
-}
-
-@keyframes island-glow-in {
-  from { opacity: 0; transform: scale(0.8); filter: brightness(0.3); }
-  to { opacity: 1; transform: scale(1); filter: brightness(1); }
-}
-
-@keyframes island-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.cinematic-island-img {
+.fc-island-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  position: relative;
-  z-index: 1;
   border-radius: 12px;
-  animation: island-float 3.5s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
 }
 
-.cinematic-island-fallback {
+.fc-island-fallback {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed rgba(240, 240, 245, 0.12);
-  border-radius: 20px;
-  background: rgba(240, 240, 245, 0.03);
+  font-size: 38px;
+  border: 1px dashed rgba(240,240,245,0.14);
+  border-radius: 14px;
+  background: rgba(240,240,245,0.03);
   position: relative;
   z-index: 1;
 }
 
-.cinematic-city-icon {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-  animation: island-float 3.5s ease-in-out infinite;
-}
-
-.cinematic-island-flash {
+/* Island label — right of the card */
+.fc-label {
   position: absolute;
-  inset: -4px;
-  border-radius: 24px;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 3;
-}
-
-.cinematic-island-label {
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(240, 240, 245, 0.7);
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: rgba(240,240,245,0.88);
   white-space: nowrap;
-  text-shadow: 0 0 8px rgba(0,0,0,0.8);
-  z-index: 4;
+  text-shadow: 0 0 10px rgba(0,0,0,0.95), 0 0 24px rgba(0,0,0,0.8);
+  pointer-events: none;
+  z-index: 2;
 }
 
-.cinematic-bridge {
-  flex-shrink: 0;
-  overflow: visible;
-}
-
-.cinematic-journey-complete-label {
+/* ── Hero screen ── */
+.fc-hero {
   position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: calc(52px + env(safe-area-inset-bottom));
+  background: #05080f;
+  animation: fc-hero-fadein 1.2s ease both;
+}
+
+@keyframes fc-hero-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.fc-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  z-index: 1;
+  animation: fc-hero-float 4.5s ease-in-out infinite;
+}
+
+@keyframes fc-hero-float {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50%       { transform: scale(1.02) translateY(-10px); }
+}
+
+.fc-hero-fallback {
+  position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 20;
-  animation: cinematic-title-fade 1s ease both;
+  font-size: 88px;
+  background: radial-gradient(ellipse at 50% 40%, #1a2a4a 0%, #05080f 70%);
+  z-index: 1;
+}
+
+/* Gradient scrim at bottom */
+.fc-hero-scrim {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62%;
+  background: linear-gradient(to top,
+    rgba(5,8,15,0.97) 0%,
+    rgba(5,8,15,0.68) 46%,
+    transparent 100%
+  );
+  z-index: 2;
   pointer-events: none;
 }
 
-.cinematic-journey-complete-label h1 {
-  font-size: 42px;
+.fc-hero-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 24px;
+}
+
+.fc-hero-sub {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: rgba(0, 229, 224, 0.78);
+  margin: 0 0 6px;
+}
+
+.fc-hero-title {
+  font-size: 28px;
   font-weight: 900;
-  letter-spacing: 4px;
-  background: linear-gradient(135deg, #FF6B6B, #FFE66D, #48BB78);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: 0.8px;
+  color: #f0f0f5;
   text-align: center;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.8), 0 0 40px rgba(255, 107, 107, 0.3);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.9);
+  margin: 0 0 32px;
 }
 
-@keyframes cinematic-title-fade {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
+.fc-hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
 }
 
-@media (max-width: 480px) {
-  .cinematic-island-wrap {
-    width: 160px;
-    height: 120px;
-  }
-  .cinematic-journey-complete-label h1 {
-    font-size: 28px;
-  }
-  .cinematic-city-icon span {
-    font-size: 40px !important;
-  }
+.fc-btn {
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+  font-family: inherit;
+}
+
+.fc-btn:active {
+  transform: scale(0.96);
+  opacity: 0.82;
+}
+
+.fc-btn--primary {
+  background: linear-gradient(135deg, #00e5e0 0%, #0099e6 100%);
+  color: #05080f;
+}
+
+.fc-btn--ghost {
+  background: rgba(240,240,245,0.09);
+  color: rgba(240,240,245,0.82);
+  border: 1px solid rgba(240,240,245,0.18);
+}
+
+/* ── Mobile ── */
+@media (max-width: 420px) {
+  .fc-hero-title { font-size: 22px; }
+  .fc-island { border-radius: 12px; }
+  .fc-label  { font-size: 10px; }
+  .fc-slot   { width: 160px; height: 100px; }
+  .fc-bridge { bottom: 100px; height: 200px; width: 50px; }
 }
