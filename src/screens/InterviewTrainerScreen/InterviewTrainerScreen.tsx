@@ -4,8 +4,6 @@ import { emit } from '@/core/events/system_event_bus';
 import { addSession, updateSession, setSessions, getSessions } from '@/core/interview/interview_store';
 import { loadInterviewSessions, saveInterviewSessions } from '@/core/interview/interview_persistence';
 import type { InterviewSession, InterviewResult } from '@/core/interview/interview_result';
-// TODO: unify with voice/ module when Interview Trainer v2 — MVP uses self-assessment,
-// voice/ uses AnswerAnalysis from AI pipeline. Integrating feedback_generator as-is.
 import { generateFeedback } from '@/core/voice/feedback_generator';
 import type { AnswerAnalysis } from '@/core/voice/interview_state_machine';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
@@ -125,14 +123,15 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   useEffect(() => {
     if (phase !== 'prepare') return;
     if (prepareCount <= 0) {
-      setPhase('record');
+      if (!recordingSupported) {
+        setPhase('review');
+      }
       return;
     }
     const t = setTimeout(() => setPrepareCount(c => c - 1), 1000);
     return () => clearTimeout(t);
-  }, [phase, prepareCount]);
+  }, [phase, prepareCount, recordingSupported]);
 
-  // Fallback check: if analyser returns zero data after 500ms, use CSS animation
   useEffect(() => {
     if (phase !== 'record' || !isRecording || !analyserRef.current) return;
     const data = new Uint8Array(analyserRef.current.frequencyBinCount);
@@ -145,7 +144,6 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     return () => clearTimeout(t);
   }, [phase, isRecording]);
 
-  // Waveform draw loop — real analyser data or random fallback
   useEffect(() => {
     if (phase !== 'record' || !isRecording || useFallbackWaveform) return;
     const canvas = canvasRef.current;
@@ -196,6 +194,14 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   }, [phase, isRecording, useFallbackWaveform]);
 
   const handleStopRecord = useCallback(() => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = 0;
+    }
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
     stopRecording();
     if (recordingDuration === 0) {
       setMicError('too_short');
@@ -208,12 +214,20 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   }, [stopRecording, recordingDuration]);
 
   const handleStartRecord = useCallback(async () => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = 0;
+    }
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
+    setUseFallbackWaveform(false);
     try {
       await startRecording();
       setMicError(null);
       setPhase('record');
 
-      // Connect analyser to the media stream for real waveform data
       try {
         const stream = streamRef.current;
         if (stream) {
@@ -235,7 +249,60 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     }
   }, [startRecording]);
 
+  const speakQuestion = useCallback((text: string) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (phase === 'prepare' && recordingSupported) {
+      speakQuestion(currentQuestion);
+    }
+  }, [phase, currentQuestion, recordingSupported, speakQuestion]);
+
+  const handleStartRecordRef = useRef(handleStartRecord);
+  handleStartRecordRef.current = handleStartRecord;
+
+  useEffect(() => {
+    if (phase !== 'prepare' || !recordingSupported) return;
+
+    if (!('speechSynthesis' in window)) {
+      handleStartRecordRef.current();
+      return;
+    }
+
+    let cancelled = false;
+    const checkTTS = setInterval(() => {
+      if (cancelled) return;
+      if (!window.speechSynthesis.speaking) {
+        clearInterval(checkTTS);
+        clearTimeout(fallbackTimeout);
+        handleStartRecordRef.current();
+      }
+    }, 100);
+
+    const fallbackTimeout = setTimeout(() => {
+      cancelled = true;
+      clearInterval(checkTTS);
+      handleStartRecordRef.current();
+    }, 6000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(checkTTS);
+      clearTimeout(fallbackTimeout);
+    };
+  }, [phase, recordingSupported]);
+
   const handleSkipPrepare = useCallback(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     setPrepareCount(0);
     handleStartRecord();
   }, [handleStartRecord]);
@@ -372,15 +439,16 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
       <div className="interview-trainer-header">
         <button className="interview-trainer-close" onClick={handleClose}>✕</button>
         <span className="interview-trainer-header-title">Interview Challenge</span>
-        <span className="interview-trainer-header-count">{questionIndex + 1} / {questions.length}</span>
       </div>
 
-      {/* Toast */}
+      {started && (phase === 'prepare' || phase === 'record' || phase === 'review') && (
+        <span className="interview-progress">{questionIndex + 1} / {questions.length}</span>
+      )}
+
       {recordingToast && (
         <div className="interview-trainer-toast">{recordingToast}</div>
       )}
 
-      {/* Start screen */}
       {!started && (
         <div className="interview-trainer-start">
           <div className="interview-trainer-start-icon">🎤</div>
@@ -395,7 +463,6 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
         </div>
       )}
 
-      {/* Error screens */}
       {started && phase === 'error' && micError === 'no_mic' && (
         <div className="interview-trainer-error">
           <div className="interview-trainer-error-icon">🎤</div>
@@ -430,18 +497,26 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
         </div>
       )}
 
-      {/* Recording unsupported banner */}
       {started && !recordingSupported && phase !== 'error' && (
         <div className="interview-trainer-unsupported-banner">
           Recording not supported on this device. Type your answer instead.
         </div>
       )}
 
-      {/* Main body */}
       {started && (phase === 'prepare' || phase === 'record' || phase === 'review') && (
         <div className="interview-trainer-body">
           <div className="interview-trainer-question-card">
             <span className="interview-trainer-question-label">QUESTION {questionIndex + 1}</span>
+            {phase === 'prepare' && recordingSupported && (
+              <div className="interview-avatar-container">
+                <img
+                  src="/art/interview_man.png"
+                  alt="Interviewer"
+                  className="interview-avatar"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                />
+              </div>
+            )}
             <p className="interview-trainer-question-text">{currentQuestion}</p>
           </div>
 
@@ -464,7 +539,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
                 <span className="interview-trainer-countdown-number">{prepareCount}</span>
               </div>
               <button className="interview-trainer-skip-btn" onClick={handleSkipPrepare}>
-                Skip →
+                Skip TTS →
               </button>
             </div>
           )}
@@ -504,11 +579,13 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
           {phase === 'review' && (
             <div className="interview-trainer-review">
-              {recordingSupported && audioBlob && (
+              {recordingSupported && audioBlob ? (
                 <div className="interview-trainer-audio-player">
                   <audio ref={audioRef} src={URL.createObjectURL(audioBlob)} controls className="interview-trainer-audio" />
                 </div>
-              )}
+              ) : recordingSupported ? (
+                <div className="interview-no-audio">Recording not available</div>
+              ) : null}
 
               {!recordingSupported && (
                 <textarea

@@ -79,6 +79,40 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-08 — OpenCode (Задания 55–56: Interview Trainer fixes + TTS + avatar)
+
+**Serj's reports:**
+
+1. **Waveform infinite after re-record (step 9).**
+   Root cause: old raf not cancelled, new raf叠加. Fixed: cancelAnimationFrame
+   + clearRect + reset fallback state on startRecording and stopRecording.
+
+2. **After 60s auto-stop — button changes to Record, can't play.**
+   Root cause: auto-stop via setInterval could race with onstop callback.
+   Fixed: added dedicated useEffect with setTimeout for auto-stop, ensures
+   onstop fires and blob is created before any state transitions.
+
+3. **Progress 2/10 hidden under close button.**
+   Fixed: moved to separate `.interview-progress` element positioned
+   `position: fixed; left: 16px`, close button stays `right: 16px`.
+
+4. **TTS — question spoken aloud in PREPARE phase.**
+   New: `speakQuestion()` uses SpeechSynthesisUtterance to read question.
+   Auto-starts recording after TTS finishes (or 6s fallback timeout).
+   "Skip TTS →" button for users who don't want to listen.
+
+5. **Interviewer avatar image.**
+   New: `<img src="/art/interview_man.png">` between question label and
+   question text in PREPARE phase. `onError` hides the image if not found.
+   Path: `public/art/interview_man.png` (Serj to add the asset).
+
+**Files:** `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx`,
+`src/screens/InterviewTrainerScreen/InterviewTrainerScreen.css`,
+`src/screens/InterviewTrainerScreen/hooks/useVoiceRecorder.ts`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
 ### 2026-07-08 — OpenCode (Задания 44–46: Interview Trainer close button fix + Exit button)
 
 **Serj's report:** Tapping ✕ in Interview Trainer does nothing. Cannot exit.

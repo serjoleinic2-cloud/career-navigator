@@ -76,14 +76,24 @@ export function useVoiceRecorder(maxDurationMs: number = 60000): UseVoiceRecorde
       timerRef.current = setInterval(() => {
         const elapsed = Date.now() - startTime;
         setRecordingDuration(Math.floor(elapsed / 1000));
-        if (elapsed >= maxDurationMs) {
-          stopRecording();
-        }
       }, 1000);
     } catch (err) {
       throw new Error('Microphone access denied or unavailable.');
     }
   }, [isSupported, maxDurationMs, stopRecording]);
+
+  // Auto-stop timeout: stops recording when maxDurationMs is reached
+  useEffect(() => {
+    if (!isRecording || !mediaRecorderRef.current) return;
+
+    const timeout = setTimeout(() => {
+      if (mediaRecorderRef.current?.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+    }, maxDurationMs);
+
+    return () => clearTimeout(timeout);
+  }, [isRecording, maxDurationMs]);
 
   const resetRecording = useCallback(() => {
     setAudioBlob(null);
