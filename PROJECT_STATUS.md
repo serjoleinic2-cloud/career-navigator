@@ -2408,3 +2408,29 @@ archive). No code changed.
 (в) zoom-out показывает все острова;
 (г) hero-экран показывает `island_software_engineer.png` с кнопками;
 (д) кнопки работают и ведут в нужные экраны.
+
+### 2026-07-08 — Claude (резолв merge-конфликта App.tsx + runtime_controller.ts)
+
+**Симптом:** `npm run build` падал с `Unexpected "<<"` в `src/App.tsx:78`
+и в `src/core/runtime/runtime_controller.ts` — git-конфликт слияния не был
+разрешён перед пушем.
+
+**Конфликты:**
+
+1. `src/App.tsx` — конфликт в `subscribe('RESET_JOURNEY', ...)`:
+   HEAD звал `resetJourney()`, ветка звала `clearRuntime()`.
+   **Оставлен `resetJourney()`** — правильная функция (уже содержит
+   `clearRuntime()` + запись в persistence), `clearAll()` убран согласно
+   фиксу 2026-07-08.
+
+2. `src/core/runtime/runtime_controller.ts` — конфликт в imports:
+   HEAD импортировал `clearAll` из event bus, ветка — нет.
+   **Убран `clearAll` из импортов**. Заодно убран `clearAll()` из тела
+   `resetJourney()` — он там тоже оставался (HEAD), вызывая тот же баг
+   «Saving progress... зависает» после New Journey (см. запись выше).
+   `clearNotes` и обёртка `saveRuntime` оставлены.
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
+**Файлы:** `src/App.tsx`, `src/core/runtime/runtime_controller.ts`,
+`PROJECT_STATUS.md`

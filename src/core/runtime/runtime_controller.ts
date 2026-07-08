@@ -9,14 +9,9 @@ import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
-<<<<<<< HEAD
-import { emit, clearAll } from '../events/system_event_bus';
+import { emit } from '../events/system_event_bus';
 import { saveRuntime as persistRuntime, clearRuntime } from '../persistence/runtime_persistence';
 import { clearNotes } from '../user_data/notes/notes_persistence';
-=======
-import { emit } from '../events/system_event_bus';
-import { saveRuntime, clearRuntime } from '../persistence/runtime_persistence';
->>>>>>> 7575280765b653cb75cdb321217bd0a49cf0d2f3
 import {
   beginTask,
   runTaskPipeline,
@@ -518,7 +513,10 @@ export function resetJourney(): void {
   runtimeState.professionId = professionId;
   saveRuntime(runtimeState);
   clearNotes();
-  clearAll();
+  // BUGFIX (2026-07-08): clearAll() removed here — see resetRuntime() comment above.
+  // clearAll() would wipe every event-bus subscriber, including module-singleton
+  // listeners (skill_engine MISSION_SUBMIT) that never re-subscribe, causing
+  // "Saving progress..." to hang forever on the next journey.
   emit('UI_REFRESH', {});
 }
 
