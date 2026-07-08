@@ -68,6 +68,17 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     recordingDuration, startRecording, stopRecording, resetRecording, streamRef,
   } = useVoiceRecorder(MAX_RECORD_SECONDS * 1000);
 
+  const audioUrl = useMemo(() => {
+    if (!audioBlob) return '';
+    return URL.createObjectURL(audioBlob);
+  }, [audioBlob]);
+
+  useEffect(() => {
+    return () => {
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+    };
+  }, [audioUrl]);
+
   const recordingSupported = isSupported;
 
   const questions = useMemo(() => {
@@ -407,7 +418,13 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
           <p className="interview-question">{currentQuestion}</p>
 
           {audioBlob && (
-            <audio ref={audioRef} controls src={URL.createObjectURL(audioBlob)} />
+            <audio
+              key={currentResultId}
+              ref={audioRef}
+              controls
+              src={audioUrl}
+              className="interview-audio-player"
+            />
           )}
 
           <hr />

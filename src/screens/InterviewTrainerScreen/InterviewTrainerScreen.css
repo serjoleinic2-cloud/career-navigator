@@ -482,3 +482,8 @@
     font-size: 16px;
   }
 }
+
+.interview-audio-player {
+  width: 100%;
+  min-height: 40px;
+}
