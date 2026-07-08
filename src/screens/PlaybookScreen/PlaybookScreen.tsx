@@ -1,41 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { getPlaybookByCategory } from '@/core/playbook/playbook_data';
 import type { PlaybookEntry, PlaybookCategory } from '@/core/playbook/playbook_types';
 import type { CSSProperties } from 'react';
 import './PlaybookScreen.css';
 
-// BUGFIX (2026-07-05): playbook_data.ts already has written entries for
-// 'communication' (Strong vs Weak Phrases), 'body_language' (Body
-// Language in Interviews), 'mistakes' (Common Interview Mistakes),
-// 'confidence' (Managing Interview Anxiety) and 'remote' (Remote
-// Interview Guide) — but this grid only ever listed 5 categories, so
-// those entries were permanently unreachable from the UI (dead content).
-// Per +Window_functional.md's required category list (Resume, LinkedIn,
-// Interview, Salary, Communication, Body language, Mistakes — STAR lives
-// inside Interview, not its own tile) plus the two extra categories that
-// already have real content, every category with entries now has a tile.
 const CATEGORIES: { id: PlaybookCategory; label: string; icon: string; color: string }[] = [
   { id: 'resume', label: 'Resume', icon: '📄', color: '#4A90D9' },
   { id: 'linkedin', label: 'LinkedIn', icon: '🔗', color: '#7B68EE' },
-  { id: 'interview', label: 'Interview', icon: '🎤', color: '#F6AD55' },
-  { id: 'networking', label: 'Networking', icon: '🤝', color: '#48BB78' },
-  { id: 'salary', label: 'Salary', icon: '💰', color: '#FF6B6B' },
+  { id: 'applications', label: 'Applications', icon: '📨', color: '#48BB78' },
+  { id: 'interviews', label: 'Interviews', icon: '🎤', color: '#F6AD55' },
+  { id: 'offer', label: 'Offer', icon: '💼', color: '#FF6B6B' },
   { id: 'communication', label: 'Communication', icon: '💬', color: '#4FD1C5' },
   { id: 'body_language', label: 'Body Language', icon: '🧍', color: '#ED8936' },
-  { id: 'mistakes', label: 'Mistakes', icon: '⚠️', color: '#E53E3E' },
   { id: 'confidence', label: 'Confidence', icon: '💪', color: '#D69E2E' },
-  { id: 'remote', label: 'Remote', icon: '🖥️', color: '#38B2AC' },
 ];
 
 interface Props {
   style?: CSSProperties;
   onClose?: () => void;
-  /** Category to jump straight into, set via a mission's "Learn more"
-   * button (OPEN_PLAYBOOK event, wired in App.tsx). Null/undefined means
-   * open on the normal category grid. */
   initialCategory?: PlaybookCategory | null;
-  /** Called once the deep-link has been applied, so App.tsx can clear it
-   * and a later manual tab switch doesn't re-trigger the same jump. */
   onConsumeInitialCategory?: () => void;
 }
 
@@ -43,13 +26,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
   const [view, setView] = useState<'categories' | 'entries' | 'entry'>('categories');
   const [selectedCategory, setSelectedCategory] = useState<PlaybookCategory | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<PlaybookEntry | null>(null);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [flipping, setFlipping] = useState(false);
-  // "Apply to Current Task" feedback state — shows a brief confirmation
-  // message before navigating back to Journey so the user knows the
-  // action happened (previously the button silently called onClose,
-  // with no feedback and no explanation of what "Apply" means).
-  const [applyConfirmed, setApplyConfirmed] = useState(false);
 
   useEffect(() => {
     if (initialCategory) {
@@ -59,18 +36,6 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCategory]);
-
-  // "Apply to Current Task" — takes the user back to their active mission
-  // in Journey so they can use the Playbook content (checklist, template,
-  // examples) while completing the mission. There is no data saved here:
-  // the Playbook is a reference/knowledge tool, not a form. The checklist
-  // checkboxes are visual helpers the user controls manually while working.
-  const handleApply = useCallback(() => {
-    setApplyConfirmed(true);
-    setTimeout(() => {
-      onClose?.();
-    }, 1100);
-  }, [onClose]);
 
   const openCategory = (cat: PlaybookCategory) => {
     setFlipping(true);
@@ -85,7 +50,6 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
     setFlipping(true);
     setTimeout(() => {
       setSelectedEntry(entry);
-      setExpandedSections({ guide: true });
       setView('entry');
       setFlipping(false);
     }, 250);
@@ -101,13 +65,8 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
         setSelectedCategory(null);
         setView('categories');
       }
-      setExpandedSections({});
       setFlipping(false);
     }, 250);
-  };
-
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
   const categories = CATEGORIES;
@@ -140,105 +99,51 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
   }
 
   if (view === 'entry' && selectedEntry) {
+    const e = selectedEntry;
     return (
       <div className="playbook-screen" style={style}>
         <button className="playbook-close-btn" onClick={onClose}>✕</button>
         <div className="playbook-scroll">
-          <h2 className="playbook-entry-title">{selectedEntry.title}</h2>
-          <span className="playbook-entry-cat">{selectedEntry.category}</span>
+          <h2 className="playbook-entry-title">{e.title}</h2>
+          <span className="playbook-entry-cat">{e.category}</span>
 
           <div className="playbook-entry-sections">
-            <AccordionSection
-              title="Guide"
-              sectionKey="guide"
-              isOpen={!!expandedSections['guide']}
-              onToggle={toggleSection}
-            >
-              <div className="playbook-entry-content">
-                {selectedEntry.content.split('\n\n').map((para, i) => (
-                  <p key={i}>{para}</p>
+            <section>
+              <h3>Overview</h3>
+              <p>{e.overview}</p>
+            </section>
+
+            <section>
+              <h3>Guides</h3>
+              <ul>{e.guides.map(g => <li key={g}>{g}</li>)}</ul>
+            </section>
+
+            {e.templates.length > 0 && (
+              <section>
+                <h3>Templates</h3>
+                {e.templates.map((t, i) => (
+                  <pre key={i}>{t}</pre>
                 ))}
-              </div>
-            </AccordionSection>
-
-            {selectedEntry.templates.length > 0 && (
-              <AccordionSection
-                title="Templates"
-                sectionKey="templates"
-                isOpen={!!expandedSections['templates']}
-                onToggle={toggleSection}
-              >
-                <div className="playbook-templates">
-                  {selectedEntry.templates.map((template, i) => (
-                    <div key={i} className="playbook-template-card">
-                      <pre>{template}</pre>
-                      <button
-                        className="playbook-copy-btn"
-                        onClick={() => navigator.clipboard.writeText(template)}
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </AccordionSection>
+              </section>
             )}
 
-            {selectedEntry.examples.length > 0 && (
-              <AccordionSection
-                title="Examples"
-                sectionKey="examples"
-                isOpen={!!expandedSections['examples']}
-                onToggle={toggleSection}
-              >
-                <div className="playbook-examples">
-                  {selectedEntry.examples.map((example, i) => (
-                    <div key={i} className="playbook-example-card">
-                      <p>{example}</p>
-                    </div>
-                  ))}
-                </div>
-              </AccordionSection>
+            {e.examples.length > 0 && (
+              <section>
+                <h3>Examples</h3>
+                {e.examples.map((ex, i) => (
+                  <pre key={i}>{ex}</pre>
+                ))}
+              </section>
             )}
 
-            {selectedEntry.checklist.length > 0 && (
-              <AccordionSection
-                title="Checklist"
-                sectionKey="checklist"
-                isOpen={!!expandedSections['checklist']}
-                onToggle={toggleSection}
-              >
-                {/* What this checklist is for: shown inline so the user
-                    always sees the explanation, not hidden behind a tooltip */}
-                <p className="playbook-checklist-hint">
-                  Use these checkboxes while working on your current mission.
-                  Tick items as you complete them — then tap
-                  <strong> Apply &amp; Return to Mission</strong> to go back.
-                </p>
-                <ul className="playbook-checklist">
-                  {selectedEntry.checklist.map((item, i) => (
-                    <li key={i}>
-                      <input type="checkbox" id={`check-${i}`} />
-                      <label htmlFor={`check-${i}`}>{item}</label>
-                    </li>
-                  ))}
-                </ul>
-              </AccordionSection>
+            {e.checklist.length > 0 && (
+              <section>
+                <h3>Checklist</h3>
+                <ul>{e.checklist.map(c => <li key={c}>{c}</li>)}</ul>
+              </section>
             )}
           </div>
 
-          {/* Apply button — navigates back to Journey after brief confirmation.
-               "Apply" here means "I've read/used this — take me back to my task."
-               Nothing is saved: the Playbook is a reference, not a form. */}
-          <button
-            className={`playbook-apply-btn${applyConfirmed ? ' applied' : ''}`}
-            onClick={handleApply}
-            disabled={applyConfirmed}
-          >
-            {applyConfirmed
-              ? '✓ Returning to mission...'
-              : 'Apply & Return to Mission ›'}
-          </button>
           <button className="playbook-back-btn" onClick={goBack}>← Назад</button>
         </div>
       </div>
@@ -264,7 +169,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
                 onClick={() => openEntry(entry)}
               >
                 <h3>{entry.title}</h3>
-                <p>{entry.content.slice(0, 100)}...</p>
+                <p>{entry.overview.slice(0, 100)}...</p>
                 <div className="playbook-entry-tags">
                   {entry.tags.slice(0, 3).map(tag => (
                     <span key={tag} className="playbook-tag">#{tag}</span>
@@ -302,35 +207,6 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
         </div>
 
         <button className="playbook-back-btn" onClick={onClose}>← Назад</button>
-      </div>
-    </div>
-  );
-}
-
-function AccordionSection({
-  title,
-  sectionKey,
-  isOpen,
-  onToggle,
-  children,
-}: {
-  title: string;
-  sectionKey: string;
-  isOpen: boolean;
-  onToggle: (key: string) => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="playbook-accordion">
-      <button
-        className="playbook-accordion-header"
-        onClick={() => onToggle(sectionKey)}
-      >
-        <span>{title}</span>
-        <span className={`playbook-accordion-arrow ${isOpen ? 'open' : ''}`}>▾</span>
-      </button>
-      <div className={`playbook-accordion-body ${isOpen ? 'open' : ''}`}>
-        {children}
       </div>
     </div>
   );

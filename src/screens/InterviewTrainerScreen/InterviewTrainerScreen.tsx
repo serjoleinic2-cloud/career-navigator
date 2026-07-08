@@ -3,19 +3,19 @@ import { createPortal } from 'react-dom';
 import { emit } from '@/core/events/system_event_bus';
 import { addSession, updateSession, setSessions, getSessions } from '@/core/interview/interview_store';
 import { loadInterviewSessions, saveInterviewSessions } from '@/core/interview/interview_persistence';
-import type { InterviewSession, InterviewResult } from '@/core/interview/interview_result';
 import { generateFeedback } from '@/core/voice/feedback_generator';
+import type { InterviewSession, InterviewResult } from '@/core/interview/interview_result';
 import type { AnswerAnalysis } from '@/core/voice/interview_state_machine';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
 import { getInterviewQuestions } from '@/core/interview/interview_question_loader';
+import { speakMale, stop as stopTts } from '@/core/voice/native_tts';
 import { useVoiceRecorder } from './hooks/useVoiceRecorder';
 import { InterviewResultsScreen } from './InterviewResultsScreen';
 import './InterviewTrainerScreen.css';
 
-const PREPARE_SECONDS = 5;
 const MAX_RECORD_SECONDS = 60;
 
-type Phase = 'idle' | 'prepare' | 'record' | 'review' | 'error';
+type Phase = 'idle' | 'record' | 'review' | 'error';
 
 type ErrorType = 'no_mic' | 'too_short' | null;
 
@@ -48,7 +48,6 @@ function generateId(): string {
 export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps) {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
-  const [prepareCount, setPrepareCount] = useState(PREPARE_SECONDS);
   const [selfAssessment, setSelfAssessment] = useState<Record<string, boolean>>({});
   const [currentResultId, setCurrentResultId] = useState<string>('');
   const [sessionId, setSessionId] = useState(() => generateId());
@@ -56,7 +55,6 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   const [micError, setMicError] = useState<ErrorType>(null);
   const [recordingToast, setRecordingToast] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
-  const [useFallbackWaveform, setUseFallbackWaveform] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const animFrameRef = useRef<number>(0);
@@ -103,56 +101,15 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     return () => document.removeEventListener('visibilitychange', handler);
   }, [isRecording, stopRecording]);
 
-  const startSession = useCallback(() => {
-    setStarted(true);
-    const pid = getRuntimeState()?.professionId || 'software_engineer';
-    const session: InterviewSession = {
-      id: sessionId,
-      professionId: pid,
-      results: [],
-      startedAt: Date.now(),
-      completedAt: null,
-    };
-    addSession(session);
-    feedbackTextRef.current = null;
-    setPhase(recordingSupported ? 'prepare' : 'review');
-    setPrepareCount(PREPARE_SECONDS);
-    setCurrentResultId(generateId());
-  }, [sessionId, recordingSupported]);
-
   useEffect(() => {
-    if (phase !== 'prepare') return;
-    if (prepareCount <= 0) {
-      if (!recordingSupported) {
-        setPhase('review');
-      }
-      return;
-    }
-    const t = setTimeout(() => setPrepareCount(c => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [phase, prepareCount, recordingSupported]);
-
-  useEffect(() => {
-    if (phase !== 'record' || !isRecording || !analyserRef.current) return;
-    const data = new Uint8Array(analyserRef.current.frequencyBinCount);
-    const t = setTimeout(() => {
-      analyserRef.current!.getByteFrequencyData(data);
-      if (data.reduce((a, b) => a + b, 0) === 0) {
-        setUseFallbackWaveform(true);
-      }
-    }, 500);
-    return () => clearTimeout(t);
-  }, [phase, isRecording]);
-
-  useEffect(() => {
-    if (phase !== 'record' || !isRecording || useFallbackWaveform) return;
+    if (phase !== 'record' || !isRecording) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const analyser = analyserRef.current;
-    const bufferLength = analyser ? analyser.frequencyBinCount : 30;
+    const bufferLength = analyser ? analyser.frequencyBinCount : 0;
     const dataArray = analyser ? new Uint8Array(bufferLength) : null;
 
     const draw = () => {
@@ -173,34 +130,41 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
           ctx.fillStyle = g;
           ctx.fillRect(x, y, barW - 1, barH);
         }
-      } else {
-        const barCount = 30;
-        const barW = canvas.width / barCount;
-        for (let i = 0; i < barCount; i++) {
-          const h = Math.random() * canvas.height * 0.8 + canvas.height * 0.1;
-          const x = i * barW + 1;
-          const g = ctx.createLinearGradient(0, canvas.height, 0, 0);
-          g.addColorStop(0, '#0A1A3A');
-          g.addColorStop(0.5, '#1E3A5F');
-          g.addColorStop(1, '#00F0FF');
-          ctx.fillStyle = g;
-          ctx.globalAlpha = 0.6 + Math.random() * 0.4;
-          ctx.fillRect(x, canvas.height - h, barW - 2, h);
-        }
       }
     };
     draw();
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [phase, isRecording, useFallbackWaveform]);
+  }, [phase, isRecording]);
+
+  useEffect(() => {
+    if (phase !== 'record' || !isRecording) return;
+    const timeout = setTimeout(() => {
+      stopRecording();
+      setPhase('review');
+    }, MAX_RECORD_SECONDS * 1000);
+    return () => clearTimeout(timeout);
+  }, [phase, isRecording, stopRecording]);
+
+  const startSession = useCallback(() => {
+    setStarted(true);
+    const pid = getRuntimeState()?.professionId || 'software_engineer';
+    const session: InterviewSession = {
+      id: sessionId,
+      professionId: pid,
+      results: [],
+      startedAt: Date.now(),
+      completedAt: null,
+    };
+    addSession(session);
+    feedbackTextRef.current = null;
+    setPhase(recordingSupported ? 'record' : 'review');
+    setCurrentResultId(generateId());
+  }, [sessionId, recordingSupported]);
 
   const handleStopRecord = useCallback(() => {
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = 0;
-    }
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d');
-      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     }
     stopRecording();
     if (recordingDuration === 0) {
@@ -214,34 +178,20 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   }, [stopRecording, recordingDuration]);
 
   const handleStartRecord = useCallback(async () => {
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = 0;
-    }
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d');
-      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    }
-    setUseFallbackWaveform(false);
     try {
       await startRecording();
       setMicError(null);
       setPhase('record');
 
-      try {
-        const stream = streamRef.current;
-        if (stream) {
-          const ac = new AudioContext();
-          const analyser = ac.createAnalyser();
-          analyser.fftSize = 256;
-          const source = ac.createMediaStreamSource(stream);
-          source.connect(analyser);
-          audioContextRef.current = ac;
-          analyserRef.current = analyser;
-          setUseFallbackWaveform(false);
-        }
-      } catch {
-        setUseFallbackWaveform(true);
+      const stream = streamRef.current;
+      if (stream) {
+        const ac = new AudioContext();
+        const analyser = ac.createAnalyser();
+        analyser.fftSize = 256;
+        const source = ac.createMediaStreamSource(stream);
+        source.connect(analyser);
+        audioContextRef.current = ac;
+        analyserRef.current = analyser;
       }
     } catch {
       setMicError('no_mic');
@@ -249,71 +199,9 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     }
   }, [startRecording]);
 
-  const speakQuestion = useCallback((text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      window.speechSynthesis.speak(utterance);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (phase === 'prepare' && recordingSupported) {
-      speakQuestion(currentQuestion);
-    }
-  }, [phase, currentQuestion, recordingSupported, speakQuestion]);
-
-  const handleStartRecordRef = useRef(handleStartRecord);
-  handleStartRecordRef.current = handleStartRecord;
-
-  useEffect(() => {
-    if (phase !== 'prepare' || !recordingSupported) return;
-
-    if (!('speechSynthesis' in window)) {
-      handleStartRecordRef.current();
-      return;
-    }
-
-    let cancelled = false;
-    const checkTTS = setInterval(() => {
-      if (cancelled) return;
-      if (!window.speechSynthesis.speaking) {
-        clearInterval(checkTTS);
-        clearTimeout(fallbackTimeout);
-        handleStartRecordRef.current();
-      }
-    }, 100);
-
-    const fallbackTimeout = setTimeout(() => {
-      cancelled = true;
-      clearInterval(checkTTS);
-      handleStartRecordRef.current();
-    }, 6000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(checkTTS);
-      clearTimeout(fallbackTimeout);
-    };
-  }, [phase, recordingSupported]);
-
-  const handleSkipPrepare = useCallback(() => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    setPrepareCount(0);
-    handleStartRecord();
-  }, [handleStartRecord]);
-
-  const toggleAssessment = useCallback((key: string) => {
-    setSelfAssessment(prev => {
-      const next = { ...prev, [key]: !prev[key] };
-      const analysis = selfAssessmentToAnswerAnalysis(next);
-      feedbackTextRef.current = generateFeedback(analysis);
-      return next;
-    });
+  const speakQuestion = useCallback(async (text: string) => {
+    await stopTts();
+    await speakMale(text);
   }, []);
 
   const saveCurrentResult = useCallback(() => {
@@ -353,8 +241,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     }
 
     setQuestionIndex(i => i + 1);
-    setPhase(recordingSupported ? 'prepare' : 'review');
-    setPrepareCount(PREPARE_SECONDS);
+    setPhase(recordingSupported ? 'record' : 'review');
     setSelfAssessment({});
     setTextAnswer('');
     setCurrentResultId(generateId());
@@ -363,23 +250,24 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
   const handleReRecord = useCallback(() => {
     resetRecording();
-    if (audioRef.current) audioRef.current.pause();
     setSelfAssessment({});
-    if (recordingSupported) {
-      setPhase('prepare');
-      setPrepareCount(PREPARE_SECONDS);
-    } else {
-      setPhase('review');
-    }
-    feedbackTextRef.current = null;
-  }, [resetRecording, recordingSupported]);
+    setPhase('record');
+  }, [resetRecording]);
 
   const handleTryAgain = useCallback(() => {
     setMicError(null);
     resetRecording();
-    setPhase(recordingSupported ? 'prepare' : 'review');
-    setPrepareCount(PREPARE_SECONDS);
+    setPhase(recordingSupported ? 'record' : 'review');
   }, [resetRecording, recordingSupported]);
+
+  const toggleAssessment = useCallback((key: string) => {
+    setSelfAssessment(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      const analysis = selfAssessmentToAnswerAnalysis(next);
+      feedbackTextRef.current = generateFeedback(analysis);
+      return next;
+    });
+  }, []);
 
   const handleClose = useCallback(() => {
     const hasProgress = questionIndex > 0 || recordingDuration > 0;
@@ -390,21 +278,6 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
       emit('CLOSE_INTERVIEW_TRAINER', {});
     }
   }, [questionIndex, recordingDuration, onClose]);
-
-  const recordProgress = recordingDuration / MAX_RECORD_SECONDS;
-
-  const clarityScore = selfAssessment.clearConclusion ? 80 : 40;
-  const structureScore = selfAssessment.structure ? 100 : 0;
-  const confidenceScore = selfAssessment.confidence ? 80 : 40;
-  const fillerScore = selfAssessment.noFillers ? 80 : 20;
-  const completenessScore = selfAssessment.clearConclusion ? 80 : 40;
-  const allScores = [clarityScore, structureScore, confidenceScore, fillerScore, completenessScore];
-  const overallScore = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
-  const star = (v: number) => Math.round(v / 20);
-  const stars = (v: number) => '★'.repeat(star(v)) + '☆'.repeat(5 - star(v));
-
-  const STAR_ITEMS = ['Situation', 'Task', 'Action', 'Result'] as const;
-  const starChecked = selfAssessment.structure === true;
 
   const handleRetry = useCallback(() => {
     setShowResults(false);
@@ -435,15 +308,6 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   return createPortal(
     <div className="interview-trainer-overlay">
       <div className="interview-trainer-bg" />
-
-      <div className="interview-trainer-header">
-        <button className="interview-trainer-close" onClick={handleClose}>✕</button>
-        <span className="interview-trainer-header-title">Interview Challenge</span>
-      </div>
-
-      {started && (phase === 'prepare' || phase === 'record' || phase === 'review') && (
-        <span className="interview-progress">{questionIndex + 1} / {questions.length}</span>
-      )}
 
       {recordingToast && (
         <div className="interview-trainer-toast">{recordingToast}</div>
@@ -503,168 +367,91 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
         </div>
       )}
 
-      {started && (phase === 'prepare' || phase === 'record' || phase === 'review') && (
+      {started && phase === 'record' && recordingSupported && (
+        <div className="interview-record-phase">
+          <div className="interview-header">
+            <span>{questionIndex + 1}/{questions.length} Interview Challenge</span>
+            <button onClick={handleClose}>✕</button>
+          </div>
+
+          <div className="interview-photo">
+            <img src="/art/software_engineer/interview_man.png" alt="Interviewer"
+              onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement?.classList.add('fallback'); }} />
+          </div>
+
+          <p className="interview-question">{currentQuestion}</p>
+
+          <button className="interview-tts" onClick={() => speakQuestion(currentQuestion)}>▶</button>
+
+          <div className="interview-waveform">
+            {isRecording ? <canvas ref={canvasRef} /> : <div className="waveform-idle" />}
+          </div>
+
+          <span className="interview-timer">{recordingDuration}s / 60s</span>
+
+          {!isRecording ? (
+            <button className="interview-record-btn" onClick={handleStartRecord}>● Record</button>
+          ) : (
+            <button className="interview-stop-btn" onClick={handleStopRecord}>■ Stop</button>
+          )}
+        </div>
+      )}
+
+      {started && phase === 'review' && recordingSupported && (
+        <div className="interview-review-phase">
+          <div className="interview-header">
+            <span>{questionIndex + 1}/{questions.length} Interview Challenge</span>
+            <button onClick={handleClose}>✕</button>
+          </div>
+
+          <p className="interview-question">{currentQuestion}</p>
+
+          {audioBlob && (
+            <audio ref={audioRef} controls src={URL.createObjectURL(audioBlob)} />
+          )}
+
+          <hr />
+
+          <h3>Самооценка</h3>
+          {ASSESSMENT_ITEMS.map(item => (
+            <label key={item.key} className="interview-check">
+              <input
+                type="checkbox"
+                checked={selfAssessment[item.key] || false}
+                onChange={() => toggleAssessment(item.key)}
+              />
+              {item.label}
+            </label>
+          ))}
+
+          <hr />
+
+          <div className="interview-actions">
+            <button onClick={handleReRecord}>🔄 Переписать</button>
+            <button onClick={handleNextQuestion}>Далее →</button>
+          </div>
+        </div>
+      )}
+
+      {started && phase === 'review' && !recordingSupported && (
         <div className="interview-trainer-body">
           <div className="interview-trainer-question-card">
             <span className="interview-trainer-question-label">QUESTION {questionIndex + 1}</span>
-            {phase === 'prepare' && recordingSupported && (
-              <div className="interview-avatar-container">
-                <img
-                  src="/art/interview_man.png"
-                  alt="Interviewer"
-                  className="interview-avatar"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-                />
-              </div>
-            )}
             <p className="interview-trainer-question-text">{currentQuestion}</p>
           </div>
-
-          {phase === 'prepare' && recordingSupported && (
-            <div className="interview-trainer-prepare">
-              <p className="interview-trainer-prepare-text">Get ready to answer...</p>
-              <div className="interview-trainer-countdown-ring">
-                <svg width="80" height="80" viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(240,240,245,0.1)" strokeWidth="4" />
-                  <circle
-                    cx="40" cy="40" r="34" fill="none"
-                    stroke="var(--w-primary, #00e5e0)"
-                    strokeWidth="4"
-                    strokeDasharray={2 * Math.PI * 34}
-                    strokeDashoffset={2 * Math.PI * 34 * (1 - prepareCount / PREPARE_SECONDS)}
-                    transform="rotate(-90 40 40)"
-                    style={{ transition: 'stroke-dashoffset 1s linear' }}
-                  />
-                </svg>
-                <span className="interview-trainer-countdown-number">{prepareCount}</span>
-              </div>
-              <button className="interview-trainer-skip-btn" onClick={handleSkipPrepare}>
-                Skip TTS →
-              </button>
-            </div>
-          )}
-
-          {phase === 'record' && recordingSupported && (
-            <div className="interview-trainer-record">
-              {useFallbackWaveform ? (
-                <div className="waveform-fallback">
-                  {[...Array(20)].map((_, i) => (
-                    <div key={i} className="waveform-fallback-bar" style={{ animationDelay: `${i * 0.05}s` }} />
-                  ))}
-                </div>
-              ) : (
-                <canvas ref={canvasRef} className="interview-trainer-waveform" width={300} height={80} />
-              )}
-
-              <div className="interview-trainer-record-timer-bar">
-                <div className="interview-trainer-record-timer-fill" style={{ width: `${recordProgress * 100}%` }} />
-              </div>
-              <span className="interview-trainer-record-timer-text">
-                {recordingDuration}s / {MAX_RECORD_SECONDS}s
-              </span>
-
-              {!isRecording ? (
-                <button className="interview-trainer-record-btn" onClick={handleStartRecord}>
-                  <div className="interview-trainer-record-btn-inner" />
-                  <span>Start Recording</span>
-                </button>
-              ) : (
-                <button className="interview-trainer-stop-btn" onClick={handleStopRecord}>
-                  <div className="interview-trainer-stop-icon" />
-                  <span>Stop</span>
-                </button>
-              )}
-            </div>
-          )}
-
-          {phase === 'review' && (
-            <div className="interview-trainer-review">
-              {recordingSupported && audioBlob ? (
-                <div className="interview-trainer-audio-player">
-                  <audio ref={audioRef} src={URL.createObjectURL(audioBlob)} controls className="interview-trainer-audio" />
-                </div>
-              ) : recordingSupported ? (
-                <div className="interview-no-audio">Recording not available</div>
-              ) : null}
-
-              {!recordingSupported && (
-                <textarea
-                  className="interview-trainer-textarea"
-                  placeholder="Type your answer here..."
-                  value={textAnswer}
-                  onChange={e => setTextAnswer(e.target.value)}
-                  rows={5}
-                />
-              )}
-
-              <p className="interview-trainer-review-label">Self Assessment</p>
-              <div className="interview-trainer-checklist">
-                {ASSESSMENT_ITEMS.map(item => (
-                  <button
-                    key={item.key}
-                    className={`interview-trainer-check-item ${selfAssessment[item.key] ? 'checked' : ''}`}
-                    onClick={() => toggleAssessment(item.key)}
-                  >
-                    <span className="interview-trainer-check-icon">
-                      {selfAssessment[item.key] ? '✓' : '○'}
-                    </span>
-                    <span className="interview-trainer-check-label">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="review-metrics">
-                <div className="review-metric">
-                  <span className="review-label">Clarity</span>
-                  <span className="review-stars">{stars(clarityScore)}</span>
-                  <span className="review-value">{clarityScore}%</span>
-                </div>
-                <div className="review-metric">
-                  <span className="review-label">Structure</span>
-                  <span className="review-stars">{stars(structureScore)}</span>
-                  <span className="review-value">{structureScore}%</span>
-                </div>
-                <div className="review-star-checklist">
-                  {STAR_ITEMS.map(item => (
-                    <span key={item} className="review-star-item">
-                      <span className="review-star-icon">{starChecked ? '✓' : '✗'}</span>
-                      <span>{item}</span>
-                    </span>
-                  ))}
-                </div>
-                <div className="review-metric">
-                  <span className="review-label">Confidence</span>
-                  <span className="review-stars">{stars(confidenceScore)}</span>
-                  <span className="review-value">{confidenceScore}%</span>
-                </div>
-                <div className="review-metric">
-                  <span className="review-label">Filler words</span>
-                  <span className="review-stars">{stars(fillerScore)}</span>
-                  <span className="review-value">{fillerScore}%</span>
-                </div>
-                <div className="review-metric review-metric-last">
-                  <span className="review-label">Completeness</span>
-                  <span className="review-stars">{stars(completenessScore)}</span>
-                  <span className="review-value">{completenessScore}%</span>
-                </div>
-                <div className="review-metric review-metric-overall">
-                  <span className="review-label">Overall</span>
-                  <span className="review-stars">{stars(overallScore)}</span>
-                  <span className="review-value">{overallScore}%</span>
-                </div>
-              </div>
-
-              <div className="interview-trainer-actions">
-                <button className="interview-trainer-rerecord-btn" onClick={handleReRecord}>
-                  Re-record
-                </button>
-                <button className="interview-trainer-next-btn" onClick={handleNextQuestion}>
-                  {isLast ? 'Finish Session' : 'Next Question'}
-                </button>
-              </div>
-            </div>
-          )}
-
+          <p className="interview-trainer-review-label">Your Answer</p>
+          <textarea
+            className="interview-trainer-textarea"
+            placeholder="Type your answer here..."
+            value={textAnswer}
+            onChange={e => setTextAnswer(e.target.value)}
+            rows={5}
+          />
+          <div className="interview-trainer-actions">
+            <button className="interview-trainer-next-btn" onClick={handleNextQuestion}>
+              {isLast ? 'Finish Session' : 'Next Question →'}
+            </button>
+          </div>
           <button className="interview-exit-btn" onClick={handleClose}>
             ← Exit Interview
           </button>

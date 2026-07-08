@@ -26,11 +26,10 @@ type TaskView = 'active' | 'completing' | 'completed' | 'retry';
 const CHAPTER_TO_PLAYBOOK_CATEGORY: Record<string, PlaybookCategory> = {
   resume: 'resume',
   linkedin: 'linkedin',
-  applications: 'networking',
-  interviews: 'interview',
-  interview: 'interview',
-  offer: 'salary',
-  offer_preparation: 'salary',
+  applications: 'applications',
+  interviews: 'interviews',
+  offer: 'offer',
+  offer_preparation: 'offer',
 };
 
 interface MissionOutcome {

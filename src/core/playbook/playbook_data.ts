@@ -5,7 +5,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'resume/summary-formulas',
     title: 'Resume Summary Formulas',
     category: 'resume',
-    content: 'A resume summary is not a biography. It is a positioning statement that answers three questions: who you are, what you do, and what you want. The most effective summaries follow proven formulas that recruiters scan in under 5 seconds.\n\nFormula 1 (Junior): [Role] with [X months/years] of experience in [stack], specializing in [domain]. Built [project type] using [key technologies]. Seeking [target role] at [company type].\n\nFormula 2 (Career Changer): [Previous field] professional transitioning to [target role]. Completed [credential/bootcamp] with focus on [stack]. Built [project] demonstrating [skill].\n\nFormula 3 (Specialist): [Role] focused on [specialization]. Deep expertise in [technology 1], [technology 2], and [methodology]. Reduced [metric] by [X]% at [context].',
+    overview: 'A resume summary is not a biography — it is a positioning statement answering who you are, what you do, and what you want. Recruiters scan summaries in under 5 seconds.',
+    guides: [
+      'Identify your target role and key differentiators',
+      'Choose a formula: Junior / Career Changer / Specialist',
+      'Write a first draft focusing on your strongest achievement',
+      'Add specific technologies and measurable results',
+      'ATS-optimise by mirroring keywords from the job description',
+      'Trim to 2-3 lines max — brevity builds impact',
+    ],
     templates: [
       'Software Engineer with 6 months of experience in React and TypeScript, specializing in frontend web applications. Built a task management app with real-time sync using Firebase. Seeking Junior Frontend role at a product company.',
       'Marketing professional transitioning to Software Engineering. Completed intensive bootcamp with focus on MERN stack. Built e-commerce platform with payment integration and admin dashboard.',
@@ -27,8 +35,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
   {
     id: 'interview/star-method-guide',
     title: 'STAR Method Mastery',
-    category: 'interview',
-    content: 'The STAR method is the industry standard for answering behavioral interview questions. Recruiters are trained to listen for these four components. Missing any part weakens your answer significantly.\n\nSITUATION (1-2 sentences): Set the context. Where were you? What team? What was the project? Keep it brief — this is not the main point.\n\nTASK (1 sentence): What was your specific responsibility? What problem did you need to solve? Be clear about your role, not the team\'s.\n\nACTION (3-5 sentences): What did YOU do? Use "I" statements. Describe the specific steps, technologies, and decisions. This is the longest part and where you demonstrate competence.\n\nRESULT (1-2 sentences): What happened? Use numbers when possible. "Reduced load time by 30%." "Increased test coverage from 40% to 85%." If negative, show what you learned.',
+    category: 'interviews',
+    overview: 'The STAR method is the industry standard for behavioral interview questions. Recruiters listen for Situation, Task, Action, and Result — missing any component weakens your answer.',
+    guides: [
+      'Set the context briefly — Situation in 1-2 sentences',
+      'State your specific responsibility — Task in 1 sentence',
+      'Describe what YOU did with "I" statements and specific technologies — Action in 3-5 sentences',
+      'Quantify the outcome with numbers — Result in 1-2 sentences',
+      'Practice each story out loud until it fits 90-120 seconds',
+    ],
     templates: [
       'S: At my internship, our team was building a customer dashboard that loaded in 8 seconds.\nT: I was responsible for optimizing the frontend performance.\nA: I implemented virtual scrolling for the data table, lazy-loaded images, and memoized expensive React components using useMemo and React.memo.\nR: Dashboard load time dropped to 1.2 seconds. My approach became the team standard for large datasets.',
       'S: During a group project at bootcamp, we had a merge conflict that deleted 2 days of work.\nT: I needed to recover the lost code and prevent future conflicts.\nA: I used git reflog to recover the commits, then set up branch protection rules and required code reviews for all PRs.\nR: Zero data loss incidents after implementation. Team adopted the workflow for all projects.'
@@ -47,10 +62,18 @@ export const PLAYBOOK: PlaybookEntry[] = [
     tags: ['star', 'behavioral', 'interview', 'structure']
   },
   {
-    id: 'salary/negotiation-scripts',
+    id: 'offer/salary-negotiation',
     title: 'Salary Negotiation Scripts',
-    category: 'salary',
-    content: 'Negotiation is not confrontation. It is information exchange. Most companies expect negotiation and have built-in flexibility. The key is to anchor high, justify with data, and create win-win framing.\n\nANCHORING: The first number mentioned becomes the reference point. If you say a number first, it anchors the conversation. If they say a number first, you can anchor higher with data.\n\nBATNA (Best Alternative to Negotiated Agreement): Know your walk-away number. If you have multiple offers, your BATNA is stronger. Never reveal your BATNA directly.\n\nRANGES NOT NUMBERS: Always give ranges. "Based on market data, I\'m targeting 85-95k." This shows flexibility while setting a floor.\n\nTOTAL COMPENSATION: Base salary is only part of the package. Consider signing bonus, equity, benefits, remote flexibility, learning budget.',
+    category: 'offer',
+    overview: 'Negotiation is information exchange, not confrontation. Most companies expect it and build flexibility into offers. Anchor high, justify with data, and frame for mutual gain.',
+    guides: [
+      'Research market rates on Levels.fyi and Glassdoor before the conversation',
+      'Prepare your BATNA — know your walk-away number',
+      'Let the employer state a number first whenever possible',
+      'Anchor high with a range, not a single figure',
+      'Discuss total compensation — base, equity, signing bonus, benefits',
+      'Practise your script out loud at least 3 times',
+    ],
     templates: [
       'Thank you for the offer. I\'m excited about the team and the product. Based on my research of market rates for Junior React Developers in [city] and my experience with [specific skill], I was targeting a range of 85-95k. Is there flexibility in the base salary?',
       'I appreciate the offer. I\'m comparing this with another opportunity, and I want to make the best decision for both of us. The other offer is at 92k base. If you could match 90k, I would accept immediately and start in 2 weeks.',
@@ -73,7 +96,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'linkedin/headline-seo',
     title: 'LinkedIn Headline SEO Guide',
     category: 'linkedin',
-    content: 'Your LinkedIn headline is the #1 searchable field. Recruiters search for "React Developer" or "Node.js Engineer" — not "Passionate Coder" or "Aspiring Techie". The algorithm matches keywords in headline, about, and experience sections.\n\nKEYWORD DENSITY: Include 3-5 core technologies in your headline. "React | TypeScript | Node.js | Frontend Developer" performs better than "Software Engineer" alone.\n\nROLE CLARITY: State your target role explicitly. "Junior Frontend Developer" is better than "Developer" because it matches exact search queries.\n\nVALUE PROPOSITION: Add one differentiator. "React Developer | Building accessible UIs" or "Node.js Engineer | API Performance Specialist".\n\nAVOID: "Looking for opportunities", "Open to work", "Passionate about tech" — these are not searchable and signal desperation.',
+    overview: 'Your LinkedIn headline is the #1 searchable field. Recruiters search for "React Developer" or "Node.js Engineer" — keywords in your headline determine whether you appear in results.',
+    guides: [
+      'Include 3-5 core technologies in your headline',
+      'State your target role explicitly — "Junior Frontend Developer" not just "Developer"',
+      'Add one differentiator — "Building accessible UIs" or "API Performance Specialist"',
+      'Remove generic phrases — "Passionate", "Looking for opportunities", "Open to work"',
+      'Keep under 120 characters so the full headline is visible in search',
+      'Cross-reference keywords from target job descriptions',
+    ],
     templates: [
       'React Developer | TypeScript | Node.js | Building scalable web apps',
       'Junior Frontend Engineer | React | Next.js | UI/UX enthusiast',
@@ -93,10 +124,17 @@ export const PLAYBOOK: PlaybookEntry[] = [
     tags: ['linkedin', 'headline', 'seo', 'keywords', 'profile']
   },
   {
-    id: 'networking/connection-templates',
+    id: 'communication/networking-messages',
     title: 'Networking Message Templates',
-    category: 'networking',
-    content: 'Cold messages fail because they ask for jobs. Warm messages succeed because they start conversations. The goal of the first message is not a referral — it is a reply.\n\nFORMULA: Context + Specific Interest + Soft Ask\n\nCONTEXT: How did you find them? "I saw your talk on React performance" or "We both went to [university]".\n\nSPECIFIC INTEREST: Why them specifically? "Your approach to code splitting was exactly what I needed for my project."\n\nSOFT ASK: Low-commitment request. "Would you be open to a 10-minute call about your experience at [company]?" NOT "Can you refer me?"\n\nFOLLOW-UP: If no reply in 5-7 days, send one gentle follow-up with value. "I implemented your suggestion and reduced bundle size by 40%."',
+    category: 'communication',
+    overview: 'Cold messages fail because they ask for jobs. Warm messages succeed because they start conversations. The goal is a reply, not a referral.',
+    guides: [
+      'Find a genuine connection point — shared conference, alumni, or mutual contact',
+      'Open with specific praise or a detail from their work',
+      'Make a soft ask — a 10-minute call, not a referral request',
+      'Keep the first message under 100 words',
+      'Send one gentle follow-up after 5-7 days if unanswered',
+    ],
     templates: [
       'Hi [Name], I came across your article on React Server Components. I\'m building a similar architecture for my portfolio project and would love to hear your thoughts on trade-offs. Would you be open to a 15-minute call next week?',
       'Hi [Name], I noticed we both studied at [University] and transitioned to tech. I\'m currently preparing for frontend interviews at [Company] and would appreciate any insights about the process. No pressure if you\'re busy!',
@@ -118,8 +156,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
   {
     id: 'interview/technical-junior',
     title: 'Technical Interview Guide (Junior)',
-    category: 'interview',
-    content: 'Junior technical interviews focus on fundamentals, not complex algorithms. Interviewers want to see: can you write clean code? Do you understand basic data structures? Can you explain your thinking?\n\nCOMMON QUESTIONS:\n- Reverse a string/array\n- Find duplicates in an array\n- FizzBuzz variations\n- Basic DOM manipulation\n- API fetching with error handling\n- React: state vs props, useEffect cleanup\n\nWHAT INTERVIEWERS LOOK FOR:\n1. Do you ask clarifying questions before coding?\n2. Do you talk through your approach?\n3. Do you test your solution with examples?\n4. Do you consider edge cases?\n5. Do you optimize after brute force?\n\nRED FLAGS:\n- Silent coding without explanation\n- Ignoring edge cases (empty input, duplicates)\n- Not testing the solution\n- Giving up without trying\n- Copy-pasting solutions without understanding',
+    category: 'interviews',
+    overview: 'Junior technical interviews focus on fundamentals — clean code, basic data structures, and clear thinking. Interviewers want to see your problem-solving process, not perfect answers.',
+    guides: [
+      'Ask clarifying questions before you start coding',
+      'Talk through your approach out loud — silence is the #1 red flag',
+      'Write a brute-force solution first, then optimise',
+      'Test your solution with 2-3 examples including edge cases',
+      'Explain time and space complexity after coding',
+    ],
     templates: [
       'Interviewer: "Reverse a string in JavaScript"\nYou: "Before I start, should I handle Unicode characters or just ASCII? And should I do it in-place or return a new string?"\n[Write solution, explain each step]\nYou: "Let me test this with a few examples: empty string, single character, palindrome, regular string."',
       'Interviewer: "Fetch data from an API and handle errors"\nYou: "I\'ll use fetch with async/await. I\'ll handle network errors, 404s, and JSON parsing. Should I implement retry logic or timeout?"\n[Write code with try/catch, loading state, error message]'
@@ -141,7 +186,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'resume/ats-optimization',
     title: 'ATS Optimization Checklist',
     category: 'resume',
-    content: 'Applicant Tracking Systems (ATS) parse resumes before humans see them. 75% of resumes are rejected by ATS, not recruiters. The system looks for: keyword matches, standard formatting, and section headers.\n\nKEYWORD MATCHING: Copy 10 keywords from the job description into your resume. Use exact spelling: "TypeScript" not "Typescript", "React.js" not "React".\n\nFORMATTING RULES:\n- Single column layout\n- Standard fonts (Arial, Calibri, Georgia)\n- No tables, headers, footers, or text boxes\n- Save as .docx or .pdf (ATS-friendly)\n- File name: FirstName_LastName_Role.pdf\n\nSECTION HEADERS: Use standard names: "Experience", "Education", "Skills", "Projects". Creative headers like "My Journey" confuse parsers.\n\nFILE FORMAT: Some ATS cannot read PDFs. When in doubt, submit .docx. Always follow the application instructions exactly.',
+    overview: '75% of resumes are rejected by Applicant Tracking Systems before a human sees them. The right formatting and keywords make the difference between screened out and shortlisted.',
+    guides: [
+      'Copy 10+ keywords from the job description — use exact spelling',
+      'Use a single-column layout with standard fonts (Arial, Calibri)',
+      'Avoid tables, headers, footers, and text boxes',
+      'Use standard section headers — "Experience", "Education", "Skills"',
+      'Save as .docx first (most ATS-friendly), then .pdf if required',
+      'Name your file professionally — FirstName_LastName_Role.pdf',
+    ],
     templates: [
       'Before: Creative two-column design with icons and graphics → ATS score: 35%\nAfter: Single column, standard fonts, keyword-rich → ATS score: 92%',
       'File name: "resume_final_v2.pdf" → unprofessional\nFile name: "John_Smith_Frontend_Developer.pdf" → professional, searchable'
@@ -162,8 +215,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
   {
     id: 'interview/behavioral-prep',
     title: 'Behavioral Interview Preparation',
-    category: 'interview',
-    content: 'Behavioral questions predict future performance based on past behavior. Every major tech company uses them. The key is preparation, not improvisation.\n\nTOP 10 QUESTIONS:\n1. Tell me about a time you failed.\n2. Describe a conflict with a teammate.\n3. Give an example of leadership.\n4. Tell me about a time you had to learn quickly.\n5. Describe a situation with a difficult stakeholder.\n6. Tell me about a time you went above and beyond.\n7. Describe a decision you made with incomplete information.\n8. Tell me about a time you received critical feedback.\n9. Give an example of prioritization under pressure.\n10. Describe a time you had to convince someone.\n\nPREPARATION METHOD:\n1. List 5-7 stories from your experience\n2. Map each to 2-3 question types\n3. Write in STAR format\n4. Practice out loud until natural\n5. Time each answer: 90-120 seconds optimal',
+    category: 'interviews',
+    overview: 'Behavioral questions predict future performance based on past behaviour. Every major tech company uses them. Preparation beats improvisation every time.',
+    guides: [
+      'List 5-7 stories from your experience that show different skills',
+      'Map each story to 2-3 likely question types',
+      'Write each story in STAR format — Situation, Task, Action, Result',
+      'Practise out loud until the story flows naturally in 90-120 seconds',
+      'Record yourself and remove filler words or weak phrases',
+    ],
     templates: [
       'Failure: "At my internship, I deployed a bug that broke the login for 2 hours. I immediately rolled back, wrote a post-mortem, and added integration tests. Now I always write tests for critical paths."\nConflict: "A teammate wanted to use Redux for a small app. I suggested Context API with useReducer. We prototyped both, measured bundle size, and chose Context. The app was 40% smaller."',
       'Leadership: "During a hackathon, our team was stuck on API integration. I suggested we split into pairs: one on frontend mockups, one on backend endpoints. We delivered a working MVP in 24 hours and won 2nd place."'
@@ -185,7 +245,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'linkedin/about-section',
     title: 'LinkedIn About Section Guide',
     category: 'linkedin',
-    content: 'The About section is your elevator pitch in writing. Recruiters read it after your headline. A strong About section converts profile views into interview requests.\n\nSTRUCTURE (3 paragraphs):\n1. WHO YOU ARE: Current role, stack, and focus. "I\'m a Frontend Developer specializing in React and TypeScript, building accessible and performant web applications."\n2. WHAT YOU\'VE BUILT: 2-3 specific projects with metrics. "I developed a real-time dashboard that reduced data loading time by 60% using React Query and WebSockets."\n3. WHAT YOU WANT: Target role and company type. "I\'m seeking a Senior Frontend role at a product company where I can lead UI architecture decisions."\n\nAVOID:\n- Third person ("John is a developer...") — sounds pretentious\n- Bullet points — About is narrative, not a resume\n- Skills list — that\'s what the Skills section is for\n- Generic traits ("hardworking", "passionate") — show, don\'t tell',
+    overview: 'Your LinkedIn About section is your elevator pitch in writing. A strong About section converts profile views into interview requests.',
+    guides: [
+      'Paragraph 1: State your current role, stack, and focus area',
+      'Paragraph 2: Describe 2-3 specific projects with measurable outcomes',
+      'Paragraph 3: State your target role and company type',
+      'Use first person ("I", not "John") — third person sounds pretentious',
+      'Keep it narrative — no bullet points or skill lists',
+      'Show, don\'t tell — replace "hardworking" with actual achievements',
+    ],
     templates: [
       'I\'m a Full-stack Developer with expertise in the MERN stack. I\'ve built and deployed 4 production applications, including an e-commerce platform processing $10k/month. I specialize in API design and database optimization. Currently seeking backend-focused roles at fintech startups.',
       'Frontend Engineer with 1 year of experience in React and Vue.js. I redesigned a healthcare portal used by 5,000+ patients, improving accessibility score from 72 to 96. Passionate about inclusive design and component-driven architecture. Looking for mid-level frontend roles at mission-driven companies.'
@@ -204,10 +272,18 @@ export const PLAYBOOK: PlaybookEntry[] = [
     tags: ['linkedin', 'about', 'profile', 'narrative', 'elevator-pitch']
   },
   {
-    id: 'salary/total-compensation',
+    id: 'offer/total-compensation',
     title: 'Total Compensation Breakdown',
-    category: 'salary',
-    content: 'Base salary is only 60-70% of total compensation in tech. Understanding the full package prevents costly mistakes. Junior engineers often ignore equity and benefits, leaving 20-30% of value on the table.\n\nCOMPONENTS:\n1. BASE SALARY: Guaranteed cash. Negotiable. Affects 401k match and bonus calculations.\n2. SIGNING BONUS: One-time cash. Common for competitive roles. Taxed as regular income.\n3. EQUITY: Stock options or RSUs. Vesting over 4 years with 1-year cliff. Illiquid until IPO/acquisition.\n4. BONUS: Annual performance bonus. Typically 10-20% of base for juniors.\n5. BENEFITS: Health insurance, 401k match, learning budget, remote stipend, PTO.\n\nVALUATION METHOD:\n- Public company: RSU value = stock price × shares\n- Startup: Option value = (future price - strike price) × shares × probability of success\n- Always annualize: "What is this worth per year?"\n\nNEGOTIATION PRIORITY:\n1. Base salary (most important for cash flow)\n2. Signing bonus (immediate value)\n3. Equity (long-term upside)\n4. Benefits (quality of life)',
+    category: 'offer',
+    overview: 'Base salary is only 60-70% of total compensation in tech. Understanding equity, bonuses, and benefits prevents costly mistakes — junior engineers often leave 20-30% of value on the table.',
+    guides: [
+      'Calculate base salary first — it affects 401k match and bonus percentages',
+      'Evaluate equity — RSUs for public companies, options for startups',
+      'Factor in signing bonus — one-time cash that is immediately valuable',
+      'Compare benefits — health insurance, 401k match, learning budget, PTO',
+      'Annualise everything — "What is this worth per year?"',
+      'Prioritise base salary for cash flow, equity for long-term upside',
+    ],
     templates: [
       'Offer A: 90k base, 10k signing, 50k RSU over 4 years, 10% bonus\nAnnual value: 90k + 2.5k + 12.5k + 9k = 114k total',
       'Offer B: 85k base, 20k signing, 80k options (high-risk startup), 15% bonus\nAnnual value: 85k + 5k + 0-20k (uncertain) + 12.75k = 102.75k-122.75k'
@@ -229,7 +305,14 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'communication/strong-weak-phrases',
     title: 'Strong vs Weak Phrases',
     category: 'communication',
-    content: 'The words you choose in an interview signal confidence, clarity, and competence. Weak phrases introduce doubt. Strong phrases demonstrate ownership and directness.\n\nWEAK PHRASES TO AVOID:\n- "I think I can..." → signals uncertainty\n- "Maybe I could..." → signals hesitation\n- "I\'m not sure but..." → signals lack of preparation\n- "I just did..." → minimizes your contribution\n- "I kind of worked on..." → vague and uncommitted\n- "Hopefully I\'ll be able to..." → future uncertainty\n\nSTRONG PHRASES TO USE:\n- "I led..." / "I built..." / "I designed..."\n- "I\'m confident that..."\n- "Based on my experience with X..."\n- "I would approach this by..."\n- "The result was..." / "I measured success by..."\n\nFOR TECHNICAL QUESTIONS:\n- Weak: "I\'ve heard of that, I think I used it once"\n- Strong: "I\'ve worked with X in [project]. The key tradeoff I noticed was..."\n\nFOR GAPS IN KNOWLEDGE:\n- Weak: "I don\'t know that"\n- Strong: "I haven\'t used that specific tool, but I\'ve solved similar problems with X. I\'d approach it by..."',
+    overview: 'The words you choose in an interview signal confidence and competence. Weak phrases introduce doubt. Strong phrases demonstrate ownership and directness.',
+    guides: [
+      'Replace "I think" and "maybe" with direct statements',
+      'Start every answer with "I" followed by a strong action verb — led, built, designed',
+      'When you don\'t know something, pivot to adjacent experience',
+      'Remove minimising language — "just", "kind of", "sort of"',
+      'Practise out loud and listen for filler words — "um", "like", "basically"',
+    ],
     templates: [
       'Weak: "I think I might be able to handle that kind of project."\nStrong: "I\'ve delivered similar projects. I\'d start by breaking it into milestones and validating the approach early."',
       'Weak: "I just kind of helped with the backend stuff."\nStrong: "I designed and implemented the authentication service, including JWT handling and role-based access control."',
@@ -250,7 +333,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'body_language/interview-presence',
     title: 'Body Language in Interviews',
     category: 'body_language',
-    content: 'Body language communicates confidence before you say a word. Research shows interviewers form first impressions in under 7 seconds — mostly from non-verbal signals.\n\nPOSTURE:\n- Sit upright with back against the chair\n- Lean slightly forward (5–10°) to show engagement\n- Keep both feet flat on the floor\n- Avoid crossing arms — it signals defensiveness\n\nEYE CONTACT:\n- Maintain eye contact 60–70% of the time\n- Look away naturally when thinking — not down\n- For video calls: look at the camera, not your own face\n- Avoid staring — break contact every 5–7 seconds\n\nHANDS:\n- Keep hands visible on the table or in your lap\n- Use open gestures when emphasizing a point\n- Avoid touching your face (signals anxiety)\n- No fidgeting with pens, phones, or clothing\n\nFACIAL EXPRESSION:\n- Smile genuinely when introduced — hold for 2 seconds\n- Nod slowly to show you\'re listening\n- Avoid blank face when the interviewer is speaking\n\nZOOM-SPECIFIC:\n- Camera at eye level — not looking up or down\n- Background is clean and professional\n- Lighting is in front of you, not behind\n- Join 5 minutes early to test audio/video',
+    overview: 'Interviewers form first impressions in under 7 seconds — mostly from non-verbal signals. Your posture, eye contact, and gestures communicate confidence before you say a word.',
+    guides: [
+      'Sit upright with feet flat — leaning forward 5-10° shows engagement',
+      'Maintain eye contact 60-70% of the time — look away naturally when thinking',
+      'Keep hands visible and use open gestures when emphasising points',
+      'Smile when introduced — hold for 2 seconds',
+      'For video calls: camera at eye level, clean background, front lighting',
+      'Do a power pose for 2 minutes before the call to reduce stress',
+    ],
     templates: [
       'Pre-interview routine: 5 minutes before, stand up, take 3 slow breaths, roll shoulders back. This activates confident posture and reduces cortisol.',
       'Power pose for 2 minutes before the call: stand with feet wide, hands on hips. Research shows this increases testosterone and reduces stress hormones.',
@@ -272,7 +363,15 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'confidence/anxiety-management',
     title: 'Managing Interview Anxiety',
     category: 'confidence',
-    content: 'Interview anxiety is normal. The goal is not to eliminate it but to use it. Adrenaline improves focus and performance when channeled correctly.\n\nBEFORE THE INTERVIEW:\n\nPhysical reset (30 minutes before):\n- Walk for 10 minutes — movement burns cortisol\n- Box breathing: inhale 4s → hold 4s → exhale 4s → hold 4s → repeat 4 times\n- Cold water on wrists — reduces pulse rate\n\nMental reset:\n- Write down 3 things you\'re genuinely good at\n- Remind yourself: they invited you — you already passed initial screening\n- Replace "I must not fail" with "I am here to see if this is a good fit for both sides"\n\nDURING THE INTERVIEW:\n\nSlowing down:\n- Pause 2–3 seconds before answering — signals thoughtfulness, not nervousness\n- Drink water — gives you a natural pause and slows speech\n- Speak slower than you think you need to\n\nHandling blank moments:\n- "That\'s a great question. Let me think for a moment."\n- "I want to give you a complete answer — can I take 30 seconds?"\n- Interviewers prefer a 5-second pause over a rushed wrong answer\n\nAFTER REJECTION:\n- Rejection is data, not verdict\n- Every interview is a training session\n- Ask for feedback — most companies will share it',
+    overview: 'Interview anxiety is normal — the goal is not to eliminate it but to use it. Adrenaline improves focus when channeled correctly through breathing, reframing, and preparation.',
+    guides: [
+      'Do box breathing 30 minutes before: inhale 4s → hold 4s → exhale 4s → hold 4s',
+      'Walk for 10 minutes — movement burns cortisol',
+      'Write down 3 things you\'re genuinely good at',
+      'Reframe the interview as a mutual exploration — not an exam',
+      'Pause 2-3 seconds before answering — signals thoughtfulness, not nerves',
+      'Prepare 2 phrases for blank moments — "Let me think about that"',
+    ],
     templates: [
       '4-7-8 breathing: inhale for 4, hold for 7, exhale for 8. Use this in the waiting room or before joining the video call.',
       'Reframe script: "I am not being judged. I am exploring whether this team and I are a match. They need someone — I am here to find out if that is me."',
@@ -291,10 +390,18 @@ export const PLAYBOOK: PlaybookEntry[] = [
     tags: ['confidence', 'anxiety', 'psychology', 'mindset', 'breathing'],
   },
   {
-    id: 'remote/remote-interview-guide',
+    id: 'interview/remote-interview',
     title: 'Remote Interview Guide',
-    category: 'remote',
-    content: 'Remote interviews have unique failure modes that in-person interviews do not. Technical problems are the #1 avoidable reason candidates lose remote offers.\n\nTECHNICAL SETUP (test 24 hours before):\n- Internet: use ethernet cable if possible; test speed at fast.com (minimum 10 Mbps up)\n- Backup: have phone hotspot ready\n- Audio: external microphone or headset — laptop mic picks up room echo\n- Camera: 1080p preferred; clean lens\n- Platform: install Zoom, Teams, Meet — whichever they use. Test login and audio\n\nENVIRONMENT:\n- Quiet room with door closed\n- Notify household members of interview time\n- Turn off phone notifications, desktop notifications, Slack\n- Close all browser tabs except what you need\n- Have water nearby\n\nDURING THE INTERVIEW:\n- If audio drops: "I think the connection cut out — could you repeat the last part?"\n- If video freezes: turn off video temporarily to save bandwidth\n- If major technical failure: call or email the interviewer immediately\n\nASYNCHRONOUS INTERVIEWS (one-way video):\n- Record in a quiet place with good lighting\n- Dress as for in-person interview\n- Look at camera, not the question on screen\n- Re-record if needed — most platforms allow multiple attempts',
+    category: 'interviews',
+    overview: 'Remote interviews have unique failure modes that in-person ones don\'t. Technical problems are the #1 avoidable reason candidates lose remote offers.',
+    guides: [
+      'Test your internet speed (10+ Mbps minimum) — use ethernet if possible',
+      'Set up a quiet room with a door that closes',
+      'Install and test the platform (Zoom, Teams, Meet) 24 hours before',
+      'Prepare a phone hotspot as backup internet',
+      'Disable all notifications on phone and computer',
+      'Join 5 minutes early — have water nearby',
+    ],
     templates: [
       'Pre-interview checklist (night before): charge laptop, test platform login, check background, confirm interview link, set alarm 30 min early.',
       'Technical failure script: "I apologize for the technical issue. I\'m switching to [backup]. Can you hear me now? Thank you for your patience — I\'m ready to continue."',
@@ -313,10 +420,18 @@ export const PLAYBOOK: PlaybookEntry[] = [
     tags: ['remote', 'interview', 'zoom', 'setup', 'technical'],
   },
   {
-    id: 'mistakes/common-interview-mistakes',
+    id: 'interview/common-mistakes',
     title: 'Common Interview Mistakes',
-    category: 'mistakes',
-    content: 'Most interview failures are preventable. The same mistakes appear across thousands of interviews. Knowing them in advance removes them as risks.\n\nMISTAKE 1: Talking too long\nAnswers over 3 minutes lose the interviewer\'s attention. Use STAR and stop. If they want more, they\'ll ask.\n\nMISTAKE 2: Not asking questions\n"No questions" signals disinterest. Prepare 3–5 questions in advance. Asking nothing is a red flag.\n\nMISTAKE 3: Badmouthing previous employer\nAlways reframe negatively. "I learned a lot but was looking for more growth opportunities" — not "my manager was terrible."\n\nMISTAKE 4: Not researching the company\nNot knowing the product, recent news, or team signals laziness. Spend 30 minutes on their website, blog, and LinkedIn.\n\nMISTAKE 5: Answering "Tell me about yourself" with a life story\nThis is a 90-second pitch: current role → key achievement → why this company. Not your childhood.\n\nMISTAKE 6: Accepting the first salary offer\nCompanies expect negotiation. Accepting immediately leaves money on the table. Always ask for 24 hours to consider.\n\nMISTAKE 7: Forgetting to follow up\nSend a thank-you email within 2 hours of the interview. Mention one specific thing from the conversation. Less than 20% of candidates do this.\n\nMISTAKE 8: Not preparing for "Why do you want this role?"\nVague answers ("I like the company") fail. Specific answers succeed: "I saw your team is building X and my experience in Y maps directly to that problem."',
+    category: 'interviews',
+    overview: 'Most interview failures are preventable — the same mistakes appear across thousands of interviews. Knowing them in advance removes them as risks.',
+    guides: [
+      'Keep answers under 2 minutes — use STAR and stop',
+      'Prepare 3-5 questions to ask — "No questions" signals disinterest',
+      'Reframe negative experiences — never badmouth a previous employer',
+      'Research the company — product, recent news, team on LinkedIn',
+      'Answer "Tell me about yourself" in 90 seconds: current role → key achievement → why this company',
+      'Send a thank-you email within 2 hours — less than 20% of candidates do this',
+    ],
     templates: [
       'Thank-you email (send within 2 hours): "Hi [Name], thank you for the conversation today. I especially enjoyed discussing [specific topic]. I\'m excited about the [role] position and the team\'s work on [project]. Please let me know if you need anything else from me."',
       '"Tell me about yourself" structure: "I\'m a [role] with [X years] of experience in [stack]. Most recently, I [key achievement]. I\'m interested in this role because [specific reason tied to company]."',
@@ -334,6 +449,150 @@ export const PLAYBOOK: PlaybookEntry[] = [
     ],
     tags: ['mistakes', 'interview', 'preparation', 'follow-up', 'negotiation'],
   },
+  {
+    id: 'applications/tracking-system',
+    title: 'Application Tracking System Guide',
+    category: 'applications',
+    overview: 'Keep track of every application you submit — roles, companies, statuses, and follow-ups. A system prevents missed opportunities and shows recruiters you\'re organised.',
+    guides: [
+      'Create a spreadsheet with columns: Company, Role, Date Applied, Status, Follow-up Date',
+      'Apply within 48 hours of the job being posted',
+      'Customise your resume and cover letter for each application',
+      'Note the recruiter or hiring manager name for follow-up',
+      'Set a reminder to follow up after 7 days of no response',
+      'Log every interview stage — date, interviewer, key feedback',
+    ],
+    templates: [
+      '| Company | Role | Date | Status | Follow-up |\n|---------|------|------|--------|-----------|\n| Acme | Jr Frontend | 01-Jan | Applied | 08-Jan |',
+      'Follow-up email: "Hi [Name], I applied for the [Role] position on [Date] and wanted to reiterate my interest. I\'d love the opportunity to discuss how my experience in [Skill] could contribute to the team."',
+    ],
+    examples: [
+      'Candidate tracked 50 applications → identified that applications submitted on Tuesday had the highest response rate → adjusted strategy → 30% more callbacks.',
+      'No tracking → forgot about an application → missed the interview invite → lost the opportunity entirely.',
+    ],
+    checklist: [
+      'Spreadsheet or tool set up with all required columns',
+      'Resume customised for each application',
+      'Cover letter tailored to the company',
+      'Recruiter name noted for follow-up',
+      'Follow-up reminder set for 7 days post-application',
+    ],
+    tags: ['tracking', 'applications', 'organisation', 'follow-up'],
+  },
+  {
+    id: 'applications/cover-letter',
+    title: 'Cover Letter Templates',
+    category: 'applications',
+    overview: 'A strong cover letter connects your experience to the company\'s needs. It should be concise, specific, and show that you understand the role and the business.',
+    guides: [
+      'Open with the specific role and why you\'re excited about it',
+      'Paragraph 2: Connect your most relevant experience to the job requirements',
+      'Paragraph 3: Show company research — mention a product, blog post, or news',
+      'Close with a call to action — "I would welcome the chance to discuss..."',
+      'Keep it under 300 words — recruiters spend 30 seconds on average',
+    ],
+    templates: [
+      'Dear [Hiring Manager],\n\nI\'m excited to apply for the [Role] position at [Company]. With [X years] of experience in [Skill] and a track record of [Achievement], I\'m confident I can contribute immediately.\n\nAt my current role, I [specific accomplishment with metric]. I see that [Company] is [specific company initiative], and my experience in [related skill] aligns directly with this.\n\nThank you for your time. I would welcome the chance to discuss how I can contribute to the team.\n\nBest,\n[Name]',
+    ],
+    examples: [
+      'Generic: "I am writing to apply for the position at your company. I have skills in many areas." → Low response rate.',
+      'Specific: "I\'m applying for the Frontend role at Acme because I\'ve used your design system and have ideas for improving component reusability." → High response rate.',
+    ],
+    checklist: [
+      'Addressed to a specific person whenever possible',
+      'Connects experience to the job description',
+      'Shows company-specific research',
+      'Under 300 words',
+      'Proofread for typos and formatting',
+    ],
+    tags: ['cover-letter', 'applications', 'templates', 'writing'],
+  },
+  {
+    id: 'applications/follow-up',
+    title: 'Follow-up Email Templates',
+    category: 'applications',
+    overview: 'A timely follow-up email keeps you top-of-mind without being pushy. Most candidates don\'t follow up — doing so sets you apart.',
+    guides: [
+      'Send the first follow-up 7 days after applying if you haven\'t heard back',
+      'Keep it brief — 3-4 sentences max',
+      'Reiterate interest without demanding a status update',
+      'After an interview, send a thank-you note within 2 hours',
+      'If rejected, send a gracious reply — you may be considered for future roles',
+    ],
+    templates: [
+      'Post-application follow-up: "Hi [Name], I hope you\'re well. I applied for the [Role] position on [Date] and remain very interested. I\'d love the chance to discuss my fit for the role. Thank you for your time."',
+      'Post-interview thank-you: "Hi [Name], thank you again for the conversation today. I especially enjoyed learning about [topic]. I\'m very excited about the role and would be grateful for any updates when available."',
+    ],
+    examples: [
+      'Candidate sent a thoughtful follow-up referencing a topic from the interview → recruiter moved them to the next round, noting "genuine interest".',
+      'Candidate didn\'t follow up → another candidate with similar qualifications who did follow up got the offer.',
+    ],
+    checklist: [
+      'Follow-up email drafted and ready to personalise',
+      'Sent within 7 days of application',
+      'Thank-you email sent within 2 hours of interview',
+      'Gracious rejection response prepared',
+      'Recruiter name confirmed for correct addressing',
+    ],
+    tags: ['follow-up', 'email', 'templates', 'professionalism'],
+  },
+  {
+    id: 'offer/evaluation-checklist',
+    title: 'Job Offer Evaluation Checklist',
+    category: 'offer',
+    overview: 'A job offer is a decision that affects your career trajectory, finances, and daily happiness. Evaluate systematically — don\'t let excitement or pressure rush your choice.',
+    guides: [
+      'Compare base salary, equity, signing bonus, and benefits across offers',
+      'Evaluate growth potential — mentorship, training budget, promotion track',
+      'Assess company culture — team dynamics, management style, work-life balance',
+      'Consider location/remote policy — commute, relocation, or WFH stipend',
+      'Review the team and tech stack — will you learn skills that increase your market value?',
+      'Talk to future teammates if possible — a 15-minute chat reveals more than any document',
+    ],
+    templates: [
+      'Offer scoring matrix:\n| Factor | Weight | Offer A (1-5) | Offer B (1-5) |\n|--------|--------|--------------|--------------|\n| Salary | 30% | 4 | 5 |\n| Growth | 25% | 5 | 3 |\n| Culture | 25% | 4 | 4 |\n| Tech | 20% | 3 | 5 |\n| Total | 100% | 4.05 | 4.30 |',
+    ],
+    examples: [
+      'Junior engineer chose a lower-paying startup over a big company — joined as early employee, learned full-stack fast, promoted to lead in 18 months.',
+      'Junior engineer chose higher base salary with no learning budget or mentorship — stalled after 6 months, needed to switch jobs to continue growing.',
+    ],
+    checklist: [
+      'Created an offer comparison spreadsheet',
+      'Researched company on Glassdoor, Blind, and LinkedIn',
+      'Talked to current or former employees if possible',
+      'Evaluated long-term career growth, not just first-year comp',
+      'Negotiated at least one component before accepting',
+    ],
+    tags: ['offer', 'evaluation', 'decision', 'comparison'],
+  },
+  {
+    id: 'offer/benefits-guide',
+    title: 'Tech Benefits Guide for Juniors',
+    category: 'offer',
+    overview: 'Benefits can be worth 20-40% of your base salary. Health insurance, retirement plans, learning budgets, and perks vary widely — knowing what to look for prevents bad surprises.',
+    guides: [
+      'Check health insurance — monthly premium, deductible, out-of-pocket max',
+      'Review 401(k) match — "50% match up to 6%" means free money',
+      'Look for a learning budget — conferences, courses, books',
+      'Check PTO policy — unlimited sounds great but often means less time off',
+      'Ask about remote stipend — home office setup, internet, co-working',
+      'Evaluate parental leave, sick days, and mental health support',
+    ],
+    templates: [
+      'Benefits comparison template:\n- Health: [Premium/Deductible/OOP Max]\n- 401k: [Match % up to X%]\n- Learning: [$ amount/year]\n- PTO: [days/year or "unlimited"]\n- Remote: [stipend amount]\n- Other: [unique perks]',
+    ],
+    examples: [
+      'Offer A: 85k base, no 401k match, limited PTO, no learning budget.\nOffer B: 80k base, 5% 401k match ($4k/year), unlimited PTO, $2k learning budget.\nNet value: Offer B = 80k + 4k + 2k = 86k vs Offer A = 85k. Offer B wins.',
+    ],
+    checklist: [
+      'Health insurance premium and deductible understood',
+      '401(k) match percentage and vesting schedule checked',
+      'Learning and development budget confirmed',
+      'PTO policy understood (unlimited vs fixed)',
+      'Remote work benefits and stipend clarified',
+    ],
+    tags: ['benefits', 'offer', 'compensation', 'insurance', 'perks'],
+  },
 ];
 
 export function getPlaybookEntry(id: string): PlaybookEntry | undefined {
@@ -349,6 +608,6 @@ export function searchPlaybook(query: string): PlaybookEntry[] {
   return PLAYBOOK.filter(entry =>
     entry.title.toLowerCase().includes(lower) ||
     entry.tags.some(tag => tag.toLowerCase().includes(lower)) ||
-    entry.content.toLowerCase().includes(lower)
+    entry.overview.toLowerCase().includes(lower)
   );
 }

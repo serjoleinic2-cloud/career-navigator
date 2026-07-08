@@ -1,21 +1,19 @@
 export type PlaybookCategory =
   | 'resume'
-  | 'interview'
-  | 'salary'
   | 'linkedin'
-  | 'networking'
+  | 'applications'
+  | 'interviews'
+  | 'offer'
   | 'communication'
   | 'body_language'
-  | 'confidence'
-  | 'remote'
-  | 'appearance'
-  | 'mistakes';
+  | 'confidence';
 
 export interface PlaybookEntry {
   id: string;
   title: string;
   category: PlaybookCategory;
-  content: string;
+  overview: string;
+  guides: string[];
   templates: string[];
   examples: string[];
   checklist: string[];
