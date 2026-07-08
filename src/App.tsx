@@ -89,6 +89,12 @@ function AppInner() {
     });
   }, []);
 
+  useEffect(() => {
+    return subscribe('CLOSE_INTERVIEW_TRAINER', () => {
+      setCurrentScreen('journey');
+    });
+  }, []);
+
   const navigateTo = (screen: Screen) => {
     if (screen === currentScreen || transitioning) return;
     setPrevScreen(currentScreen);

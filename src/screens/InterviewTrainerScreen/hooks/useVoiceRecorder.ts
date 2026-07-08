@@ -8,6 +8,7 @@ export interface UseVoiceRecorderReturn {
   startRecording: () => Promise<void>;
   stopRecording: () => void;
   resetRecording: () => void;
+  streamRef: React.MutableRefObject<MediaStream | null>;
 }
 
 export function useVoiceRecorder(maxDurationMs: number = 60000): UseVoiceRecorderReturn {
@@ -107,5 +108,6 @@ export function useVoiceRecorder(maxDurationMs: number = 60000): UseVoiceRecorde
     startRecording,
     stopRecording,
     resetRecording,
+    streamRef,
   };
 }

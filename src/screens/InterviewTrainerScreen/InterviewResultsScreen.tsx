@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { emit } from '@/core/events/system_event_bus';
-import type { InterviewSession } from '@/core/interview/interview_result';
+import { getSessionsByProfession } from '@/core/interview/interview_store';
 import './InterviewResultsScreen.css';
 
 interface InterviewResultsScreenProps {
-  session: InterviewSession;
+  professionId: string;
   onRetry: () => void;
   onComplete: () => void;
 }
@@ -26,8 +26,9 @@ function stars(score: number): string {
   return '★'.repeat(filled) + '☆'.repeat(5 - filled);
 }
 
-function computeMetrics(session: InterviewSession): { metrics: Metric[]; overall: Metric } {
-  const results = session.results;
+function computeMetrics(professionId: string): { metrics: Metric[]; overall: Metric } {
+  const sessions = getSessionsByProfession(professionId);
+  const results = sessions.flatMap(s => s.results);
   const count = results.length || 1;
 
   const avgStructure = results.filter(r => r.selfAssessment.structure).length / count;
@@ -129,8 +130,10 @@ function computeMetrics(session: InterviewSession): { metrics: Metric[]; overall
   return { metrics, overall };
 }
 
-export function InterviewResultsScreen({ session, onRetry, onComplete }: InterviewResultsScreenProps) {
-  const { metrics, overall } = useMemo(() => computeMetrics(session), [session]);
+export function InterviewResultsScreen({ professionId, onRetry, onComplete }: InterviewResultsScreenProps) {
+  const sessions = getSessionsByProfession(professionId);
+  const { metrics, overall } = useMemo(() => computeMetrics(professionId), [professionId]);
+  const totalQuestions = sessions.reduce((sum, s) => sum + s.results.length, 0);
 
   return (
     <div className="interview-results-overlay">
@@ -138,7 +141,7 @@ export function InterviewResultsScreen({ session, onRetry, onComplete }: Intervi
 
       <div className="interview-results-header">
         <span className="interview-results-title">Session Results</span>
-        <span className="interview-results-subtitle">{session.results.length} questions completed</span>
+        <span className="interview-results-subtitle">{totalQuestions} questions across {sessions.length} session{sessions.length !== 1 ? 's' : ''}</span>
       </div>
 
       <div className="interview-results-scroll">

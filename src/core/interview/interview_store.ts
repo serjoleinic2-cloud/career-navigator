@@ -25,6 +25,10 @@ export function updateSession(sessionId: string, updates: Partial<InterviewSessi
   }
 }
 
+export function getSessionsByProfession(professionId: string): InterviewSession[] {
+  return sessions.filter(s => s.professionId === professionId);
+}
+
 export function calculateInterviewReadiness(sessionsList?: InterviewSession[]): number {
   const target = sessionsList ?? sessions;
   const allResults = target.flatMap(s => s.results);

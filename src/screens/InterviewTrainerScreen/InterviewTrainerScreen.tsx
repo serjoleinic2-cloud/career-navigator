@@ -8,13 +8,11 @@ import type { InterviewSession, InterviewResult } from '@/core/interview/intervi
 // voice/ uses AnswerAnalysis from AI pipeline. Integrating feedback_generator as-is.
 import { generateFeedback } from '@/core/voice/feedback_generator';
 import type { AnswerAnalysis } from '@/core/voice/interview_state_machine';
+import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { getInterviewQuestions } from '@/core/interview/interview_question_loader';
 import { useVoiceRecorder } from './hooks/useVoiceRecorder';
 import { InterviewResultsScreen } from './InterviewResultsScreen';
 import './InterviewTrainerScreen.css';
-
-import { SOFTWARE_ENGINEER_INTERVIEW_QUESTIONS } from '@/professions/software_engineer/interview/questions';
-
-const INTERVIEW_QUESTIONS = SOFTWARE_ENGINEER_INTERVIEW_QUESTIONS;
 
 const PREPARE_SECONDS = 5;
 const MAX_RECORD_SECONDS = 60;
@@ -60,21 +58,28 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   const [micError, setMicError] = useState<ErrorType>(null);
   const [recordingToast, setRecordingToast] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [useFallbackWaveform, setUseFallbackWaveform] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const animFrameRef = useRef<number>(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
   const [textAnswer, setTextAnswer] = useState('');
   const feedbackTextRef = useRef<string | null>(null);
 
   const {
     isRecording, isSupported, audioBlob,
-    recordingDuration, startRecording, stopRecording, resetRecording,
+    recordingDuration, startRecording, stopRecording, resetRecording, streamRef,
   } = useVoiceRecorder(MAX_RECORD_SECONDS * 1000);
 
   const recordingSupported = isSupported;
 
-  const question = INTERVIEW_QUESTIONS[questionIndex] || '';
-  const isLast = questionIndex >= INTERVIEW_QUESTIONS.length - 1;
+  const questions = useMemo(() => {
+    const pid = getRuntimeState()?.professionId || 'software_engineer';
+    return getInterviewQuestions(pid);
+  }, []);
+  const question = questions[questionIndex] || '';
+  const isLast = questionIndex >= questions.length - 1;
   const currentQuestion = useMemo(() => question, [question]);
 
   useEffect(() => {
@@ -102,9 +107,10 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
   const startSession = useCallback(() => {
     setStarted(true);
+    const pid = getRuntimeState()?.professionId || 'software_engineer';
     const session: InterviewSession = {
       id: sessionId,
-      professionId: 'software_engineer',
+      professionId: pid,
       results: [],
       startedAt: Date.now(),
       completedAt: null,
@@ -126,32 +132,68 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     return () => clearTimeout(t);
   }, [phase, prepareCount]);
 
+  // Fallback check: if analyser returns zero data after 500ms, use CSS animation
   useEffect(() => {
-    if (phase !== 'record' || !isRecording) return;
+    if (phase !== 'record' || !isRecording || !analyserRef.current) return;
+    const data = new Uint8Array(analyserRef.current.frequencyBinCount);
+    const t = setTimeout(() => {
+      analyserRef.current!.getByteFrequencyData(data);
+      if (data.reduce((a, b) => a + b, 0) === 0) {
+        setUseFallbackWaveform(true);
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [phase, isRecording]);
+
+  // Waveform draw loop — real analyser data or random fallback
+  useEffect(() => {
+    if (phase !== 'record' || !isRecording || useFallbackWaveform) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const barCount = 30;
-    const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-    gradient.addColorStop(0, '#7B2D8E');
-    gradient.addColorStop(1, '#00F0FF');
+    const analyser = analyserRef.current;
+    const bufferLength = analyser ? analyser.frequencyBinCount : 30;
+    const dataArray = analyser ? new Uint8Array(bufferLength) : null;
+
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const barW = canvas.width / barCount;
-      for (let i = 0; i < barCount; i++) {
-        const h = Math.random() * canvas.height * 0.8 + canvas.height * 0.1;
-        const x = i * barW + 1;
-        ctx.fillStyle = gradient;
-        ctx.globalAlpha = 0.6 + Math.random() * 0.4;
-        ctx.fillRect(x, canvas.height - h, barW - 2, h);
-      }
       animFrameRef.current = requestAnimationFrame(draw);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (analyser && dataArray) {
+        analyser.getByteFrequencyData(dataArray);
+        const barW = canvas.width / bufferLength;
+        for (let i = 0; i < bufferLength; i++) {
+          const barH = (dataArray[i] / 255) * canvas.height;
+          const x = i * barW;
+          const y = canvas.height - barH;
+          const g = ctx.createLinearGradient(x, canvas.height, x, y);
+          g.addColorStop(0, '#0A1A3A');
+          g.addColorStop(0.5, '#1E3A5F');
+          g.addColorStop(1, '#00F0FF');
+          ctx.fillStyle = g;
+          ctx.fillRect(x, y, barW - 1, barH);
+        }
+      } else {
+        const barCount = 30;
+        const barW = canvas.width / barCount;
+        for (let i = 0; i < barCount; i++) {
+          const h = Math.random() * canvas.height * 0.8 + canvas.height * 0.1;
+          const x = i * barW + 1;
+          const g = ctx.createLinearGradient(0, canvas.height, 0, 0);
+          g.addColorStop(0, '#0A1A3A');
+          g.addColorStop(0.5, '#1E3A5F');
+          g.addColorStop(1, '#00F0FF');
+          ctx.fillStyle = g;
+          ctx.globalAlpha = 0.6 + Math.random() * 0.4;
+          ctx.fillRect(x, canvas.height - h, barW - 2, h);
+        }
+      }
     };
     draw();
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [phase, isRecording]);
+  }, [phase, isRecording, useFallbackWaveform]);
 
   const handleStopRecord = useCallback(() => {
     stopRecording();
@@ -170,6 +212,23 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
       await startRecording();
       setMicError(null);
       setPhase('record');
+
+      // Connect analyser to the media stream for real waveform data
+      try {
+        const stream = streamRef.current;
+        if (stream) {
+          const ac = new AudioContext();
+          const analyser = ac.createAnalyser();
+          analyser.fftSize = 256;
+          const source = ac.createMediaStreamSource(stream);
+          source.connect(analyser);
+          audioContextRef.current = ac;
+          analyserRef.current = analyser;
+          setUseFallbackWaveform(false);
+        }
+      } catch {
+        setUseFallbackWaveform(true);
+      }
     } catch {
       setMicError('no_mic');
       setPhase('error');
@@ -258,8 +317,12 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   const handleClose = useCallback(() => {
     const hasProgress = questionIndex > 0 || recordingDuration > 0;
     if (hasProgress && !window.confirm('Exit Interview? Your progress will be lost.')) return;
-    emit('CLOSE_INTERVIEW_TRAINER', {});
-  }, [questionIndex, recordingDuration]);
+    if (onClose) {
+      onClose();
+    } else {
+      emit('CLOSE_INTERVIEW_TRAINER', {});
+    }
+  }, [questionIndex, recordingDuration, onClose]);
 
   const recordProgress = recordingDuration / MAX_RECORD_SECONDS;
 
@@ -276,7 +339,6 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   const STAR_ITEMS = ['Situation', 'Task', 'Action', 'Result'] as const;
   const starChecked = selfAssessment.structure === true;
 
-  const session = getSessions().find(s => s.id === sessionId);
   const handleRetry = useCallback(() => {
     setShowResults(false);
     setQuestionIndex(0);
@@ -292,10 +354,10 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     onClose();
   }, [sessionId, onClose]);
 
-  if (showResults && session) {
+  if (showResults) {
     return createPortal(
       <InterviewResultsScreen
-        session={session}
+        professionId={getRuntimeState()?.professionId || 'software_engineer'}
         onRetry={handleRetry}
         onComplete={handleResultsComplete}
       />,
@@ -310,7 +372,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
       <div className="interview-trainer-header">
         <button className="interview-trainer-close" onClick={handleClose}>✕</button>
         <span className="interview-trainer-header-title">Interview Challenge</span>
-        <span className="interview-trainer-header-count">{questionIndex + 1} / {INTERVIEW_QUESTIONS.length}</span>
+        <span className="interview-trainer-header-count">{questionIndex + 1} / {questions.length}</span>
       </div>
 
       {/* Toast */}
@@ -324,7 +386,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
           <div className="interview-trainer-start-icon">🎤</div>
           <h2 className="interview-trainer-start-title">Interview Challenge</h2>
           <p className="interview-trainer-start-desc">
-            Practice answering {INTERVIEW_QUESTIONS.length} common interview questions.
+            Practice answering {questions.length} common interview questions.
             You'll be recorded and can self-assess your responses.
           </p>
           <button className="interview-trainer-start-btn" onClick={startSession}>
@@ -409,7 +471,15 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
           {phase === 'record' && recordingSupported && (
             <div className="interview-trainer-record">
-              <canvas ref={canvasRef} className="interview-trainer-waveform" width={300} height={80} />
+              {useFallbackWaveform ? (
+                <div className="waveform-fallback">
+                  {[...Array(20)].map((_, i) => (
+                    <div key={i} className="waveform-fallback-bar" style={{ animationDelay: `${i * 0.05}s` }} />
+                  ))}
+                </div>
+              ) : (
+                <canvas ref={canvasRef} className="interview-trainer-waveform" width={300} height={80} />
+              )}
 
               <div className="interview-trainer-record-timer-bar">
                 <div className="interview-trainer-record-timer-fill" style={{ width: `${recordProgress * 100}%` }} />
@@ -517,6 +587,10 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
               </div>
             </div>
           )}
+
+          <button className="interview-exit-btn" onClick={handleClose}>
+            ← Exit Interview
+          </button>
         </div>
       )}
     </div>,

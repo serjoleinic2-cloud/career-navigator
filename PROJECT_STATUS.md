@@ -79,6 +79,28 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-08 — OpenCode (Задания 44–46: Interview Trainer close button fix + Exit button)
+
+**Serj's report:** Tapping ✕ in Interview Trainer does nothing. Cannot exit.
+
+**Root cause:** `handleClose()` emitted `CLOSE_INTERVIEW_TRAINER` event but nobody
+subscribed to it. App.tsx already passed `onClose` prop but `handleClose` ignored it.
+
+**Fixes:**
+1. `handleClose` now calls `onClose()` first; falls back to
+   `emit('CLOSE_INTERVIEW_TRAINER')` if `onClose` is undefined.
+2. App.tsx — added `subscribe('CLOSE_INTERVIEW_TRAINER')` handler as fallback safety net.
+3. CSS — `.interview-trainer-close` z-index bumped to 100, `pointer-events: auto`,
+   `top` uses `safe-area-inset-top`.
+4. Added "← Exit Interview" button at bottom of the trainer body (consistent with the
+   "← Назад" pattern used across all other screens).
+
+**Files:** `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx`,
+`src/screens/InterviewTrainerScreen/InterviewTrainerScreen.css`,
+`src/App.tsx`, `PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
 ### 2026-07-08 — OpenCode (Задания 40–43: Interview Results Screen, waveform gradient, results-before-cinematic flow)
 
 **Serj's reports:**
@@ -2177,3 +2199,51 @@ archive). No code changed.
 
 **Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
 **Не проверено вживую** — нужен ретест после следующей сборки Serj'ом.
+
+### 2026-07-08 — OpenCode (Задания 47–50: waveform gradient, real AudioContext analyser, CSS fallback animation)
+
+**Serj's task (17.txt):** Fix waveform gradient colors (dark blue → neon cyan), add real AudioContext analyser for waveform animation, add CSS fallback animation when Web Audio API fails.
+
+**Changes:**
+
+1. **Real AudioContext analyser for waveform** — `handleStartRecord` now creates `AudioContext` + `AnalyserNode` from the `MediaStream` (via exposed `streamRef` in `useVoiceRecorder`). The analyser is connected to `createMediaStreamSource(stream)` but NOT to `audioContext.destination` (avoids feedback/blocking on mobile). Canvas draw loop uses `analyser.getByteFrequencyData()` instead of `Math.random()`.
+
+2. **Waveform gradient fix** — Canvas gradient changed from `#7B2D8E → #00F0FF` (purple → cyan) to `#0A1A3A → #1E3A5F → #00F0FF` (dark blue → mid blue → neon cyan). CSS `background` on `.interview-trainer-waveform` updated to match.
+
+3. **CSS fallback animation** — Added `.waveform-fallback` (flex row, same gradient background as real waveform) and `.waveform-fallback-bar` (20 animated bars, each with staggered `animationDelay`). Keyframes `waveformPulse` drives bar heights and opacity in a 1.2s cycle (12% → 70% → 30% → 90%).
+
+4. **Fallback detection** — When analyser exists but returns all-zero data after 500ms, `useFallbackWaveform(true)` is set and CSS animation renders instead of canvas.
+
+**Files:**
+- `src/screens/InterviewTrainerScreen/hooks/useVoiceRecorder.ts` — exposed `streamRef` in return type/value
+- `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx` — analyser refs, fallback state, real waveform draw, conditional canvas/fallback render
+- `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.css` — gradient update, `.waveform-fallback`, `.waveform-fallback-bar`, `@keyframes waveformPulse`
+- `PROJECT_STATUS.md` — this entry
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
+### 2026-07-08 — OpenCode (Задания 51–54: Interview Trainer profession-agnostic, Playbook analysis)
+
+**Serj's task (18.txt):**
+
+- **Задание 51 — Interview Questions profession-agnostic:**
+  Created `src/core/interview/interview_question_loader.ts` — a `QUESTION_MAP` registry (`Record<string, string[]>`) with `getInterviewQuestions(professionId)` that returns questions for the given profession, falling back to `software_engineer` if the profession has no dedicated question set.
+  Updated `InterviewTrainerScreen.tsx`: replaced the hardcoded `import { SOFTWARE_ENGINEER_INTERVIEW_QUESTIONS }` with `getInterviewQuestions(getRuntimeState()?.professionId || 'software_engineer')`, used throughout (question display, count badge, session creation). Session now stores the real `professionId` from runtime instead of the hardcoded string.
+
+- **Задание 52 — Interview Results filter by profession:**
+  Added `getSessionsByProfession(professionId)` to `interview_store.ts` (`sessions.filter(s => s.professionId === professionId)`).
+  Changed `InterviewResultsScreen` prop from `session: InterviewSession` to `professionId: string` — metrics now aggregate across ALL sessions for that profession, showing "X questions across Y sessions" in the header.
+
+- **Задание 53 — Playbook profession-agnostic analysis:**
+  Playbook categories (resume, linkedin, interview, salary, communication, body_language, mistakes, confidence, remote) are **universal** — common interview skills valid for any profession. Content inside categories (e.g. "Technical Interview" vs "Data Case Study") may become profession-specific in v2. **No code change needed now.**
+
+- **Задание 54 — PROJECT_STATUS.md:** this entry.
+
+**Files:**
+- `src/core/interview/interview_question_loader.ts` (new)
+- `src/core/interview/interview_store.ts` — added `getSessionsByProfession()`
+- `src/screens/InterviewTrainerScreen/InterviewResultsScreen.tsx` — changed prop from `session` to `professionId`
+- `src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx` — dynamic question loading, runtime professionId
+- `PROJECT_STATUS.md` — this entry
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
