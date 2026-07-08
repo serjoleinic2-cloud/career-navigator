@@ -9,9 +9,14 @@ import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
+<<<<<<< HEAD
 import { emit, clearAll } from '../events/system_event_bus';
 import { saveRuntime as persistRuntime, clearRuntime } from '../persistence/runtime_persistence';
 import { clearNotes } from '../user_data/notes/notes_persistence';
+=======
+import { emit } from '../events/system_event_bus';
+import { saveRuntime, clearRuntime } from '../persistence/runtime_persistence';
+>>>>>>> 7575280765b653cb75cdb321217bd0a49cf0d2f3
 import {
   beginTask,
   runTaskPipeline,
@@ -495,7 +500,15 @@ export function resetRuntime(): void {
   activeTask = null;
   activeTaskDefinition = null;
   clearRuntime();
-  clearAll();
+  // BUGFIX (2026-07-08): this used to call clearAll() on the event bus,
+  // which wipes EVERY subscriber — including module-singleton listeners
+  // that are only ever registered once at import time and never
+  // re-subscribe (e.g. skill_engine.ts's `subscribe('MISSION_SUBMIT', ...)`).
+  // After a reset (Test -> New Journey), MISSION_SUBMIT still fired but
+  // had zero listeners left, so MISSION_RESULT never came back and the
+  // Mission screen hung on "Saving progress..." until the 5s safety
+  // timeout. resetRuntime() only needs to clear runtime STATE; the event
+  // bus is a long-lived app-wide bus and must not be torn down here.
   emit('UI_REFRESH', {});
 }
 

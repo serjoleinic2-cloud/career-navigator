@@ -75,7 +75,21 @@ function AppInner() {
 
   useEffect(() => {
     return subscribe('RESET_JOURNEY', () => {
+<<<<<<< HEAD
       resetJourney();
+=======
+      clearRuntime();
+      // BUGFIX (2026-07-08): clearAll() used to wipe every event-bus
+      // subscriber here, including the useEffect-based subscriptions in
+      // this very component (OPEN_PLAYBOOK, START_INTERVIEW_TRAINER,
+      // this RESET_JOURNEY handler itself, etc.) since App never
+      // remounts, plus module-singleton listeners like skill_engine.ts's
+      // MISSION_SUBMIT handler. That's what caused "New Journey" ->
+      // first mission to hang on "Saving progress..." forever (the
+      // MISSION_SUBMIT event had no listener left to answer it). Resetting
+      // the journey only needs to clear persisted runtime state, not
+      // tear down the whole app-wide event bus.
+>>>>>>> 7575280765b653cb75cdb321217bd0a49cf0d2f3
       setCurrentScreen('journey');
       setShowOnboarding(true);
     });
