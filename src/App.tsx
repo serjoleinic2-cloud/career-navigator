@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { loadRuntime, clearRuntime } from './core/persistence/runtime_persistence';
-import { startJourney, initializeRuntime, getRuntimeState } from './core/runtime/runtime_controller';
+import { loadRuntime } from './core/persistence/runtime_persistence';
+import { startJourney, initializeRuntime, getRuntimeState, resetJourney } from './core/runtime/runtime_controller';
 import { loadNotes } from './core/user_data/notes/notes_persistence';
 import { setNotes } from './core/user_data/notes/notes_store';
-import { clearAll } from './core/events/system_event_bus';
 import { WorldRenderer } from './core';
 import { OnboardingScreen } from './screens/OnboardingScreen/OnboardingScreen';
 import { IntroJourneyScreen } from './screens/IntroJourneyScreen/IntroJourneyScreen';
@@ -76,8 +75,7 @@ function AppInner() {
 
   useEffect(() => {
     return subscribe('RESET_JOURNEY', () => {
-      clearRuntime();
-      clearAll();
+      resetJourney();
       setCurrentScreen('journey');
       setShowOnboarding(true);
     });

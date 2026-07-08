@@ -119,6 +119,9 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    canvas.width = canvas.clientWidth || 320;
+    canvas.height = canvas.clientHeight || 80;
+
     const analyser = analyserRef.current;
     const bufferLength = analyser ? analyser.frequencyBinCount : 0;
     const dataArray = analyser ? new Uint8Array(bufferLength) : null;
@@ -177,6 +180,9 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = 0;
     }
+    audioContextRef.current?.close();
+    audioContextRef.current = null;
+    analyserRef.current = null;
     stopRecording();
     if (recordingDuration === 0) {
       setMicError('too_short');
@@ -197,6 +203,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
       const stream = streamRef.current;
       if (stream) {
         const ac = new AudioContext();
+        if (ac.state === 'suspended') await ac.resume();
         const analyser = ac.createAnalyser();
         analyser.fftSize = 256;
         const source = ac.createMediaStreamSource(stream);
@@ -259,10 +266,23 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     feedbackTextRef.current = null;
   }, [saveCurrentResult, resetRecording, isLast, sessionId, onClose, recordingSupported]);
 
-  const handleReRecord = useCallback(() => {
+  const handleReRecord = useCallback(async () => {
     resetRecording();
     setSelfAssessment({});
     setPhase('record');
+
+    const stream = streamRef.current;
+    if (stream) {
+      audioContextRef.current?.close();
+      const ac = new AudioContext();
+      if (ac.state === 'suspended') await ac.resume();
+      const analyser = ac.createAnalyser();
+      analyser.fftSize = 256;
+      const source = ac.createMediaStreamSource(stream);
+      source.connect(analyser);
+      audioContextRef.current = ac;
+      analyserRef.current = analyser;
+    }
   }, [resetRecording]);
 
   const handleTryAgain = useCallback(() => {

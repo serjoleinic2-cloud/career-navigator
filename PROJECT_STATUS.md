@@ -79,6 +79,58 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-08 — OpenCode (Задания 70–72: Save timeout fix, Capacitor localStorage fallback)
+
+**Serj's report:** First chapter, first task — "Save timeout - please try again".
+
+**Root cause:** saveRuntime debounce (100ms) + MissionScreen timeout (5s) = race
+condition. First save delayed, timeout fires first.
+
+**Fixes:**
+1. Removed debounce from `saveRuntime` — synchronous save with try/catch.
+2. Removed 5s timeout from `MissionScreen` — no false timeout.
+3. Added error logging in `save()` — catches real failures and throws.
+4. Added memory fallback (`memoryStore`) in `storage.ts` — if localStorage
+   is blocked in Capacitor WebView, data stays in memory.
+5. Added `console.log` for `runtimeState` keys and JSON stringify check in
+   `startJourney()` to detect circular references.
+
+**Files:** `src/core/runtime/runtime_controller.ts`,
+`src/core/persistence/storage.ts`,
+`src/screens/MissionScreen/MissionScreen.tsx`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — needs retest without cache clear.
+
+### 2026-07-08 — OpenCode (Задания 66–69: New Journey reset, saveRuntime debounce, localStorage safety)
+
+**Serj's report:** After "New Journey" → select profession → long saving,
+cancel by timeout. Cleared cache — works.
+
+**Root cause:** `resetJourney()` not fully clearing runtime state + old
+persistence data conflicting with new profession. `saveRuntime` possibly
+called in loop or localStorage corrupted.
+
+**Fixes:**
+1. `resetJourney()` — full runtime state reset via `createEmptyRuntime()` +
+   `clearNotes()` + `clearAll()`. Keeps `professionId`. Doesn't clear
+   interview sessions or other professions.
+2. `switchProfession()` — complete reset + `window.location.reload()`.
+3. `saveRuntime()` — added 100ms debounce in `runtime_controller.ts` to
+   prevent infinite save loops from rapid React re-renders.
+4. `save()` in `storage.ts` — added 4MB size check + try/catch error
+   handling with automatic key cleanup on failure.
+5. `clearAllPersistence()` — debug helper for manual cache clearing.
+6. `App.tsx` RESET_JOURNEY handler — now uses `resetJourney()` instead of
+   inlined `clearRuntime()` + `clearAll()`.
+
+**Files:** `src/core/runtime/runtime_controller.ts`,
+`src/core/persistence/storage.ts`, `src/persistence/runtime_persistence.ts`,
+`src/App.tsx`, `PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто.
+
 ### 2026-07-08 — OpenCode (Задания 55–56: Interview Trainer fixes + TTS + avatar)
 
 **Serj's reports:**

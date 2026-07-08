@@ -1,5 +1,5 @@
 import type { JourneyRuntimeState } from './journey_runtime';
-import { initializeJourneyRuntime } from './journey_runtime';
+import { initializeJourneyRuntime, createEmptyRuntime } from './journey_runtime';
 import type { OnboardingState } from '../onboarding/onboarding_state';
 import type { UserAction } from '../skill_engine';
 import type { SkillNode } from '../skill_state';
@@ -10,7 +10,8 @@ import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
 import { emit, clearAll } from '../events/system_event_bus';
-import { saveRuntime, clearRuntime } from '../persistence/runtime_persistence';
+import { saveRuntime as persistRuntime, clearRuntime } from '../persistence/runtime_persistence';
+import { clearNotes } from '../user_data/notes/notes_persistence';
 import {
   beginTask,
   runTaskPipeline,
@@ -23,6 +24,13 @@ import type { TaskDefinition } from '../task/task_content_engine';
 let runtimeState: JourneyRuntimeState | null = null;
 let activeTask: Task | null = null;
 let activeTaskDefinition: TaskDefinition | null = null;
+function saveRuntime(state: JourneyRuntimeState): void {
+  try {
+    persistRuntime(state);
+  } catch (e) {
+    console.error('saveRuntime failed:', e);
+  }
+}
 
 export function startJourney(onboardingState: OnboardingState): JourneyRuntimeState {
   // Ensure core profession_loader knows the active profession
@@ -36,6 +44,8 @@ export function startJourney(onboardingState: OnboardingState): JourneyRuntimeSt
   }
 
   runtimeState = initializeJourneyRuntime(onboardingState);
+  console.log('runtimeState keys:', Object.keys(runtimeState));
+  console.log('can stringify:', JSON.stringify(runtimeState) !== undefined);
   saveRuntime(runtimeState);
   emit('SYSTEM_BOOTED', { professionId: runtimeState.professionId });
   emit('UI_REFRESH', {});
@@ -487,6 +497,29 @@ export function resetRuntime(): void {
   clearRuntime();
   clearAll();
   emit('UI_REFRESH', {});
+}
+
+export function resetJourney(): void {
+  const professionId = runtimeState?.professionId || 'software_engineer';
+  runtimeState = createEmptyRuntime();
+  runtimeState.professionId = professionId;
+  saveRuntime(runtimeState);
+  clearNotes();
+  clearAll();
+  emit('UI_REFRESH', {});
+}
+
+export function switchProfession(professionId: string): void {
+  runtimeState = createEmptyRuntime();
+  runtimeState.professionId = professionId;
+  saveRuntime(runtimeState);
+  window.location.reload();
+}
+
+export function clearAllPersistence(): void {
+  localStorage.removeItem('career-navigator.runtime.v1');
+  localStorage.removeItem('career-navigator.notes.v1');
+  localStorage.removeItem('career-navigator.interview.v1');
 }
 
 // ─── DEV TOOL: complete entire journey ────────────────────────────────────────
