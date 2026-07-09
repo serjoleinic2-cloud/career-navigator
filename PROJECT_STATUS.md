@@ -2449,3 +2449,41 @@ archive). No code changed.
 
 **Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
 **Не проверено вживую** — нужно: (а) проверить что острова без чёрных карточек парят на фоне анимации; (б) мосты рисуются неоновым путём с искрой; (в) проверить мобильные размеры.
+
+### 2026-07-09 — Claude (Задания 73–76: FinalCinematic — refs instead of state for bridge animation)
+
+**Serj's report:** Final animation shows only one island in center, no bridges, no camera movement.
+
+**Root cause:** `activeBridge` state + `useEffect` cleanup race condition. `setActiveBridge()` triggers effect cleanup → `cancelAnimationFrame` kills newly started bridge animation in same tick. Bridge never builds, camera never moves.
+
+**Fix:**
+- Removed `activeBridge` state — replaced with `activeBridgeRef` (useRef) to avoid state-driven re-render cycles
+- Bridge sequencing via `setTimeout` chain in a single effect (no `bridgesDone`/`activeBridge` in deps)
+- All timeouts tracked in array for proper cleanup on unmount
+- Camera position tracked via `camYRef` with minimal render updates
+- Fixed zoom-out effect: `return () => clearTimeout(hold)` was inside rAF callback (return value ignored, timeout leak) — now stored in timeouts array and cleaned up properly
+
+**Island order check (Задание 74):** `islandTop(i) = (N-1-i) * ISLAND_SPACING` — i=0 (Resume) at bottom (max top), i=N-1 (Offer) at top (top=0). Camera starts at `targetCamY(0)` centering Resume. Correct.
+
+**Final island fullscreen (Задание 75):** Already implemented as hero-phase — `island_${professionId}.png` with buttons. No changes needed.
+
+**Files:** `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — needs retest.
+
+### 2026-07-09 — Claude (Задание 77: Golden door particles in hero screen)
+
+- Added 15 golden floating particles that emit from the "doors" area (lower-center) during hero phase
+- Particles use CSS `@keyframes particleFly` (2s loop) with staggered `animationDelay`
+- Each particle: gold radial gradient, fly upward 80px while scaling down, blur 0.5px
+- Positions deterministic from index (no `Math.random()` jitter on re-render)
+- Particles render inside `.final-island-container` overlay above the hero image
+
+**Files:** `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`,
+`src/screens/JourneyScreen/components/FinalCinematicScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — needs visual check: golden sparkles rising from door area on hero screen.

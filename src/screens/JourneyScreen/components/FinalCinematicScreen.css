@@ -297,6 +297,46 @@
   border: 1px solid rgba(240, 240, 245, 0.18);
 }
 
+/* ── Golden particles from doors ── */
+.final-island-container {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.door-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.gold-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: radial-gradient(circle, #FFD700 0%, #FFA500 50%, transparent 100%);
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFly 2s ease-out infinite;
+  filter: blur(0.5px);
+}
+
+@keyframes particleFly {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.2);
+  }
+}
+
 /* ── Mobile ── */
 @media (max-width: 420px) {
   .fc-slot        { height: 200px; }
