@@ -25,8 +25,11 @@
   /* Keeps every island's `bottom: X%` anchor measured against a shorter
      box that already excludes the floating bottom-nav pill (72px tall,
      16px from the screen edge, see BottomNavigation.css) — so the two
-     lowest islands are never rendered underneath it. */
+     lowest islands are never rendered underneath it. Top padding leaves
+     room for the hero/city island (the tallest anchor) so it's never
+     clipped by the top edge on short viewports either. */
   padding-bottom: calc(72px + 16px + 24px + env(safe-area-inset-bottom));
+  padding-top: calc(var(--island-size) / 2 + 24px + env(safe-area-inset-top));
   box-sizing: border-box;
 }
 

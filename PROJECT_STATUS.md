@@ -2768,3 +2768,16 @@ archive). No code changed.
 
 **Проверено:** `npx tsc --noEmit` — чисто.
 **Не проверено вживую** — нужна проверка на устройстве: острова не обрезаются по бокам, прогресс-бейджи не перекрываются, нижние 2 острова не под меню, hero-остров сверху выглядывает наполовину.
+
+
+### 2026-07-09 — Claude (World: hero island was clipped — that was a bug report, not a request)
+
+Misread the previous message: "главный остров ... наполовину за верх экрана" was Serj reporting a bug (hero island half-invisible off the top edge), not requesting that look. Reverted:
+
+- `CITY_POSITION.bottom`: `100%` → `88%`, so the hero island now sits fully inside the visible screen, just above the highest regular island.
+- Added `padding-top: calc(var(--island-size)/2 + 24px + env(safe-area-inset-top))` to `.world-islands`, mirroring the existing bottom-nav clearance padding, so the hero island can't clip the top edge on short viewports either.
+
+**Файлы:** `src/screens/WorldMapScreen/hooks/useIslandPositions.ts`, `src/screens/WorldMapScreen/WorldMapScreen.css`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто.
+**Не проверено вживую.**

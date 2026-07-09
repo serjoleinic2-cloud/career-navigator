@@ -41,11 +41,9 @@ const ISLAND_POSITIONS: IslandPosition[] = [
   columnPosition('right', 2),
 ];
 
-// Hero/city island: centered on top, deliberately anchored at the very
-// top edge of the map so roughly half of it pokes up past the visible
-// screen (translate(-50%, 50%) on .world-island shifts it down by half
-// its own height from this anchor).
-const CITY_POSITION: IslandPosition = { side: 'center', bottom: '100%' };
+// Hero/city island: centered on top, fully visible (not clipped by the
+// screen edge) — sits just above the highest regular island.
+const CITY_POSITION: IslandPosition = { side: 'center', bottom: '88%' };
 
 export function useIslandPositions(
   chapters: Chapter[],
