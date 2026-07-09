@@ -2599,3 +2599,48 @@ archive). No code changed.
 `PROJECT_STATUS.md`
 
 **Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
+### 2026-07-09 — OpenCode (Задание 94: WorldMapScreen — 7 островов зигзагом)
+
+**Полный переписыв WorldMapScreen:**
+- Вместо пустого экрана с фоном — 7 островов зигзагом снизу вверх:
+  - resume (center, 0%), linkedin (left, 15%), applications (right, 30%)
+  - interviews (left, 45%), offer_preparation (right, 60%), offer (left, 75%)
+  - city-профессии (center, 90%)
+- Каждый остров: PNG (или fallback 🏝️), прогресс-индикатор `X%`, подсветка акцентным цветом
+- Заблокированные главы: `opacity: 0.4; grayscale(0.8)`
+- Кликабельные: `cursor: pointer; drop-shadow(accent)`, вызывают `onChapterSelect`
+- Город профессии: `island_${professionId}.png`, 150% размер, иконка 🏙️
+- Все острова с `@keyframes island-float` (translateY -10px, 3.5s)
+- Сохранён проп `style` для совместимости с `App.tsx`
+
+**Файлы:** `src/screens/WorldMapScreen/WorldMapScreen.tsx` (переписан),
+`src/screens/WorldMapScreen/WorldMapScreen.css` (переписан),
+`PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Не проверено вживую** — нужен визуальный осмотр: острова по спирали/зигзагу, прогресс, кликабельность.
+
+### 2026-07-09 — OpenCode (Задание 100+101: SVG иконки + WorldMapScreen с иконками)
+
+**Задание 100 — SVG иконки:**
+- Создан `src/components/Icon/Icon.tsx` — 17 SVG-иконок (resume, linkedin, applications, interviews, offer, communication, body_language, confidence, trophy, microphone, city, island, map, medal, chart, target, star)
+- Feather-style: `stroke`, `strokeWidth=2`, `round` caps, `drop-shadow(0 0 4px $color)` через inline style
+- Принимает `name`, `size` (default 24), `color` (default #00e5e0)
+
+**Задание 101 — WorldMapScreen переписан с Icon:**
+- Импортирует `Icon` вместо эмодзи для fallback-островов и city
+- Позиции зигзага сдвинуты (0→5%, 15→18%, 30→31%, 45→44%, 60→57%, 75→70%, 90→83%)
+- `isUnlocked`: глава открыта если предыдущая на 100%, иначе `opacity: 0.35; grayscale(0.9)`
+- `getProgress` получает `completed/total` через `getActiveChapters()` + `nodeStates`
+- `.world-island-float` — 100×100px контейнер с `island-float` анимацией
+- Город: `<Icon name="city" color="#FFD700" />` вместо 🏙️
+- Fallback острова: `<Icon name="island" size={48} color={accent} />` вместо 🏝️
+
+**Файлы:** `src/components/Icon/Icon.tsx` (новый),
+`src/screens/WorldMapScreen/WorldMapScreen.tsx` (переписан),
+`src/screens/WorldMapScreen/WorldMapScreen.css` (переписан),
+`PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Не проверено вживую** — нужна проверка: (а) иконки рендерятся корректно; (б) WorldMapScreen с новыми позициями и isUnlocked.
