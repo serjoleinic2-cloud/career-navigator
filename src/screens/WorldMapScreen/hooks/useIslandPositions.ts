@@ -41,9 +41,17 @@ export function useIslandPositions(
       const completed = nodes.filter(n => n!.state === 'confidence').length;
       const total = nodeIds.length || 1;
 
-      const unlocked = i === 0
+      const ownProgress = runtimeState?.chapterProgress?.[ch.id] || 0;
+      const isActiveChapter = runtimeState?.activeChapterId === ch.id;
+      const prevCompleted = i === 0
         ? true
         : (runtimeState?.chapterProgress?.[chapters[i - 1]?.id] || 0) >= 100;
+
+      // Island becomes active (tappable) once the user has entered this
+      // chapter and started it (own progress > 0, or it's the current
+      // active chapter), or once the previous chapter is fully completed
+      // and the journey can move on to this one.
+      const unlocked = i === 0 || ownProgress > 0 || isActiveChapter || prevCompleted;
 
       return {
         chapterId: ch.id,
