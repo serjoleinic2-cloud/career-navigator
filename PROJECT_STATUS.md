@@ -2644,3 +2644,15 @@ archive). No code changed.
 
 **Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
 **Не проверено вживую** — нужна проверка: (а) иконки рендерятся корректно; (б) WorldMapScreen с новыми позициями и isUnlocked.
+### 2026-07-09 — Kimi (SVG icons + WorldMap zigzag)
+
+**In progress (not verified on-device):**
+- SVG Icon component — replacing all emojis
+- WorldMapScreen — 7 islands in zigzag pattern
+- Island click → chapter navigation
+- Progress indicator per island (completed/total)
+- Floating animation on all islands
+
+**Files:** [перечислить после коммита]
+
+**Not done yet:** Stabilization Pass #1 (separate task)
