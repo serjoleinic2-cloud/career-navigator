@@ -1,14 +1,8 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   FinalCinematicScreen
-   Универсальная — работает для любой профессии.
-   Острова подхватываются из /art/{professionId}/ автоматически.
-
-   Фаза 1 — hud-fade (0.9s)   : интерфейс гаснет, камера на первом острове
-   Фаза 2 — building           : Tron-мост рисуется снизу вверх, камера следует,
-                                  острова вспыхивают на прибытии
-   Фаза 3 — zoom-out (2.4s)   : камера отъезжает, все острова видны
-   Фаза 4 — crossfade (1.3s)  : мир гаснет
-   Фаза 5 — hero               : финальная картинка профессии, кнопки
+   FinalCinematicScreen.css
+   Bridges are drawn on <canvas> in screen-space — no SVG inside slots.
+   Islands are transparent PNG — zero background / border / border-radius on wrapper.
+   Works for any profession: paths come from /art/{professionId}/ dynamically.
 ──────────────────────────────────────────────────────────────────────────────── */
 
 /* ── Root ── */
@@ -16,8 +10,7 @@
   position: fixed;
   inset: 0;
   z-index: 400;
-  /* Фон: пользователь кладёт 1_fon_end_anim.png в /public/
-     Если файла нет — чёрный fallback.                        */
+  /* User drops 1_fon_end_anim.png into /public/ — fallback is deep dark */
   background:
     url('/1_fon_end_anim.png') center center / cover no-repeat,
     #05080f;
@@ -28,10 +21,10 @@
 .fc-world {
   position: absolute;
   inset: 0;
-  /* НЕТ background — фон берётся из fc-root (картинка) */
+  /* No background here — fc-root background shows through */
 }
 
-/* Blackout overlay — гаснет в начале */
+/* Blackout overlay fades out at the start */
 .fc-blackout {
   position: absolute;
   inset: 0;
@@ -40,126 +33,128 @@
   pointer-events: none;
 }
 
-/* Camera — JS двигает transform */
+/* ── Bridge canvas — full screen, above islands so glow renders on top ── */
+.fc-bridge-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  display: block;
+}
+
+/* ── Camera div — JS drives translateY + scale ── */
 .fc-camera {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   will-change: transform;
-  z-index: 1;
+  z-index: 1;           /* below canvas */
 }
 
-/* Виртуальная колонна */
+/* Virtual column holding all island slots */
 .fc-col {
   position: relative;
   width: 100%;
 }
 
-/* ── Island slot ── */
-/* Занимает ~90% ширины экрана, высота = ISLAND_H (260px) */
+/* ── Island slot ──
+   Width set inline by TSX (88 vw, max 440 px).
+   Height = ISLAND_H constant (280 px).                          */
 .fc-slot {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 90vw;
-  max-width: 440px;
-  height: 260px;  /* = ISLAND_H в TSX */
+  height: 280px;   /* = ISLAND_H in TSX — keep in sync */
 }
 
-/* ── Tron bridge SVG ── */
-/* Расположен ВЫШЕ карточки острова.
-   bottom = ISLAND_H = 260px
-   height = ISLAND_SPACING = 380px                        */
-.fc-bridge {
-  position: absolute;
-  bottom: 260px;    /* = ISLAND_H */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 380px;    /* = ISLAND_SPACING */
-  overflow: visible;
-  pointer-events: none;
-  display: block;
-}
-
-/* ── Island — прозрачный PNG, никакого фона/рамки ── */
+/* ── Island wrapper — TRANSPARENT, no background, no border, no radius ── */
 .fc-island {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Намеренно НЕТ: background, border, border-radius
-     PNG с прозрачностью должен показываться чисто       */
+  /* Intentionally NO: background, border, border-radius
+     The PNG itself has the island shape with transparency.       */
   transition: opacity 0.5s ease;
-  animation: fc-float 3.5s ease-in-out infinite;
+  animation: fc-float 3.6s ease-in-out infinite;
 }
 
-/* Lit state — добавляем свечение через ::after (не через box-shadow на самом div) */
+/* Lit state */
 .fc-island--lit {
   animation:
-    fc-glow-in 0.7s ease both,
-    fc-float 3.5s ease-in-out 0.7s infinite;
+    fc-glow-in 0.65s ease both,
+    fc-float   3.6s ease-in-out 0.65s infinite;
 }
 
+/* Neon glow around the PNG via drop-shadow on the img itself (in .fc-island-img).
+   The ::after overlay just adds ambient light beneath the island. */
 .fc-island--lit::after {
   content: '';
   position: absolute;
-  /* Свечение шире острова */
-  inset: -20px;
+  inset: 0;
   border-radius: 50%;
   pointer-events: none;
-  box-shadow:
-    0 0 40px 18px var(--acc, #00e5e0),
-    0 0 90px 40px var(--acc, #00e5e0);
-  opacity: 0.35;
-  animation: fc-glow-pulse 2.2s ease-in-out infinite;
+  background: radial-gradient(
+    ellipse 60% 30% at 50% 90%,
+    var(--acc, #00e5e0) 0%,
+    transparent 70%
+  );
+  opacity: 0.22;
+  animation: fc-glow-pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes fc-glow-in {
-  from { filter: brightness(0.3) saturate(0.3); transform: scale(0.9); }
-  to   { filter: brightness(1) saturate(1);     transform: scale(1);   }
+  from { filter: brightness(0.25) saturate(0.2); transform: scale(0.88); }
+  to   { filter: brightness(1)    saturate(1);   transform: scale(1);    }
 }
-
 @keyframes fc-float {
-  0%, 100% { transform: translateY(0);   }
-  50%       { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0);     }
+  50%       { transform: translateY(-11px); }
 }
-
 @keyframes fc-glow-pulse {
-  0%, 100% { opacity: 0.35; }
-  50%       { opacity: 0.6;  }
+  0%, 100% { opacity: 0.22; }
+  50%       { opacity: 0.42; }
 }
 
-/* Island image: object-fit contain, нет border-radius, нет фона */
+/* ── Island image — the actual PNG, fills slot, NO border-radius, NO bg ── */
 .fc-island-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center bottom;
   background: transparent;
   border-radius: 0;
+  border: none;
   position: relative;
   z-index: 1;
-  /* Небольшой drop-shadow повторяет акцентный цвет (не рамка) */
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.6));
+  /* Coloured drop-shadow matches accent — subtle ground glow under island */
+  filter: drop-shadow(0 16px 32px rgba(0,0,0,0.55));
 }
 
-/* Fallback (если PNG не загрузился) — буква профессии */
+/* Lit islands get accent drop-shadow added */
+.fc-island--lit .fc-island-img {
+  filter:
+    drop-shadow(0 0 18px var(--acc, #00e5e0))
+    drop-shadow(0 16px 28px rgba(0,0,0,0.5));
+}
+
+/* Fallback when PNG fails to load */
 .fc-island-fallback {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 56px;
+  font-size: 64px;
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-/* ── Label справа от острова ── */
+/* ── Chapter label — right of island ── */
 .fc-label {
   position: absolute;
   left: calc(100% + 16px);
@@ -171,13 +166,15 @@
   color: rgba(240, 240, 245, 0.92);
   white-space: nowrap;
   text-shadow:
-    0 0 10px rgba(0, 0, 0, 0.98),
-    0 0 28px rgba(0, 0, 0, 0.85);
+    0 0 12px rgba(0, 0, 0, 1),
+    0 0 30px rgba(0, 0, 0, 0.9);
   pointer-events: none;
   z-index: 2;
 }
 
-/* ── Hero screen ── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   Hero screen (Phase 5)
+──────────────────────────────────────────────────────────────────────────────── */
 .fc-hero {
   position: fixed;
   inset: 0;
@@ -208,7 +205,7 @@
 }
 
 @keyframes fc-hero-float {
-  0%, 100% { transform: scale(1)    translateY(0);    }
+  0%, 100% { transform: scale(1)    translateY(0);     }
   50%       { transform: scale(1.02) translateY(-10px); }
 }
 
@@ -223,7 +220,7 @@
   z-index: 1;
 }
 
-/* Градиентный шлейф снизу */
+/* Bottom gradient scrim */
 .fc-hero-scrim {
   position: absolute;
   bottom: 0;
@@ -287,11 +284,7 @@
   transition: transform 0.12s ease, opacity 0.12s ease;
   font-family: inherit;
 }
-
-.fc-btn:active {
-  transform: scale(0.96);
-  opacity: 0.82;
-}
+.fc-btn:active { transform: scale(0.96); opacity: 0.82; }
 
 .fc-btn--primary {
   background: linear-gradient(135deg, #00e5e0 0%, #0099e6 100%);
@@ -304,21 +297,9 @@
   border: 1px solid rgba(240, 240, 245, 0.18);
 }
 
-/* ── Mobile (<420px) ── */
+/* ── Mobile ── */
 @media (max-width: 420px) {
-  .fc-slot {
-    width: 92vw;
-    height: 200px;
-  }
-  .fc-bridge {
-    bottom: 200px;
-    height: 320px;
-  }
-  .fc-label {
-    font-size: 10px;
-    left: calc(100% + 10px);
-  }
-  .fc-hero-title {
-    font-size: 22px;
-  }
+  .fc-slot        { height: 200px; }
+  .fc-hero-title  { font-size: 22px; }
+  .fc-label       { font-size: 10px; left: calc(100% + 10px); }
 }
