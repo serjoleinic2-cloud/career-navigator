@@ -23,7 +23,7 @@
 > через git напрямую) — правило всё равно действует, просто без автоматической
 > проверки, и агент должен соблюдать его вручную.
 
-**Последнее обновление:** 2026-07-08
+**Последнее обновление:** 2026-07-09
 **Обновил:** Claude (сессия — исправлен баг: после Test → New Journey первое задание навсегда зависало на "Saving progress...", т.к. resetRuntime() убивал весь event bus вызовом clearAll())
 **Последний коммит на момент записи:** будет создан этой сессией (main, до неё см. историю ниже)
 
@@ -2487,3 +2487,103 @@ archive). No code changed.
 
 **Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
 **Not verified on-device** — needs visual check: golden sparkles rising from door area on hero screen.
+
+### 2026-07-09 — OpenCode (Задание 78: Islands +50%, WorldRenderer as background)
+
+**Islands +50%:**
+- Added `transform: scale(1.5); transform-origin: center bottom;` to `.fc-island-img` in CSS
+- Islands visually grow 50% larger from the bottom of each slot while layout/bridge positions stay correct
+- Canvas bridges still connect to slot centers; the scaled islands overlap bridges slightly for a more impressive look
+
+**WorldRenderer as background:**
+- Removed `url('/1_fon_end_anim.png')` background from `.fc-root` — now transparent
+- WorldRenderer (permanently mounted at z-index 0 in App.tsx) shows through as the cinematic background
+- `.fc-blackout` (fades from #05080f to transparent during hud-fade) provides smooth transition from black to WorldRenderer
+- `.fc-hero` keeps its `background: #05080f` — hero overlay remains solid for text/button readability
+
+**Files:** `src/screens/JourneyScreen/components/FinalCinematicScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — needs visual check: (a) islands 50% bigger with no distortion; (b) WorldRenderer visible behind the cinematic instead of the static background image.
+
+### 2026-07-09 — OpenCode (Задание 80: Particles exactly in doors)
+
+**Fix — gold particle positions now in pixels relative to fixed-size PNG container:**
+- `.final-island-container` changed from `position: absolute; inset: 0` to a fixed-size centered wrapper (`width: min(400px, 90vw); height: 975px; top: 50%; left: 50%; transform: translate(-50%, -50%)`)
+- Hero image inside uses class `.fc-island-png` with `object-fit: contain` (was `object-fit: cover` fullscreen)
+- Removed old `.fc-hero-img` class (replaced by `.fc-island-png` inside container)
+- Particles: 20 instead of 15, pixel coordinates (`bottom: 558-710px`, `left: 75-325px`) matching door area of PNG
+- Particle CSS: 4px (was 3px), 2.5s flight (was 2s), +120px upward (was 80px), added `box-shadow: 0 0 6px 2px rgba(255,215,0,0.4)`, updated gradient stops
+
+**Files:** `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`,
+`src/screens/JourneyScreen/components/FinalCinematicScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — needs visual check: golden particles rising from exact door area (bottom 558-710px) of the hero island PNG.
+
+### 2026-07-09 — OpenCode (Задание 82: Float on container, particles move with PNG)
+
+**Fix — moved `fc-hero-float` animation from `.fc-island-png` (img) to `.final-island-container` (wrapper):**
+- Container now floats as one unit — particles move together with the hero image
+- Merged `translate(-50%, -50%)` centering into the keyframes to avoid transform conflict
+- `.fc-island-png` has no animation, only `object-fit: contain`
+
+**Files:** `src/screens/JourneyScreen/components/FinalCinematicScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — particles should drift together with the floating island.
+
+### 2026-07-09 — OpenCode (Задание 83: Remove labels, add cursor sparks)
+
+**1. Island labels removed:**
+- Removed `labelVis` state, all `setLabelVis()` calls, and `.fc-label` span from TSX
+- Removed `.fc-label` CSS rules (desktop + mobile media query)
+- Each island slot now has only the PNG + fallback, no text label next to it
+
+**2. Bridge cursor with CSS-only spark particles:**
+- Added `.fc-cursor` — 12px glowing cyan dot with `box-shadow: 0 0 20px 8px rgba(0,229,224,0.6)`, positioned at the bridge tip via `cursorRef` in the rAF tick
+- `::before` / `::after` pseudo-elements generate gold spark particles that fly outward (—15/15px X, —10/—8px Y) with `@keyframes sparkTrail` (1s loop, staggered delays 0s / 0.3s)
+- Cursor position recalculated each frame from `islandCY(idx) * camScale + camY` to stay locked to the bridge tip during camera movement
+
+**Files:** `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`,
+`src/screens/JourneyScreen/components/FinalCinematicScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — check: (a) no island labels visible; (b) cyan cursor dot with gold sparks flies along each bridge during building phase.
+
+### 2026-07-09 — OpenCode (Задание 85: Fullscreen hero image, particles in viewport %)
+
+**Hero image reverted to fullscreen:**
+- Removed fixed-size `.final-island-container` (400×975px) approach from Задание 80/82
+- Restored `.fc-hero-img` — `position: absolute; inset: 0; object-fit: cover; object-position: center 25%` fills the entire hero screen
+- Float animation back on the img (not container), keyframes simplified to `scale(1) translateY(0)` / `scale(1.02) translateY(-10px)` without centering offset
+
+**Particles in viewport % (aligned to door region):**
+- Particles now positioned in `%` of viewport instead of fixed pixels
+- Horizontal: `centerX 50% ± 125px` converted to vw via `(125 / window.innerWidth) * 100`
+- Vertical: door region approximated as `bottom: 82-98%` (25% object-position offset + 57-73% door position in PNG)
+- Removed `.fc-island-png` / `.final-island-container` CSS rules; `.door-particles` is now a simple fullscreen overlay (`position: absolute; inset: 0; z-index: 2`)
+
+**Files:** `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`,
+`src/screens/JourneyScreen/components/FinalCinematicScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Not verified on-device** — check particles align with door region of the fullscreen hero image at different screen sizes.
+
+### 2026-07-09 — OpenCode (Задание 86: Частицы поверх картинки, упрощение позиций)
+
+**Упрощены позиции частиц:**
+- Убрана сложная конвертация `(125 / vw) * 100` — теперь `left: 45-55%` (центр ±5%)
+- Вертикаль: `bottom: 20-35%` вместо `25 + 57 + Math.random() * 16`
+- `.final-island-container` уже был удалён в Задании 85 — код уже соответствовал требуемой структуре
+- Единственное изменение: упрощение расчёта позиций в TSX (убран `centerX`/`spreadVw`/`bottomPct`, прямые проценты в `style`)
+
+**Файлы:** `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`,
+`PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.

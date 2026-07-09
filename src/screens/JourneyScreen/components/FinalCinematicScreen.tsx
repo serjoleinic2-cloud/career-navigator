@@ -70,7 +70,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
     Array(Math.max(N - 1, 0)).fill(null).map(() => ({ progress: 0, done: false }))
   );
   const [islandGlow,   setIslandGlow]   = useState<boolean[]>(() => Array(N).fill(false));
-  const [labelVis,     setLabelVis]     = useState<boolean[]>(() => Array(N).fill(false));
   const [cameraY,      setCameraY]      = useState(0);
   const [cameraScale,  setCameraScale]  = useState(1);
   const [worldOpacity, setWorldOpacity] = useState(1);
@@ -78,6 +77,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   const [heroError,    setHeroError]    = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
 
   // ── Viewport ──
   const vw = typeof window !== 'undefined' ? window.innerWidth  : 390;
@@ -228,7 +228,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
 
     const t0 = setTimeout(() => {
       setIslandGlow(g => { const n = [...g]; n[0] = true; return n; });
-      setLabelVis(v  => { const n = [...v]; n[0] = true; return n; });
     }, 200);
 
     const t1 = setTimeout(() => setPhase('building'), HUD_FADE_MS);
@@ -260,6 +259,16 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
         return next;
       });
 
+      if (cursorRef.current && t < 1) {
+        const fromCY = islandCY(idx) * camScaleRef.current + newCamY;
+        const toCY   = islandCY(idx + 1) * camScaleRef.current + newCamY;
+        const totalLen = fromCY - toCY;
+        const drawnLen = totalLen * t;
+        const sparkY = fromCY - drawnLen;
+        cursorRef.current.style.left = `${islandCX()}px`;
+        cursorRef.current.style.top = `${sparkY}px`;
+      }
+
       if (t < 1) {
         bridgeRafRef.current = requestAnimationFrame(tick);
       } else {
@@ -269,7 +278,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
           return next;
         });
         setIslandGlow(g => { const n = [...g]; n[idx + 1] = true; return n; });
-        setLabelVis(v  => { const n = [...v]; n[idx + 1] = true; return n; });
       }
     };
     bridgeRafRef.current = requestAnimationFrame(tick);
@@ -380,6 +388,8 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
             height={vh}
           />
 
+          <div ref={cursorRef} className="fc-cursor" />
+
           <div
             className="fc-camera"
             style={{
@@ -391,7 +401,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
               {islands.map((isl, i) => {
                 const top       = islandTop(i);
                 const glowing   = islandGlow[i];
-                const showLabel = labelVis[i];
 
                 return (
                   <div key={isl.id} className="fc-slot" style={{ top, width: ISLAND_W }}>
@@ -416,17 +425,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
                         {isl.title[0]}
                       </div>
                     </div>
-
-                    <span
-                      className="fc-label"
-                      style={{
-                        opacity:   showLabel ? 1 : 0,
-                        transform: showLabel ? 'translateX(0)' : 'translateX(12px)',
-                        transition: 'opacity 0.5s ease, transform 0.5s ease',
-                      }}
-                    >
-                      {isl.title}
-                    </span>
                   </div>
                 );
               })}
@@ -438,7 +436,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
       {phase === 'hero' && (
         <div className="fc-hero">
           {!heroError ? (
-            <div className="final-island-container">
+            <>
               <img
                 className="fc-hero-img"
                 src={heroSrc}
@@ -449,20 +447,20 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
               />
               {heroLoaded && (
                 <div className="door-particles">
-                  {[...Array(15)].map((_, i) => (
+                  {[...Array(20)].map((_, i) => (
                     <div
                       key={i}
                       className="gold-particle"
                       style={{
-                        animationDelay: `${i * 0.3}s`,
-                        left: `${45 + ((i * 0.7) % 10)}%`,
-                        bottom: `${20 + ((i * 1.2) % 15)}%`,
+                        animationDelay: `${i * 0.25}s`,
+                        left: `${45 + Math.random() * 10}%`,
+                        bottom: `${20 + Math.random() * 15}%`,
                       }}
                     />
                   ))}
                 </div>
               )}
-            </div>
+            </>
           ) : (
             <div className="fc-hero-fallback">🏙️</div>
           )}
