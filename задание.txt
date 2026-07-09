@@ -1,239 +1,236 @@
-PLAYBOOK REWORK v2
-Цель
+Мне нравится направление, но я бы сделал Profile не как "настройки Android", а как паспорт путешественника. Тогда шестерёнка — это системные настройки, а сам экран — про игрока.
 
-Playbook — это библиотека помощника, а не курс и не набор чеклистов.
+⚙️ Settings
+🔔 Notifications
 
-Он должен помогать выполнять текущие задания Journey.
+Не просто переключатель.
 
-1. Структура разделов
+Notifications
 
-Оставить только:
+Stay on track with your journey.
 
-Resume
+✓ Daily mission reminder
+✓ Interview practice reminder
+✓ Inactivity reminder (after 3 days)
+✓ Weekly progress summary
+✓ Achievement unlocked
 
-LinkedIn
+MVP можно оставить один переключатель
 
-Applications
+Enable notifications
 
-Interviews
+остальное позже.
 
-Offer
+☁️ Backup
 
-Communication
+Нужно.
 
-Body Language
+Но только для Premium.
 
-Confidence
+Описание
 
-Удалить:
+Backup
 
-Networking
-Salary
-Mistakes
-Remote
+Securely save your journey progress.
 
-Причина:
+Includes:
 
-Они не являются самостоятельными разделами.
+• Current profession
+• Completed missions
+• Notes
+• Interview history
+• Scores
 
-Их контент должен жить внутри основных разделов.
+Your data remains private.
 
-Например:
+Кнопка
 
-Offer
+Create Backup
 
-Salary Negotiation
-Benefits
-Counter Offer
+Free
 
-Interviews
+Available in Premium
+🔄 Restore
 
-Common Mistakes
-Remote Interview
-Technical Interview
-Behavioral Interview
+Восстановление.
 
-Communication
+Описание
 
-Networking
-Cold Messages
-Recruiter Messages
-2. Каждый раздел состоит одинаково
+Restore
 
-Например Resume
+Restore your previously saved journey.
 
-Overview
+This will replace the current local progress.
 
-Guides
+Кнопка
 
-Templates
+Restore Backup
+🔒 Privacy
 
-Examples
+Без длинной юридической стены.
 
-Checklist
+Privacy
 
-Не больше.
+Career Navigator works offline.
 
-Не меньше.
+Your personal data is stored only on your device.
 
-3. Overview
+We do not collect:
 
-Короткое описание
+• Resume
+• Notes
+• Interview recordings
+• Personal information
 
-Что это
+Nothing is uploaded unless you create a cloud backup.
 
-Почему важно
+Внизу
 
-Когда использовать
+Privacy Policy
 
-2–3 абзаца максимум.
+(ссылка)
 
-4. Guides
+ℹ️ About
+Career Navigator
 
-Пошаговые инструкции.
+Offline Career Readiness System
+
+Version 1.0.0 (Build 27)
+
+Designed to help you become interview-ready.
+
+Made with ❤️
+
+Да.
+
+Версия и Build должны автоматически читаться из сборки, а не быть захардкожены.
 
 Например
 
-Resume
+Version 1.0.0
 
-Choose Positioning
+Build 27
 
-Write Summary
+Android AAB
+⭐ Premium
 
+Я бы красиво оформил.
+
+Career Navigator Premium
+
+Unlock your full journey.
+
+Includes
+
+✅ All professions
+
+✅ Full career roadmap
+
+(начиная с 3 главы и далее)
+
+✅ Interview Trainer
+
+Voice practice
+
+Recording
+
+Playback
+
+Self assessment
+
+AI-ready evaluation (future)
+
+✅ Complete Playbook
+
+✅ Psychology Library
+
+✅ Cloud Backup
+
+✅ Future updates included
+
+Кнопка
+
+Upgrade to Premium
+❤️ Share
+
+Это не экспорт JSON.
+
+Вообще убрать.
+
+Должно быть одно действие.
+
+Love Career Navigator?
+
+Help others start their journey.
+
+Share the app with friends.
+
+Кнопка
+
+Share App
+
+Открывается системный Share
+
+с текстом
+
+I'm using Career Navigator to prepare for interviews. Check it out on Google Play!
+
+ссылка на Google Play.
+
+ВСЁ.
+
+Никаких:
+
+JSON
+CSV
+Copy Raw Data
+
+Пользователю это вообще не нужно.
+
+Я бы вообще сделал так
+Profile
+
+↓
+
+Traveler Passport
 Achievements
+Current Profession
+Career Score
+Confidence
+Days in Journey
 
-Skills
+----------------
 
-ATS Optimization
+⚙ Settings
 
-Proofreading
-5. Templates
+Notifications
 
-Готовые шаблоны.
+Premium
 
-Например
+Backup
 
-Senior Resume
+Restore
 
-Junior Resume
+Privacy
 
-Career Change Resume
+About
 
-6. Examples
+Share App
 
-Хорошие
+Это выглядит как настоящее приложение, а не как меню разработчика.
 
-Плохие
+Что я бы убрал совсем
 
-До
+❌ Export JSON
 
-После
+❌ Export CSV
 
-7. Checklist
+❌ Copy Debug Data
 
-НЕ интерактивный.
+❌ Share Progress Screenshot (пока)
 
-НЕ сохраняется.
+❌ Developer Info
 
-НЕ влияет на прогресс.
+Это всё можно оставить скрытым через Debug Mode, но обычный пользователь этого видеть не должен.
 
-Это просто список проверки.
-
-Например
-
-✓ Resume fits one page
-
-✓ ATS keywords added
-
-✓ Numbers included
-
-✓ Grammar checked
-
-
-Это обычный текст.
-
-Не состояние приложения.
-
-8. Удалить кнопку
-
-Полностью удалить
-
-Apply & Return to Mission
-
-Она ничего не делает.
-
-Она вводит пользователя в заблуждение.
-
-Вместо неё оставить обычную навигацию:
-
-← Back
-
-или
-
-✕
-
-9. Контраст
-
-Все тексты
-
-#F5F6FA
-
-Никакого белого на светлом фоне.
-
-10. Скролл
-
-Любой длинный текст
-
-обязательно
-
-overflow-y:auto
-
-с учетом Safe Area.
-
-Ничего не должно уходить под Bottom Navigation.
-
-11. Проверить наполненность
-
-После переработки проверить каждый раздел.
-
-Для каждого раздела должно быть:
-
-Overview
-
-Guides
-
-Templates
-
-Examples
-
-Checklist
-
-Если какого-то блока нет —
-
-создать placeholder.
-
-Никогда не показывать пустой экран.
-
-12. UX
-
-Пользователь должен открыть любой раздел Playbook и за 5 секунд понять:
-
-"Что это?"
-
-ещё через 5 секунд
-
-"Что мне делать?"
-
-ещё через 5 секунд
-
-"Возвращаюсь выполнять миссию."
-
-Playbook не должен превращаться в Википедию.
-
-Архитектурное правило
-
-Playbook не изменяет состояние приложения.
-
-Он не отмечает задания выполненными, не изменяет прогресс, не сохраняет чеклисты и не содержит кнопок "Apply".
-
-Это исключительно библиотека знаний, которая помогает пройти текущую миссию в Journey. Прогресс изменяется только на экране Journey при выполнении реальных заданий. Это правило должно соблюдаться во всех будущих разделах Playbook.
+Такой Profile уже будет соответствовать общей идее Career Navigator: пользователь ощущает себя путешественником, а не человеком, который ковыряется в технических настройках приложения.
