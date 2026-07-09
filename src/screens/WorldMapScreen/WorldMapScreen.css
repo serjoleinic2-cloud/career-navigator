@@ -2,6 +2,11 @@
   position: fixed;
   inset: 0;
   overflow: hidden;
+  /* Single source of truth for island size — used both by the float
+     wrapper (size) and by the left/right anchor calc() below (so an
+     island's own half-width is always accounted for and it can never
+     clip off the left/right edge of the screen, at any viewport size). */
+  --island-size: clamp(126px, 34vmin, 218px);
 }
 
 .world-map-bg {
@@ -17,6 +22,12 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  /* Keeps every island's `bottom: X%` anchor measured against a shorter
+     box that already excludes the floating bottom-nav pill (72px tall,
+     16px from the screen edge, see BottomNavigation.css) — so the two
+     lowest islands are never rendered underneath it. */
+  padding-bottom: calc(72px + 16px + 24px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
 .world-island {
@@ -30,11 +41,14 @@
 }
 
 .world-island--left {
-  left: 10%;
+  /* Anchor point sits at least half the island's width plus a small
+     margin in from the edge, so translate(-50%) can never push the
+     island itself past the screen edge. */
+  left: calc(var(--island-size) / 2 + 10px);
 }
 
 .world-island--right {
-  right: 10%;
+  right: calc(var(--island-size) / 2 + 10px);
 }
 
 .world-island--center {
@@ -54,8 +68,8 @@
 }
 
 .world-island-float {
-  width: clamp(110px, 30vmin, 190px);
-  height: clamp(110px, 30vmin, 190px);
+  width: var(--island-size);
+  height: var(--island-size);
   animation: island-float 3.5s ease-in-out infinite;
 }
 

@@ -20,16 +20,16 @@ export interface CityData {
 }
 
 // Chapters 1-3 stack on the left, chapters 4-6 stack on the right.
-// Both columns cover the SAME vertical range, evenly spaced (not one
-// column confined to the bottom half and the other to the top half —
-// that's what made the previous version look lopsided). The hero/city
-// island sits on top, center.
-const COLUMN_RANGE = { start: 10, end: 82 }; // % from bottom
-const ROWS_PER_COLUMN = 3;
-const ROW_STEP = (COLUMN_RANGE.end - COLUMN_RANGE.start) / (ROWS_PER_COLUMN - 1);
+// Rows are staggered between the two columns (right offset by half a
+// row-step) so a left island and a right island are never at exactly
+// the same height — otherwise their progress badges, which both sit
+// pushed toward the screen's center, land on top of each other.
+const COLUMN_RANGE = { start: 24, end: 62 }; // % from bottom, tighter than before
+const ROW_STEP = (COLUMN_RANGE.end - COLUMN_RANGE.start) / 2; // 3 rows per column
 
 function columnPosition(side: 'left' | 'right', row: number): IslandPosition {
-  return { side, bottom: `${COLUMN_RANGE.start + row * ROW_STEP}%` };
+  const stagger = side === 'right' ? ROW_STEP / 2 : 0;
+  return { side, bottom: `${COLUMN_RANGE.start + row * ROW_STEP + stagger}%` };
 }
 
 const ISLAND_POSITIONS: IslandPosition[] = [
@@ -41,7 +41,11 @@ const ISLAND_POSITIONS: IslandPosition[] = [
   columnPosition('right', 2),
 ];
 
-const CITY_POSITION: IslandPosition = { side: 'center', bottom: '94%' };
+// Hero/city island: centered on top, deliberately anchored at the very
+// top edge of the map so roughly half of it pokes up past the visible
+// screen (translate(-50%, 50%) on .world-island shifts it down by half
+// its own height from this anchor).
+const CITY_POSITION: IslandPosition = { side: 'center', bottom: '100%' };
 
 export function useIslandPositions(
   chapters: Chapter[],

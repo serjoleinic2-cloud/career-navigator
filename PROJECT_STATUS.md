@@ -2751,3 +2751,20 @@ archive). No code changed.
 
 **Проверено:** `npx tsc --noEmit` — чисто.
 **Не проверено вживую** — нужна проверка на устройстве: левая и правая колонки должны визуально занимать одинаковую высоту экрана (не одна внизу, другая вверху), острова заметно крупнее.
+
+
+### 2026-07-09 — Claude (World: off-screen islands, badge overlap, nav clipping, hero placement)
+
+**WorldMapScreen.css:**
+- `left: 10%` / `right: 10%` were fixed percentages that didn't account for the island's own width — once islands got bigger (previous commit), the left column clipped off the left edge of the screen, and the right column's large size made it visually crowd toward center. Fixed with a single `--island-size` CSS var (now +15%: `clamp(126px, 34vmin, 218px)`) used both for the float wrapper's size AND for `left`/`right: calc(var(--island-size) / 2 + 10px)` — the anchor point always accounts for the island's own half-width, so it can never clip off either edge, at any viewport size.
+- The two lowest islands rendered underneath the floating bottom-nav pill (72px tall, 16px from edge). Added `padding-bottom: calc(72px + 16px + 24px + env(safe-area-inset-bottom))` on `.world-islands`, which — since percentage `bottom` on an absolutely-positioned child resolves against the parent's padding box — shifts every row up by that fixed clearance regardless of screen height.
+
+**useIslandPositions.ts:**
+- Row spacing tightened (24–62% range, 19% step vs. previous 36% step) per request to reduce distance between islands.
+- Left/right rows are now staggered by half a row-step. Previously same-height left/right islands both push their progress badges toward the screen's horizontal center, so at the same height the two badges collided. Staggering keeps every badge at a distinct height.
+- Hero/city island moved to `bottom: 100%` (anchor at the very top edge), so — combined with the existing `translate(-50%, 50%)` — roughly half of it now pokes up past the top of the screen, per request.
+
+**Файлы:** `src/screens/WorldMapScreen/WorldMapScreen.css`, `src/screens/WorldMapScreen/hooks/useIslandPositions.ts`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто.
+**Не проверено вживую** — нужна проверка на устройстве: острова не обрезаются по бокам, прогресс-бейджи не перекрываются, нижние 2 острова не под меню, hero-остров сверху выглядывает наполовину.
