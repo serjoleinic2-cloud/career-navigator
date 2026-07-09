@@ -26,9 +26,8 @@ const CHAPTER_ART: Record<string, string> = {
 };
 
 // Virtual layout constants (px in world space)
-const ISLAND_SPACING = 240;  // distance between island centres
-// ISLAND_W = 160 (island card width, matches CSS .fc-slot width)
-const ISLAND_H = 120;
+const ISLAND_SPACING = 380; // distance between island centres
+const ISLAND_H = 260;       // island slot height — must match CSS .fc-slot height
 const HUD_FADE_MS = 900;
 const BRIDGE_MS = 1900;
 const BRIDGE_PAUSE_MS = 350;
@@ -43,6 +42,8 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   /**
    * Islands array — index 0 = Resume (first chapter, sits at the BOTTOM of the world).
    * In DOM we position them top-to-bottom, so island[0] has the largest `top` value.
+   * artSrc path is dynamic: /art/{professionId}/{filename}
+   * Works for any profession as long as island PNG files use the same names.
    */
   const islands = useMemo(() => chapters.map((ch) => {
     const id = ch.id.toLowerCase();
@@ -58,29 +59,25 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   const N = islands.length;
 
   // ── State ────────────────────────────────────────────────────────────────
-  const [phase, setPhase] = useState<Phase>('hud-fade');
-  const [bridgesDone, setBridgesDone]     = useState(0);   // fully completed bridges
-  const [bridgeProg, setBridgeProg]       = useState(0);   // 0→1 for bridge currently drawing
-  const [islandGlow, setIslandGlow]       = useState<boolean[]>(() => Array(N).fill(false));
-  const [labelVis, setLabelVis]           = useState<boolean[]>(() => Array(N).fill(false));
-  const [cameraY, setCameraY]             = useState(0);
-  const [cameraScale, setCameraScale]     = useState(1);
-  const [worldOpacity, setWorldOpacity]   = useState(1);
-  const [heroLoaded, setHeroLoaded]       = useState(false);
-  const [heroError, setHeroError]         = useState(false);
+  const [phase, setPhase]               = useState<Phase>('hud-fade');
+  const [bridgesDone, setBridgesDone]   = useState(0);   // fully completed bridges
+  const [bridgeProg, setBridgeProg]     = useState(0);   // 0→1 for bridge currently drawing
+  const [islandGlow, setIslandGlow]     = useState<boolean[]>(() => Array(N).fill(false));
+  const [labelVis, setLabelVis]         = useState<boolean[]>(() => Array(N).fill(false));
+  const [cameraY, setCameraY]           = useState(0);
+  const [cameraScale, setCameraScale]   = useState(1);
+  const [worldOpacity, setWorldOpacity] = useState(1);
+  const [heroLoaded, setHeroLoaded]     = useState(false);
+  const [heroError, setHeroError]       = useState(false);
 
   const rafRef = useRef<number | null>(null);
 
   // ── Layout helpers ───────────────────────────────────────────────────────
-  // island[i] (0=Resume=bottom) top edge in the column:
-  //   column runs top→bottom; island[0] is at the bottom
-  //   DOM top of island[i] = (N - 1 - i) * ISLAND_SPACING
   const islandTop = useCallback((i: number) => (N - 1 - i) * ISLAND_SPACING, [N]);
   const islandCY  = useCallback((i: number) => islandTop(i) + ISLAND_H / 2, [islandTop]);
 
   const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
 
-  // cameraY that centres island[i] on screen (with a given scale)
   const targetCamY = useCallback(
     (i: number, scale = 1) => vh / 2 - islandCY(i) * scale,
     [vh, islandCY]
@@ -90,7 +87,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   useEffect(() => {
     setCameraY(targetCamY(0));
 
-    // Light up island 0 immediately
     const t0 = setTimeout(() => {
       setIslandGlow(g => { const n = [...g]; n[0] = true; return n; });
       setLabelVis(v  => { const n = [...v]; n[0] = true; return n; });
@@ -109,14 +105,13 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
 
     const tick = (now: number) => {
       const t = Math.min((now - start) / BRIDGE_MS, 1);
-      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // ease-in-out
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
       setBridgeProg(t);
       setCameraY(fromY + (toY - fromY) * e);
 
       if (t < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
-        // Bridge complete
         setBridgesDone(d => d + 1);
         setBridgeProg(0);
         setIslandGlow(g => { const n = [...g]; n[idx + 1] = true; return n; });
@@ -130,7 +125,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
     if (phase !== 'building') return;
 
     if (bridgesDone >= N - 1) {
-      // All bridges done → zoom out
       const t = setTimeout(() => setPhase('zoom-out'), BRIDGE_PAUSE_MS + 400);
       return () => clearTimeout(t);
     }
@@ -142,7 +136,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
     };
   }, [phase, bridgesDone, N, animateBridge]);
 
-  // ── Phase 3: zoom-out — scale down to show all islands ───────────────────
+  // ── Phase 3: zoom-out ────────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== 'zoom-out') return;
 
@@ -162,7 +156,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
       if (t < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
-        // Hold for 700ms then crossfade
         const hold = setTimeout(() => setPhase('crossfade'), 700);
         return () => clearTimeout(hold);
       }
@@ -172,7 +165,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // ── Phase 4: crossfade — world fades to black, then hero appears ─────────
+  // ── Phase 4: crossfade ───────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== 'crossfade') return;
     const start = performance.now();
@@ -192,14 +185,18 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
 
   // ── Render ───────────────────────────────────────────────────────────────
   const colHeight = (N - 1) * ISLAND_SPACING + ISLAND_H + 80;
-  const heroSrc   = `/art/${professionId}/island_software_engineer.png`;
+
+  // Hero image: profession-specific full art. Path: /art/{professionId}/island_{professionId}.png
+  const heroSrc = `/art/${professionId}/island_${professionId}.png`;
 
   return createPortal(
     <div className="fc-root">
-      {/* ── World scene (visible during hud-fade / building / zoom-out / crossfade) ── */}
+
+      {/* ── World scene ── */}
       {phase !== 'hero' && (
         <div className="fc-world" style={{ opacity: worldOpacity, transition: 'none' }}>
-          {/* Blackout layer fades away during hud-fade */}
+
+          {/* Blackout fades away during hud-fade */}
           <div
             className="fc-blackout"
             style={{
@@ -215,20 +212,18 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
           >
             <div className="fc-col" style={{ height: colHeight }}>
               {islands.map((isl, i) => {
-                const top    = islandTop(i);
+                const top     = islandTop(i);
                 const glowing = islandGlow[i];
                 const showLabel = labelVis[i];
 
-                // Bridge from island[i] upward to island[i+1]
-                // In DOM: island[i+1] has a smaller top value (higher on screen)
-                // Bridge height = difference in top positions = ISLAND_SPACING
                 const bridgeDrawn   = bridgesDone > i;
                 const bridgeDrawing = phase === 'building' && bridgesDone === i;
                 const bProg = bridgeDrawing ? bridgeProg : (bridgeDrawn ? 1 : 0);
 
                 return (
                   <div key={isl.id} className="fc-slot" style={{ top }}>
-                    {/* Bridge: positioned above the island, goes up ISLAND_SPACING px */}
+
+                    {/* ── Tron neon bridge ── */}
                     {i < N - 1 && (
                       <svg
                         className="fc-bridge"
@@ -237,44 +232,109 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
                         viewBox={`0 0 60 ${ISLAND_SPACING}`}
                       >
                         <defs>
+                          {/* Colour gradient bottom→top */}
                           <linearGradient id={`fcg${i}`} x1="0" y1="1" x2="0" y2="0">
-                            <stop offset="0%"   stopColor={isl.accent} stopOpacity="0.95" />
-                            <stop offset="100%" stopColor={islands[i + 1]?.accent ?? isl.accent} stopOpacity="0.95" />
+                            <stop offset="0%"   stopColor={isl.accent} stopOpacity="1" />
+                            <stop offset="100%" stopColor={islands[i + 1]?.accent ?? isl.accent} stopOpacity="1" />
                           </linearGradient>
-                          <filter id={`fcf${i}`} x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur stdDeviation="3" result="blur" />
-                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+
+                          {/* Wide Tron glow for outer track */}
+                          <filter id={`fcf-glow${i}`} x="-300%" y="-2%" width="700%" height="104%">
+                            <feGaussianBlur stdDeviation="7" result="b1" />
+                            <feGaussianBlur stdDeviation="14" result="b2" />
+                            <feMerge>
+                              <feMergeNode in="b2"/>
+                              <feMergeNode in="b1"/>
+                              <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                          </filter>
+
+                          {/* Tight glow for bright core line */}
+                          <filter id={`fcf-core${i}`} x="-150%" y="-2%" width="400%" height="104%">
+                            <feGaussianBlur stdDeviation="1.5" result="b" />
+                            <feMerge>
+                              <feMergeNode in="b"/>
+                              <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                          </filter>
+
+                          {/* Spark glow */}
+                          <filter id={`fcf-spark${i}`} x="-400%" y="-400%" width="900%" height="900%">
+                            <feGaussianBlur stdDeviation="5" result="b" />
+                            <feMerge>
+                              <feMergeNode in="b"/>
+                              <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
                           </filter>
                         </defs>
-                        {/* Line drawn bottom→top as bProg increases */}
+
+                        {/* Outer glow track */}
                         <line
                           x1="30" y1={ISLAND_SPACING}
                           x2="30" y2={ISLAND_SPACING * (1 - bProg)}
                           stroke={`url(#fcg${i})`}
-                          strokeWidth="4"
+                          strokeWidth="14"
                           strokeLinecap="round"
-                          filter={`url(#fcf${i})`}
+                          filter={`url(#fcf-glow${i})`}
+                          opacity="0.38"
                         />
-                        {/* Travelling dot */}
-                        {bridgeDrawing && bProg > 0 && bProg < 0.98 && (
-                          <circle
-                            cx="30"
-                            cy={ISLAND_SPACING * (1 - bProg)}
-                            r="6"
-                            fill={isl.accent}
-                            filter={`url(#fcf${i})`}
-                          />
-                        )}
+
+                        {/* Mid glow track */}
+                        <line
+                          x1="30" y1={ISLAND_SPACING}
+                          x2="30" y2={ISLAND_SPACING * (1 - bProg)}
+                          stroke={`url(#fcg${i})`}
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          filter={`url(#fcf-glow${i})`}
+                          opacity="0.65"
+                        />
+
+                        {/* Bright core line */}
+                        <line
+                          x1="30" y1={ISLAND_SPACING}
+                          x2="30" y2={ISLAND_SPACING * (1 - bProg)}
+                          stroke={`url(#fcg${i})`}
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          filter={`url(#fcf-core${i})`}
+                          opacity="1"
+                        />
+
+                        {/* Running spark — diamond cross, no ball */}
+                        {bridgeDrawing && bProg > 0.01 && bProg < 0.98 && (() => {
+                          const sparkY = ISLAND_SPACING * (1 - bProg);
+                          const c = isl.accent;
+                          return (
+                            <g transform={`translate(30, ${sparkY})`} filter={`url(#fcf-spark${i})`}>
+                              {/* Outer soft halo */}
+                              <ellipse cx="0" cy="0" rx="10" ry="10" fill={c} opacity="0.25" />
+                              {/* Inner glow ring */}
+                              <ellipse cx="0" cy="0" rx="5" ry="5" fill={c} opacity="0.6" />
+                              {/* White hot centre */}
+                              <ellipse cx="0" cy="0" rx="2" ry="2" fill="#ffffff" opacity="1" />
+                              {/* Horizontal Tron streak */}
+                              <line x1="-14" y1="0" x2="14" y2="0"
+                                stroke={c} strokeWidth="1.2" opacity="0.55" strokeLinecap="round" />
+                              {/* Vertical trailing streak */}
+                              <line x1="0" y1="-18" x2="0" y2="18"
+                                stroke={c} strokeWidth="1.2" opacity="0.35" strokeLinecap="round" />
+                            </g>
+                          );
+                        })()}
                       </svg>
                     )}
 
-                    {/* Island */}
+                    {/* ── Island image — transparent PNG, no card background ── */}
                     <div
                       className={`fc-island${glowing ? ' fc-island--lit' : ''}`}
                       style={{ '--acc': isl.accent, opacity: glowing ? 1 : 0.12 } as React.CSSProperties}
                     >
                       {isl.artSrc
-                        ? <img className="fc-island-img" src={isl.artSrc} alt={isl.title}
+                        ? <img
+                            className="fc-island-img"
+                            src={isl.artSrc}
+                            alt={isl.title}
                             onError={e => {
                               (e.currentTarget as HTMLImageElement).style.display = 'none';
                               const fb = e.currentTarget.nextSibling as HTMLElement | null;
@@ -314,7 +374,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
             ? <img
                 className="fc-hero-img"
                 src={heroSrc}
-                alt="Software Engineer"
+                alt={professionId}
                 onLoad={() => setHeroLoaded(true)}
                 onError={() => setHeroError(true)}
                 style={{ opacity: heroLoaded ? 1 : 0, transition: 'opacity 1s ease' }}
@@ -322,7 +382,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
             : <div className="fc-hero-fallback">🏙️</div>
           }
 
-          {/* Bottom gradient scrim */}
           <div className="fc-hero-scrim" />
 
           <div

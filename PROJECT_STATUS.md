@@ -2434,3 +2434,18 @@ archive). No code changed.
 
 **Файлы:** `src/App.tsx`, `src/core/runtime/runtime_controller.ts`,
 `PROJECT_STATUS.md`
+
+### 2026-07-09 — Claude (сессия — FinalCinematicScreen: Tron-стиль мостов)
+
+- FinalCinematicScreen.tsx + .css: убран чёрный фон-рамка вокруг островов (background/border/border-radius → transparent/none)
+- Острова увеличены до 90vw (были 200px), ISLAND_H 120→260, ISLAND_SPACING 240→380
+- Мост переработан: двойная неоновая трасса (glow + core) в стиле Трон, бегущая искра (diamond с крестом) вместо шарика
+- fc-root получает фон из /1_fon_end_anim.png (файл добавить вручную)
+- Mobile media query обновлён под новые размеры
+
+**Файлы:** `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`,
+`src/screens/JourneyScreen/components/FinalCinematicScreen.css`,
+`PROJECT_STATUS.md`
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+**Не проверено вживую** — нужно: (а) проверить что острова без чёрных карточек парят на фоне анимации; (б) мосты рисуются неоновым путём с искрой; (в) проверить мобильные размеры.
