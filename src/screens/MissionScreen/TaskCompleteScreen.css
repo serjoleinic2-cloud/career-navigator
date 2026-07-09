@@ -82,6 +82,10 @@
 }
 
 .task-complete-banner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -323,10 +327,12 @@
   .task-complete-ring-explainer { font-size: 10px; }
 }
 
-/* Chapter-complete banner variant */
+/* Chapter-complete banner variant — text/icon tinted green, no pill
+   background behind them (the icon+label sit directly on the photo,
+   like the regular task-complete banner). */
 .chapter-complete-banner {
-  background: linear-gradient(90deg, rgba(0,184,148,0.3), rgba(0,184,148,0.15)) !important;
-  border-color: rgba(0,184,148,0.5) !important;
+  background: none !important;
+  border: none !important;
   color: #00b894 !important;
 }
 

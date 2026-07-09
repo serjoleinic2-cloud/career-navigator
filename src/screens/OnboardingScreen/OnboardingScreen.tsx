@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Icon } from '../../components/Icon/Icon';
+import { SoftwareEngineerModule } from '../../professions/software_engineer/module';
 import './OnboardingScreen.css';
 
 type Profession = 'software_engineer' | 'data_scientist' | 'product_manager';
@@ -267,10 +268,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 {state.goals.length} selected
               </div>
             </div>
-            <div className="review-item">
+            <div className="review-item review-item--wide">
               <div className="onboarding-timeline">
                 <Icon name="map" size={24} color="#00e5e0" />
-                <span>Journey Length 38 Missions</span>
+                <span>Journey Length — {SoftwareEngineerModule.skillGraph.length} Missions</span>
                 <span className="onboarding-sub">Complete at your own pace</span>
               </div>
             </div>

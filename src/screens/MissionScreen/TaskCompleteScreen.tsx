@@ -85,7 +85,7 @@ export function TaskCompleteScreen({
 
           {showChapterComplete ? (
             <>
-              <div className="task-complete-banner chapter-complete-banner"><Icon name="trophy" /> CHAPTER COMPLETE!</div>
+              <div className="task-complete-banner chapter-complete-banner"><Icon name="trophy" size={16} color="#00b894" /> CHAPTER COMPLETE!</div>
               <h2 className="task-complete-heading">{chapterTitle ? `${chapterTitle} Mastered` : 'Chapter Mastered!'}</h2>
               <p className="task-complete-subtitle">
                 You've completed all {totalTasks} steps. On to the next island!
@@ -168,7 +168,7 @@ export function TaskCompleteScreen({
 
           <button className="task-complete-continue-btn" onClick={onContinue}>
             <span>{showChapterComplete ? 'Next Chapter →' : 'Continue Journey'}</span>
-            <span className="task-complete-continue-arrow">{showChapterComplete ? <Icon name="map" /> : '→'}</span>
+            <span className="task-complete-continue-arrow">{showChapterComplete ? <Icon name="map" size={16} color="#fff" /> : '→'}</span>
           </button>
 
           {/* "Coming next" — a task preview mid-chapter, or the next

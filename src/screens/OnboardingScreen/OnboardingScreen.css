@@ -205,6 +205,14 @@
   padding: 20px;
   text-align: center;
   transition: all 0.25s ease;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* The "Journey Length" card spans the full width so its longer text
+   has room to sit on one row instead of spilling past the screen edge. */
+.review-item--wide {
+  grid-column: 1 / -1;
 }
 
 .review-item:hover {
@@ -227,6 +235,28 @@
 .review-value {
   font-size: 14px;
   font-weight: 600;
+  word-break: break-word;
+}
+
+.onboarding-timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.onboarding-timeline span {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+.onboarding-timeline .onboarding-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: #a0a0b0;
 }
 
 .onboarding-start-btn {

@@ -2714,3 +2714,25 @@ archive). No code changed.
 
 **Проверено:** `npx tsc --noEmit` — чисто (по затронутым файлам).
 **Не проверено вживую** — нужна проверка на устройстве: тап по острову сразу после старта его главы (до завершения) должен вести в главу.
+
+
+### 2026-07-09 — Claude (Review overflow, World zigzag→columns, Chapter Complete visuals)
+
+**OnboardingScreen (Review screen overflow):**
+- `.onboarding-timeline` / `.onboarding-sub` had **zero CSS rules** — the icon+text+subtext inside the "Journey Length" review card had no layout, causing it to overflow past the screen edge.
+- Added flex-column layout for `.onboarding-timeline`, made its card span the full grid width (`.review-item--wide`), added `overflow-wrap`/`word-break` safety on all review cards.
+- Mission count was hardcoded as "38" — actual count (`SoftwareEngineerModule.skillGraph.length`) is 41. Replaced hardcoded number with a live import from the profession module so it can't drift again.
+
+**WorldMapScreen (island layout):**
+- `ISLAND_POSITIONS` alternated left/right per chapter (zigzag path). Changed to grouped columns: chapters 1–3 stack vertically on the left, chapters 4–6 stack vertically on the right, hero/city island on top — per spec. Progress-badge placement (inner edge of each column) was already correct, untouched.
+
+**TaskCompleteScreen (chapter-complete banner + button):**
+- `.chapter-complete-banner` had a green pill background behind the trophy icon + "CHAPTER COMPLETE!" text — removed the background/border, kept only the green text/icon tint.
+- `.task-complete-banner` had no flex alignment, so the icon and text weren't vertically centered as a row — made it `inline-flex` with `align-items:center`.
+- Trophy icon now explicitly colored `#00b894` (matches the label) instead of the default cyan.
+- "Next Chapter →" button's map icon now explicit `color="#fff"` instead of the default cyan/glow, so it doesn't read as a stray green icon on the orange button.
+
+**Файлы:** `src/screens/OnboardingScreen/OnboardingScreen.tsx`, `src/screens/OnboardingScreen/OnboardingScreen.css`, `src/screens/WorldMapScreen/hooks/useIslandPositions.ts`, `src/screens/MissionScreen/TaskCompleteScreen.tsx`, `src/screens/MissionScreen/TaskCompleteScreen.css`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто (кроме pre-existing baseUrl deprecation warning, не связано).
+**Не проверено вживую** — нужна проверка на устройстве: (а) Review-экран онбординга не улетает за экран и показывает 41 Missions; (б) World: 3 острова слева колонкой, 3 справа колонкой, hero сверху; (в) экран Chapter Complete — трофей без зелёной плашки, кнопка Next Chapter без лишней иконки-глюка.

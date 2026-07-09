@@ -19,16 +19,19 @@ export interface CityData {
   position: IslandPosition;
 }
 
+// Chapters 1-3 stack vertically on the left, chapters 4-6 stack
+// vertically on the right, continuing upward — not an alternating
+// left/right zigzag. The hero/city island sits on top, center.
 const ISLAND_POSITIONS: IslandPosition[] = [
-  { side: 'left',   bottom: '10%' },
-  { side: 'right',  bottom: '22%' },
-  { side: 'left',   bottom: '38%' },
-  { side: 'right',  bottom: '50%' },
-  { side: 'left',   bottom: '66%' },
-  { side: 'right',  bottom: '78%' },
+  { side: 'left',   bottom: '8%' },
+  { side: 'left',   bottom: '24%' },
+  { side: 'left',   bottom: '40%' },
+  { side: 'right',  bottom: '52%' },
+  { side: 'right',  bottom: '68%' },
+  { side: 'right',  bottom: '84%' },
 ];
 
-const CITY_POSITION: IslandPosition = { side: 'center', bottom: '90%' };
+const CITY_POSITION: IslandPosition = { side: 'center', bottom: '94%' };
 
 export function useIslandPositions(
   chapters: Chapter[],
