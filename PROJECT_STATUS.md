@@ -2587,3 +2587,15 @@ archive). No code changed.
 `PROJECT_STATUS.md`
 
 **Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+
+### 2026-07-09 — OpenCode (Задание 88: Фон world.png)
+
+**Добавлен бэкграунд world.png обратно:**
+- В Задании 78 фон был убран (`.fc-root` стал transparent для WorldRenderer)
+- Теперь добавлен profession-специфичный `world.png` через инлайн-стиль: `url('/art/${professionId}/world.png') center center / cover no-repeat, #05080f`
+- Фоллбэк `#05080f` если файл отсутствует
+
+**Файлы:** `src/screens/JourneyScreen/components/FinalCinematicScreen.tsx`,
+`PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.

@@ -368,7 +368,12 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   const heroSrc   = `/art/${professionId}/island_${professionId}.png`;
 
   return createPortal(
-    <div className="fc-root">
+    <div
+      className="fc-root"
+      style={{
+        background: `url('/art/${professionId}/world.png') center center / cover no-repeat, #05080f`,
+      }}
+    >
 
       {phase !== 'hero' && (
         <div className="fc-world" style={{ opacity: worldOpacity }}>
