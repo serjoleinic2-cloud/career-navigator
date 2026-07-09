@@ -54,8 +54,8 @@
 }
 
 .world-island-float {
-  width: 120px;
-  height: 120px;
+  width: clamp(110px, 30vmin, 190px);
+  height: clamp(110px, 30vmin, 190px);
   animation: island-float 3.5s ease-in-out infinite;
 }
 

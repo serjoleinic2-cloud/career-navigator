@@ -19,16 +19,26 @@ export interface CityData {
   position: IslandPosition;
 }
 
-// Chapters 1-3 stack vertically on the left, chapters 4-6 stack
-// vertically on the right, continuing upward — not an alternating
-// left/right zigzag. The hero/city island sits on top, center.
+// Chapters 1-3 stack on the left, chapters 4-6 stack on the right.
+// Both columns cover the SAME vertical range, evenly spaced (not one
+// column confined to the bottom half and the other to the top half —
+// that's what made the previous version look lopsided). The hero/city
+// island sits on top, center.
+const COLUMN_RANGE = { start: 10, end: 82 }; // % from bottom
+const ROWS_PER_COLUMN = 3;
+const ROW_STEP = (COLUMN_RANGE.end - COLUMN_RANGE.start) / (ROWS_PER_COLUMN - 1);
+
+function columnPosition(side: 'left' | 'right', row: number): IslandPosition {
+  return { side, bottom: `${COLUMN_RANGE.start + row * ROW_STEP}%` };
+}
+
 const ISLAND_POSITIONS: IslandPosition[] = [
-  { side: 'left',   bottom: '8%' },
-  { side: 'left',   bottom: '24%' },
-  { side: 'left',   bottom: '40%' },
-  { side: 'right',  bottom: '52%' },
-  { side: 'right',  bottom: '68%' },
-  { side: 'right',  bottom: '84%' },
+  columnPosition('left', 0),
+  columnPosition('left', 1),
+  columnPosition('left', 2),
+  columnPosition('right', 0),
+  columnPosition('right', 1),
+  columnPosition('right', 2),
 ];
 
 const CITY_POSITION: IslandPosition = { side: 'center', bottom: '94%' };

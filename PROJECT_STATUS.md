@@ -2736,3 +2736,18 @@ archive). No code changed.
 
 **Проверено:** `npx tsc --noEmit` — чисто (кроме pre-existing baseUrl deprecation warning, не связано).
 **Не проверено вживую** — нужна проверка на устройстве: (а) Review-экран онбординга не улетает за экран и показывает 41 Missions; (б) World: 3 острова слева колонкой, 3 справа колонкой, hero сверху; (в) экран Chapter Complete — трофей без зелёной плашки, кнопка Next Chapter без лишней иконки-глюка.
+
+
+### 2026-07-09 — Claude (World: columns weren't vertically balanced)
+
+**useIslandPositions.ts:**
+- Audited for leftover/dead code per Serj's suspicion — found none; `WorldMapScreen.css`/`Island.tsx`/`useIslandPositions.ts` are the only files touching `.world-island*`, no stale duplicates.
+- Real bug: previous commit's "grouped columns" fix confined the left column to the bottom half of the screen (8–40%) and the right column to the top half (52–84%) — so left looked stuck at the bottom, right looked stuck near the top/center, exactly as reported. Rewrote so both columns share the same full vertical range (10–82%, 3 evenly spaced rows each) via a small `columnPosition()` helper instead of hand-picked percentages.
+
+**WorldMapScreen.css:**
+- Island size was a fixed 120px; switched to `clamp(110px, 30vmin, 190px)` so islands scale up proportionally with screen size instead of a fixed pixel size. Row spacing is already percentage-based (proportional to screen height) via the helper above.
+
+**Файлы:** `src/screens/WorldMapScreen/hooks/useIslandPositions.ts`, `src/screens/WorldMapScreen/WorldMapScreen.css`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто.
+**Не проверено вживую** — нужна проверка на устройстве: левая и правая колонки должны визуально занимать одинаковую высоту экрана (не одна внизу, другая вверху), острова заметно крупнее.
