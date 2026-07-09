@@ -4,6 +4,7 @@ import { getNotesByProfession, addNote, updateNote, deleteNote } from '@/core/us
 import { getActiveProfessionId } from '@/core/profession_loader';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
 import { subscribe } from '@/core/events/system_event_bus';
+import { Icon } from '@/components/Icon/Icon';
 import type { Note } from '@/core/user_data/notes/note';
 import './NotesScreen.css';
 
@@ -16,15 +17,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   offer_preparation: 'Offer Prep',
   offer: 'Offer',
   other: 'Other',
-};
-const CATEGORY_ICONS: Record<string, string> = {
-  resume: '📄',
-  linkedin: '🔗',
-  applications: '📨',
-  interviews: '🎤',
-  offer_preparation: '📋',
-  offer: '💼',
-  other: '📌',
 };
 const CATEGORY_COLORS: Record<string, string> = {
   resume: '#4A90D9',
@@ -135,15 +127,15 @@ export function NotesScreen({ style, onClose, professionId }: { style?: CSSPrope
   if (!hasNotes && !showNewNote) {
     return (
       <div className="notes-screen" style={style}>
-        <button className="notes-close-btn" onClick={onClose}>✕</button>
+        <button className="notes-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>
         <div className="notes-scroll">
           <h1 className="notes-title">My Journal</h1>
           <div className="notes-empty-state">
-            <div className="notes-empty-icon">📝</div>
+            <div className="notes-empty-icon"><Icon name="resume" /></div>
             <h2>No notes for this journey yet</h2>
             <p>Tap + to create your first note.</p>
           </div>
-          <button className="notes-back-btn" onClick={onClose}>← Назад</button>
+          <button className="notes-back-btn" onClick={onClose}>← Back</button>
         </div>
         <button className="notes-fab" onClick={() => setShowNewNote(true)}>+</button>
       </div>
@@ -152,7 +144,7 @@ export function NotesScreen({ style, onClose, professionId }: { style?: CSSPrope
 
   return (
     <div className="notes-screen" style={style}>
-      <button className="notes-close-btn" onClick={onClose}>✕</button>
+      <button className="notes-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>
       <div className="notes-scroll">
       <h1 className="notes-title">My Journal</h1>
 
@@ -175,7 +167,7 @@ export function NotesScreen({ style, onClose, professionId }: { style?: CSSPrope
               '--chip-color': CATEGORY_COLORS[cat],
             } as React.CSSProperties}
           >
-            {CATEGORY_ICONS[cat]} {CATEGORY_LABELS[cat]}
+            <Icon name={cat as any} size={20} color={CATEGORY_COLORS[cat]} /> {CATEGORY_LABELS[cat]}
           </button>
         ))}
       </div>
@@ -227,7 +219,7 @@ export function NotesScreen({ style, onClose, professionId }: { style?: CSSPrope
       <div className="notes-groups">
         {!hasNotes && (
           <div className="notes-empty">
-            <span className="notes-empty-icon">📝</span>
+            <span className="notes-empty-icon"><Icon name="resume" /></span>
             <p>No notes for this journey yet.</p>
           </div>
         )}
@@ -235,7 +227,7 @@ export function NotesScreen({ style, onClose, professionId }: { style?: CSSPrope
         {visibleCategories.map(cat => (
           <div key={cat} className="notes-group">
             <div className="notes-group-header" style={{ color: CATEGORY_COLORS[cat] || '#888' }}>
-              <span>{CATEGORY_ICONS[cat] || '📌'} {CATEGORY_LABELS[cat] || cat}</span>
+              <span><Icon name={cat as any} size={20} color={CATEGORY_COLORS[cat] || '#888'} /> {CATEGORY_LABELS[cat] || cat}</span>
               <span className="notes-group-count">{grouped[cat].length}</span>
             </div>
 
@@ -259,13 +251,13 @@ export function NotesScreen({ style, onClose, professionId }: { style?: CSSPrope
                       the only in-card indicator of which chapter a note
                       belongs to. */}
                   <span className="notes-card-cat-label">
-                    {CATEGORY_ICONS[cat] || '📌'} {CATEGORY_LABELS[cat] || cat}
+                    <Icon name={cat as any} size={20} color={CATEGORY_COLORS[cat] || '#888'} /> {CATEGORY_LABELS[cat] || cat}
                   </span>
                   <button
                     className="notes-card-delete"
                     onClick={(e) => { e.stopPropagation(); handleDelete(note.id); }}
                   >
-                    ✕
+                    <Icon name="close" size={16} />
                   </button>
                 </div>
                 {note.title && <div className="notes-card-title">{note.title}</div>}
@@ -296,7 +288,7 @@ export function NotesScreen({ style, onClose, professionId }: { style?: CSSPrope
         ))}
       </div>
 
-      <button className="notes-back-btn" onClick={onClose}>← Назад</button>
+      <button className="notes-back-btn" onClick={onClose}>← Back</button>
 
       {/* New note floating button */}
       <button

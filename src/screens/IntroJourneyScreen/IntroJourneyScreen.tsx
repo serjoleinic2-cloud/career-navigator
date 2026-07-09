@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWorldCssStyle } from '@/core/world/useWorldCssStyle';
+import { Icon } from '@/components/Icon/Icon';
 import './IntroJourneyScreen.css';
 
 interface IntroJourneyScreenProps {
@@ -96,7 +97,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
           {/* Resume Island */}
           <div className={`island resume-island ${phase >= 5 ? 'revealed' : ''} ${phase >= 6 ? 'glowing' : ''} ${phase >= 8 ? 'zoomed' : ''}`}>
             <div className="island-body">
-              <span className="island-icon">📄</span>
+              <span className="island-icon"><Icon name="resume" /></span>
               <span className="island-name">Resume</span>
             </div>
           </div>
@@ -107,7 +108,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
           {/* LinkedIn Island */}
           <div className="island linkedin-island">
             <div className="island-body">
-              <span className="island-icon">💼</span>
+              <span className="island-icon"><Icon name="briefcase" /></span>
               <span className="island-name">LinkedIn</span>
             </div>
           </div>
@@ -117,7 +118,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
           {/* Applications Island */}
           <div className="island applications-island">
             <div className="island-body">
-              <span className="island-icon">📨</span>
+              <span className="island-icon"><Icon name="mail" /></span>
               <span className="island-name">Applications</span>
             </div>
           </div>
@@ -127,7 +128,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
           {/* Interview Island */}
           <div className="island interview-island">
             <div className="island-body">
-              <span className="island-icon">🎤</span>
+              <span className="island-icon"><Icon name="microphone" /></span>
               <span className="island-name">Interview</span>
             </div>
           </div>
@@ -137,7 +138,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
           {/* Offer Island */}
           <div className="island offer-island">
             <div className="island-body">
-              <span className="island-icon">🏆</span>
+              <span className="island-icon"><Icon name="trophy" /></span>
               <span className="island-name">Offer</span>
             </div>
           </div>

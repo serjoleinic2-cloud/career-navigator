@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { loadRuntime } from './core/persistence/runtime_persistence';
+import { loadRuntime, saveRuntime } from './core/persistence/runtime_persistence';
 import { startJourney, initializeRuntime, getRuntimeState, resetJourney } from './core/runtime/runtime_controller';
+import { getActiveChapters } from './core/profession_loader';
 import { loadNotes } from './core/user_data/notes/notes_persistence';
 import { setNotes } from './core/user_data/notes/notes_store';
 import { WorldRenderer } from './core';
@@ -10,6 +11,7 @@ import { PlaybookScreen } from './screens/PlaybookScreen/PlaybookScreen';
 import { NotesScreen } from './screens/NotesScreen/NotesScreen';
 import { WorldMapScreen } from './screens/WorldMapScreen/WorldMapScreen';
 import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
+import { SettingsScreen } from './screens/SettingsScreen/SettingsScreen';
 import { JourneyHUD } from './screens/JourneyScreen';
 import { InterviewTrainerScreen } from './screens/InterviewTrainerScreen/InterviewTrainerScreen';
 import { BottomNav } from './components/BottomNav/BottomNav';
@@ -35,6 +37,7 @@ function AppInner() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('journey');
   const [prevScreen, setPrevScreen] = useState<Screen | null>(null);
   const [transitioning, setTransitioning] = useState(false);
+  const [showSettingsOverlay, setShowSettingsOverlay] = useState(false);
   // Deep-link target set by a mission's "Learn more" button (see
   // MissionScreen.tsx) via the OPEN_PLAYBOOK event — lets a task jump
   // straight to its matching Playbook category instead of the user
@@ -189,9 +192,28 @@ function AppInner() {
       case 'notes':
         return <NotesScreen key={common.key} style={common.style} onClose={closeToJourney} professionId={getRuntimeState()?.professionId || 'software_engineer'} />;
       case 'world':
-        return <WorldMapScreen key={common.key} style={common.style} />;
+        return (
+          <WorldMapScreen
+            key={common.key}
+            style={common.style}
+            onChapterSelect={(chapterId) => {
+              const rt = getRuntimeState();
+              if (rt) {
+                rt.activeChapterId = chapterId;
+                const chapters = getActiveChapters();
+                const chapter = chapters.find(c => c.id === chapterId);
+                if (chapter) {
+                  const firstNodeId = chapter.nodeIds[0];
+                  rt.activeNodeId = firstNodeId;
+                }
+                saveRuntime(rt);
+              }
+              setCurrentScreen('journey');
+            }}
+          />
+        );
       case 'profile':
-        return <ProfileScreen key={common.key} style={common.style} onClose={closeToJourney} />;
+        return <ProfileScreen key={common.key} style={common.style} onClose={closeToJourney} onOpenSettings={() => setShowSettingsOverlay(true)} />;
       case 'interview':
         return (
           <InterviewTrainerScreen
@@ -215,6 +237,7 @@ function AppInner() {
         {renderScreen(currentScreen, false)}
       </div>
       <BottomNav currentTab={currentScreen as 'journey' | 'playbook' | 'notes' | 'world' | 'profile'} onTabChange={handleTabChange} />
+      {showSettingsOverlay && <SettingsScreen onClose={() => setShowSettingsOverlay(false)} />}
     </div>
   );
 }

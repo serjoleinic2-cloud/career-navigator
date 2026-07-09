@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { ProgressRing } from '@/components/layout/ProgressRing';
 import { useWorldConfettiColors } from '@/core/world/useWorldConfettiColors';
+import { Icon } from '@/components/Icon/Icon';
 
 export interface TaskCompleteNextTask {
   title: string;
@@ -84,7 +85,7 @@ export function TaskCompleteScreen({
 
           {showChapterComplete ? (
             <>
-              <div className="task-complete-banner chapter-complete-banner">🏆 CHAPTER COMPLETE!</div>
+              <div className="task-complete-banner chapter-complete-banner"><Icon name="trophy" /> CHAPTER COMPLETE!</div>
               <h2 className="task-complete-heading">{chapterTitle ? `${chapterTitle} Mastered` : 'Chapter Mastered!'}</h2>
               <p className="task-complete-subtitle">
                 You've completed all {totalTasks} steps. On to the next island!
@@ -92,7 +93,7 @@ export function TaskCompleteScreen({
             </>
           ) : (
             <>
-              <div className="task-complete-banner">🎉 TASK COMPLETED!</div>
+              <div className="task-complete-banner"><Icon name="party" /> TASK COMPLETED!</div>
               <h2 className="task-complete-heading">Great work!</h2>
               <p className="task-complete-subtitle">
                 Step {tasksCompleted} of {totalTasks} — keep going!
@@ -167,7 +168,7 @@ export function TaskCompleteScreen({
 
           <button className="task-complete-continue-btn" onClick={onContinue}>
             <span>{showChapterComplete ? 'Next Chapter →' : 'Continue Journey'}</span>
-            <span className="task-complete-continue-arrow">{showChapterComplete ? '🗺️' : '→'}</span>
+            <span className="task-complete-continue-arrow">{showChapterComplete ? <Icon name="map" /> : '→'}</span>
           </button>
 
           {/* "Coming next" — a task preview mid-chapter, or the next
@@ -182,9 +183,9 @@ export function TaskCompleteScreen({
                   Task {nextTask.index} of {nextTask.total}
                 </span>
                 <span className="task-complete-next-subtitle">{nextTask.title}</span>
-                <span className="task-complete-next-time">🕐 {nextTask.estimatedMinutes} min</span>
+                <span className="task-complete-next-time"><Icon name="clock" size={14} /> {nextTask.estimatedMinutes} min</span>
               </div>
-              <div className="task-complete-next-icon">📋</div>
+              <div className="task-complete-next-icon"><Icon name="resume" /></div>
             </div>
           )}
 
@@ -195,7 +196,7 @@ export function TaskCompleteScreen({
                 <span className="task-complete-next-title">{nextChapterTitle}</span>
                 <span className="task-complete-next-subtitle">New chapter unlocked</span>
               </div>
-              <div className="task-complete-next-icon">🗺️</div>
+              <div className="task-complete-next-icon"><Icon name="map" /></div>
             </div>
           )}
 

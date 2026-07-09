@@ -1,5 +1,6 @@
 import { GlassCard } from '@/components/layout/GlassCard';
 import { PrimaryButton } from '@/components/layout/PrimaryButton';
+import { Icon } from '@/components/Icon/Icon';
 import type { TaskContent } from '@/core/task_content';
 
 interface MissionCardProps {
@@ -21,7 +22,7 @@ export function MissionCard({ task, onStart }: MissionCardProps) {
   return (
     <div className="mission-card-wrapper">
       <GlassCard className="mission-card-glass">
-        <div className="mission-card-emoji">🎯</div>
+        <div className="mission-card-emoji"><Icon name="target" /></div>
         <h2 className="mission-card-heading">Mission</h2>
         <h3 className="mission-card-title">{task.title}</h3>
 

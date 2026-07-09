@@ -30,7 +30,9 @@
 
 .world-island--unlocked {
   cursor: pointer;
-  filter: drop-shadow(0 0 12px var(--island-accent, #00e5e0));
+}
+
+.world-island--city {
 }
 
 .world-island--locked {
@@ -38,13 +40,9 @@
   filter: grayscale(0.9);
 }
 
-.world-island--city {
-  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
-}
-
 .world-island-float {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   animation: island-float 3.5s ease-in-out infinite;
 }
 

@@ -9,6 +9,7 @@ import { addNote, updateNote, getNotesByTask } from '../../core/user_data/notes/
 import { getActiveProfessionId, getActiveChapters } from '../../core/profession_loader';
 import { getNextChapter } from '../../core/chapter_engine';
 import { TaskCompleteScreen, type TaskCompleteNextTask } from './TaskCompleteScreen';
+import { Icon } from '../../components/Icon/Icon';
 
 interface MissionScreenProps {
   runtimeState: JourneyRuntimeState;
@@ -186,7 +187,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
   if (!activeTask) {
     return (
       <div className="mission-screen mission-empty">
-        {onClose && <button className="mission-close-btn" onClick={onClose}>✕</button>}
+        {onClose && <button className="mission-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>}
         <div className="mission-empty-text">No active mission</div>
         <button className="mission-primary-btn" onClick={onComplete}>
           Return to Journey
@@ -309,12 +310,12 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
             {Math.round(runtimeState.confidenceScore * 100)}%
           </div>
         </div>
-        {onClose && <button className="mission-close-btn" onClick={onClose} aria-label="Close">✕</button>}
+        {onClose && <button className="mission-close-btn" onClick={onClose} aria-label="Close"><Icon name="close" size={16} /></button>}
       </div>
 
       <div className={`mission-card ${taskView === 'completing' ? 'mission-pulse' : ''}`}>
         <div className="task-type-badge">
-          {activeTask.completionCriteria.length > 0 ? '☑️ Complete' : '✏️ Write'}
+          {activeTask.completionCriteria.length > 0 ? <><Icon name="check" size={14} /> Complete</> : '✏️ Write'}
         </div>
 
         <h2 className="task-title">{activeTask.title}</h2>
@@ -334,7 +335,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
             emit('OPEN_PLAYBOOK', { category });
           }}
         >
-          📖 Learn more
+          <Icon name="book" /> Learn more
         </button>
 
         <div className="mission-card-meta">
@@ -374,7 +375,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
                     onClick={() => handleChecklistToggle(index)}
                   >
                     <div className="checklist-box">
-                      {checkedItems.has(index) && <span className="checklist-mark">✓</span>}
+                      {checkedItems.has(index) && <span className="checklist-mark"><Icon name="check" size={14} /></span>}
                     </div>
                     <span className="checklist-label">{criterion}</span>
                   </div>
@@ -394,7 +395,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
             />
             <div className={`text-quality-hint ${textInput.trim().length >= 40 ? 'text-quality-hint-ready' : ''}`}>
               {textInput.trim().length >= 40
-                ? '✓ Detailed enough for full credit on this mission.'
+                ? <><Icon name="check" size={14} /> Detailed enough for full credit on this mission.</>
                 : `Write at least 2–3 full sentences (${textInput.trim().length}/40 characters) for full credit. Checklist and star rating below are for your own reflection and don't affect whether this mission counts as a full pass.`}
             </div>
           </div>
@@ -409,7 +410,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
                     className={`reflection-star ${star <= reflectionScore ? 'active' : ''}`}
                     onClick={() => setReflectionScore(star)}
                   >
-                    ★
+                    <Icon name="star" />
                   </button>
                 ))}
               </div>

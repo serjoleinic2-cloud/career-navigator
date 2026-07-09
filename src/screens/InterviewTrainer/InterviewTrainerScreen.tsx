@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { TaskContent } from '@/core/task_content';
 import { submitTask, createTask } from '@/core/runtime/runtime_controller';
 import { speak, stop } from '@/voice/tts';
+import { Icon } from '@/components/Icon/Icon';
 import './InterviewTrainer.css';
 
 type Phase = 'idle' | 'countdown' | 'recording' | 'review' | 'feedback' | 'completed';
@@ -292,7 +293,7 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: TrainerPro
             disabled={repeatDisabled}
             aria-label="Repeat question"
           >
-            🔁 Repeat
+            <Icon name="refresh" size={14} /> Repeat
           </button>
           <button className="trainer-btn primary" onClick={startCountdown} aria-label="Start recording">
             ▶ Start Recording
@@ -374,7 +375,7 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: TrainerPro
 
           <div className="trainer-buttons">
             <button className="trainer-btn" onClick={handleTryAgain} aria-label="Record again">
-              🔄 Record Again
+              <Icon name="refresh" size={14} /> Record Again
             </button>
             <button className="trainer-btn primary" onClick={handleSubmitReview} aria-label="Submit self-assessment">
               Submit Assessment
@@ -387,7 +388,7 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: TrainerPro
       {phase === 'feedback' && (
         <div className="trainer-feedback">
           <h3 className={`trainer-feedback-title ${passed ? 'pass' : 'fail'}`}>
-            {passed ? '✓ Good self-awareness!' : 'Keep practicing'}
+            {passed ? <><Icon name="check" size={14} /> Good self-awareness!</> : 'Keep practicing'}
           </h3>
 
           <div className="trainer-feedback-section">
@@ -425,7 +426,7 @@ export function InterviewTrainerScreen({ task, onComplete, onClose }: TrainerPro
       {/* Phase: completed */}
       {phase === 'completed' && (
         <div className="trainer-completed">
-          <div className="trainer-completed-icon">🎉</div>
+          <div className="trainer-completed-icon"><Icon name="party" size={48} /></div>
           <h2>Task Completed</h2>
           <p>Your recording and self-assessment have been submitted.</p>
           <button

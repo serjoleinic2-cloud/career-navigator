@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { Icon } from '../../components/Icon/Icon';
 import './OnboardingScreen.css';
 
 type Profession = 'software_engineer' | 'data_scientist' | 'product_manager';
@@ -111,7 +112,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       {screen === 0 && (
         <div className={`onboarding-page onboarding-welcome ${slideClass}`}>
           <div className="welcome-illustration">
-            <div className="illustration-placeholder">🧭</div>
+            <div className="illustration-placeholder"><Icon name="map" /></div>
           </div>
           <h1 className="welcome-title">Career Navigator</h1>
           <p className="welcome-subtitle">
@@ -184,7 +185,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 onClick={() => toggleGoal(g.id)}
               >
                 <span className="card-label">{g.label}</span>
-                {state.goals.includes(g.id) && <span className="card-check">✓</span>}
+                {state.goals.includes(g.id) && <span className="card-check"><Icon name="check" /></span>}
               </div>
             ))}
           </div>
@@ -229,7 +230,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 onClick={() => togglePreference(p.id)}
               >
                 <span className="card-label">{p.label}</span>
-                {state.preferences.includes(p.id) && <span className="card-check">✓</span>}
+                {state.preferences.includes(p.id) && <span className="card-check"><Icon name="check" /></span>}
               </div>
             ))}
           </div>
@@ -246,21 +247,21 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           <h2 className="onboarding-heading">Review</h2>
           <div className="review-grid">
             <div className="review-item">
-              <div className="review-icon">💼</div>
+              <div className="review-icon"><Icon name="briefcase" /></div>
               <div className="review-label">Profession</div>
               <div className="review-value">
                 {professions.find(p => p.id === state.profession)?.label}
               </div>
             </div>
             <div className="review-item">
-              <div className="review-icon">⭐</div>
+              <div className="review-icon"><Icon name="star" /></div>
               <div className="review-label">Experience</div>
               <div className="review-value">
                 {experiences.find(e => e.id === state.experience)?.label}
               </div>
             </div>
             <div className="review-item">
-              <div className="review-icon">🎯</div>
+              <div className="review-icon"><Icon name="target" /></div>
               <div className="review-label">Goals</div>
               <div className="review-value">
                 {state.goals.length} selected
@@ -274,7 +275,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               </div>
             </div>
             <div className="review-item">
-              <div className="review-icon">⚙️</div>
+              <div className="review-icon"><Icon name="settings" /></div>
               <div className="review-label">Preferences</div>
               <div className="review-value">
                 {state.preferences.length} selected

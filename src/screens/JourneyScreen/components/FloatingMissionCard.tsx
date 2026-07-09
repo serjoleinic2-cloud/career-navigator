@@ -1,3 +1,4 @@
+import { Icon } from '@/components/Icon/Icon';
 import type { SkillNode } from '@/core/skill_state';
 import { PrimaryButton } from '@/components/layout/PrimaryButton';
 
@@ -15,7 +16,7 @@ export function FloatingMissionCard({ node, onContinue, onClose }: FloatingMissi
     <div className="floating-mission-card-overlay" onClick={onClose}>
       <div className="floating-mission-card" onClick={e => e.stopPropagation()}>
         <button className="mission-card-close" onClick={onClose} aria-label="Close">
-          ✕
+          <Icon name="close" size={16} />
         </button>
 
         <div className="mission-card-header">
@@ -37,7 +38,7 @@ export function FloatingMissionCard({ node, onContinue, onClose }: FloatingMissi
             <span className="mission-card-stars">
               {Array.from({ length: 5 }, (_, i) => (
                 <span key={i} className={`star ${i < difficultyStars ? 'star--filled' : ''}`}>
-                  ★
+                  <Icon name="star" size={12} />
                 </span>
               ))}
             </span>

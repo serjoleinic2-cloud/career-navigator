@@ -1,5 +1,6 @@
 import { GlassCard } from '@/components/layout/GlassCard';
 import { PrimaryButton } from '@/components/layout/PrimaryButton';
+import { Icon } from '../../../components/Icon/Icon';
 import type { TaskResult } from '@/core/task/task_execution_engine';
 import './ResultCard.css';
 
@@ -11,7 +12,7 @@ interface ResultCardProps {
 export function ResultCard({ result, onContinue }: ResultCardProps) {
   return (
     <GlassCard className="result-card">
-      <div className="result-card-icon">🎉</div>
+      <div className="result-card-icon"><Icon name="party" size={48} /></div>
       <h3 className="result-card-title">Mission Complete</h3>
 
       <div className="result-card-stats">

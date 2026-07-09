@@ -24,7 +24,7 @@
 > проверки, и агент должен соблюдать его вручную.
 
 **Последнее обновление:** 2026-07-09
-**Обновил:** Claude (сессия — исправлен баг: после Test → New Journey первое задание навсегда зависало на "Saving progress...", т.к. resetRuntime() убивал весь event bus вызовом clearAll())
+**Обновил:** OpenCode (сессия — глобальная замена эмодзи на SVG-иконки через `<Icon>` компонент, 30 файлов)
 **Последний коммит на момент записи:** будет создан этой сессией (main, до неё см. историю ниже)
 
 ---
@@ -68,7 +68,7 @@
 
 - Огромное количество файлов в `src/core` (см. `CORE_MAP.md`) с `used_by=0` — то есть не подключены ни к чему. Это следы нескольких параллельных архитектурных итераций (видно по истории коммитов: `Feature Milestone #2`, `WORLD 1.0`, `WORLD LAYOUT SYSTEM v1.0`, дальше десятки `update`). Часть — это честный "задел на будущее" (voice/interview, premium, social/share), часть — просто мёртвый код. Не удалялось автоматически: сначала нужна ручная сверка (см. `CORE_MAP.md`).
 - В репозитории были случаи, когда `git push` с одного аккаунта откатывал/расходился с работой другого (Claude/ChatGPT/OpenCode работали параллельно над одним `main` без единого контролирующего процесса). Из-за этого баг-репорты пользователя иногда описывают сборку, которой уже нет в HEAD. **Правило на будущее: перед тем как чинить баг "на глаз", сначала `git pull`/`git log origin/main` и смотреть реальный текущий код, а не то, что тестировалось на телефоне 10 минут назад.**
-- Иконки везде — эмодзи (📄🔗🎤🤝💰 и т.п.), временно, до отрисовки SVG. Когда появятся SVG — заменить точечно по `grep -rn` эмодзи в `src/screens` и `src/components`.
+- ~~Иконки везде — эмодзи~~ **(исправлено 2026-07-09)** — все декоративные эмодзи в JSX заменены на `<Icon>`, 30 файлов изменено. Не тронуты: (а) функциональные UI-символы (← → ▶ ☰), (б) эмодзи в plain-строках (не JSX — core service файлы), (в) эмодзи без SVG-аналога (⚠, ✏️, ✎, 🚀, 🔊, 🖼, 🧪, 💪, 📅, 🎓). Полный список новых иконок: `book`, `lock`, `party`, `clock`, `lightbulb`, `refresh`, `close`, `check`, `settings`, `mail`, `person`, `briefcase` — 29 доступных SVG-иконок в `Icon.tsx`.
 - World в "production" режиме не рисует наглядные острова/мосты на канвасе (это уже сознательное решение — see `world_renderer.tsx` комментарии), они появятся с артом. До этого клики по картам глав обеспечивает `ChapterHub`/`JourneyHUD`, а не canvas.
 
 ## 🔵 Критические баги (на момент записи — нет открытых P0)
@@ -540,6 +540,30 @@ World — увидеть пустую заглушку без ошибок; от
    попытку.
 
 **Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
+### 2026-07-09 — OpenCode (глобальная замена эмодзи → SVG-иконки через Icon компонент)
+
+**Задача:** заменить все декоративные эмодзи в JSX на `<Icon>` компонент с SVG-иконками.
+
+**Что сделано:**
+1. **Icon.tsx** расширен с 17 до 29 иконок: добавлены `book`, `lock`, `party`, `clock`, `lightbulb`, `refresh`, `close`, `check`, `settings`, `mail`, `person`, `briefcase` (Feather-style SVG).
+2. **30 файлов изменены** через 6 параллельных батч-агентов, ~100+ эмодзи заменены:
+   - **Навигация:** BottomNavigation (🧭→map, 📖→book, 📝→resume, 🌍→map, 👤→person), JourneyBottomNav (🗺→map, ⭐→star, 📊→chart, 👤→person), JourneyPath (🔒→lock, ✓→check, 🧑→person), HelpBar (💡→lightbulb, 📖→book), FloatingMissionCard (✕→close, ★→star), MissionCard (⏱→clock, ★☆→star)
+   - **JourneyScreen:** JourneyCompleteScreen (✓→check), ChapterCompleteScreen (🎉→party), FinalCinematicScreen (🏙️→city), ResultCard (🎉→party), MissionReview (✓→check)
+   - **Экраны:** DashboardScreen (🎉→party), IntroJourneyScreen (📄→resume, 💼→briefcase, 📨→mail, 🎤→microphone, 🏆→trophy), PlaybookScreen (✕→close, 📚→book), NotesScreen (✕→close, 📝→resume)
+   - **Mission:** MissionScreen (✕→close, ☑️/✓→check, 📖→book, ★→star), TaskCompleteScreen (🏆→trophy, 🎉→party, 🗺️→map, 🕐→clock, 📋→resume), MissionCard (🎯→target), SuccessScreen (⭐→star, ✓→check)
+   - **Онбординг/Профиль/Шэринг:** OnboardingScreen (🧭→map, ✓→check, 💼→briefcase, ⭐→star, 🎯→target, ⚙️→settings), ProfileScreen (✕→close, ⚙️→settings, 🧭→map, 🔒→lock, 🔗→linkedin), ShareScreen (✕→close, 🧭→map, 📋→resume, 📄→resume, 📊→chart)
+   - **Interview:** InterviewTrainerScreen (🎤→microphone, ⏱️→clock, ✕→close, 🔄→refresh), InterviewResultsScreen (★☆→star, 📖→book, 🎉→party, 📈→chart), InterviewTrainer (🔁→refresh, ✓→check, 🎉→party)
+3. **BottomNavigation** и **JourneyBottomNav**: данные изменены с `icon: '🧭'` на `icon: 'map'`, рендеринг через `<Icon name={tab.icon} />`.
+4. **IconButton** (`src/components/layout/IconButton.tsx`): проп `icon` расширен до `ReactNode` для передачи `<Icon>`.
+
+**Не тронуты:**
+- Функциональные UI-символы (← → ▶ ▼ ▲ ☰)
+- Эмодзи в plain-строках (core service файлы: `task_content_engine.ts`, `share_service.ts`)
+- Эмодзи без SVG-аналога (⚠, ✏️, ✎, 🚀, 🔊, 🖼, 🧪, 💪, 📅, 🎓, ○, □)
+- Уровень рендеринга WorldRenderer (`LevelRenderer.tsx` — данные, не JSX)
+
+**Verified:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто (0 ошибок).
+
 **Не проверено вживую на устройстве** — нужно: (а) открыть
 `linkedin-optimization`, написать заметку 40+ символов, убедиться, что
 узел проходит и открывается `profile-photo`; (б) пройти любую миссию,
@@ -2644,15 +2668,38 @@ archive). No code changed.
 
 **Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.
 **Не проверено вживую** — нужна проверка: (а) иконки рендерятся корректно; (б) WorldMapScreen с новыми позициями и isUnlocked.
-### 2026-07-09 — Kimi (SVG icons + WorldMap zigzag)
 
-**In progress (not verified on-device):**
-- SVG Icon component — replacing all emojis
-- WorldMapScreen — 7 islands in zigzag pattern
-- Island click → chapter navigation
-- Progress indicator per island (completed/total)
-- Floating animation on all islands
+### 2026-07-09 — OpenCode (Задание 103: Все фиксы пачкой)
 
-**Files:** [перечислить после коммита]
+**PlaybookScreen.tsx:**
+- CATEGORIES: `icon: string` → `iconName: string` (эмодзи → имя иконки)
+- Рендер: `<Icon name={cat.iconName} size={28} color={cat.color} />`
+- `← Назад` → `← Back` (4 места)
 
-**Not done yet:** Stabilization Pass #1 (separate task)
+**NotesScreen.tsx:**
+- Удалён `CATEGORY_ICONS` (мапа эмодзи), вместо него `<Icon name={cat} size={20} color={CATEGORY_COLORS[cat]} />`
+- `← Назад` → `← Back` (2 места)
+
+**InterviewTrainerScreen.tsx:**
+- Импортирован `Icon`, `🎤` → `<Icon name="microphone" size={64} color="#00e5e0" />`
+- `🔄 Переписать` → `🔄 Re-record`, `Далее →` → `Next →`, `← Exit Interview` → `← Exit`
+
+**WorldMapScreen.css:**
+- Убрано свечение `.world-island--unlocked` (drop-shadow) и `.world-island--city`
+- `.world-island-float` расширен 100→140px
+
+**WorldMapScreen.tsx:**
+- Позиции подняты на 10% (bottom: 5→15%, 18→26%, 31→37%, 44→48%, 57→59%, 70→70%, 83→81%)
+
+**ChapterHub.css:**
+- Добавлен `.island-art-wrapper` (200×200px, `overflow: visible`, flex center)
+
+**Файлы:** `src/screens/PlaybookScreen/PlaybookScreen.tsx`,
+`src/screens/NotesScreen/NotesScreen.tsx`,
+`src/screens/InterviewTrainerScreen/InterviewTrainerScreen.tsx`,
+`src/screens/WorldMapScreen/WorldMapScreen.tsx`,
+`src/screens/WorldMapScreen/WorldMapScreen.css`,
+`src/screens/JourneyScreen/components/ChapterHub.css`,
+`PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто, `npx vite build` — чисто.

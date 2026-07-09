@@ -1,4 +1,5 @@
 import { PrimaryButton } from '@/components/layout/PrimaryButton';
+import { Icon } from '@/components/Icon/Icon';
 import type { TaskResult } from '@/core/task/task_execution_engine';
 
 interface SuccessScreenProps {
@@ -13,7 +14,7 @@ export function SuccessScreen({ result, onContinue }: SuccessScreenProps) {
   return (
     <div className="success-screen">
       <div className="success-screen-content">
-        <div className="success-icon">⭐</div>
+        <div className="success-icon"><Icon name="star" /></div>
         <h1 className="success-title">Mission Complete</h1>
 
         <div className="success-stats">
@@ -26,7 +27,7 @@ export function SuccessScreen({ result, onContinue }: SuccessScreenProps) {
             <span className="success-stat-label">Confidence</span>
           </div>
           <div className="success-stat">
-            <span className="success-stat-value">✓</span>
+            <span className="success-stat-value"><Icon name="check" size={14} /></span>
             <span className="success-stat-label">Node mastered</span>
           </div>
         </div>

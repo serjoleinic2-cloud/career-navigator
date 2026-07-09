@@ -1,4 +1,5 @@
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { Icon } from '@/components/Icon/Icon';
 import './DashboardScreen.css';
 
 export function DashboardScreen({ onBack }: { onBack: () => void }) {
@@ -106,7 +107,7 @@ export function DashboardScreen({ onBack }: { onBack: () => void }) {
             <p className="next-action-state">{nextActionNode.state}</p>
           </div>
         ) : (
-          <p className="next-action-empty">All tasks completed! 🎉</p>
+          <p className="next-action-empty">All tasks completed! <Icon name="party" /></p>
         )}
       </div>
 

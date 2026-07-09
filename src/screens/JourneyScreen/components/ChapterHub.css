@@ -3,6 +3,15 @@
   50% { transform: translateY(-10px); }
 }
 
+.island-art-wrapper {
+  width: 200px;
+  height: 200px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .island-art-img {
   width: 143%;
   height: 143%;

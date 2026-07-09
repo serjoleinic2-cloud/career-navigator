@@ -7,6 +7,7 @@ import { mapToShareModel } from '@/core/share/share_mapper';
 import { copyText, nativeShare, shareImage } from '@/core/share/share_service';
 import { exportJSON, exportCSV } from '@/core/export/export_service';
 import type { ShareModel } from '@/core/share/share_model';
+import { Icon } from '@/components/Icon/Icon';
 import './ShareScreen.css';
 
 export function ShareScreen({ style, onClose }: { style?: CSSProperties; onClose?: () => void }) {
@@ -57,7 +58,7 @@ export function ShareScreen({ style, onClose }: { style?: CSSProperties; onClose
 
   return (
     <div className="share-screen" style={style}>
-      {onClose && <button className="share-close-btn" onClick={onClose} aria-label="Close">✕</button>}
+      {onClose && <button className="share-close-btn" onClick={onClose} aria-label="Close"><Icon name="close" size={16} /></button>}
       {/* Share Card for display and export */}
       <div className="share-card-container" ref={cardRef}>
         <div
@@ -72,7 +73,7 @@ export function ShareScreen({ style, onClose }: { style?: CSSProperties; onClose
               className="share-emblem-ring"
               style={{ borderColor: model.themeColor }}
             />
-            <span className="share-emblem-icon">🧭</span>
+            <span className="share-emblem-icon"><Icon name="map" /></span>
           </div>
 
           <div className="share-profession-label">{model.profession}</div>
@@ -117,13 +118,13 @@ export function ShareScreen({ style, onClose }: { style?: CSSProperties; onClose
           🖼 Share Image
         </button>
         <button className="share-action-btn" onClick={handleCopyText}>
-          {copied ? '✓ Copied!' : '📋 Copy Text'}
+          {copied ? <><Icon name="check" /> Copied!</> : <><Icon name="resume" /> Copy Text</>}
         </button>
         <button className="share-action-btn" onClick={handleExportJSON}>
-          📄 Export JSON
+          <Icon name="resume" /> Export JSON
         </button>
         <button className="share-action-btn" onClick={handleExportCSV}>
-          📊 Export CSV
+          <Icon name="chart" /> Export CSV
         </button>
       </div>
 

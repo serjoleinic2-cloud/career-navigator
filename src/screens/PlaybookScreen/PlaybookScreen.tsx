@@ -4,15 +4,17 @@ import type { PlaybookEntry, PlaybookCategory } from '@/core/playbook/playbook_t
 import type { CSSProperties } from 'react';
 import './PlaybookScreen.css';
 
-const CATEGORIES: { id: PlaybookCategory; label: string; icon: string; color: string }[] = [
-  { id: 'resume', label: 'Resume', icon: '📄', color: '#4A90D9' },
-  { id: 'linkedin', label: 'LinkedIn', icon: '🔗', color: '#7B68EE' },
-  { id: 'applications', label: 'Applications', icon: '📨', color: '#48BB78' },
-  { id: 'interviews', label: 'Interviews', icon: '🎤', color: '#F6AD55' },
-  { id: 'offer', label: 'Offer', icon: '💼', color: '#FF6B6B' },
-  { id: 'communication', label: 'Communication', icon: '💬', color: '#4FD1C5' },
-  { id: 'body_language', label: 'Body Language', icon: '🧍', color: '#ED8936' },
-  { id: 'confidence', label: 'Confidence', icon: '💪', color: '#D69E2E' },
+import { Icon } from '@/components/Icon/Icon';
+
+const CATEGORIES: { id: PlaybookCategory; label: string; iconName: string; color: string }[] = [
+  { id: 'resume', label: 'Resume', iconName: 'resume', color: '#4A90D9' },
+  { id: 'linkedin', label: 'LinkedIn', iconName: 'linkedin', color: '#7B68EE' },
+  { id: 'applications', label: 'Applications', iconName: 'applications', color: '#48BB78' },
+  { id: 'interviews', label: 'Interviews', iconName: 'interviews', color: '#F6AD55' },
+  { id: 'offer', label: 'Offer', iconName: 'offer', color: '#FF6B6B' },
+  { id: 'communication', label: 'Communication', iconName: 'communication', color: '#4FD1C5' },
+  { id: 'body_language', label: 'Body Language', iconName: 'body_language', color: '#ED8936' },
+  { id: 'confidence', label: 'Confidence', iconName: 'confidence', color: '#D69E2E' },
 ];
 
 interface Props {
@@ -75,16 +77,16 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
   if (!hasContent) {
     return (
       <div className="playbook-screen" style={style}>
-        <button className="playbook-close-btn" onClick={onClose}>✕</button>
+        <button className="playbook-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>
         <div className="playbook-scroll">
           <h1 className="playbook-main-title">Playbook</h1>
           <p className="playbook-subtitle">Your career knowledge base</p>
           <div className="playbook-empty-state">
-            <div className="playbook-empty-icon">📚</div>
+            <div className="playbook-empty-icon"><Icon name="book" /></div>
             <h2>No content yet</h2>
             <p>Complete missions to unlock playbook entries.</p>
           </div>
-          <button className="playbook-back-btn" onClick={onClose}>← Назад</button>
+          <button className="playbook-back-btn" onClick={onClose}>← Back</button>
         </div>
       </div>
     );
@@ -102,7 +104,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
     const e = selectedEntry;
     return (
       <div className="playbook-screen" style={style}>
-        <button className="playbook-close-btn" onClick={onClose}>✕</button>
+        <button className="playbook-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>
         <div className="playbook-scroll">
           <h2 className="playbook-entry-title">{e.title}</h2>
           <span className="playbook-entry-cat">{e.category}</span>
@@ -144,7 +146,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
             )}
           </div>
 
-          <button className="playbook-back-btn" onClick={goBack}>← Назад</button>
+          <button className="playbook-back-btn" onClick={goBack}>← Back</button>
         </div>
       </div>
     );
@@ -154,7 +156,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
     const entries = getPlaybookByCategory(selectedCategory);
     return (
       <div className="playbook-screen" style={style}>
-        <button className="playbook-close-btn" onClick={onClose}>✕</button>
+        <button className="playbook-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>
         <div className="playbook-scroll">
 
           <h2 className="playbook-entries-title">
@@ -179,7 +181,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
             ))}
           </div>
 
-          <button className="playbook-back-btn" onClick={goBack}>← Назад</button>
+          <button className="playbook-back-btn" onClick={goBack}>← Back</button>
         </div>
       </div>
     );
@@ -187,7 +189,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
 
   return (
     <div className="playbook-screen" style={style}>
-      <button className="playbook-close-btn" onClick={onClose}>✕</button>
+      <button className="playbook-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>
       <div className="playbook-scroll">
         <h1 className="playbook-main-title">Playbook</h1>
         <p className="playbook-subtitle">Deep knowledge, templates, and strategies</p>
@@ -200,13 +202,13 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
               onClick={() => openCategory(cat.id)}
               style={{ '--cat-color': cat.color } as React.CSSProperties}
             >
-              <span className="playbook-category-icon">{cat.icon}</span>
+              <span className="playbook-category-icon"><Icon name={cat.iconName as any} size={28} color={cat.color} /></span>
               <span className="playbook-category-label">{cat.label}</span>
             </button>
           ))}
         </div>
 
-        <button className="playbook-back-btn" onClick={onClose}>← Назад</button>
+        <button className="playbook-back-btn" onClick={onClose}>← Back</button>
       </div>
     </div>
   );

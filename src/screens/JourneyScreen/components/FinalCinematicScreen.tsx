@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { getWorldThemeOrDefault, getChapterAccent } from '@/core/world/world_theme';
 import { emit } from '@/core/events/system_event_bus';
+import { Icon } from '../../../components/Icon/Icon';
 import './FinalCinematicScreen.css';
 
 export interface CinematicChapter {
@@ -467,7 +468,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
               )}
             </>
           ) : (
-            <div className="fc-hero-fallback">🏙️</div>
+            <div className="fc-hero-fallback"><Icon name="city" size={48} /></div>
           )}
 
           <div className="fc-hero-scrim" />

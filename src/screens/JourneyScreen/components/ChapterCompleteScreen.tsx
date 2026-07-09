@@ -1,6 +1,7 @@
 import { PrimaryButton } from '@/components/layout/PrimaryButton';
 import { useWorldCssStyle } from '@/core/world/useWorldCssStyle';
 import { useWorldConfettiColors } from '@/core/world/useWorldConfettiColors';
+import { Icon } from '../../../components/Icon/Icon';
 
 interface ChapterCompleteScreenProps {
   chapterId: string;
@@ -48,7 +49,7 @@ export function ChapterCompleteScreen({
 
       <div className="chapter-complete-content">
         <div className="chapter-complete-circle">
-          <span className="chapter-complete-icon">🎉</span>
+          <span className="chapter-complete-icon"><Icon name="party" size={48} /></span>
         </div>
         <h2 className="chapter-complete-heading">Chapter Complete</h2>
         <p className="chapter-complete-subtitle">{chapterTitle} Mastered</p>

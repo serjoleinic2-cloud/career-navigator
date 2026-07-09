@@ -1,8 +1,9 @@
+import { Icon, type IconName } from '../Icon/Icon';
 import './BottomNavigation.css';
 
 interface Tab {
   id: string;
-  icon: string;
+  icon: IconName;
   label: string;
 }
 
@@ -12,11 +13,11 @@ interface BottomNavigationProps {
 }
 
 const TABS: Tab[] = [
-  { id: 'journey', icon: '🧭', label: 'Journey' },
-  { id: 'playbook', icon: '📖', label: 'Playbook' },
-  { id: 'notes', icon: '📝', label: 'Notes' },
-  { id: 'world', icon: '🌍', label: 'World' },
-  { id: 'profile', icon: '👤', label: 'Profile' },
+  { id: 'journey', icon: 'map', label: 'Journey' },
+  { id: 'playbook', icon: 'book', label: 'Playbook' },
+  { id: 'notes', icon: 'resume', label: 'Notes' },
+  { id: 'world', icon: 'map', label: 'World' },
+  { id: 'profile', icon: 'person', label: 'Profile' },
 ];
 
 export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
@@ -31,7 +32,7 @@ export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationPro
             onClick={() => onTabChange(tab.id)}
             aria-label={tab.label}
           >
-            <span className="bottom-nav-new-icon">{tab.icon}</span>
+            <span className="bottom-nav-new-icon"><Icon name={tab.icon} size={20} /></span>
             <span className="bottom-nav-new-label">{tab.label}</span>
           </button>
         );

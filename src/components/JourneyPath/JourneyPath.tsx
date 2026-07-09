@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Icon } from '../Icon/Icon';
 import { CHAPTER_THEMES } from './theme';
 import './JourneyPath.css';
 
@@ -123,15 +124,15 @@ export function JourneyPath({ nodes, activeNodeId, onNodeSelect, totalNodes, rea
                         backgroundColor: status === 'completed' ? theme.primary : undefined,
                       }}
                     >
-                      {status === 'locked' && '🔒'}
-                      {status === 'completed' && '✓'}
+                      {status === 'locked' && <Icon name="lock" size={14} />}
+                      {status === 'completed' && <Icon name="check" size={14} />}
                       {status === 'current' && '●'}
                       {status === 'available' && '○'}
                     </div>
 
                     {isActive && (
                       <div className="node-character">
-                        <span className="character-body">🧑</span>
+                        <span className="character-body"><Icon name="person" size={16} /></span>
                         <span className="character-arrow">⬆</span>
                       </div>
                     )}

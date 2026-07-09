@@ -8,13 +8,13 @@ import './WorldMapScreen.css';
 const CHAPTER_ORDER = ['resume', 'linkedin', 'applications', 'interviews', 'offer_preparation', 'offer'];
 
 const ISLAND_POSITIONS = [
-  { left: '50%', bottom: '5%' },    // resume - center
-  { left: '20%', bottom: '18%' },   // linkedin - left
-  { left: '80%', bottom: '31%' },   // applications - right
-  { left: '20%', bottom: '44%' },   // interviews - left
-  { left: '80%', bottom: '57%' },   // offer_preparation - right
-  { left: '20%', bottom: '70%' },   // offer - left
-  { left: '50%', bottom: '83%' },   // city - center top
+  { left: '25%', bottom: '12%' },   // resume - left
+  { left: '75%', bottom: '22%' },   // linkedin - right
+  { left: '25%', bottom: '38%' },   // applications - left
+  { left: '75%', bottom: '48%' },   // interviews - right
+  { left: '25%', bottom: '64%' },   // offer_preparation - left
+  { left: '75%', bottom: '74%' },   // offer - right
+  { left: '50%', bottom: '88%' },   // city - center top
 ];
 
 const CHAPTER_ART: Record<string, string> = {

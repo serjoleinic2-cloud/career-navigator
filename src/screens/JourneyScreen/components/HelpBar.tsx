@@ -1,3 +1,4 @@
+import { Icon } from '@/components/Icon/Icon';
 import { IconButton } from '@/components/layout/IconButton';
 import { GlassCard } from '@/components/layout/GlassCard';
 import './HelpBar.css';
@@ -12,8 +13,8 @@ interface HelpBarProps {
 export function HelpBar({ tips, showHint, onToggleHint, onOpenPlaybook }: HelpBarProps) {
   return (
     <div className="help-bar">
-      <IconButton icon="💡" label="Need Hint" onClick={onToggleHint} size={48} />
-      <IconButton icon="📖" label="Open Playbook" onClick={onOpenPlaybook} size={48} />
+      <IconButton icon={<Icon name="lightbulb" size={24} />} label="Need Hint" onClick={onToggleHint} size={48} />
+      <IconButton icon={<Icon name="book" size={24} />} label="Open Playbook" onClick={onOpenPlaybook} size={48} />
 
       {showHint && tips.length > 0 && (
         <GlassCard className="help-bar-hint">

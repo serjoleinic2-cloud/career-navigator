@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { emit } from '@/core/events/system_event_bus';
 import { getSessionsByProfession } from '@/core/interview/interview_store';
+import { Icon } from '@/components/Icon/Icon';
 import './InterviewResultsScreen.css';
 
 interface InterviewResultsScreenProps {
@@ -21,9 +22,18 @@ function pct(value: number): number {
   return Math.round(value * 100);
 }
 
-function stars(score: number): string {
+function stars(score: number) {
   const filled = Math.round(score / 20);
-  return '★'.repeat(filled) + '☆'.repeat(5 - filled);
+  return (
+    <>
+      {Array.from({ length: filled }, (_, i) => (
+        <Icon key={`f-${i}`} name="star" size={12} />
+      ))}
+      {Array.from({ length: 5 - filled }, (_, i) => (
+        <Icon key={`e-${i}`} name="star" size={12} color="rgba(255,255,255,0.15)" />
+      ))}
+    </>
+  );
 }
 
 function computeMetrics(professionId: string): { metrics: Metric[]; overall: Metric } {
@@ -161,7 +171,7 @@ export function InterviewResultsScreen({ professionId, onRetry, onComplete }: In
                     className="ir-card-link"
                     onClick={() => emit('OPEN_PLAYBOOK', { category: m.playbookSection!.toLowerCase() })}
                   >
-                    📖 Review Playbook →
+                    <Icon name="book" size={14} /> Review Playbook →
                   </button>
                 )}
               </div>
@@ -183,10 +193,10 @@ export function InterviewResultsScreen({ professionId, onRetry, onComplete }: In
 
         <div className="interview-results-hint">
           {overall.score >= 80
-            ? '🎉 Excellent performance! You are ready for real interviews.'
+            ? <><Icon name="party" size={18} /> Excellent performance! You are ready for real interviews.</>
             : overall.score >= 60
             ? '💪 Good progress! A few more sessions will boost your readiness.'
-            : '📈 Keep practicing! Consistent sessions build real confidence.'}
+            : <><Icon name="chart" size={18} /> Keep practicing! Consistent sessions build real confidence.</>}
         </div>
 
         <div className="interview-results-actions">

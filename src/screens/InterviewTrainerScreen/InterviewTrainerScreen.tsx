@@ -10,6 +10,7 @@ import { getRuntimeState } from '@/core/runtime/runtime_controller';
 import { getInterviewQuestions } from '@/core/interview/interview_question_loader';
 import { speakMale, stop as stopTts } from '@/core/voice/native_tts';
 import { useVoiceRecorder } from './hooks/useVoiceRecorder';
+import { Icon } from '@/components/Icon/Icon';
 import { InterviewResultsScreen } from './InterviewResultsScreen';
 import './InterviewTrainerScreen.css';
 
@@ -346,7 +347,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
       {!started && (
         <div className="interview-trainer-start">
-          <div className="interview-trainer-start-icon">🎤</div>
+          <div className="interview-trainer-start-icon"><Icon name="microphone" size={64} color="#00e5e0" /></div>
           <h2 className="interview-trainer-start-title">Interview Challenge</h2>
           <p className="interview-trainer-start-desc">
             Practice answering {questions.length} common interview questions.
@@ -360,7 +361,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
       {started && phase === 'error' && micError === 'no_mic' && (
         <div className="interview-trainer-error">
-          <div className="interview-trainer-error-icon">🎤</div>
+          <div className="interview-trainer-error-icon"><Icon name="microphone" size={48} /></div>
           <h3 className="interview-trainer-error-title">Microphone access is required</h3>
           <p className="interview-trainer-error-desc">
             Please allow microphone access in your browser or device settings to record your answers.
@@ -381,7 +382,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
       {started && phase === 'error' && micError === 'too_short' && (
         <div className="interview-trainer-error">
-          <div className="interview-trainer-error-icon">⏱️</div>
+          <div className="interview-trainer-error-icon"><Icon name="clock" size={48} /></div>
           <h3 className="interview-trainer-error-title">Recording too short</h3>
           <p className="interview-trainer-error-desc">
             Your recording was less than a second. Please try again and speak your answer.
@@ -402,7 +403,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
         <div className="interview-record-phase">
           <div className="interview-header">
             <span>{questionIndex + 1}/{questions.length} Interview Challenge</span>
-            <button onClick={handleClose}>✕</button>
+            <button onClick={handleClose}><Icon name="close" size={16} /></button>
           </div>
 
           <div className="interview-photo">
@@ -432,7 +433,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
         <div className="interview-review-phase">
           <div className="interview-header">
             <span>{questionIndex + 1}/{questions.length} Interview Challenge</span>
-            <button onClick={handleClose}>✕</button>
+            <button onClick={handleClose}><Icon name="close" size={16} /></button>
           </div>
 
           <p className="interview-question">{currentQuestion}</p>
@@ -464,8 +465,8 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
           <hr />
 
           <div className="interview-actions">
-            <button onClick={handleReRecord}>🔄 Переписать</button>
-            <button onClick={handleNextQuestion}>Далее →</button>
+            <button onClick={handleReRecord}><Icon name="refresh" size={14} /> Re-record</button>
+            <button onClick={handleNextQuestion}>Next →</button>
           </div>
         </div>
       )}
@@ -490,7 +491,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
             </button>
           </div>
           <button className="interview-exit-btn" onClick={handleClose}>
-            ← Exit Interview
+            ← Exit
           </button>
         </div>
       )}

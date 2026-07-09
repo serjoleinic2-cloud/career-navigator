@@ -1,4 +1,5 @@
 import { emit } from '@/core/events/system_event_bus';
+import { Icon } from '../../../components/Icon/Icon';
 import './JourneyCompleteScreen.css';
 
 interface JourneyCompleteScreenProps {
@@ -63,7 +64,7 @@ export function JourneyCompleteScreen({
           <div className="journey-complete-timeline">
             {chapters.map((ch, i) => (
               <div key={i} className={`timeline-item ${ch.completed ? 'timeline-done' : ''}`}>
-                <span className="timeline-check">{ch.completed ? '✓' : '○'}</span>
+                <span className="timeline-check">{ch.completed ? <Icon name="check" size={16} /> : '○'}</span>
                 <span className="timeline-label">{ch.title}</span>
               </div>
             ))}

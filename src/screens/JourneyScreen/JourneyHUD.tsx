@@ -6,6 +6,7 @@ import { getNextChapter } from '@/core/chapter_engine';
 import { calculateReadiness } from '@/core/readiness_engine';
 import { subscribe, emit } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
+import { SettingsScreen } from '@/screens/SettingsScreen/SettingsScreen';
 import { fastForwardJourney } from '@/core/runtime/runtime_controller';
 import type { SkillNode } from '@/core/skill_state';
 import { JourneyHeader } from './components/JourneyHeader';
@@ -59,6 +60,7 @@ const DEFAULT_ICON = '📄';
 export function JourneyHUD() {
   const [, setTick] = useState(0);
   const [showMission, setShowMission] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
   const { phase, startBridge, finishBridge, startCinematic, finishCinematic } = useChapterHub();
@@ -383,6 +385,12 @@ export function JourneyHUD() {
           onDone={handleBridgeDone}
         />
       )}
+
+      <button className="journey-settings-btn" onClick={() => setShowSettings(true)} aria-label="Settings">
+        ⚙️
+      </button>
+
+      {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}
 
       {lockedToast && <div className="locked-toast">{lockedToast}</div>}
 

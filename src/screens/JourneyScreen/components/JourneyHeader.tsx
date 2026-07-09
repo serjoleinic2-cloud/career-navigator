@@ -1,3 +1,4 @@
+import { Icon } from '@/components/Icon/Icon';
 import { IconButton } from '@/components/layout/IconButton';
 
 interface JourneyHeaderProps {
@@ -33,7 +34,7 @@ export function JourneyHeader({
           />
         </div>
         <IconButton
-          icon="⚙️"
+          icon={<Icon name="settings" size={20} />}
           label="Settings"
           size={40}
           onClick={onSettings}
