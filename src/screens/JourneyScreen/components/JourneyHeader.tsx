@@ -1,12 +1,10 @@
-import { Icon } from '@/components/Icon/Icon';
-import { IconButton } from '@/components/layout/IconButton';
+
 
 interface JourneyHeaderProps {
   chapterTitle: string;
   nodeIndex: number;
   totalNodes: number;
   readinessScore: number;
-  onSettings?: () => void;
 }
 
 export function JourneyHeader({
@@ -14,7 +12,6 @@ export function JourneyHeader({
   nodeIndex,
   totalNodes,
   readinessScore,
-  onSettings,
 }: JourneyHeaderProps) {
   return (
     <header className="journey-header">
@@ -33,12 +30,6 @@ export function JourneyHeader({
             style={{ width: `${readinessScore}%` }}
           />
         </div>
-        <IconButton
-          icon={<Icon name="settings" size={20} />}
-          label="Settings"
-          size={40}
-          onClick={onSettings}
-        />
       </div>
     </header>
   );

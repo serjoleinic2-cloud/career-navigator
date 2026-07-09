@@ -1,32 +1,25 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { emit } from '@/core/events/system_event_bus';
-import { addSession, updateSession, setSessions, getSessions } from '@/core/interview/interview_store';
+import { setSessions, getSessions } from '@/core/interview/interview_store';
 import { loadInterviewSessions, saveInterviewSessions } from '@/core/interview/interview_persistence';
 import { generateFeedback } from '@/core/voice/feedback_generator';
-import type { InterviewSession, InterviewResult } from '@/core/interview/interview_result';
 import type { AnswerAnalysis } from '@/core/voice/interview_state_machine';
 import { getRuntimeState } from '@/core/runtime/runtime_controller';
 import { getInterviewQuestions } from '@/core/interview/interview_question_loader';
 import { speakMale, stop as stopTts } from '@/core/voice/native_tts';
 import { useVoiceRecorder } from './hooks/useVoiceRecorder';
+import { useInterviewSession } from './hooks/useInterviewSession';
 import { Icon } from '@/components/Icon/Icon';
-import { InterviewResultsScreen } from './InterviewResultsScreen';
+import { RecordPhase } from './RecordPhase';
+import { ReviewPhase } from './ReviewPhase';
+import { ResultsScreen } from './ResultsScreen';
 import './InterviewTrainerScreen.css';
 
 const MAX_RECORD_SECONDS = 60;
 
 type Phase = 'idle' | 'record' | 'review' | 'error';
-
 type ErrorType = 'no_mic' | 'too_short' | null;
-
-const ASSESSMENT_ITEMS = [
-  { key: 'structure', label: 'Structure' },
-  { key: 'confidence', label: 'Confidence' },
-  { key: 'noFillers', label: 'No Fillers' },
-  { key: 'noPauses', label: 'No Long Pauses' },
-  { key: 'clearConclusion', label: 'Clear Conclusion' },
-] as const;
 
 function selfAssessmentToAnswerAnalysis(sa: Record<string, boolean>): AnswerAnalysis {
   return {
@@ -42,27 +35,30 @@ interface InterviewTrainerScreenProps {
   onClose: () => void;
 }
 
-function generateId(): string {
-  return `int_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
 export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps) {
-  const [questionIndex, setQuestionIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
   const [selfAssessment, setSelfAssessment] = useState<Record<string, boolean>>({});
-  const [currentResultId, setCurrentResultId] = useState<string>('');
-  const [sessionId, setSessionId] = useState(() => generateId());
-  const [started, setStarted] = useState(false);
   const [micError, setMicError] = useState<ErrorType>(null);
   const [recordingToast, setRecordingToast] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [textAnswer, setTextAnswer] = useState('');
+
   const audioRef = useRef<HTMLAudioElement>(null);
-  const animFrameRef = useRef<number>(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const [textAnswer, setTextAnswer] = useState('');
   const feedbackTextRef = useRef<string | null>(null);
+
+  const {
+    sessionId,
+    questionIndex,
+    currentResultId,
+    started,
+    startSession,
+    saveCurrentResult,
+    nextQuestion,
+    finishSession,
+    resetSession,
+  } = useInterviewSession();
 
   const {
     isRecording, isSupported, audioBlob,
@@ -80,15 +76,14 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     };
   }, [audioUrl]);
 
-  const recordingSupported = isSupported;
-
   const questions = useMemo(() => {
     const pid = getRuntimeState()?.professionId || 'software_engineer';
     return getInterviewQuestions(pid);
   }, []);
   const question = questions[questionIndex] || '';
   const isLast = questionIndex >= questions.length - 1;
-  const currentQuestion = useMemo(() => question, [question]);
+
+  const professionId = getRuntimeState()?.professionId || 'software_engineer';
 
   useEffect(() => {
     const saved = loadInterviewSessions();
@@ -115,44 +110,6 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
   useEffect(() => {
     if (phase !== 'record' || !isRecording) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    canvas.width = canvas.clientWidth || 320;
-    canvas.height = canvas.clientHeight || 80;
-
-    const analyser = analyserRef.current;
-    const bufferLength = analyser ? analyser.frequencyBinCount : 0;
-    const dataArray = analyser ? new Uint8Array(bufferLength) : null;
-
-    const draw = () => {
-      animFrameRef.current = requestAnimationFrame(draw);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (analyser && dataArray) {
-        analyser.getByteFrequencyData(dataArray);
-        const barW = canvas.width / bufferLength;
-        for (let i = 0; i < bufferLength; i++) {
-          const barH = (dataArray[i] / 255) * canvas.height;
-          const x = i * barW;
-          const y = canvas.height - barH;
-          const g = ctx.createLinearGradient(x, canvas.height, x, y);
-          g.addColorStop(0, '#0A1A3A');
-          g.addColorStop(0.5, '#1E3A5F');
-          g.addColorStop(1, '#00F0FF');
-          ctx.fillStyle = g;
-          ctx.fillRect(x, y, barW - 1, barH);
-        }
-      }
-    };
-    draw();
-    return () => cancelAnimationFrame(animFrameRef.current);
-  }, [phase, isRecording]);
-
-  useEffect(() => {
-    if (phase !== 'record' || !isRecording) return;
     const timeout = setTimeout(() => {
       stopRecording();
       setPhase('review');
@@ -160,27 +117,13 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     return () => clearTimeout(timeout);
   }, [phase, isRecording, stopRecording]);
 
-  const startSession = useCallback(() => {
-    setStarted(true);
-    const pid = getRuntimeState()?.professionId || 'software_engineer';
-    const session: InterviewSession = {
-      id: sessionId,
-      professionId: pid,
-      results: [],
-      startedAt: Date.now(),
-      completedAt: null,
-    };
-    addSession(session);
+  const handleStartSession = useCallback(() => {
+    startSession();
     feedbackTextRef.current = null;
-    setPhase(recordingSupported ? 'record' : 'review');
-    setCurrentResultId(generateId());
-  }, [sessionId, recordingSupported]);
+    setPhase(isSupported ? 'record' : 'review');
+  }, [startSession, isSupported]);
 
   const handleStopRecord = useCallback(() => {
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = 0;
-    }
     audioContextRef.current?.close();
     audioContextRef.current = null;
     analyserRef.current = null;
@@ -223,49 +166,23 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     await speakMale(text);
   }, []);
 
-  const saveCurrentResult = useCallback(() => {
-    const result: InterviewResult = {
-      id: currentResultId,
-      question: currentQuestion,
-      audioBlob: null,
-      durationSeconds: recordingDuration,
-      selfAssessment: {
-        structure: selfAssessment.structure || false,
-        confidence: selfAssessment.confidence || false,
-        noFillers: selfAssessment.noFillers || false,
-        noPauses: selfAssessment.noPauses || false,
-        clearConclusion: selfAssessment.clearConclusion || false,
-      },
-      completedAt: Date.now(),
-    };
-    const sessions = getSessions();
-    const session = sessions.find(s => s.id === sessionId);
-    if (session) {
-      session.results.push(result);
-      updateSession(sessionId, { results: [...session.results] });
-    }
-    saveInterviewSessions(getSessions());
-  }, [currentResultId, currentQuestion, recordingDuration, selfAssessment, sessionId]);
-
   const handleNextQuestion = useCallback(() => {
-    saveCurrentResult();
+    saveCurrentResult(question, recordingDuration, selfAssessment);
     resetRecording();
     if (audioRef.current) audioRef.current.pause();
 
     if (isLast) {
-      updateSession(sessionId, { completedAt: Date.now() });
-      saveInterviewSessions(getSessions());
+      finishSession();
       setShowResults(true);
       return;
     }
 
-    setQuestionIndex(i => i + 1);
-    setPhase(recordingSupported ? 'record' : 'review');
+    nextQuestion();
+    setPhase(isSupported ? 'record' : 'review');
     setSelfAssessment({});
     setTextAnswer('');
-    setCurrentResultId(generateId());
     feedbackTextRef.current = null;
-  }, [saveCurrentResult, resetRecording, isLast, sessionId, onClose, recordingSupported]);
+  }, [saveCurrentResult, question, recordingDuration, selfAssessment, resetRecording, isLast, finishSession, nextQuestion, isSupported]);
 
   const handleReRecord = useCallback(async () => {
     resetRecording();
@@ -289,8 +206,8 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
   const handleTryAgain = useCallback(() => {
     setMicError(null);
     resetRecording();
-    setPhase(recordingSupported ? 'record' : 'review');
-  }, [resetRecording, recordingSupported]);
+    setPhase(isSupported ? 'record' : 'review');
+  }, [resetRecording, isSupported]);
 
   const toggleAssessment = useCallback((key: string) => {
     setSelfAssessment(prev => {
@@ -313,11 +230,10 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
   const handleRetry = useCallback(() => {
     setShowResults(false);
-    setQuestionIndex(0);
-    setStarted(false);
+    resetSession();
     setPhase('idle');
-    setSessionId(generateId());
-  }, []);
+  }, [resetSession]);
+
   const handleResultsComplete = useCallback(() => {
     const s = getSessions().find(s => s.id === sessionId);
     if (s) {
@@ -328,8 +244,8 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
 
   if (showResults) {
     return createPortal(
-      <InterviewResultsScreen
-        professionId={getRuntimeState()?.professionId || 'software_engineer'}
+      <ResultsScreen
+        professionId={professionId}
         onRetry={handleRetry}
         onComplete={handleResultsComplete}
       />,
@@ -353,7 +269,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
             Practice answering {questions.length} common interview questions.
             You'll be recorded and can self-assess your responses.
           </p>
-          <button className="interview-trainer-start-btn" onClick={startSession}>
+          <button className="interview-trainer-start-btn" onClick={handleStartSession}>
             Begin Challenge
           </button>
         </div>
@@ -393,89 +309,50 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
         </div>
       )}
 
-      {started && !recordingSupported && phase !== 'error' && (
+      {started && !isSupported && phase !== 'error' && (
         <div className="interview-trainer-unsupported-banner">
           Recording not supported on this device. Type your answer instead.
         </div>
       )}
 
-      {started && phase === 'record' && recordingSupported && (
-        <div className="interview-record-phase">
-          <div className="interview-header">
-            <span>{questionIndex + 1}/{questions.length} Interview Challenge</span>
-            <button onClick={handleClose}><Icon name="close" size={16} /></button>
-          </div>
-
-          <div className="interview-photo">
-            <img src="/art/software_engineer/interview_man.png" alt="Interviewer"
-              onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement?.classList.add('fallback'); }} />
-          </div>
-
-          <p className="interview-question">{currentQuestion}</p>
-
-          <button className="interview-tts" onClick={() => speakQuestion(currentQuestion)}>▶</button>
-
-          <div className="interview-waveform">
-            {isRecording ? <canvas ref={canvasRef} /> : <div className="waveform-idle" />}
-          </div>
-
-          <span className="interview-timer">{recordingDuration}s / 60s</span>
-
-          {!isRecording ? (
-            <button className="interview-record-btn" onClick={handleStartRecord}>● Record</button>
-          ) : (
-            <button className="interview-stop-btn" onClick={handleStopRecord}>■ Stop</button>
-          )}
-        </div>
+      {started && phase === 'record' && isSupported && (
+        <RecordPhase
+          questionIndex={questionIndex}
+          totalQuestions={questions.length}
+          currentQuestion={question}
+          isRecording={isRecording}
+          recordingDuration={recordingDuration}
+          onStartRecord={handleStartRecord}
+          onStopRecord={handleStopRecord}
+          onClose={handleClose}
+          onSpeakQuestion={speakQuestion}
+          analyserRef={analyserRef}
+          professionId={professionId}
+        />
       )}
 
-      {started && phase === 'review' && recordingSupported && (
-        <div className="interview-review-phase">
-          <div className="interview-header">
-            <span>{questionIndex + 1}/{questions.length} Interview Challenge</span>
-            <button onClick={handleClose}><Icon name="close" size={16} /></button>
-          </div>
-
-          <p className="interview-question">{currentQuestion}</p>
-
-          {audioBlob && (
-            <audio
-              key={currentResultId}
-              ref={audioRef}
-              controls
-              src={audioUrl}
-              className="interview-audio-player"
-            />
-          )}
-
-          <hr />
-
-          <h3>Самооценка</h3>
-          {ASSESSMENT_ITEMS.map(item => (
-            <label key={item.key} className="interview-check">
-              <input
-                type="checkbox"
-                checked={selfAssessment[item.key] || false}
-                onChange={() => toggleAssessment(item.key)}
-              />
-              {item.label}
-            </label>
-          ))}
-
-          <hr />
-
-          <div className="interview-actions">
-            <button onClick={handleReRecord}><Icon name="refresh" size={14} /> Re-record</button>
-            <button onClick={handleNextQuestion}>Next →</button>
-          </div>
-        </div>
+      {started && phase === 'review' && isSupported && (
+        <ReviewPhase
+          questionIndex={questionIndex}
+          totalQuestions={questions.length}
+          currentQuestion={question}
+          audioBlob={audioBlob}
+          audioUrl={audioUrl}
+          currentResultId={currentResultId}
+          selfAssessment={selfAssessment}
+          onToggleAssessment={toggleAssessment}
+          onReRecord={handleReRecord}
+          onNextQuestion={handleNextQuestion}
+          onClose={handleClose}
+          audioRef={audioRef as React.RefObject<HTMLAudioElement>}
+        />
       )}
 
-      {started && phase === 'review' && !recordingSupported && (
+      {started && phase === 'review' && !isSupported && (
         <div className="interview-trainer-body">
           <div className="interview-trainer-question-card">
             <span className="interview-trainer-question-label">QUESTION {questionIndex + 1}</span>
-            <p className="interview-trainer-question-text">{currentQuestion}</p>
+            <p className="interview-trainer-question-text">{question}</p>
           </div>
           <p className="interview-trainer-review-label">Your Answer</p>
           <textarea

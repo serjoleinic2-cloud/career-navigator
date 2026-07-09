@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { getWorldThemeOrDefault, getChapterAccent } from '@/core/world/world_theme';
-import { emit } from '@/core/events/system_event_bus';
-import { Icon } from '../../../components/Icon/Icon';
+import { FadeOutPhase } from './phases/FadeOutPhase';
+import { BuildingPhase } from './phases/BuildingPhase';
+import { ZoomOutPhase } from './phases/ZoomOutPhase';
+import { HeroPhase } from './phases/HeroPhase';
 import './FinalCinematicScreen.css';
 
 export interface CinematicChapter {
@@ -59,13 +61,11 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
 
   const N = islands.length;
 
-  // ── Animation refs (avoid state-driven race conditions) ──
   const activeBridgeRef = useRef(-1);
   const bridgeRafRef = useRef(0);
   const camYRef = useRef(0);
   const camScaleRef = useRef(1);
 
-  // ── State (only for rendering) ──
   const [phase,        setPhase]        = useState<Phase>('hud-fade');
   const [bridges,      setBridges]      = useState<BridgeState[]>(() =>
     Array(Math.max(N - 1, 0)).fill(null).map(() => ({ progress: 0, done: false }))
@@ -80,12 +80,10 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
 
-  // ── Viewport ──
   const vw = typeof window !== 'undefined' ? window.innerWidth  : 390;
   const vh = typeof window !== 'undefined' ? window.innerHeight : 844;
   const ISLAND_W = Math.min(vw * ISLAND_W_VW, 440);
 
-  // ── Layout helpers ──
   const islandTop = useCallback((i: number) => (N - 1 - i) * ISLAND_SPACING, [N]);
   const islandCX  = useCallback(() => vw / 2, [vw]);
   const islandCY  = useCallback((i: number) => islandTop(i) + ISLAND_H / 2, [islandTop]);
@@ -95,7 +93,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
     [vh, islandCY]
   );
 
-  // ── Draw bridges on canvas ──
   const drawBridges = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -218,10 +215,16 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   }, [bridges, cameraY, cameraScale, islandCY, islandCX, islands]);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width = vw;
+    canvas.height = vh;
+  }, [vw, vh]);
+
+  useEffect(() => {
     drawBridges();
   }, [drawBridges]);
 
-  // ── Phase 1: hud-fade ──
   useEffect(() => {
     const startY = targetCamY(0);
     camYRef.current = startY;
@@ -236,7 +239,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Phase 2: building — setTimeout chain, no state-driven effects ──
   const animateBridge = useCallback((idx: number) => {
     if (idx >= N - 1) return;
 
@@ -312,7 +314,6 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
     };
   }, [phase, N, animateBridge]);
 
-  // ── Phase 3: zoom-out ──
   useEffect(() => {
     if (phase !== 'zoom-out') return;
 
@@ -322,6 +323,8 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
     const startY      = cameraY;
     const startScale  = cameraScale;
     const start       = performance.now();
+
+    const timeouts: number[] = [];
 
     const tick = (now: number) => {
       const t = Math.min((now - start) / ZOOM_MS, 1);
@@ -340,13 +343,11 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
         timeouts.push(hold);
       }
     };
-    const timeouts: number[] = [];
     bridgeRafRef.current = requestAnimationFrame(tick);
     return () => { timeouts.forEach(clearTimeout); cancelAnimationFrame(bridgeRafRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // ── Phase 4: crossfade ──
   useEffect(() => {
     if (phase !== 'crossfade') return;
     const start = performance.now();
@@ -364,9 +365,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
     return () => { cancelAnimationFrame(bridgeRafRef.current); };
   }, [phase]);
 
-  // ── Render ──
   const colHeight = (N - 1) * ISLAND_SPACING + ISLAND_H + 120;
-  const heroSrc   = `/art/${professionId}/island_${professionId}.png`;
 
   return createPortal(
     <div
@@ -375,130 +374,78 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
         background: `url('/art/${professionId}/world.png') center center / cover no-repeat, #05080f`,
       }}
     >
-
-      {phase !== 'hero' && (
-        <div className="fc-world" style={{ opacity: worldOpacity }}>
-
-          <div
-            className="fc-blackout"
-            style={{
-              opacity: phase === 'hud-fade' ? 1 : 0,
-              transition: `opacity ${HUD_FADE_MS}ms ease`,
-            }}
+      {phase === 'hud-fade' && (
+        <div className="fc-world">
+          <FadeOutPhase />
+          <BuildingPhase
+            islands={islands}
+            islandGlow={islandGlow}
+            islandTop={islandTop}
+            islandWidth={ISLAND_W}
+            cameraY={cameraY}
+            cameraScale={cameraScale}
+            colHeight={colHeight}
+            canvasRef={canvasRef as React.RefObject<HTMLCanvasElement>}
+            cursorRef={cursorRef as React.RefObject<HTMLDivElement>}
+            cursorVisible={false}
+            worldOpacity={1}
           />
-
-          <canvas
-            ref={canvasRef}
-            className="fc-bridge-canvas"
-            width={vw}
-            height={vh}
-          />
-
-          <div ref={cursorRef} className="fc-cursor" />
-
-          <div
-            className="fc-camera"
-            style={{
-              transform: `translateY(${cameraY}px) scale(${cameraScale})`,
-              transformOrigin: '50% 0',
-            }}
-          >
-            <div className="fc-col" style={{ height: colHeight }}>
-              {islands.map((isl, i) => {
-                const top       = islandTop(i);
-                const glowing   = islandGlow[i];
-
-                return (
-                  <div key={isl.id} className="fc-slot" style={{ top, width: ISLAND_W }}>
-
-                    <div
-                      className={`fc-island${glowing ? ' fc-island--lit' : ''}`}
-                      style={{ '--acc': isl.accent, opacity: glowing ? 1 : 0.08 } as React.CSSProperties}
-                    >
-                      {isl.artSrc ? (
-                        <img
-                          className="fc-island-img"
-                          src={isl.artSrc}
-                          alt={isl.title}
-                          onError={e => {
-                            (e.currentTarget as HTMLImageElement).style.display = 'none';
-                            const fb = e.currentTarget.nextSibling as HTMLElement | null;
-                            if (fb) fb.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div className="fc-island-fallback" style={{ display: isl.artSrc ? 'none' : 'flex' }}>
-                        {isl.title[0]}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       )}
 
+      {phase === 'building' && (
+        <BuildingPhase
+          islands={islands}
+          islandGlow={islandGlow}
+          islandTop={islandTop}
+          islandWidth={ISLAND_W}
+          cameraY={cameraY}
+          cameraScale={cameraScale}
+          colHeight={colHeight}
+          canvasRef={canvasRef as React.RefObject<HTMLCanvasElement>}
+          cursorRef={cursorRef as React.RefObject<HTMLDivElement>}
+          cursorVisible={true}
+          worldOpacity={1}
+        />
+      )}
+
+      {phase === 'zoom-out' && (
+        <ZoomOutPhase
+          islands={islands}
+          islandGlow={islandGlow}
+          islandTop={islandTop}
+          islandWidth={ISLAND_W}
+          cameraY={cameraY}
+          cameraScale={cameraScale}
+          colHeight={colHeight}
+          canvasRef={canvasRef as React.RefObject<HTMLCanvasElement>}
+          worldOpacity={1}
+        />
+      )}
+
+      {phase === 'crossfade' && (
+        <ZoomOutPhase
+          islands={islands}
+          islandGlow={islandGlow}
+          islandTop={islandTop}
+          islandWidth={ISLAND_W}
+          cameraY={cameraY}
+          cameraScale={cameraScale}
+          colHeight={colHeight}
+          canvasRef={canvasRef as React.RefObject<HTMLCanvasElement>}
+          worldOpacity={worldOpacity}
+        />
+      )}
+
       {phase === 'hero' && (
-        <div className="fc-hero">
-          {!heroError ? (
-            <>
-              <img
-                className="fc-hero-img"
-                src={heroSrc}
-                alt={professionId}
-                onLoad={() => setHeroLoaded(true)}
-                onError={() => setHeroError(true)}
-                style={{ opacity: heroLoaded ? 1 : 0, transition: 'opacity 1s ease' }}
-              />
-              {heroLoaded && (
-                <div className="door-particles">
-                  {[...Array(20)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="gold-particle"
-                      style={{
-                        animationDelay: `${i * 0.25}s`,
-                        left: `${45 + Math.random() * 10}%`,
-                        bottom: `${20 + Math.random() * 15}%`,
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="fc-hero-fallback"><Icon name="city" size={48} /></div>
-          )}
-
-          <div className="fc-hero-scrim" />
-
-          <div
-            className="fc-hero-content"
-            style={{
-              opacity: heroLoaded || heroError ? 1 : 0,
-              transition: 'opacity 1.1s ease 0.4s',
-            }}
-          >
-            <p className="fc-hero-sub">Journey Complete</p>
-            <h1 className="fc-hero-title">Software Engineer</h1>
-
-            <div className="fc-hero-actions">
-              <button
-                className="fc-btn fc-btn--primary"
-                onClick={() => { onComplete(); emit('START_INTERVIEW_TRAINER', {}); }}
-              >
-                Перейти к интервью
-              </button>
-              <button
-                className="fc-btn fc-btn--ghost"
-                onClick={() => { onComplete(); emit('RESET_JOURNEY', {}); }}
-              >
-                Выбрать новую профессию
-              </button>
-            </div>
-          </div>
-        </div>
+        <HeroPhase
+          professionId={professionId}
+          heroLoaded={heroLoaded}
+          heroError={heroError}
+          onComplete={onComplete}
+          onHeroLoad={() => setHeroLoaded(true)}
+          onHeroError={() => setHeroError(true)}
+        />
       )}
     </div>,
     document.body

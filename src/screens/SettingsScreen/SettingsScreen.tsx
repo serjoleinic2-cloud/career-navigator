@@ -148,6 +148,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
           </section>
         </div>
       </div>
+
+      <button className="settings-back" onClick={onClose}>← Back</button>
     </div>
   );
 }

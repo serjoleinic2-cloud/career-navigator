@@ -12,6 +12,7 @@ import type { SkillNode } from '@/core/skill_state';
 import { JourneyHeader } from './components/JourneyHeader';
 import { ChapterHub } from './components/ChapterHub';
 import type { ChapterData } from './components/ChapterHub';
+import { Icon } from '@/components/Icon/Icon';
 import { BridgeRestoreScreen } from './components/BridgeRestoreScreen';
 import { FinalCinematicScreen } from './components/FinalCinematicScreen';
 import { JourneyCompleteScreen } from './components/JourneyCompleteScreen';
@@ -387,7 +388,7 @@ export function JourneyHUD() {
       )}
 
       <button className="journey-settings-btn" onClick={() => setShowSettings(true)} aria-label="Settings">
-        ⚙️
+        <Icon name="settings" size={20} />
       </button>
 
       {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}

@@ -191,6 +191,10 @@
 }
 
 .notes-card-delete {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   color: rgba(240, 240, 245, 0.2);
@@ -200,7 +204,6 @@
   min-width: 44px;
   transition: color 200ms ease;
   min-height: 44px;
-  min-width: 44px;
 }
 
 .notes-card-delete:hover {

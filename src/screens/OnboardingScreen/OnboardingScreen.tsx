@@ -268,10 +268,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               </div>
             </div>
             <div className="review-item">
-              <div className="review-icon">📅</div>
-              <div className="review-label">Timeline</div>
-              <div className="review-value">
-                {timelines.find(t => t.id === state.timeline)?.label}
+              <div className="onboarding-timeline">
+                <Icon name="map" size={24} color="#00e5e0" />
+                <span>Journey Length 38 Missions</span>
+                <span className="onboarding-sub">Complete at your own pace</span>
               </div>
             </div>
             <div className="review-item">

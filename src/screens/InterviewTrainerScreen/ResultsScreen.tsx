@@ -4,7 +4,7 @@ import { getSessionsByProfession } from '@/core/interview/interview_store';
 import { Icon } from '@/components/Icon/Icon';
 import './InterviewResultsScreen.css';
 
-interface InterviewResultsScreenProps {
+interface ResultsScreenProps {
   professionId: string;
   onRetry: () => void;
   onComplete: () => void;
@@ -140,7 +140,14 @@ function computeMetrics(professionId: string): { metrics: Metric[]; overall: Met
   return { metrics, overall };
 }
 
-export function InterviewResultsScreen({ professionId, onRetry, onComplete }: InterviewResultsScreenProps) {
+function getColor(score: number): string {
+  if (score >= 80) return '#00e5e0';
+  if (score >= 60) return '#f5b25c';
+  if (score >= 40) return '#e84393';
+  return '#FF6B6B';
+}
+
+export function ResultsScreen({ professionId, onRetry, onComplete }: ResultsScreenProps) {
   const sessions = getSessionsByProfession(professionId);
   const { metrics, overall } = useMemo(() => computeMetrics(professionId), [professionId]);
   const totalQuestions = sessions.reduce((sum, s) => sum + s.results.length, 0);
@@ -210,11 +217,4 @@ export function InterviewResultsScreen({ professionId, onRetry, onComplete }: In
       </div>
     </div>
   );
-}
-
-function getColor(score: number): string {
-  if (score >= 80) return '#00e5e0';
-  if (score >= 60) return '#f5b25c';
-  if (score >= 40) return '#e84393';
-  return '#FF6B6B';
 }

@@ -13,8 +13,8 @@
 }
 
 .island-art-img {
-  width: 143%;
-  height: 143%;
+  width: 143% !important;
+  height: 143% !important;
   object-fit: contain;
   animation: island-float 3.5s ease-in-out infinite;
   will-change: transform;

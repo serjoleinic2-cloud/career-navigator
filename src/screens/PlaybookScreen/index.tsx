@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { getPlaybookByCategory } from '@/core/playbook/playbook_data';
 import type { PlaybookEntry, PlaybookCategory } from '@/core/playbook/playbook_types';
 import type { CSSProperties } from 'react';
-import './PlaybookScreen.css';
-
 import { Icon } from '@/components/Icon/Icon';
+import { CategoryCard } from './components/CategoryCard';
+import { EntryCard } from './components/EntryCard';
+import { SectionView } from './components/SectionView';
+import './PlaybookScreen.css';
 
 const CATEGORIES: { id: PlaybookCategory; label: string; iconName: string; color: string }[] = [
   { id: 'resume', label: 'Resume', iconName: 'resume', color: '#4A90D9' },
@@ -36,8 +38,7 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
       setView('entries');
       onConsumeInitialCategory?.();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialCategory]);
+  }, [initialCategory, onConsumeInitialCategory]);
 
   const openCategory = (cat: PlaybookCategory) => {
     setFlipping(true);
@@ -101,52 +102,11 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
   }
 
   if (view === 'entry' && selectedEntry) {
-    const e = selectedEntry;
     return (
       <div className="playbook-screen" style={style}>
         <button className="playbook-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>
         <div className="playbook-scroll">
-          <h2 className="playbook-entry-title">{e.title}</h2>
-          <span className="playbook-entry-cat">{e.category}</span>
-
-          <div className="playbook-entry-sections">
-            <section>
-              <h3>Overview</h3>
-              <p>{e.overview}</p>
-            </section>
-
-            <section>
-              <h3>Guides</h3>
-              <ul>{e.guides.map(g => <li key={g}>{g}</li>)}</ul>
-            </section>
-
-            {e.templates.length > 0 && (
-              <section>
-                <h3>Templates</h3>
-                {e.templates.map((t, i) => (
-                  <pre key={i}>{t}</pre>
-                ))}
-              </section>
-            )}
-
-            {e.examples.length > 0 && (
-              <section>
-                <h3>Examples</h3>
-                {e.examples.map((ex, i) => (
-                  <pre key={i}>{ex}</pre>
-                ))}
-              </section>
-            )}
-
-            {e.checklist.length > 0 && (
-              <section>
-                <h3>Checklist</h3>
-                <ul>{e.checklist.map(c => <li key={c}>{c}</li>)}</ul>
-              </section>
-            )}
-          </div>
-
-          <button className="playbook-back-btn" onClick={goBack}>← Back</button>
+          <SectionView entry={selectedEntry} onBack={goBack} />
         </div>
       </div>
     );
@@ -158,29 +118,14 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
       <div className="playbook-screen" style={style}>
         <button className="playbook-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>
         <div className="playbook-scroll">
-
           <h2 className="playbook-entries-title">
             {CATEGORIES.find(c => c.id === selectedCategory)?.label}
           </h2>
-
           <div className="playbook-entries-list">
             {entries.map(entry => (
-              <button
-                key={entry.id}
-                className="playbook-entry-card"
-                onClick={() => openEntry(entry)}
-              >
-                <h3>{entry.title}</h3>
-                <p>{entry.overview.slice(0, 100)}...</p>
-                <div className="playbook-entry-tags">
-                  {entry.tags.slice(0, 3).map(tag => (
-                    <span key={tag} className="playbook-tag">#{tag}</span>
-                  ))}
-                </div>
-              </button>
+              <EntryCard key={entry.id} entry={entry} onClick={openEntry} />
             ))}
           </div>
-
           <button className="playbook-back-btn" onClick={goBack}>← Back</button>
         </div>
       </div>
@@ -193,21 +138,18 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
       <div className="playbook-scroll">
         <h1 className="playbook-main-title">Playbook</h1>
         <p className="playbook-subtitle">Deep knowledge, templates, and strategies</p>
-
         <div className="playbook-categories-grid">
           {CATEGORIES.map(cat => (
-            <button
+            <CategoryCard
               key={cat.id}
-              className="playbook-category-card"
-              onClick={() => openCategory(cat.id)}
-              style={{ '--cat-color': cat.color } as React.CSSProperties}
-            >
-              <span className="playbook-category-icon"><Icon name={cat.iconName as any} size={28} color={cat.color} /></span>
-              <span className="playbook-category-label">{cat.label}</span>
-            </button>
+              id={cat.id}
+              label={cat.label}
+              iconName={cat.iconName}
+              color={cat.color}
+              onClick={openCategory}
+            />
           ))}
         </div>
-
         <button className="playbook-back-btn" onClick={onClose}>← Back</button>
       </div>
     </div>
