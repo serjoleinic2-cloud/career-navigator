@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { loadRuntime, saveRuntime } from './core/persistence/runtime_persistence';
-import { startJourney, initializeRuntime, getRuntimeState, resetJourney } from './core/runtime/runtime_controller';
-import { getActiveChapters } from './core/profession_loader';
+import { loadRuntime } from './core/persistence/runtime_persistence';
+import { startJourney, initializeRuntime, getRuntimeState, resetJourney, setActiveChapter } from './core/runtime/runtime_controller';
 import { loadNotes } from './core/user_data/notes/notes_persistence';
 import { setNotes } from './core/user_data/notes/notes_store';
 import { WorldRenderer } from './core';
@@ -197,16 +196,16 @@ function AppInner() {
             key={common.key}
             style={common.style}
             onChapterSelect={(chapterId) => {
-              const rt = getRuntimeState();
-              if (rt) {
-                rt.activeChapterId = chapterId;
-                const chapters = getActiveChapters();
-                const chapter = chapters.find(c => c.id === chapterId);
-                if (chapter) {
-                  const firstNodeId = chapter.nodeIds[0];
-                  rt.activeNodeId = firstNodeId;
-                }
-                saveRuntime(rt);
+              // BUGFIX (2026-07-10): this used to mutate getRuntimeState()'s
+              // result in place, which left JourneyHUD's memoized `chapters`
+              // (keyed on referential equality of the runtime object) stale,
+              // so the screen you landed on after tapping an island didn't
+              // match the island you tapped. setActiveChapter() replaces the
+              // runtime object (same immutable-update pattern as every other
+              // mutator in runtime_controller.ts) and emits CHAPTER_CHANGED /
+              // NODE_CHANGED / UI_REFRESH so the HUD actually re-derives.
+              if (getRuntimeState()) {
+                setActiveChapter(chapterId);
               }
               setCurrentScreen('journey');
             }}

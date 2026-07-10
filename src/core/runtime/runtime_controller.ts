@@ -80,6 +80,43 @@ export function setActiveNode(nodeId: string): JourneyRuntimeState {
   return runtimeState;
 }
 
+// BUGFIX (2026-07-10): WorldMapScreen island clicks used to be handled in
+// App.tsx by mutating `getRuntimeState()`'s result IN PLACE
+// (`rt.activeChapterId = chapterId; rt.activeNodeId = firstNodeId;`)
+// instead of replacing it with a new object, which is the pattern every
+// other mutator in this file follows (see setActiveNode above). Because
+// the object reference never changed, JourneyHUD's
+// `useMemo(() => {...}, [runtime])` (which derives `chapters` /
+// `activeChapter` from `getRuntimeState()`) never saw a new dependency
+// and kept returning its stale, memoized value from before the click —
+// so navigating from an island opened whatever chapter was active
+// *before* the click, not the one the user actually tapped. Routing
+// island selection through a real mutator here (new object + emitted
+// events, same as setActiveNode) fixes the stale-memo problem and gives
+// island navigation a single, well-defined entry point instead of the
+// UI layer reaching into runtime internals directly.
+export function setActiveChapter(chapterId: string): JourneyRuntimeState {
+  if (!runtimeState) {
+    throw new Error('Runtime not initialized');
+  }
+  const chapters = getActiveChapters();
+  const chapter = chapters.find(c => c.id === chapterId);
+  const firstNodeId = chapter?.nodeIds?.[0];
+
+  runtimeState = {
+    ...runtimeState,
+    activeChapterId: chapterId,
+    ...(firstNodeId ? { activeNodeId: firstNodeId } : {}),
+  };
+  saveRuntime(runtimeState);
+  emit('CHAPTER_CHANGED', { chapterId });
+  if (firstNodeId) {
+    emit('NODE_CHANGED', { nodeId: firstNodeId });
+  }
+  emit('UI_REFRESH', {});
+  return runtimeState;
+}
+
 // ─── TASK LIFECYCLE WITH CONTENT ENGINE ─────────────────────
 
 // BUGFIX (2026-07-05): TASK_LIBRARY in task_content_engine.ts was authored
