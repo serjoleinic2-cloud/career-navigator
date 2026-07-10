@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { getRuntimeState } from '@/core/runtime/runtime_controller';
 import { getActiveProfession } from '@/core/profession_loader';
 import { Icon } from '@/components/Icon/Icon';
 import { createPremiumState } from '@/core/premium/premium_state';
-import { nativeShare } from '@/core/share/share_service';
+import { shareApp } from '@/core/share/app_share';
+import { APP_ABOUT } from '@/content/legal_content';
+import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen/PrivacyPolicyScreen';
 import type { PremiumState } from '@/core/premium/premium_state';
 import './SettingsScreen.css';
 
@@ -16,24 +17,17 @@ interface SettingsScreenProps {
 
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [premium] = useState<PremiumState>(() => {
     const prof = getActiveProfession();
     return createPremiumState(prof?.id || 'software_engineer', prof?.chapters?.length || 8, 'free');
   });
 
-  const runtime = getRuntimeState();
-  const profession = getActiveProfession();
-
   const handleShareApp = async () => {
     try {
-      const days = runtime?.journeyStartedAt
-        ? Math.max(0, Math.floor((Date.now() - runtime.journeyStartedAt) / (1000 * 60 * 60 * 24)))
-        : 0;
-      await nativeShare(
-        `🧭 Career Navigator\n\n${profession?.title || 'Career Explorer'}\nDays: ${days}`
-      );
+      await shareApp();
     } catch {
-      // silently fail
+      // silently fail (e.g. user dismissed the share sheet)
     }
   };
 
@@ -117,7 +111,11 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             <p className="settings-privacy-text">
               Your data stays on your device. No cloud, no tracking.
             </p>
-            <a className="settings-privacy-link" href="#" onClick={e => e.preventDefault()}>
+            <a
+              className="settings-privacy-link"
+              href="#"
+              onClick={e => { e.preventDefault(); setShowPrivacyPolicy(true); }}
+            >
               Read our Privacy Policy
             </a>
           </section>
@@ -134,22 +132,23 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <span>{APP_BUILD}</span>
               </div>
             </div>
-            <p className="settings-about-desc">
-              Career Navigator helps you navigate your career journey — from resume optimization
-              to interview preparation and job search strategy.
-            </p>
+            <p className="settings-about-desc">{APP_ABOUT.description}</p>
           </section>
 
           <section className="settings-section">
             <h3 className="settings-section-title">Share App</h3>
             <button className="settings-action-btn primary" onClick={handleShareApp}>
-              <Icon name="linkedin" size={16} /> Share App
+              <Icon name="share" size={16} /> Share App
             </button>
           </section>
         </div>
       </div>
 
       <button className="settings-back" onClick={onClose}>← Back</button>
+
+      {showPrivacyPolicy && (
+        <PrivacyPolicyScreen onClose={() => setShowPrivacyPolicy(false)} />
+      )}
     </div>
   );
 }

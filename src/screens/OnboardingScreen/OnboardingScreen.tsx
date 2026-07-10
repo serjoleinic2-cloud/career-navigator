@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Icon } from '../../components/Icon/Icon';
 import { SoftwareEngineerModule } from '../../professions/software_engineer/module';
+import { PrivacyPolicyScreen } from '../PrivacyPolicyScreen/PrivacyPolicyScreen';
 import './OnboardingScreen.css';
 
 type Profession = 'software_engineer' | 'data_scientist' | 'product_manager';
@@ -58,6 +59,8 @@ interface OnboardingScreenProps {
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const [screen, setScreen] = useState(0);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [state, setState] = useState<OnboardingState>({
     profession: 'software_engineer',
     experience: 'junior',
@@ -102,8 +105,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   }, []);
 
   const handleComplete = useCallback(() => {
+    if (!agreedToPrivacy) return;
     onComplete(state);
-  }, [onComplete, state]);
+  }, [onComplete, state, agreedToPrivacy]);
 
   const slideClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
 
@@ -283,8 +287,31 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               </div>
             </div>
           </div>
-          <button className="onboarding-primary-btn onboarding-start-btn" onClick={handleComplete}>
-            Start Journey
+          <label className="onboarding-privacy-agree">
+            <input
+              type="checkbox"
+              checked={agreedToPrivacy}
+              onChange={e => setAgreedToPrivacy(e.target.checked)}
+            />
+            <span className="onboarding-privacy-checkbox">
+              {agreedToPrivacy && <Icon name="check" size={14} color="#0b0e14" />}
+            </span>
+            <span className="onboarding-privacy-label">I agree to the Privacy Policy</span>
+          </label>
+          <button
+            type="button"
+            className="onboarding-privacy-link"
+            onClick={() => setShowPrivacyPolicy(true)}
+          >
+            Read full Privacy Policy
+          </button>
+
+          <button
+            className="onboarding-primary-btn onboarding-start-btn"
+            onClick={handleComplete}
+            disabled={!agreedToPrivacy}
+          >
+            Start My Journey
           </button>
         </div>
       )}
@@ -295,6 +322,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           <div key={i} className={`progress-dot ${i === screen ? 'active' : ''}`} />
         ))}
       </div>
+
+      {showPrivacyPolicy && (
+        <PrivacyPolicyScreen onClose={() => setShowPrivacyPolicy(false)} />
+      )}
     </div>
   );
 };
