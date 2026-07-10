@@ -41,8 +41,8 @@ function getNodeCardState(node: SkillNode, activeNodeId: string | null): NodeCar
  * не всегда совпадают один в один (пример реального бага: глава
  * "interviews" (мн.ч.) искала island-interviews.png, а файл художника
  * называется island-interview.png (ед.ч.) — картинка никогда не грузилась).
- * Главы без готового арта (например offer_preparation) сюда не добавляются —
- * для них штатно сработает onError → иконка-плейсхолдер ниже.
+ * Главы без готового арта (файл ещё не добавлен в public/art/) не ломаются:
+ * onError ниже штатно откатывается на иконку-плейсхолдер.
  */
 const CHAPTER_ART_FILENAME: Record<string, string> = {
   resume: 'island-resume.png',
@@ -50,10 +50,7 @@ const CHAPTER_ART_FILENAME: Record<string, string> = {
   applications: 'island-applications.png',
   interviews: 'island-interview.png',
   offer: 'island-offer.png',
-  // Пока отдельного арта для Offer Preparation нет — переиспользуем
-  // island-offer.png, чтобы не показывать плейсхолдер-иконку. Когда
-  // появится отдельный файл — заменить эту строку.
-  offer_preparation: 'island-offer.png',
+  offer_preparation: 'offer-preparation.png',
 };
 
 export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubProps) {
