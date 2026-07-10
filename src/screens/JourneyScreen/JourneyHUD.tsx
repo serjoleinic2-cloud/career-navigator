@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getUIState } from '@/core/ui_bridge/ui_bridge';
 import { setActiveNode, getActiveNode, getRuntimeState, advanceChapter } from '@/core/runtime/runtime_controller';
 import { getActiveChapters } from '@/core/profession_loader';
-import { getNextChapter } from '@/core/chapter_engine';
+import { getNextChapter, getCurrentChapter } from '@/core/chapter_engine';
 import { calculateReadiness } from '@/core/readiness_engine';
 import { subscribe, emit } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
@@ -149,6 +149,28 @@ export function JourneyHUD() {
   const activeChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex] : null;
   const nextChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex + 1] : undefined;
 
+  // BUGFIX (2026-07-10): the bridge-forward effect below used to fire any
+  // time the active chapter was fully completed, regardless of *how* the
+  // user got there. That's correct right after finishing a chapter's last
+  // task, but it also fired when the user manually revisited an
+  // already-finished chapter from the WorldMap (e.g. tapping chapter 1's
+  // island to review it after having moved on to chapter 3) — since
+  // chapter 1 is "completed", the effect immediately bridged forward to
+  // chapter 2, then chapter 2 was also completed so it bridged again to
+  // chapter 3, auto-ejecting the user from the chapter they explicitly
+  // chose to look at. The bridge-forward behavior only makes sense at the
+  // actual leading edge of progression (the first not-yet-completed
+  // chapter, same definition chapter_engine/runtime_controller use
+  // elsewhere) — not for reviewing chapters behind that edge. Gate the
+  // effect on activeChapter actually being that frontier chapter.
+  const frontierChapterId = useMemo(() => {
+    if (!runtime) return null;
+    const definitions = getActiveChapters();
+    return getCurrentChapter(definitions, runtime.nodeStates)?.id ?? null;
+  }, [runtime]);
+  const isReviewingPastChapter =
+    !!activeChapter && frontierChapterId !== null && activeChapter.id !== frontierChapterId;
+
   // BUGFIX (2026-07-07): the HUD used to show `runtime.readinessScore`,
   // a single number that only ever accumulates (+readinessDelta per task,
   // clamped 0-100) across the ENTIRE journey and never comes back down.
@@ -187,6 +209,7 @@ export function JourneyHUD() {
       activeChapter.isCompleted &&
       phase === 'active' &&
       !showMission &&
+      !isReviewingPastChapter &&
       prevChapterCompletedRef.current !== activeChapter.id
     ) {
       prevChapterCompletedRef.current = activeChapter.id;
@@ -197,7 +220,7 @@ export function JourneyHUD() {
       // If there's no next chapter, allNodesCompleted (below) already
       // takes over and shows JourneyCompleteScreen instead.
     }
-  }, [activeChapter, phase, showMission, nextChapter, startBridge]);
+  }, [activeChapter, phase, showMission, nextChapter, startBridge, isReviewingPastChapter]);
 
   useEffect(() => {
     if (allNodesCompleted && phase === 'active') {
