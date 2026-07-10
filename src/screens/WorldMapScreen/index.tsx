@@ -4,7 +4,6 @@ import { getWorldThemeOrDefault, getChapterAccent } from '@/core/world/world_the
 import { getActiveChapters } from '@/core/profession_loader';
 import { useIslandPositions } from './hooks/useIslandPositions';
 import { WorldMapIsland } from './components/Island';
-import { IslandBridge } from './components/Bridge';
 import type { IslandPosition } from './hooks/useIslandPositions';
 import './WorldMapScreen.css';
 
@@ -45,49 +44,56 @@ export function WorldMapScreen({ style, onChapterSelect }: WorldMapScreenProps) 
         onError={(e) => { e.currentTarget.style.display = 'none'; }}
       />
 
-      <div className="world-islands">
+      {/* 7 grid cells: 1 hero cell on top (spans both columns), then two
+          columns of 3 cells below it. Each cell centers its one island —
+          no absolute-position math, so sizing/spacing scales proportionally
+          with the grid itself (see WorldMapScreen.css) and nothing can
+          clip off an edge or land under the bottom nav. */}
+      <div className="world-grid">
+        <div className="world-cell world-cell--hero">
+          <WorldMapIsland
+            chapterId="city"
+            position={city.position}
+            accent="#FFD700"
+            artSrc={`/art/${professionId}/island_${professionId}.png`}
+            unlocked={true}
+            completed={0}
+            total={0}
+            isCity={true}
+            imgError={false}
+            onClick={() => {}}
+            onImgError={() => {}}
+          />
+        </div>
+
         {islands.map((isl) => {
           const accent = getChapterAccent(theme, isl.chapterId);
           const art = CHAPTER_ART[isl.chapterId];
           const artSrc = art ? `/art/${professionId}/${art}` : '';
           return (
-            <WorldMapIsland
+            <div
               key={isl.chapterId}
-              chapterId={isl.chapterId}
-              position={isl.position}
-              accent={accent}
-              artSrc={artSrc}
-              unlocked={isl.unlocked}
-              completed={isl.completed}
-              total={isl.total}
-              imgError={imgError[isl.chapterId]}
-              onClick={handleIslandClick}
-              onImgError={() => setImgError(prev => ({ ...prev, [isl.chapterId]: true }))}
-            />
+              className="world-cell"
+              style={{
+                gridRow: isl.position.row,
+                gridColumn: isl.position.side === 'left' ? 1 : 2,
+              }}
+            >
+              <WorldMapIsland
+                chapterId={isl.chapterId}
+                position={isl.position}
+                accent={accent}
+                artSrc={artSrc}
+                unlocked={isl.unlocked}
+                completed={isl.completed}
+                total={isl.total}
+                imgError={imgError[isl.chapterId]}
+                onClick={handleIslandClick}
+                onImgError={() => setImgError(prev => ({ ...prev, [isl.chapterId]: true }))}
+              />
+            </div>
           );
         })}
-
-        {islands.length > 1 && islands.slice(0, -1).map((isl, i) => (
-          <IslandBridge
-            key={`bridge-${i}`}
-            from={isl.position}
-            to={islands[i + 1].position}
-          />
-        ))}
-
-        <WorldMapIsland
-          chapterId="city"
-          position={city.position}
-          accent="#FFD700"
-          artSrc={`/art/${professionId}/island_${professionId}.png`}
-          unlocked={true}
-          completed={0}
-          total={0}
-          isCity={true}
-          imgError={false}
-          onClick={() => {}}
-          onImgError={() => {}}
-        />
       </div>
     </div>
   );

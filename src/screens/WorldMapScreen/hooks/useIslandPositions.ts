@@ -3,8 +3,13 @@ import type { Chapter } from '@/core/chapter_model';
 import type { JourneyRuntimeState } from '@/core/runtime/journey_runtime';
 
 export interface IslandPosition {
+  /** Which column the island's badge should lean toward (also used for
+   *  the grid column: left -> col 1, right -> col 2, center -> spans
+   *  both, used only by the hero/city island). */
   side: 'left' | 'right' | 'center';
-  bottom: string;
+  /** Grid row inside `.world-grid` (row 1 is reserved for the hero
+   *  island; rows 2-4 hold the two columns of three regular islands). */
+  row: number;
 }
 
 export interface IslandData {
@@ -19,31 +24,22 @@ export interface CityData {
   position: IslandPosition;
 }
 
-// Chapters 1-3 stack on the left, chapters 4-6 stack on the right.
-// Rows are staggered between the two columns (right offset by half a
-// row-step) so a left island and a right island are never at exactly
-// the same height — otherwise their progress badges, which both sit
-// pushed toward the screen's center, land on top of each other.
-const COLUMN_RANGE = { start: 24, end: 62 }; // % from bottom, tighter than before
-const ROW_STEP = (COLUMN_RANGE.end - COLUMN_RANGE.start) / 2; // 3 rows per column
-
-function columnPosition(side: 'left' | 'right', row: number): IslandPosition {
-  const stagger = side === 'right' ? ROW_STEP / 2 : 0;
-  return { side, bottom: `${COLUMN_RANGE.start + row * ROW_STEP + stagger}%` };
-}
-
+// 7 grid cells total: 1 hero cell on top (row 1, spans both columns),
+// and two columns of 3 cells below it (rows 2-4). Chapters 1-3 go in
+// the left column, chapters 4-6 in the right column. Each cell centers
+// its island via flex — no manual percentage math, so nothing can
+// clip off an edge or land under the bottom nav, and everything scales
+// proportionally with the grid's own size (see WorldMapScreen.css).
 const ISLAND_POSITIONS: IslandPosition[] = [
-  columnPosition('left', 0),
-  columnPosition('left', 1),
-  columnPosition('left', 2),
-  columnPosition('right', 0),
-  columnPosition('right', 1),
-  columnPosition('right', 2),
+  { side: 'left',  row: 2 },
+  { side: 'left',  row: 3 },
+  { side: 'left',  row: 4 },
+  { side: 'right', row: 2 },
+  { side: 'right', row: 3 },
+  { side: 'right', row: 4 },
 ];
 
-// Hero/city island: centered on top, fully visible (not clipped by the
-// screen edge) — sits just above the highest regular island.
-const CITY_POSITION: IslandPosition = { side: 'center', bottom: '88%' };
+const CITY_POSITION: IslandPosition = { side: 'center', row: 1 };
 
 export function useIslandPositions(
   chapters: Chapter[],
@@ -70,7 +66,7 @@ export function useIslandPositions(
 
       return {
         chapterId: ch.id,
-        position: ISLAND_POSITIONS[i] || { side: 'center', bottom: '50%' },
+        position: ISLAND_POSITIONS[i] || { side: 'left', row: 4 },
         unlocked,
         completed,
         total,

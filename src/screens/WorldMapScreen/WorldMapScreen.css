@@ -3,10 +3,9 @@
   inset: 0;
   overflow: hidden;
   /* Single source of truth for island size — used both by the float
-     wrapper (size) and by the left/right anchor calc() below (so an
-     island's own half-width is always accounted for and it can never
-     clip off the left/right edge of the screen, at any viewport size). */
-  --island-size: clamp(126px, 34vmin, 218px);
+     wrapper (size) and to size the grid's row/column tracks below, so
+     everything scales together, proportionally, with the screen. */
+  --island-size: clamp(126px, 30vmin, 200px);
 }
 
 .world-map-bg {
@@ -18,44 +17,46 @@
   z-index: 0;
 }
 
-.world-islands {
+/* 7 containers: row 1 is the hero cell (spans both columns), rows 2-4
+   are two columns of 3 cells each. Every cell is a flex box that
+   centers its one island — sizing/spacing is entirely proportional
+   (fr tracks + vmin-based island size), so nothing needs manual
+   percentage math and nothing can clip off an edge. */
+.world-grid {
   position: absolute;
   inset: 0;
   z-index: 1;
-  /* Keeps every island's `bottom: X%` anchor measured against a shorter
-     box that already excludes the floating bottom-nav pill (72px tall,
-     16px from the screen edge, see BottomNavigation.css) — so the two
-     lowest islands are never rendered underneath it. Top padding leaves
-     room for the hero/city island (the tallest anchor) so it's never
-     clipped by the top edge on short viewports either. */
-  padding-bottom: calc(72px + 16px + 24px + env(safe-area-inset-bottom));
-  padding-top: calc(var(--island-size) / 2 + 24px + env(safe-area-inset-top));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1.15fr 1fr 1fr 1fr;
+  row-gap: 2vh;
+  column-gap: 4vw;
+  /* Clears the floating bottom-nav pill (72px tall, 16px from the
+     screen edge, see BottomNavigation.css) and gives breathing room
+     under the status bar on short screens. */
+  padding: calc(16px + env(safe-area-inset-top)) 6vw
+    calc(72px + 16px + 24px + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
+.world-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0;
+}
+
+.world-cell--hero {
+  grid-column: 1 / -1;
+}
+
 .world-island {
-  position: absolute;
-  bottom: var(--bottom);
-  transform: translate(-50%, 50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-}
-
-.world-island--left {
-  /* Anchor point sits at least half the island's width plus a small
-     margin in from the edge, so translate(-50%) can never push the
-     island itself past the screen edge. */
-  left: calc(var(--island-size) / 2 + 10px);
-}
-
-.world-island--right {
-  right: calc(var(--island-size) / 2 + 10px);
-}
-
-.world-island--center {
-  left: 50%;
+  position: relative;
 }
 
 .world-island--unlocked {
@@ -76,6 +77,12 @@
   animation: island-float 3.5s ease-in-out infinite;
 }
 
+.world-cell--hero .world-island-float {
+  /* Hero island reads as the "capital" — a bit larger than the rest. */
+  width: calc(var(--island-size) * 1.15);
+  height: calc(var(--island-size) * 1.15);
+}
+
 .world-island-float img {
   width: 100%;
   height: 100%;
@@ -83,9 +90,6 @@
 }
 
 .world-island-progress {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   background: rgba(5, 8, 15, 0.85);
   padding: 3px 10px;
   border-radius: 10px;
@@ -95,19 +99,6 @@
   color: #f0f0f5;
   backdrop-filter: blur(8px);
   white-space: nowrap;
-}
-
-.world-island--left .world-island-progress {
-  right: -50px;
-}
-
-.world-island--right .world-island-progress {
-  left: -50px;
-}
-
-.world-island--center .world-island-progress {
-  position: static;
-  transform: none;
 }
 
 @keyframes island-float {

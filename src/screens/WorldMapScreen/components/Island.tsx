@@ -29,15 +29,16 @@ export function WorldMapIsland({
   onClick,
   onImgError,
 }: WorldMapIslandProps) {
+  // Positioning itself now lives entirely in the parent `.world-cell`
+  // (a CSS grid cell that centers its one child) — this component just
+  // decides which side its progress badge leans toward, and whether
+  // it's tappable.
   const className = `world-island world-island--${position.side} ${unlocked ? 'world-island--unlocked' : 'world-island--locked'}${isCity ? ' world-island--city' : ''}`;
 
   return (
     <div
       className={className}
-      style={{
-        '--bottom': position.bottom,
-        '--island-accent': accent,
-      } as React.CSSProperties}
+      style={{ '--island-accent': accent } as React.CSSProperties}
       onClick={() => unlocked && onClick(chapterId)}
     >
       <div className="world-island-float">

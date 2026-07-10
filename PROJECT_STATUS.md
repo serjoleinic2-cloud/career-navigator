@@ -2781,3 +2781,21 @@ Misread the previous message: "главный остров ... наполови�
 
 **Проверено:** `npx tsc --noEmit` — чисто.
 **Не проверено вживую.**
+
+
+### 2026-07-09 — Claude (World: switched to CSS Grid, per Serj's explicit design)
+
+Root cause of the repeated left/right/overlap bugs finally found: `src/screens/WorldMapScreen/index.tsx` had **never actually been touched** in any of the previous sessions — I kept editing `useIslandPositions.ts` and `WorldMapScreen.css` assuming an absolute-position (`bottom`/`left`/`right`) layout, but `index.tsx` (present in the repo since before this thread started) was already expecting a completely different, incompatible shape (`position.row` for a CSS grid) that never existed on `IslandPosition`. My CSS classes and the component's actual markup were out of sync the whole time — that's the "мусор" Serj suspected.
+
+Rebuilt per Serj's explicit spec — 7 containers, CSS Grid:
+- `.world-grid`: `grid-template-columns: 1fr 1fr`, `grid-template-rows: 1.15fr 1fr 1fr 1fr` (hero row + 3 rows × 2 cols). All sizing is `fr`/`vmin`-based so it scales proportionally with screen size automatically — no manual percent/calc positioning left anywhere.
+- `.world-cell--hero` spans both columns (row 1) and holds the hero/city island.
+- Each `.world-cell` is a flex box that centers its one island — this is what "centers" every island inside its container.
+- `useIslandPositions.ts`: `IslandPosition` is now `{ side, row }` — chapters 1-3 → left column rows 2-4, chapters 4-6 → right column rows 2-4, hero → row 1.
+- Deleted `Bridge.tsx` (the old zigzag-path connector lines) — no longer meaningful with a grid layout and wasn't imported by `index.tsx` anyway.
+- Progress badge is now simply below the island icon (centered), not offset to the left/right — removes the source of the earlier badge-collision bugs entirely.
+
+**Файлы:** `src/screens/WorldMapScreen/index.tsx`, `src/screens/WorldMapScreen/WorldMapScreen.css`, `src/screens/WorldMapScreen/hooks/useIslandPositions.ts`, `src/screens/WorldMapScreen/components/Island.tsx`, `src/screens/WorldMapScreen/components/Bridge.tsx` (deleted), `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто. `vite build` не запускался (в этой песочнице нет node_modules — окружение, не связано с кодом); нужно прогнать `npm run build` на вашей стороне перед тем как считать это финально проверенным.
+**Не проверено вживую.**
