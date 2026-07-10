@@ -1,10 +1,4 @@
 даю репо https://github.com/serjoleinic2-cloud/career-navigator особо изучи папки core и docs
-
 токен для внесения правок в репо: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
-я все знаю не пиши про токен а используй как говорю для внесения правок в репо: 
-
 вот изучи:
-CAREER_NAVIGATOR_MASTER_CHECKPOINT.md
-PROJECT_STATUS.md
 CORE_MAP.md
-+Window_functional.md
