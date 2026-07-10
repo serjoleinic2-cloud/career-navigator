@@ -1,0 +1,679 @@
+diff --git a/package.json b/package.json
+index 486d4eb..9329200 100644
+--- a/package.json
++++ b/package.json
+@@ -13,6 +13,7 @@
+     "@capacitor/android": "^6.1.2",
+     "@capacitor/cli": "^6.1.2",
+     "@capacitor/core": "^6.1.2",
++    "@capacitor/local-notifications": "^6.1.3",
+     "@capacitor/share": "^6.0.4",
+     "framer-motion": "^11.0.0",
+     "html-to-image": "^1.11.11",
+diff --git a/src/App.tsx b/src/App.tsx
+index 813e020..061db15 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -16,6 +16,7 @@ import { InterviewTrainerScreen } from './screens/InterviewTrainerScreen';
+ import { BottomNav } from './components/BottomNav/BottomNav';
+ import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
+ import { subscribe } from './core/events/system_event_bus';
++import { initNotifications } from './core/notifications/notification_service';
+ import type { PlaybookCategory } from './core/playbook/playbook_types';
+ import './App.css';
+ 
+@@ -59,6 +60,7 @@ function AppInner() {
+       setShowOnboarding(true);
+     }
+     setIsReady(true);
++    void initNotifications();
+   }, []);
+ 
+   useEffect(() => {
+diff --git a/src/core/export/backup_service.ts b/src/core/export/backup_service.ts
+new file mode 100644
+index 0000000..1e0af16
+--- /dev/null
++++ b/src/core/export/backup_service.ts
+@@ -0,0 +1,148 @@
++/**
++ * Backup / Restore — dumps the app's entire local state (all
++ * `career-navigator.*` localStorage keys — runtime progress, notes,
++ * interview history, notification settings, etc.) to a single JSON file
++ * the user saves wherever they like, and restores from that file later.
++ *
++ * Deliberately generic: it doesn't know or care about the shape of any
++ * individual key's data. New persisted features automatically get
++ * included in backups for free as long as they keep using the existing
++ * `career-navigator.` key prefix (see storage.ts / runtime_persistence.ts
++ * / notes_persistence.ts / interview_persistence.ts / notification_service.ts).
++ */
++
++const KEY_PREFIX = 'career-navigator.';
++const BACKUP_FORMAT_VERSION = 1;
++
++interface BackupFile {
++  format: 'career-navigator-backup';
++  version: number;
++  exportedAt: string;
++  data: Record<string, string>;
++}
++
++function collectAppData(): Record<string, string> {
++  const data: Record<string, string> = {};
++  for (let i = 0; i < localStorage.length; i++) {
++    const key = localStorage.key(i);
++    if (key && key.startsWith(KEY_PREFIX)) {
++      const value = localStorage.getItem(key);
++      if (value !== null) data[key] = value;
++    }
++  }
++  return data;
++}
++
++function buildBackupFile(): BackupFile {
++  return {
++    format: 'career-navigator-backup',
++    version: BACKUP_FORMAT_VERSION,
++    exportedAt: new Date().toISOString(),
++    data: collectAppData(),
++  };
++}
++
++/**
++ * Saves a backup file. Uses the File System Access API (native "Save As"
++ * dialog, lets the user pick the folder) where available; falls back to
++ * a plain browser download (goes to the default Downloads location) on
++ * browsers/webviews that don't support it.
++ */
++export async function createBackup(): Promise<void> {
++  const backup = buildBackupFile();
++  const json = JSON.stringify(backup, null, 2);
++  const filename = `career-navigator-backup-${new Date().toISOString().slice(0, 10)}.json`;
++
++  const w = window as any;
++  if (typeof w.showSaveFilePicker === 'function') {
++    try {
++      const handle = await w.showSaveFilePicker({
++        suggestedName: filename,
++        types: [{ description: 'Career Navigator Backup', accept: { 'application/json': ['.json'] } }],
++      });
++      const writable = await handle.createWritable();
++      await writable.write(json);
++      await writable.close();
++      return;
++    } catch (e) {
++      // User cancelled the picker, or API failed — fall through to the
++      // plain-download fallback below rather than erroring out.
++      if ((e as any)?.name === 'AbortError') throw e;
++      console.warn('[backup] showSaveFilePicker failed, falling back to download:', e);
++    }
++  }
++
++  const blob = new Blob([json], { type: 'application/json' });
++  const url = URL.createObjectURL(blob);
++  const a = document.createElement('a');
++  a.href = url;
++  a.download = filename;
++  a.click();
++  URL.revokeObjectURL(url);
++}
++
++function isBackupFile(data: unknown): data is BackupFile {
++  if (!data || typeof data !== 'object') return false;
++  const d = data as Record<string, unknown>;
++  return d.format === 'career-navigator-backup' && typeof d.data === 'object' && d.data !== null;
++}
++
++async function readFileAsText(): Promise<string> {
++  const w = window as any;
++  if (typeof w.showOpenFilePicker === 'function') {
++    const [handle] = await w.showOpenFilePicker({
++      types: [{ description: 'Career Navigator Backup', accept: { 'application/json': ['.json'] } }],
++      multiple: false,
++    });
++    const file = await handle.getFile();
++    return await file.text();
++  }
++
++  // Fallback: hidden <input type="file"> for browsers without the File
++  // System Access API.
++  return new Promise((resolve, reject) => {
++    const input = document.createElement('input');
++    input.type = 'file';
++    input.accept = 'application/json,.json';
++    input.onchange = () => {
++      const file = input.files?.[0];
++      if (!file) {
++        reject(new Error('No file selected'));
++        return;
++      }
++      const reader = new FileReader();
++      reader.onload = () => resolve(String(reader.result ?? ''));
++      reader.onerror = () => reject(reader.error ?? new Error('File read failed'));
++      reader.readAsText(file);
++    };
++    // If the user dismisses the native picker with no selection, no
++    // 'change' event fires and this promise would hang forever; give it
++    // a reasonable timeout instead.
++    input.click();
++  });
++}
++
++/** Restores all `career-navigator.*` keys from a user-picked backup file. */
++export async function restoreBackupFromFile(): Promise<void> {
++  const text = await readFileAsText();
++  let parsed: unknown;
++  try {
++    parsed = JSON.parse(text);
++  } catch {
++    throw new Error('Selected file is not valid JSON.');
++  }
++  if (!isBackupFile(parsed)) {
++    throw new Error('Selected file is not a Career Navigator backup.');
++  }
++
++  // Clear existing app keys first so a restore from an older/smaller
++  // backup doesn't leave stray keys the backup didn't know about.
++  const existingKeys = Object.keys(localStorage).filter(k => k.startsWith(KEY_PREFIX));
++  for (const key of existingKeys) localStorage.removeItem(key);
++
++  for (const [key, value] of Object.entries(parsed.data)) {
++    if (key.startsWith(KEY_PREFIX)) {
++      localStorage.setItem(key, value);
++    }
++  }
++}
+diff --git a/src/core/notifications/notification_service.ts b/src/core/notifications/notification_service.ts
+new file mode 100644
+index 0000000..3f090f2
+--- /dev/null
++++ b/src/core/notifications/notification_service.ts
+@@ -0,0 +1,169 @@
++/**
++ * Local notifications — MVP scope (see Settings.txt):
++ * only the "Daily Mission Reminder" is implemented. The other reminder
++ * types described in Settings.txt (Interview Practice / Come Back /
++ * Milestone) are intentionally NOT scheduled yet — they depend on
++ * features (Interview Trainer usage tracking, app-open tracking, chapter
++ * milestones) this service doesn't have hooks into yet. Wiring them in
++ * later just means adding more `scheduleX()` functions alongside this one
++ * and calling them from the same places (see notes at the bottom).
++ *
++ * Behavior implemented:
++ * - User toggles "Enable notifications" in Settings.
++ * - If enabled, once a day (default 19:00 local time) the app reminds the
++ *   user to do today's mission — but only if today's mission hasn't
++ *   already been completed.
++ * - If the toggle is off, no local notifications are shown at all.
++ *
++ * Capacitor's LocalNotifications API can't evaluate "has the user done
++ * today's mission yet" at delivery time — a scheduled notification just
++ * fires. So instead of a naive daily-repeating notification, this module
++ * always schedules a single one-off notification for the *next* relevant
++ * 19:00, and reschedules it (cancel + re-schedule) every time a mission
++ * is completed or the app starts. That keeps the only pending
++ * notification, at any moment, correct for "today's mission still not
++ * done."
++ */
++import { LocalNotifications } from '@capacitor/local-notifications';
++import { load, save } from '../persistence/storage';
++
++const REMINDER_NOTIFICATION_ID = 1001;
++const SETTINGS_KEY = 'career-navigator.notifications.v1';
++const SETTINGS_VERSION = 1;
++
++interface NotificationSettings {
++  enabled: boolean;
++  /** 24h "HH:mm", local time. Default matches the MVP spec: 19:00. */
++  reminderTime: string;
++}
++
++const DEFAULT_SETTINGS: NotificationSettings = {
++  enabled: false,
++  reminderTime: '19:00',
++};
++
++const opts = { key: SETTINGS_KEY, version: SETTINGS_VERSION };
++
++export function getNotificationSettings(): NotificationSettings {
++  return load<NotificationSettings>(opts) ?? DEFAULT_SETTINGS;
++}
++
++function saveSettings(settings: NotificationSettings): void {
++  save<NotificationSettings>(opts, settings);
++}
++
++// ─── "today's mission already done" tracking ──────────────────────────
++// Deliberately separate from the runtime/nodeStates schema — this is a
++// tiny, standalone "last day a task was completed" marker, not part of
++// journey progress.
++const LAST_COMPLETED_KEY = 'career-navigator.lastMissionCompletedDate.v1';
++
++function todayString(d = new Date()): string {
++  return d.toISOString().slice(0, 10); // YYYY-MM-DD
++}
++
++export function markMissionCompletedToday(): void {
++  localStorage.setItem(LAST_COMPLETED_KEY, todayString());
++  // A mission was just finished — the pending reminder (if any) is either
++  // no longer needed today, or needs to move to tomorrow. Recompute it.
++  void rescheduleReminder();
++}
++
++function missionCompletedToday(): boolean {
++  return localStorage.getItem(LAST_COMPLETED_KEY) === todayString();
++}
++
++// ─── permission + scheduling ───────────────────────────────────────────
++
++async function ensurePermission(): Promise<boolean> {
++  try {
++    const current = await LocalNotifications.checkPermissions();
++    if (current.display === 'granted') return true;
++    const requested = await LocalNotifications.requestPermissions();
++    return requested.display === 'granted';
++  } catch (e) {
++    // Not running on a platform with the native plugin (e.g. plain web
++    // preview) — fail silently, notifications just won't fire there.
++    console.warn('[notifications] permission check failed:', e);
++    return false;
++  }
++}
++
++function nextReminderDate(reminderTime: string, from = new Date()): Date {
++  const [h, m] = reminderTime.split(':').map(Number);
++  const next = new Date(from);
++  next.setHours(h, m, 0, 0);
++  if (next.getTime() <= from.getTime() || missionCompletedToday()) {
++    // Today's slot already passed, or today's mission is already done —
++    // either way the next relevant reminder is tomorrow.
++    next.setDate(next.getDate() + 1);
++    next.setHours(h, m, 0, 0);
++  }
++  return next;
++}
++
++async function cancelReminder(): Promise<void> {
++  try {
++    await LocalNotifications.cancel({ notifications: [{ id: REMINDER_NOTIFICATION_ID }] });
++  } catch (e) {
++    console.warn('[notifications] cancel failed:', e);
++  }
++}
++
++export async function rescheduleReminder(): Promise<void> {
++  const settings = getNotificationSettings();
++  await cancelReminder();
++  if (!settings.enabled) return;
++
++  const granted = await ensurePermission();
++  if (!granted) return;
++
++  const fireAt = nextReminderDate(settings.reminderTime);
++  try {
++    await LocalNotifications.schedule({
++      notifications: [
++        {
++          id: REMINDER_NOTIFICATION_ID,
++          title: "Ready for today's mission?",
++          body: 'Continue your journey.',
++          schedule: { at: fireAt },
++        },
++      ],
++    });
++  } catch (e) {
++    console.warn('[notifications] schedule failed:', e);
++  }
++}
++
++export async function setNotificationsEnabled(enabled: boolean): Promise<void> {
++  const settings = getNotificationSettings();
++  saveSettings({ ...settings, enabled });
++  if (enabled) {
++    await rescheduleReminder();
++  } else {
++    await cancelReminder();
++  }
++}
++
++export async function setReminderTime(reminderTime: string): Promise<void> {
++  const settings = getNotificationSettings();
++  saveSettings({ ...settings, reminderTime });
++  if (settings.enabled) {
++    await rescheduleReminder();
++  }
++}
++
++/** Call once on app start so a stale/missed reminder gets corrected. */
++export async function initNotifications(): Promise<void> {
++  const settings = getNotificationSettings();
++  if (settings.enabled) {
++    await rescheduleReminder();
++  }
++}
++
++// Future reminder types from Settings.txt, once their trigger data exists:
++//   scheduleInterviewPracticeReminder() — needs "last interview practice" timestamp
++//   scheduleComeBackReminder()          — needs "last app open" timestamp + 3-5 day check
++//   scheduleMilestoneReminder()         — fire once, immediately, when a chapter completes
++// Each would follow the same pattern: its own notification id, its own
++// cancel/schedule pair, called from setNotificationsEnabled/rescheduleReminder.
+diff --git a/src/core/runtime/runtime_controller.ts b/src/core/runtime/runtime_controller.ts
+index 6c17020..f1353c4 100644
+--- a/src/core/runtime/runtime_controller.ts
++++ b/src/core/runtime/runtime_controller.ts
+@@ -10,6 +10,7 @@ import { getNextChapter, getCurrentChapter } from '../chapter_engine';
+ import { checkNodeAccess } from '../premium/premium_gate';
+ import type { PremiumState } from '../premium/premium_state';
+ import { emit } from '../events/system_event_bus';
++import { markMissionCompletedToday } from '../notifications/notification_service';
+ import { saveRuntime as persistRuntime, clearRuntime } from '../persistence/runtime_persistence';
+ import { clearNotes } from '../user_data/notes/notes_persistence';
+ import {
+@@ -332,6 +333,13 @@ export function submitTask(userPayload: unknown): TaskResult {
+     };
+   }
+ 
++  // Daily Mission Reminder (Settings.txt MVP scope): once today's mission
++  // succeeds, today's local reminder is no longer needed — this reschedules
++  // it to tomorrow instead of leaving a stale "do your mission" ping.
++  if (enrichedResult.success) {
++    markMissionCompletedToday();
++  }
++
+   // BUGFIX (2026-07-04): chapterProgress used to be incremented on every
+   // submitTask() call unconditionally, even when the node had already
+   // reached its final state before this submission (e.g. user re-opens an
+diff --git a/src/screens/JourneyScreen/JourneyHUD.tsx b/src/screens/JourneyScreen/JourneyHUD.tsx
+index 3034637..153e4a4 100644
+--- a/src/screens/JourneyScreen/JourneyHUD.tsx
++++ b/src/screens/JourneyScreen/JourneyHUD.tsx
+@@ -1,6 +1,6 @@
+ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+ import { getUIState } from '@/core/ui_bridge/ui_bridge';
+-import { setActiveNode, getActiveNode, getRuntimeState, advanceChapter } from '@/core/runtime/runtime_controller';
++import { setActiveNode, getActiveNode, getRuntimeState, advanceChapter, setActiveChapter } from '@/core/runtime/runtime_controller';
+ import { getActiveChapters } from '@/core/profession_loader';
+ import { getNextChapter, getCurrentChapter } from '@/core/chapter_engine';
+ import { calculateReadiness } from '@/core/readiness_engine';
+@@ -148,6 +148,7 @@ export function JourneyHUD() {
+   const activeChapterIndex = chapters.findIndex(c => c.isActive);
+   const activeChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex] : null;
+   const nextChapter = activeChapterIndex >= 0 ? chapters[activeChapterIndex + 1] : undefined;
++  const prevChapter = activeChapterIndex > 0 ? chapters[activeChapterIndex - 1] : undefined;
+ 
+   // BUGFIX (2026-07-10): the bridge-forward effect below used to fire any
+   // time the active chapter was fully completed, regardless of *how* the
+@@ -271,6 +272,33 @@ export function JourneyHUD() {
+     }, 650);
+   }, [moveUp, zoomOut, finishBridge, refresh]);
+ 
++  // BUGFIX: tapping an already-completed island in the World map (via
++  // onChapterSelect -> setActiveChapter) dropped the user into that
++  // chapter to review it, but with no way to move forward — the
++  // auto-bridge-to-next-chapter effect above is deliberately gated off
++  // while reviewing a past chapter (isReviewingPastChapter), and even for
++  // the just-finished frontier chapter, `prevChapterCompletedRef` blocks
++  // it from firing a second time. If that chapter was the last one the
++  // player had completed, there was simply no path from "reviewing a done
++  // chapter" back to "start the next, unstarted chapter." These Back/Next
++  // controls (rendered below, only while the active chapter is completed)
++  // give that path explicitly: Next reuses advanceChapter() (unlocks the
++  // next chapter if needed, otherwise just re-activates its first node —
++  // it never touches nodeStates for chapters already unlocked/in progress)
++  // and Back reuses setActiveChapter() (the same mutator WorldMap island
++  // taps use), so no new state-mutation logic was introduced.
++  const handleGoToPrevChapter = useCallback(() => {
++    if (!prevChapter) return;
++    setActiveChapter(prevChapter.id);
++    refresh();
++  }, [prevChapter, refresh]);
++
++  const handleGoToNextChapter = useCallback(() => {
++    if (!nextChapter) return;
++    advanceChapter();
++    refresh();
++  }, [nextChapter, refresh]);
++
+   const handleMissionComplete = useCallback(() => {
+     setShowMission(false);
+     refresh();
+@@ -414,6 +442,25 @@ export function JourneyHUD() {
+         <Icon name="settings" size={20} />
+       </button>
+ 
++      {activeChapter?.isCompleted && phase === 'active' && (
++        <div className="journey-chapter-nav">
++          <button
++            className="journey-chapter-nav-btn"
++            onClick={handleGoToPrevChapter}
++            disabled={!prevChapter}
++          >
++            ← Back
++          </button>
++          <button
++            className="journey-chapter-nav-btn primary"
++            onClick={handleGoToNextChapter}
++            disabled={!nextChapter}
++          >
++            Next →
++          </button>
++        </div>
++      )}
++
+       {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}
+ 
+       {lockedToast && <div className="locked-toast">{lockedToast}</div>}
+diff --git a/src/screens/JourneyScreen/JourneyScreen.css b/src/screens/JourneyScreen/JourneyScreen.css
+index 2b192b1..d922579 100644
+--- a/src/screens/JourneyScreen/JourneyScreen.css
++++ b/src/screens/JourneyScreen/JourneyScreen.css
+@@ -83,14 +83,24 @@
+ 
+ .journey-header-right {
+   display: flex;
+-  align-items: center;
+-  gap: 12px;
++  flex-direction: column;
++  align-items: flex-end;
++  gap: 6px;
++  /* BUGFIX: the readiness bar used to sit in the same row as the label,
++     which pushed it far enough right to land directly under the fixed
++     settings gear button (top-right, 44px circle, see .journey-settings-btn
++     below). Stacking label above bar (and reserving room for the gear on
++     the right) keeps the bar clear of the gear at every screen width. */
++  padding-top: 2px;
++  padding-right: 52px;
+ }
+ 
+ .journey-header-readiness {
+   display: flex;
+   align-items: baseline;
+   gap: 6px;
++  /* Sits on the same visual line as the chapter title on the left. */
++  height: 20px;
+ }
+ 
+ .readiness-label {
+@@ -1199,6 +1209,44 @@
+   pointer-events: auto;
+ }
+ 
++/* === Chapter Back / Next (only shown while reviewing a completed
++   chapter — see JourneyHUD.tsx) === */
++.journey-chapter-nav {
++  position: fixed;
++  left: 16px;
++  right: 16px;
++  bottom: calc(96px + env(safe-area-inset-bottom));
++  z-index: 60;
++  display: flex;
++  gap: 10px;
++  pointer-events: auto;
++}
++
++.journey-chapter-nav-btn {
++  flex: 1;
++  padding: 12px 16px;
++  border-radius: 14px;
++  border: 1px solid rgba(240, 240, 245, 0.12);
++  background: rgba(20, 24, 33, 0.85);
++  backdrop-filter: blur(12px);
++  -webkit-backdrop-filter: blur(12px);
++  color: #f0f0f5;
++  font-size: 15px;
++  font-weight: 600;
++  cursor: pointer;
++  min-height: 44px;
++}
++
++.journey-chapter-nav-btn.primary {
++  background: linear-gradient(90deg, #4A90D9, #48BB78);
++  border-color: transparent;
++}
++
++.journey-chapter-nav-btn:disabled {
++  opacity: 0.35;
++  cursor: default;
++}
++
+ /* === DEV: Test → Interview button === */
+ .dev-ffwd-btn {
+   position: fixed;
+diff --git a/src/screens/SettingsScreen/SettingsScreen.css b/src/screens/SettingsScreen/SettingsScreen.css
+index e22c48c..0f7fa04 100644
+--- a/src/screens/SettingsScreen/SettingsScreen.css
++++ b/src/screens/SettingsScreen/SettingsScreen.css
+@@ -287,15 +287,36 @@
+ }
+ 
+ .settings-back {
+-  width: 100%;
+-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
++  /* BUGFIX: on some screens this button used to render underneath the
++     app's main bottom tab bar (BottomNav, fixed/z-index:50 in App.tsx),
++     because .settings-screen sat in the same root stacking context and a
++     later re-render of BottomNav could repaint over it. Making this its
++     own fixed, high-z-index element (instead of a plain flow child at the
++     bottom of the scroll column) guarantees it always sits above the tab
++     bar and any other overlay, and it no longer scrolls away with the
++     settings list.
++  */
++  position: fixed;
++  left: 16px;
++  right: 16px;
++  bottom: calc(14px + env(safe-area-inset-bottom));
++  z-index: 400;
++  width: auto;
++  padding: 14px 16px;
+   border-radius: 14px;
+   border: 1px solid rgba(240, 240, 245, 0.1);
+-  background: rgba(240, 240, 245, 0.06);
++  background: #1a1f2b;
+   color: #f0f0f5;
+   font-size: 15px;
+   font-weight: 600;
+   cursor: pointer;
+   min-height: 44px;
+   text-align: center;
++  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
++}
++
++.settings-scroll {
++  /* Leave room so the last section isn't hidden behind the now-fixed
++     back button. */
++  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+ }
+diff --git a/src/screens/SettingsScreen/SettingsScreen.tsx b/src/screens/SettingsScreen/SettingsScreen.tsx
+index 4e56080..9bfb356 100644
+--- a/src/screens/SettingsScreen/SettingsScreen.tsx
++++ b/src/screens/SettingsScreen/SettingsScreen.tsx
+@@ -6,6 +6,8 @@ import { shareApp } from '@/core/share/app_share';
+ import { APP_ABOUT } from '@/content/legal_content';
+ import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen/PrivacyPolicyScreen';
+ import type { PremiumState } from '@/core/premium/premium_state';
++import { getNotificationSettings, setNotificationsEnabled as persistNotificationsEnabled } from '@/core/notifications/notification_service';
++import { createBackup, restoreBackupFromFile } from '@/core/export/backup_service';
+ import './SettingsScreen.css';
+ 
+ const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0';
+@@ -16,8 +18,11 @@ interface SettingsScreenProps {
+ }
+ 
+ export function SettingsScreen({ onClose }: SettingsScreenProps) {
+-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
++  const [notificationsEnabled, setNotificationsEnabled] = useState(
++    () => getNotificationSettings().enabled
++  );
+   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
++  const [backupStatus, setBackupStatus] = useState<string | null>(null);
+   const [premium] = useState<PremiumState>(() => {
+     const prof = getActiveProfession();
+     return createPremiumState(prof?.id || 'software_engineer', prof?.chapters?.length || 8, 'free');
+@@ -31,12 +36,33 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
+     }
+   };
+ 
++  const handleToggleNotifications = async () => {
++    const next = !notificationsEnabled;
++    setNotificationsEnabled(next);
++    await persistNotificationsEnabled(next);
++  };
++
+   const handleBackup = async () => {
+-    // MVP placeholder
++    setBackupStatus(null);
++    try {
++      await createBackup();
++      setBackupStatus('Backup saved.');
++    } catch (e) {
++      console.warn('[settings] backup failed:', e);
++      setBackupStatus('Backup failed.');
++    }
+   };
+ 
+   const handleRestore = async () => {
+-    // MVP placeholder
++    setBackupStatus(null);
++    try {
++      await restoreBackupFromFile();
++      setBackupStatus('Restored — reloading...');
++      setTimeout(() => window.location.reload(), 600);
++    } catch (e) {
++      console.warn('[settings] restore failed:', e);
++      setBackupStatus('Restore failed or cancelled.');
++    }
+   };
+ 
+   return (
+@@ -56,7 +82,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
+               <span className="settings-row-label">Enable notifications</span>
+               <button
+                 className={`settings-toggle ${notificationsEnabled ? 'active' : ''}`}
+-                onClick={() => setNotificationsEnabled(!notificationsEnabled)}
++                onClick={handleToggleNotifications}
+                 aria-label="Toggle notifications"
+               >
+                 <div className="settings-toggle-thumb" />
+@@ -90,11 +116,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
+ 
+           <section className="settings-section">
+             <h3 className="settings-section-title">Backup</h3>
+-            <button
+-              className={`settings-action-btn ${!premium.isUnlocked ? 'disabled' : ''}`}
+-              disabled={!premium.isUnlocked}
+-              onClick={handleBackup}
+-            >
++            <button className="settings-action-btn" onClick={handleBackup}>
+               <Icon name="refresh" size={16} /> Create Backup
+             </button>
+           </section>
+@@ -104,6 +126,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
+             <button className="settings-action-btn" onClick={handleRestore}>
+               <Icon name="refresh" size={16} /> Restore Backup
+             </button>
++            {backupStatus && <p className="settings-privacy-text">{backupStatus}</p>}
+           </section>
+ 
+           <section className="settings-section">

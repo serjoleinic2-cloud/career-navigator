@@ -1,0 +1,38 @@
+🔔 Notifications
+
+Описание:
+
+Stay motivated on your career journey with helpful reminders.
+
+Переключатель:
+
+Enable notifications
+
+Если включено, приложение может присылать:
+
+📅 Daily Mission Reminder — раз в день напоминает выполнить текущую миссию.
+🎤 Interview Practice Reminder — если пользователь давно не тренировался.
+🌱 Come Back Reminder — если пользователь не открывал приложение 3–5 дней.
+🎉 Milestone Reminder — поздравление после завершения главы.
+
+Но в MVP я бы реализовал только первое.
+
+Логика MVP
+
+Например, каждый день в 19:00 (или в выбранное пользователем время):
+
+Ready for today's mission? Continue your journey.
+
+Если пользователь уже выполнил сегодняшнюю миссию — уведомление не отправляется.
+
+Если переключатель выключен
+
+Никаких локальных уведомлений приложение не показывает.
+
+
+После появления Interview Trainer можно добавить:
+
+🎙️ Time to practice today's interview.
+💼 You're getting closer to your offer.
+🚀 Continue your journey.
+⭐ Chapter completed! Ready for the next one?

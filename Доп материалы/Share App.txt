@@ -1,0 +1,58 @@
+TASK — Implement "Share App"
+Goal
+
+Implement the Share App action in Profile → Settings.
+
+Do not export progress, JSON, CSV, screenshots, or any debug data.
+
+This feature is only for recommending Career Navigator to other people.
+
+Behaviour
+
+When the user taps Share App:
+
+Open the native Android/iOS Share Sheet using the Capacitor Share API.
+
+Share the following text:
+
+I'm using Career Navigator to prepare for job interviews and build my career with step-by-step missions.
+
+Download it on Google Play:
+https://play.google.com/store/apps/details?id=com.careernavigator.app
+
+If the Play Store URL is not available yet, create a constant (APP_SHARE_URL) with a placeholder so it can be replaced before release.
+
+Example:
+
+const APP_SHARE_URL = "https://play.google.com/store/apps/details?id=com.careernavigator.app";
+UI
+
+Title
+
+Share App
+
+Description
+
+Recommend Career Navigator to friends and colleagues.
+
+Icon
+
+Standard Share icon.
+
+Technical Requirements
+Use the native Capacitor Share plugin.
+One tap → system share dialog.
+No custom dialogs.
+No copy-to-clipboard screen.
+No export options.
+No JSON.
+No CSV.
+No screenshots.
+Acceptance Criteria
+Tapping Share App opens the native share sheet.
+Shared text contains the app description and Google Play link.
+Works on Android.
+Easy to update the Play Store URL before release.
+No additional UI or settings are introduced.
+
+Такое поведение соответствует уровню качественного мобильного приложения: пользователь нажимает одну кнопку, выбирает WhatsApp, Telegram, Email, Messages или любое другое приложение — и отправляет ссылку на Career Navigator. Это именно то, чего ожидают пользователи от пункта Share App.

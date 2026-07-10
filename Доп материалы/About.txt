@@ -1,0 +1,15 @@
+Career Navigator
+
+Your personal guide to career readiness.
+
+Build confidence, complete practical missions, prepare for interviews, and track your progress—all in one private, offline-first app.
+
+Career Navigator helps you stay focused on what matters most: becoming ready for your next opportunity.
+
+Version
+
+1.0.0
+
+Build
+
+(автоматически из сборки)

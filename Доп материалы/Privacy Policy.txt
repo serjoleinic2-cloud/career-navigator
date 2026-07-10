@@ -1,0 +1,59 @@
+Privacy Policy — Career Navigator
+Effective Date: July 11, 2026
+Last Updated: July 11, 2026
+1. Introduction
+Career Navigator ("we", "our", or "the App") is an offline career preparation and interview training application. This Privacy Policy explains how we handle your information.
+2. Information We Do Not Collect
+Career Navigator is designed with privacy as a core principle. We do not collect:
+Personal identification information (name, email, address)
+Account credentials
+Location data
+Device identifiers
+Usage analytics
+Crash reports
+Any data transmitted to external servers
+3. Information Stored Locally
+All data created by you is stored exclusively on your device:
+Table
+Data Type	Purpose	Storage
+Journey progress	Track your career preparation steps	Local device
+Notes	Your personal reflections per chapter	Local device
+Interview recordings	Voice practice sessions (optional)	Local device
+Self-assessment scores	Track interview readiness	Local device
+Settings	App preferences	Local device
+No data leaves your device. We have no access to this information.
+4. Voice Recording
+The Interview Trainer feature uses your device's microphone:
+Recordings are processed locally
+Audio data is not transmitted to any server
+Recordings are not permanently stored unless you explicitly save them
+You may delete recordings at any time
+5. Third-Party Services
+Career Navigator does not integrate with:
+Analytics platforms (Google Analytics, Firebase, etc.)
+Advertising networks
+Social media SDKs
+Cloud storage services
+AI/ML APIs
+6. Data Security
+Since all data is local:
+Your data is as secure as your device
+We recommend enabling device encryption
+App data is protected by your device's operating system sandbox
+7. Children's Privacy
+Career Navigator is not intended for users under 16 years of age. We do not knowingly collect any information from children.
+8. Changes to This Policy
+We may update this Privacy Policy. Changes will be reflected in the App's Settings screen and the effective date will be updated.
+9. Contact Us
+For questions about this Privacy Policy:
+Email: privacy@careernavigator.app
+Address:
+Career Navigator Team
+[Your Company Address]
+10. Your Rights
+You have the right to:
+Access: All your data is visible within the App
+Delete: Clear all data via Settings → Privacy → Delete All Data
+Export: Backup your data locally via Settings → Backup
+Opt-out: Uninstall the App to remove all associated data
+By using Career Navigator, you acknowledge that you understand and agree to this Privacy Policy.
