@@ -9,7 +9,26 @@
  * included in backups for free as long as they keep using the existing
  * `career-navigator.` key prefix (see storage.ts / runtime_persistence.ts
  * / notes_persistence.ts / interview_persistence.ts / notification_service.ts).
+ *
+ * BUGFIX (2026-07-11): "Create Backup" always failed on the Android build.
+ * The old implementation only knew two tricks — `showSaveFilePicker`
+ * (a desktop-browser-only API, doesn't exist in an Android WebView) and a
+ * plain `<a download>` blob link (Android WebView has no Downloads
+ * integration for blob: URLs, so the click silently does nothing / throws).
+ * Neither path can ever succeed inside the packaged app, which is why the
+ * user only ever saw "Backup failed."
+ *
+ * Fix: on native platforms, write the JSON to the app's cache dir via
+ * @capacitor/filesystem and hand it to the native share sheet via
+ * @capacitor/share (same plugin + one-tap system dialog already used by
+ * "Share App" in app_share.ts) — the OS share sheet is what lets the user
+ * pick *where* the file goes (Drive, Files, email, etc.), exactly like a
+ * normal Android "export" action. The old File System Access API / blob
+ * download path is kept as-is for the plain desktop-browser build.
  */
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
 
 const KEY_PREFIX = 'career-navigator.';
 const BACKUP_FORMAT_VERSION = 1;
@@ -43,15 +62,34 @@ function buildBackupFile(): BackupFile {
 }
 
 /**
- * Saves a backup file. Uses the File System Access API (native "Save As"
- * dialog, lets the user pick the folder) where available; falls back to
- * a plain browser download (goes to the default Downloads location) on
- * browsers/webviews that don't support it.
+ * Saves a backup file.
+ * - Native (Android/iOS): writes the JSON into the app's cache directory,
+ *   then opens the native share sheet on it, so the user picks the
+ *   destination (Drive, Files, email, etc.) themselves — this is the
+ *   "export" flow, same mechanism as "Share App".
+ * - Plain web: uses the File System Access API ("Save As" dialog) where
+ *   available, falling back to a normal browser download.
  */
 export async function createBackup(): Promise<void> {
   const backup = buildBackupFile();
   const json = JSON.stringify(backup, null, 2);
   const filename = `career-navigator-backup-${new Date().toISOString().slice(0, 10)}.json`;
+
+  if (Capacitor.isNativePlatform()) {
+    const written = await Filesystem.writeFile({
+      path: filename,
+      data: json,
+      directory: Directory.Cache,
+      encoding: Encoding.UTF8,
+    });
+    await Share.share({
+      title: 'Career Navigator Backup',
+      text: 'Career Navigator progress backup',
+      files: [written.uri],
+      dialogTitle: 'Save backup to…',
+    });
+    return;
+  }
 
   const w = window as any;
   if (typeof w.showSaveFilePicker === 'function') {
