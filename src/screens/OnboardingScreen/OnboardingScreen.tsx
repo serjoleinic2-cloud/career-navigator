@@ -1,21 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { Icon } from '../../components/Icon/Icon';
-import { SoftwareEngineerModule } from '../../professions/software_engineer/module';
 import { PrivacyPolicyScreen } from '../PrivacyPolicyScreen/PrivacyPolicyScreen';
 import './OnboardingScreen.css';
 
 type Profession = 'software_engineer' | 'data_scientist' | 'product_manager';
-type Experience = 'junior' | 'middle' | 'senior';
-type Goal = 'first_job' | 'career_switch' | 'interview_prep' | 'skill_growth';
-type Timeline = '1_month' | '3_months' | '6_months' | '1_year';
-type Preference = 'remote' | 'hybrid' | 'onsite' | 'us' | 'eu';
 
 export interface OnboardingState {
   profession: Profession;
-  experience: Experience;
-  goals: Goal[];
-  timeline: Timeline;
-  preferences: Preference[];
+  biggestFear: string[];
+  privacyAgreed: boolean;
 }
 
 const professions: { id: Profession; label: string; status: 'available' | 'coming_soon' }[] = [
@@ -24,32 +17,14 @@ const professions: { id: Profession; label: string; status: 'available' | 'comin
   { id: 'product_manager', label: 'Product Manager', status: 'coming_soon' },
 ];
 
-const experiences: { id: Experience; label: string }[] = [
-  { id: 'junior', label: 'Junior' },
-  { id: 'middle', label: 'Middle' },
-  { id: 'senior', label: 'Senior' },
-];
-
-const goals: { id: Goal; label: string }[] = [
-  { id: 'first_job', label: 'Get my first job' },
-  { id: 'career_switch', label: 'Career switch' },
-  { id: 'interview_prep', label: 'Interview prep' },
-  { id: 'skill_growth', label: 'Skill growth' },
-];
-
-const timelines: { id: Timeline; label: string }[] = [
-  { id: '1_month', label: '1 Month' },
-  { id: '3_months', label: '3 Months' },
-  { id: '6_months', label: '6 Months' },
-  { id: '1_year', label: '1 Year' },
-];
-
-const preferences: { id: Preference; label: string }[] = [
-  { id: 'remote', label: 'Remote' },
-  { id: 'hybrid', label: 'Hybrid' },
-  { id: 'onsite', label: 'On-site' },
-  { id: 'us', label: 'US' },
-  { id: 'eu', label: 'EU' },
+const biggestFears: { id: string; label: string }[] = [
+  { id: 'rejection', label: 'Rejection' },
+  { id: 'interviews', label: 'Interviews' },
+  { id: 'lack_of_experience', label: 'Lack of experience' },
+  { id: 'salary_negotiation', label: 'Salary negotiation' },
+  { id: 'english_language', label: 'English language' },
+  { id: 'competition', label: 'Competition' },
+  { id: 'not_sure_yet', label: 'Not sure yet' },
 ];
 
 interface OnboardingScreenProps {
@@ -59,19 +34,16 @@ interface OnboardingScreenProps {
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const [screen, setScreen] = useState(0);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
-  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [state, setState] = useState<OnboardingState>({
     profession: 'software_engineer',
-    experience: 'junior',
-    goals: [],
-    timeline: '3_months',
-    preferences: [],
+    biggestFear: [],
+    privacyAgreed: false,
   });
 
   const goNext = useCallback(() => {
     setDirection('next');
-    setScreen(s => Math.min(s + 1, 6));
+    setScreen(s => Math.min(s + 1, 2));
   }, []);
 
   const goBack = useCallback(() => {
@@ -79,35 +51,19 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
     setScreen(s => Math.max(s - 1, 0));
   }, []);
 
-  const updateState = useCallback(<K extends keyof OnboardingState>(
-    key: K,
-    value: OnboardingState[K]
-  ) => {
-    setState(prev => ({ ...prev, [key]: value }));
-  }, []);
-
-  const toggleGoal = useCallback((goalId: Goal) => {
+  const toggleFear = useCallback((fearId: string) => {
     setState(prev => ({
       ...prev,
-      goals: prev.goals.includes(goalId)
-        ? prev.goals.filter(g => g !== goalId)
-        : [...prev.goals, goalId],
-    }));
-  }, []);
-
-  const togglePreference = useCallback((prefId: Preference) => {
-    setState(prev => ({
-      ...prev,
-      preferences: prev.preferences.includes(prefId)
-        ? prev.preferences.filter(p => p !== prefId)
-        : [...prev.preferences, prefId],
+      biggestFear: prev.biggestFear.includes(fearId)
+        ? prev.biggestFear.filter(f => f !== fearId)
+        : [...prev.biggestFear, fearId],
     }));
   }, []);
 
   const handleComplete = useCallback(() => {
-    if (!agreedToPrivacy) return;
+    if (!state.privacyAgreed) return;
     onComplete(state);
-  }, [onComplete, state, agreedToPrivacy]);
+  }, [onComplete, state]);
 
   const slideClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
 
@@ -140,7 +96,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 className={`onboarding-card ${p.status === 'coming_soon' ? 'disabled' : ''} ${
                   state.profession === p.id ? 'selected' : ''
                 }`}
-                onClick={() => p.status === 'available' && updateState('profession', p.id)}
+                onClick={() => p.status === 'available' && setState(prev => ({ ...prev, profession: p.id }))}
               >
                 <span className="card-label">{p.label}</span>
                 <span className={`card-status ${p.status}`}>
@@ -156,169 +112,61 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         </div>
       )}
 
-      {/* Screen 2: Experience */}
+      {/* Screen 2: Fear + Privacy */}
       {screen === 2 && (
         <div className={`onboarding-page ${slideClass}`}>
-          <h2 className="onboarding-heading">Experience</h2>
+          <h2 className="onboarding-heading">Biggest Challenge</h2>
+          <p className="onboarding-subheading">What's your biggest challenge?</p>
           <div className="onboarding-cards">
-            {experiences.map(e => (
+            {biggestFears.map(f => (
               <div
-                key={e.id}
-                className={`onboarding-card ${state.experience === e.id ? 'selected scaled' : ''}`}
-                onClick={() => updateState('experience', e.id)}
+                key={f.id}
+                className={`onboarding-card ${state.biggestFear.includes(f.id) ? 'selected' : ''}`}
+                onClick={() => toggleFear(f.id)}
               >
-                <span className="card-label">{e.label}</span>
+                <span className="card-label">{f.label}</span>
+                {state.biggestFear.includes(f.id) && <span className="card-check"><Icon name="check" /></span>}
               </div>
             ))}
           </div>
-          <div className="onboarding-nav">
-            <button className="onboarding-back-btn" onClick={goBack}>Back</button>
-            <button className="onboarding-primary-btn" onClick={goNext}>Continue</button>
-          </div>
-        </div>
-      )}
 
-      {/* Screen 3: Goals */}
-      {screen === 3 && (
-        <div className={`onboarding-page ${slideClass}`}>
-          <h2 className="onboarding-heading">Your Mission</h2>
-          <div className="onboarding-cards">
-            {goals.map(g => (
-              <div
-                key={g.id}
-                className={`onboarding-card ${state.goals.includes(g.id) ? 'selected' : ''}`}
-                onClick={() => toggleGoal(g.id)}
-              >
-                <span className="card-label">{g.label}</span>
-                {state.goals.includes(g.id) && <span className="card-check"><Icon name="check" /></span>}
-              </div>
-            ))}
-          </div>
-          <div className="onboarding-nav">
-            <button className="onboarding-back-btn" onClick={goBack}>Back</button>
-            <button className="onboarding-primary-btn" onClick={goNext}>Continue</button>
-          </div>
-        </div>
-      )}
-
-      {/* Screen 4: Timeline */}
-      {screen === 4 && (
-        <div className={`onboarding-page ${slideClass}`}>
-          <h2 className="onboarding-heading">Timeline</h2>
-          <div className="onboarding-cards">
-            {timelines.map(t => (
-              <div
-                key={t.id}
-                className={`onboarding-card ${state.timeline === t.id ? 'selected' : ''}`}
-                onClick={() => updateState('timeline', t.id)}
-              >
-                <span className="card-label">{t.label}</span>
-              </div>
-            ))}
-          </div>
-          <div className="onboarding-nav">
-            <button className="onboarding-back-btn" onClick={goBack}>Back</button>
-            <button className="onboarding-primary-btn" onClick={goNext}>Continue</button>
-          </div>
-        </div>
-      )}
-
-      {/* Screen 5: Preferences */}
-      {screen === 5 && (
-        <div className={`onboarding-page ${slideClass}`}>
-          <h2 className="onboarding-heading">Preferences</h2>
-          <div className="onboarding-cards">
-            {preferences.map(p => (
-              <div
-                key={p.id}
-                className={`onboarding-card ${state.preferences.includes(p.id) ? 'selected' : ''}`}
-                onClick={() => togglePreference(p.id)}
-              >
-                <span className="card-label">{p.label}</span>
-                {state.preferences.includes(p.id) && <span className="card-check"><Icon name="check" /></span>}
-              </div>
-            ))}
-          </div>
-          <div className="onboarding-nav">
-            <button className="onboarding-back-btn" onClick={goBack}>Back</button>
-            <button className="onboarding-primary-btn" onClick={goNext}>Continue</button>
-          </div>
-        </div>
-      )}
-
-      {/* Screen 6: Review */}
-      {screen === 6 && (
-        <div className={`onboarding-page onboarding-review ${slideClass}`}>
-          <h2 className="onboarding-heading">Review</h2>
-          <div className="review-grid">
-            <div className="review-item">
-              <div className="review-icon"><Icon name="briefcase" /></div>
-              <div className="review-label">Profession</div>
-              <div className="review-value">
-                {professions.find(p => p.id === state.profession)?.label}
-              </div>
-            </div>
-            <div className="review-item">
-              <div className="review-icon"><Icon name="star" /></div>
-              <div className="review-label">Experience</div>
-              <div className="review-value">
-                {experiences.find(e => e.id === state.experience)?.label}
-              </div>
-            </div>
-            <div className="review-item">
-              <div className="review-icon"><Icon name="target" /></div>
-              <div className="review-label">Goals</div>
-              <div className="review-value">
-                {state.goals.length} selected
-              </div>
-            </div>
-            <div className="review-item review-item--wide">
-              <div className="onboarding-timeline">
-                <Icon name="map" size={24} color="#00e5e0" />
-                <span>Journey Length — {SoftwareEngineerModule.skillGraph.length} Missions</span>
-                <span className="onboarding-sub">Complete at your own pace</span>
-              </div>
-            </div>
-            <div className="review-item">
-              <div className="review-icon"><Icon name="settings" /></div>
-              <div className="review-label">Preferences</div>
-              <div className="review-value">
-                {state.preferences.length} selected
-              </div>
-            </div>
-          </div>
-          <label className="onboarding-privacy-agree">
+          <label className="privacy-checkbox">
             <input
               type="checkbox"
-              checked={agreedToPrivacy}
-              onChange={e => setAgreedToPrivacy(e.target.checked)}
+              checked={state.privacyAgreed}
+              onChange={e => setState(prev => ({ ...prev, privacyAgreed: e.target.checked }))}
             />
             <span className="onboarding-privacy-checkbox">
-              {agreedToPrivacy && <Icon name="check" size={14} color="#0b0e14" />}
+              {state.privacyAgreed && <Icon name="check" size={14} color="#0b0e14" />}
             </span>
-            <span className="onboarding-privacy-label">I agree to the Privacy Policy</span>
+            <span className="onboarding-privacy-label">
+              I agree to the{' '}
+              <button
+                type="button"
+                className="onboarding-privacy-link"
+                onClick={() => setShowPrivacyPolicy(true)}
+              >
+                Privacy Policy
+              </button>
+            </span>
           </label>
-          <button
-            type="button"
-            className="onboarding-privacy-link"
-            onClick={() => setShowPrivacyPolicy(true)}
-          >
-            Read full Privacy Policy
-          </button>
 
-          <button
-            className="onboarding-primary-btn onboarding-start-btn"
-            onClick={handleComplete}
-            disabled={!agreedToPrivacy}
-          >
-            Start My Journey
-          </button>
+          <div className="onboarding-nav">
+            <button className="onboarding-back-btn" onClick={goBack}>Back</button>
+            <button
+              className="onboarding-primary-btn onboarding-start-btn"
+              onClick={handleComplete}
+              disabled={!state.privacyAgreed}
+            >
+              Start My Journey
+            </button>
+          </div>
         </div>
       )}
 
       {/* Progress dots */}
       <div className="onboarding-progress">
-        {[0, 1, 2, 3, 4, 5, 6].map(i => (
+        {[0, 1, 2].map(i => (
           <div key={i} className={`progress-dot ${i === screen ? 'active' : ''}`} />
         ))}
       </div>

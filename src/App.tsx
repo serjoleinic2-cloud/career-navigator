@@ -124,17 +124,17 @@ function AppInner() {
         onComplete={(localState) => {
           const coreState = {
             professionId: localState.profession,
-            experienceLevel: localState.experience,
-            goals: localState.goals,
-            timeline: localState.timeline,
-            preferences: localState.preferences,
+            fears: localState.biggestFear,
+            experienceLevel: null,
+            goals: [],
+            confidenceLevel: null,
+            timeline: null,
+            preferences: [],
             situation: null,
             emotion: null,
             applicationsCount: null,
             interviewsCount: null,
-            confidenceLevel: null,
-            fears: [],
-            step: 7,
+            step: 3,
             isComplete: true,
           };
           startJourney(coreState as any);
