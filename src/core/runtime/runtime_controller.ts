@@ -681,6 +681,58 @@ export function devCompleteAllChaptersExceptLast(): void {
   emit('UI_REFRESH', {});
 }
 
+// ─── DEV TOOL: complete everything except the very last task ─────────────────
+// Marks every chapter/node as done EXCEPT the last node of the last chapter,
+// which is left unlocked ('awareness' → 'confidence') so the user can walk
+// through that one remaining task themselves and see what happens after it
+// (chapter completion, journey completion, final cinematic, etc.).
+// Used by Settings > Test.
+export function devCompleteAllExceptLastTask(): void {
+  if (!runtimeState) throw new Error('Runtime not initialized');
+
+  const chapters = getActiveChapters();
+  if (chapters.length === 0) return;
+
+  const lastChapter = chapters[chapters.length - 1];
+  const lastNodeId = lastChapter.nodeIds[lastChapter.nodeIds.length - 1];
+
+  const updatedNodeStates = { ...runtimeState.nodeStates };
+  for (const ch of chapters) {
+    for (const nodeId of ch.nodeIds) {
+      const node = updatedNodeStates[nodeId];
+      if (!node) continue;
+      if (nodeId === lastNodeId) {
+        updatedNodeStates[nodeId] = { ...node, state: 'awareness', nextState: 'confidence' };
+      } else {
+        updatedNodeStates[nodeId] = { ...node, state: 'confidence', nextState: null };
+      }
+    }
+  }
+
+  // Recompute each chapter's stored progress % from the node states above,
+  // same formula as chapter_engine.getChapterProgress, so ProfileScreen /
+  // WorldMapScreen island-unlock logic stay consistent with what's shown.
+  const updatedChapterProgress: Record<string, number> = { ...runtimeState.chapterProgress };
+  for (const ch of chapters) {
+    const chapterNodes = ch.nodeIds.map(id => updatedNodeStates[id]).filter(Boolean);
+    const completed = chapterNodes.filter(n => n.state === 'confidence').length;
+    updatedChapterProgress[ch.id] = chapterNodes.length > 0
+      ? Math.round((completed / chapterNodes.length) * 100)
+      : 0;
+  }
+
+  runtimeState = {
+    ...runtimeState,
+    nodeStates: updatedNodeStates,
+    chapterProgress: updatedChapterProgress,
+    activeChapterId: lastChapter.id,
+    activeNodeId: lastNodeId ?? runtimeState.activeNodeId,
+  };
+
+  saveRuntime(runtimeState);
+  emit('UI_REFRESH', {});
+}
+
 export function initializeRuntime(saved: JourneyRuntimeState): void {
   // BUGFIX (2026-07-06): initializeRuntime was only restoring runtimeState
   // but not calling setActiveProfession(), so profession_loader.activeState

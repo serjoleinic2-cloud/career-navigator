@@ -8,6 +8,7 @@ import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen/PrivacyPolicy
 import type { PremiumState } from '@/core/premium/premium_state';
 import { getNotificationSettings, setNotificationsEnabled as persistNotificationsEnabled } from '@/core/notifications/notification_service';
 import { createBackup, restoreBackupFromFile } from '@/core/export/backup_service';
+import { devCompleteAllExceptLastTask } from '@/core/runtime/runtime_controller';
 import './SettingsScreen.css';
 
 const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0';
@@ -63,6 +64,16 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
       console.warn('[settings] restore failed:', e);
       setBackupStatus('Restore failed or cancelled.');
     }
+  };
+
+  const handleTest = () => {
+    try {
+      devCompleteAllExceptLastTask();
+    } catch (e) {
+      console.warn('[settings] Test failed:', e);
+      return;
+    }
+    window.location.reload();
   };
 
   return (
@@ -162,6 +173,17 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             <h3 className="settings-section-title">Share App</h3>
             <button className="settings-action-btn primary" onClick={handleShareApp}>
               <Icon name="share" size={16} /> Share App
+            </button>
+          </section>
+
+          <section className="settings-section">
+            <h3 className="settings-section-title">Test</h3>
+            <p className="settings-privacy-text">
+              Completes every chapter except the very last task, so you can
+              finish that one yourself and see what happens next.
+            </p>
+            <button className="settings-action-btn" onClick={handleTest}>
+              <Icon name="refresh" size={16} /> Test
             </button>
           </section>
         </div>
