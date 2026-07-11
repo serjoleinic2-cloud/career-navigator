@@ -1212,11 +1212,8 @@
 /* === Chapter Back / Next (only shown while reviewing a completed
    chapter — see JourneyHUD.tsx) === */
 .journey-chapter-nav {
-  position: fixed;
-  left: 16px;
-  right: 16px;
-  bottom: calc(96px + env(safe-area-inset-bottom));
-  z-index: 60;
+  position: relative;
+  margin-top: 24px;
   display: flex;
   gap: 10px;
   pointer-events: auto;

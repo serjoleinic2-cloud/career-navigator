@@ -272,18 +272,18 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 {state.goals.length} selected
               </div>
             </div>
-            <div className="review-item review-item--wide">
-              <div className="onboarding-timeline">
-                <Icon name="map" size={24} color="#00e5e0" />
-                <span>Journey Length — {SoftwareEngineerModule.skillGraph.length} Missions</span>
-                <span className="onboarding-sub">Complete at your own pace</span>
-              </div>
-            </div>
             <div className="review-item">
               <div className="review-icon"><Icon name="settings" /></div>
               <div className="review-label">Preferences</div>
               <div className="review-value">
                 {state.preferences.length} selected
+              </div>
+            </div>
+            <div className="review-item review-item--wide">
+              <div className="onboarding-timeline">
+                <Icon name="map" size={24} color="#00e5e0" />
+                <span>Journey Length — {SoftwareEngineerModule.skillGraph.length} Missions</span>
+                <span className="onboarding-sub">Complete at your own pace</span>
               </div>
             </div>
           </div>

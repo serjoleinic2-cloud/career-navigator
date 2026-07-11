@@ -6,7 +6,6 @@ import { getNextChapter, getCurrentChapter } from '@/core/chapter_engine';
 import { calculateReadiness } from '@/core/readiness_engine';
 import { subscribe, emit } from '@/core/events/system_event_bus';
 import { MissionScreen } from '@/screens/MissionScreen/MissionScreen';
-import { SettingsScreen } from '@/screens/SettingsScreen/SettingsScreen';
 import { fastForwardJourney } from '@/core/runtime/runtime_controller';
 import type { SkillNode } from '@/core/skill_state';
 import { JourneyHeader } from './components/JourneyHeader';
@@ -58,10 +57,9 @@ const CHAPTER_ICONS: Record<string, string> = {
 
 const DEFAULT_ICON = '📄';
 
-export function JourneyHUD() {
+export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) {
   const [, setTick] = useState(0);
   const [showMission, setShowMission] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
   const { phase, startBridge, finishBridge, startCinematic, finishCinematic } = useChapterHub();
@@ -428,6 +426,25 @@ export function JourneyHUD() {
           activeNodeId={ui.activeNodeId}
           onNodeSelect={handleNodeSelect}
         />
+
+        {activeChapter?.isCompleted && phase === 'active' && (
+          <div className="journey-chapter-nav">
+            <button
+              className="journey-chapter-nav-btn"
+              onClick={handleGoToPrevChapter}
+              disabled={!prevChapter}
+            >
+              ← Back
+            </button>
+            <button
+              className="journey-chapter-nav-btn primary"
+              onClick={handleGoToNextChapter}
+              disabled={!nextChapter}
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </div>
 
       {phase === 'bridge' && activeChapter && (
@@ -438,30 +455,9 @@ export function JourneyHUD() {
         />
       )}
 
-      <button className="journey-settings-btn" onClick={() => setShowSettings(true)} aria-label="Settings">
+      <button className="journey-settings-btn" onClick={onOpenSettings} aria-label="Settings">
         <Icon name="settings" size={20} />
       </button>
-
-      {activeChapter?.isCompleted && phase === 'active' && (
-        <div className="journey-chapter-nav">
-          <button
-            className="journey-chapter-nav-btn"
-            onClick={handleGoToPrevChapter}
-            disabled={!prevChapter}
-          >
-            ← Back
-          </button>
-          <button
-            className="journey-chapter-nav-btn primary"
-            onClick={handleGoToNextChapter}
-            disabled={!nextChapter}
-          >
-            Next →
-          </button>
-        </div>
-      )}
-
-      {showSettings && <SettingsScreen onClose={() => setShowSettings(false)} />}
 
       {lockedToast && <div className="locked-toast">{lockedToast}</div>}
 

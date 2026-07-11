@@ -49,13 +49,13 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onH
             className="fc-btn fc-btn--primary"
             onClick={() => { onComplete(); emit('START_INTERVIEW_TRAINER', {}); }}
           >
-            Перейти к интервью
+            Go to Interview
           </button>
           <button
             className="fc-btn fc-btn--ghost"
             onClick={() => { onComplete(); emit('RESET_JOURNEY', {}); }}
           >
-            Выбрать новую профессию
+            Choose New Profession
           </button>
         </div>
       </div>
