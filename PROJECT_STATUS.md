@@ -79,6 +79,84 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-11 — Claude (5 задач: Offer island, World titles, portrait lock, notifications, onboarding design)
+
+**1. Баг: через Next кнопку на главе Offer нет острова (картинки)**
+
+**Root cause:** `handleGoToNextChapter` в `JourneyHUD.tsx` вызывал `advanceChapter()`,
+которая ищет текущую главу через `runtimeState.activeNodeId`. После
+`devCompleteAllExceptLastTask()` `activeNodeId` указывает на последний узел главы
+Offer — поэтому `advanceChapter()` всегда считала текущей главой Offer и кидала
+`"No next chapter available"` при нажатии Next на любой предыдущей главе.
+В результате кнопка Next ничего не делала, пользователь оставался на Resume,
+и дойти до Offer через цепочку Next было невозможно.
+
+**Fix:** `handleGoToNextChapter` теперь вызывает `setActiveChapter(nextChapter.id)`
+вместо `advanceChapter()`. `setActiveChapter` просто переключает вид на нужную
+главу без мутации прогресса — именно это нужно для Back/Next навигации по
+просмотру глав.
+
+**Files:** `src/screens/JourneyScreen/JourneyHUD.tsx`
+
+**2. World — названия глав над прогресс-бейджем**
+
+Добавлен `<div className="world-island-title">` в `Island.tsx` с таблицей
+`CHAPTER_TITLES` (Resume / LinkedIn / Applications / Interviews / Offer Prep / Offer).
+Цвет — акцентный цвет главы, uppercase, glow через text-shadow.
+CSS правило `.world-island-title` добавлено в `WorldMapScreen.css`.
+
+**Files:** `src/screens/WorldMapScreen/components/Island.tsx`,
+`src/screens/WorldMapScreen/WorldMapScreen.css`
+
+**3. Запрет поворота экрана в горизонтальный режим**
+
+`android:screenOrientation="portrait"` добавлен в `<activity>` в `AndroidManifest.xml`.
+Требует Clean + Rebuild в Android Studio (манифест кэшируется).
+
+**4. Пуш-уведомления — подключены к реальному триггеру завершения миссии**
+
+`notification_service.ts` уже был написан (предыдущая сессия), `initNotifications()`
+уже вызывался в `App.tsx`. Недоставало:
+- `markMissionCompletedToday()` теперь вызывается в `MissionScreen.tsx` при
+  `payload.advanced === true` (реальное продвижение узла) — перепланирует
+  уведомление на завтра.
+- `POST_NOTIFICATIONS` permission (Android 13+) добавлен в `AndroidManifest.xml`.
+- `RECEIVE_BOOT_COMPLETED` permission добавлен для переплани\ровки после перезагрузки.
+
+Переключатель «Enable notifications» в Settings уже работал — теперь вся цепочка
+замкнута.
+
+**Files:** `src/screens/MissionScreen/MissionScreen.tsx`,
+`android/app/src/main/AndroidManifest.xml`
+
+**5. Онбординг — дизайн-перфекционизм**
+
+Полный переписыв `OnboardingScreen.tsx` + `OnboardingScreen.css`:
+- Welcome: ambient glow-орбы, floating island с ring-эффектом, stat-row
+  (6 Chapters / 41 Missions / 1 Offer), gradient title
+- Profession screen: Step badge, иконки к карточкам профессий, статус «Soon»
+- Fear screen: 2-колоночный grid карточек с иконками, compact layout
+- Privacy: inline checkbox без modal-паттерна
+- Кнопка Start засвечивается зелёным когда Privacy отмечена
+- Progress dots: active + done состояния
+- Анимации: slideIn/fadeIn, floatSlow, glowPulse, ringPulse
+
+**Files:** `src/screens/OnboardingScreen/OnboardingScreen.tsx`,
+`src/screens/OnboardingScreen/OnboardingScreen.css`
+
+**Verified:** все файлы запушены. `tsc --noEmit` и `vite build` нужно
+прогнать на стороне Serj перед деплоем (нет node_modules в этом окружении).
+
+**Не проверено вживую** — нужно:
+(а) Test → Next по главам — дойти до Offer, убедиться что остров PNG виден;
+(б) World tab — убедиться что под каждым островом есть название главы;
+(в) повернуть телефон — приложение не должно уходить в landscape;
+(г) в Settings включить Notifications — пройти миссию — на следующий
+день должно прийти уведомление «Ready for today's mission?»;
+(д) запустить онбординг (New Journey) и убедиться что все 3 экрана
+выглядят красиво, анимации не рвутся.
+
+
 ### 2026-07-08 — OpenCode (Задания 70–72: Save timeout fix, Capacitor localStorage fallback)
 
 **Serj's report:** First chapter, first task — "Save timeout - please try again".
