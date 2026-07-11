@@ -130,7 +130,120 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             ))}
           </div>
 
+<<<<<<< HEAD
           <label className="privacy-checkbox">
+=======
+      {/* Screen 3: Goals */}
+      {screen === 3 && (
+        <div className={`onboarding-page ${slideClass}`}>
+          <h2 className="onboarding-heading">Your Mission</h2>
+          <div className="onboarding-cards">
+            {goals.map(g => (
+              <div
+                key={g.id}
+                className={`onboarding-card ${state.goals.includes(g.id) ? 'selected' : ''}`}
+                onClick={() => toggleGoal(g.id)}
+              >
+                <span className="card-label">{g.label}</span>
+                {state.goals.includes(g.id) && <span className="card-check"><Icon name="check" /></span>}
+              </div>
+            ))}
+          </div>
+          <div className="onboarding-nav">
+            <button className="onboarding-back-btn" onClick={goBack}>Back</button>
+            <button className="onboarding-primary-btn" onClick={goNext}>Continue</button>
+          </div>
+        </div>
+      )}
+
+      {/* Screen 4: Timeline */}
+      {screen === 4 && (
+        <div className={`onboarding-page ${slideClass}`}>
+          <h2 className="onboarding-heading">Timeline</h2>
+          <div className="onboarding-cards">
+            {timelines.map(t => (
+              <div
+                key={t.id}
+                className={`onboarding-card ${state.timeline === t.id ? 'selected' : ''}`}
+                onClick={() => updateState('timeline', t.id)}
+              >
+                <span className="card-label">{t.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="onboarding-nav">
+            <button className="onboarding-back-btn" onClick={goBack}>Back</button>
+            <button className="onboarding-primary-btn" onClick={goNext}>Continue</button>
+          </div>
+        </div>
+      )}
+
+      {/* Screen 5: Preferences */}
+      {screen === 5 && (
+        <div className={`onboarding-page ${slideClass}`}>
+          <h2 className="onboarding-heading">Preferences</h2>
+          <div className="onboarding-cards">
+            {preferences.map(p => (
+              <div
+                key={p.id}
+                className={`onboarding-card ${state.preferences.includes(p.id) ? 'selected' : ''}`}
+                onClick={() => togglePreference(p.id)}
+              >
+                <span className="card-label">{p.label}</span>
+                {state.preferences.includes(p.id) && <span className="card-check"><Icon name="check" /></span>}
+              </div>
+            ))}
+          </div>
+          <div className="onboarding-nav">
+            <button className="onboarding-back-btn" onClick={goBack}>Back</button>
+            <button className="onboarding-primary-btn" onClick={goNext}>Continue</button>
+          </div>
+        </div>
+      )}
+
+      {/* Screen 6: Review */}
+      {screen === 6 && (
+        <div className={`onboarding-page onboarding-review ${slideClass}`}>
+          <h2 className="onboarding-heading">Review</h2>
+          <div className="review-grid">
+            <div className="review-item">
+              <div className="review-icon"><Icon name="briefcase" /></div>
+              <div className="review-label">Profession</div>
+              <div className="review-value">
+                {professions.find(p => p.id === state.profession)?.label}
+              </div>
+            </div>
+            <div className="review-item">
+              <div className="review-icon"><Icon name="star" /></div>
+              <div className="review-label">Experience</div>
+              <div className="review-value">
+                {experiences.find(e => e.id === state.experience)?.label}
+              </div>
+            </div>
+            <div className="review-item">
+              <div className="review-icon"><Icon name="target" /></div>
+              <div className="review-label">Goals</div>
+              <div className="review-value">
+                {state.goals.length} selected
+              </div>
+            </div>
+            <div className="review-item">
+              <div className="review-icon"><Icon name="settings" /></div>
+              <div className="review-label">Preferences</div>
+              <div className="review-value">
+                {state.preferences.length} selected
+              </div>
+            </div>
+            <div className="review-item review-item--wide">
+              <div className="onboarding-timeline">
+                <Icon name="map" size={24} color="#00e5e0" />
+                <span>Journey Length — {SoftwareEngineerModule.skillGraph.length} Missions</span>
+                <span className="onboarding-sub">Complete at your own pace</span>
+              </div>
+            </div>
+          </div>
+          <label className="onboarding-privacy-agree">
+>>>>>>> 4753e844203c47263896e5dfacd27536dd2d0f55
             <input
               type="checkbox"
               checked={state.privacyAgreed}

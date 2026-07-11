@@ -47,7 +47,13 @@ export function Waveform({ isRecording, analyserRef }: WaveformProps) {
     return () => cancelAnimationFrame(animFrameRef.current);
   }, [isRecording, analyserRef]);
 
-  if (!isRecording) return <div className="waveform-idle" />;
+  if (!isRecording) {
+    return (
+      <div className="interview-waveform">
+        <div className="waveform-idle" />
+      </div>
+    );
+  }
 
   return (
     <div className="interview-waveform">

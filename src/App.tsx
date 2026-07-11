@@ -177,7 +177,7 @@ function AppInner() {
         // see +Window_functional.md).
         return (
           <div key={common.key} style={common.style}>
-            <JourneyHUD />
+            <JourneyHUD onOpenSettings={() => setShowSettingsOverlay(true)} />
           </div>
         );
       case 'playbook':
