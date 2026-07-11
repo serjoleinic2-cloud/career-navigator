@@ -1,4 +1,4 @@
 даю репо https://github.com/serjoleinic2-cloud/career-navigator особо изучи папки core и docs
-токен для внесения правок в репо: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
+
 вот изучи:
 CORE_MAP.md

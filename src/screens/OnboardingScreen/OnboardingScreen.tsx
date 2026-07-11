@@ -116,7 +116,6 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       {screen === 2 && (
         <div className={`onboarding-page ${slideClass}`}>
           <h2 className="onboarding-heading">Biggest Challenge</h2>
-          <p className="onboarding-subheading">What's your biggest challenge?</p>
           <div className="onboarding-cards">
             {biggestFears.map(f => (
               <div
