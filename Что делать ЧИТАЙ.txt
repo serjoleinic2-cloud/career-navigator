@@ -1,4 +1,1 @@
-даю репо https://github.com/serjoleinic2-cloud/career-navigator особо изучи папки core и docs
-
-вот изучи:
-CORE_MAP.md
+даю репо https://github.com/serjoleinic2-cloud/career-navigator особо изучи папки core и docs.вот изучи:CORE_MAP.md

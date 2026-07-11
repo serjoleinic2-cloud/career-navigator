@@ -78,11 +78,11 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
           numbers never sit on top of the islands (was: stayed forever). */}
       <div className={`intro-stats ${phase >= 3 && phase < 4 ? 'visible' : ''}`}>
         <div className="stat-item">
-          <span className="stat-number">38</span>
+          <span className="stat-number">41</span>
           <span className="stat-label">Skills</span>
         </div>
         <div className="stat-item">
-          <span className="stat-number">142</span>
+          <span className="stat-number">98</span>
           <span className="stat-label">Missions</span>
         </div>
         <div className="stat-item">

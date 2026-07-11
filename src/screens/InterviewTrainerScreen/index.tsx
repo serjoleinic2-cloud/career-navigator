@@ -11,6 +11,7 @@ import { speakMale, stop as stopTts } from '@/core/voice/native_tts';
 import { useVoiceRecorder } from './hooks/useVoiceRecorder';
 import { useInterviewSession } from './hooks/useInterviewSession';
 import { Icon } from '@/components/Icon/Icon';
+import { markInterviewPracticeToday } from '@/core/notifications/notification_service';
 import { RecordPhase } from './RecordPhase';
 import { ReviewPhase } from './ReviewPhase';
 import { ResultsScreen } from './ResultsScreen';
@@ -239,6 +240,7 @@ export function InterviewTrainerScreen({ onClose }: InterviewTrainerScreenProps)
     if (s) {
       emit('INTERVIEW_SESSION_COMPLETE', { session: s });
     }
+    markInterviewPracticeToday();
     onClose();
   }, [sessionId, onClose]);
 

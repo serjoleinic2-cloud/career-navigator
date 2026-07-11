@@ -46,7 +46,7 @@
   width: 100%;
   max-width: 400px;
   height: 100%;
-  padding: 16px 24px 80px;
+  padding: 48px 24px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -57,7 +57,7 @@
 
 .onboarding-page:not(.onboarding-welcome) {
   justify-content: flex-start;
-  padding-top: calc(env(safe-area-inset-top) + 20px);
+  padding-top: calc(env(safe-area-inset-top) + 48px);
   min-height: 0;
 }
 
@@ -87,6 +87,9 @@
 /* ─── Welcome screen ─────────────────────────────────────── */
 .onboarding-welcome {
   text-align: center;
+  justify-content: center;
+  padding-top: 48px;
+  padding-bottom: 80px;
 }
 
 .welcome-island-wrap {
@@ -328,7 +331,8 @@
   display: flex;
   gap: 10px;
   flex-shrink: 0;
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .onboarding-primary-btn {
@@ -364,8 +368,9 @@
 }
 
 .onboarding-back-btn {
-  padding: 15px 18px;
-  background: transparent;
+  flex: 1;
+  padding: 15px 20px;
+  background: rgba(255,255,255,0.06);
   border: 1.5px solid rgba(255,255,255,0.12);
   border-radius: 14px;
   color: rgba(240,240,245,0.7);
@@ -377,7 +382,7 @@
 }
 
 .onboarding-back-btn:active {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.1);
 }
 
 /* ─── Privacy agree ──────────────────────────────────────── */

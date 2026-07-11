@@ -319,7 +319,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
 
       <div className={`mission-card ${taskView === 'completing' ? 'mission-pulse' : ''}`}>
         <div className="task-type-badge">
-          {activeTask.completionCriteria.length > 0 ? <><Icon name="check" size={14} /> Complete</> : '✏️ Write'}
+          <Icon name="target" size={16} color="#00e5e0" /> Mission
         </div>
 
         <h2 className="task-title">{activeTask.title}</h2>

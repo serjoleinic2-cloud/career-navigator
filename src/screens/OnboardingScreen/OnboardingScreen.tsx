@@ -107,9 +107,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             </div>
           </div>
 
-          <button className="onboarding-primary-btn" onClick={goNext}>
-            Begin Journey
-          </button>
+          <div className="onboarding-nav" style={{ maxWidth: 280 }}>
+            <button className="onboarding-primary-btn" onClick={goNext}>
+              Begin Journey
+            </button>
+          </div>
         </div>
       )}
 

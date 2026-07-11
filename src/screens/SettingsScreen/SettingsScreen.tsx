@@ -6,7 +6,7 @@ import { shareApp } from '@/core/share/app_share';
 import { APP_ABOUT } from '@/content/legal_content';
 import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen/PrivacyPolicyScreen';
 import type { PremiumState } from '@/core/premium/premium_state';
-import { getNotificationSettings, setNotificationsEnabled as persistNotificationsEnabled } from '@/core/notifications/notification_service';
+import { getNotificationSettings, setNotificationsEnabled as persistNotificationsEnabled, setReminderTime as setReminderTimePersist } from '@/core/notifications/notification_service';
 import { createBackup, restoreBackupFromFile } from '@/core/export/backup_service';
 import { devCompleteAllExceptLastTask } from '@/core/runtime/runtime_controller';
 import './SettingsScreen.css';
@@ -21,6 +21,9 @@ interface SettingsScreenProps {
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     () => getNotificationSettings().enabled
+  );
+  const [reminderTime, setReminderTime] = useState(
+    () => getNotificationSettings().reminderTime
   );
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
@@ -41,6 +44,12 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
     const next = !notificationsEnabled;
     setNotificationsEnabled(next);
     await persistNotificationsEnabled(next);
+  };
+
+  const handleTimeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = e.target.value;
+    setReminderTime(time);
+    await setReminderTimePersist(time);
   };
 
   const handleBackup = async () => {
@@ -89,6 +98,9 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         <div className="settings-sections">
           <section className="settings-section">
             <h3 className="settings-section-title">Notifications</h3>
+            <p className="settings-section-desc">
+              Stay motivated on your career journey with helpful reminders.
+            </p>
             <div className="settings-row">
               <span className="settings-row-label">Enable notifications</span>
               <button
@@ -99,6 +111,22 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <div className="settings-toggle-thumb" />
               </button>
             </div>
+            {notificationsEnabled && (
+              <div className="settings-row settings-row--time">
+                <span className="settings-row-label">Reminder time</span>
+                <input
+                  type="time"
+                  className="settings-time-input"
+                  value={reminderTime}
+                  onChange={handleTimeChange}
+                />
+              </div>
+            )}
+            {notificationsEnabled && (
+              <p className="settings-row-hint">
+                Daily at {reminderTime} — if today's mission isn't done yet.
+              </p>
+            )}
           </section>
 
           <section className="settings-section">

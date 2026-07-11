@@ -10,7 +10,7 @@ import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
 import { emit } from '../events/system_event_bus';
-import { markMissionCompletedToday } from '../notifications/notification_service';
+import { markMissionCompletedToday, markChapterCompleted } from '../notifications/notification_service';
 import { saveRuntime as persistRuntime, clearRuntime } from '../persistence/runtime_persistence';
 import { clearNotes } from '../user_data/notes/notes_persistence';
 import {
@@ -323,6 +323,8 @@ export function submitTask(userPayload: unknown): TaskResult {
     runtimeState = { ...runtimeState, activeChapterId: newChapterId };
     emit('CHAPTER_CHANGED', { chapterId: newChapterId, prevChapterId });
     emit('CHAPTER_UNLOCKED', { chapterId: newChapterId });
+    // Notify that previous chapter was completed
+    markChapterCompleted(prevChapterId);
   }
 
   // Track time invested (task estimated minutes)
