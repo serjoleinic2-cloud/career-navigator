@@ -97,7 +97,7 @@ export const PRIVACY_POLICY_SECTIONS: PrivacyPolicySection[] = [
   },
   {
     heading: '9. Contact Us',
-    body: ['For questions about this Privacy Policy:', 'Email: privacy@careernavigator.app'],
+    body: ['For questions about this Privacy Policy, please use the feedback option in the app settings.'],
   },
   {
     heading: '10. Your Rights',

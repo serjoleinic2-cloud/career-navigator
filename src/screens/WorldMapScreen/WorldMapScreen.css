@@ -21,10 +21,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1.15fr 1fr 1fr 1fr;
-  row-gap: 2vh;
+  row-gap: 1.5vh;
   column-gap: 4vw;
   padding: calc(16px + env(safe-area-inset-top)) 6vw
-    calc(72px + 16px + 24px + env(safe-area-inset-bottom));
+    calc(80px + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
@@ -44,8 +44,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   position: relative;
+  max-height: 100%;
 }
 
 .world-island--unlocked {
@@ -64,11 +65,13 @@
   width: var(--island-size);
   height: var(--island-size);
   animation: island-float 3.5s ease-in-out infinite;
+  flex-shrink: 1;
+  min-height: 0;
 }
 
 .world-cell--hero .world-island-float {
-  width: calc(var(--island-size) * 1.15);
-  height: calc(var(--island-size) * 1.15);
+  width: calc(var(--island-size) * 1.05);
+  height: calc(var(--island-size) * 1.05);
 }
 
 .world-island-float img {
@@ -79,25 +82,27 @@
 
 /* Chapter name shown directly above the progress badge */
 .world-island-title {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  text-shadow: 0 0 8px currentColor, 0 1px 3px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 6px currentColor, 0 1px 2px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
   pointer-events: none;
+  line-height: 1.2;
 }
 
 .world-island-progress {
   background: rgba(5, 8, 15, 0.85);
-  padding: 3px 10px;
-  border-radius: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
   border: 1px solid rgba(240, 240, 245, 0.15);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #f0f0f5;
   backdrop-filter: blur(8px);
   white-space: nowrap;
+  line-height: 1.2;
 }
 
 @keyframes island-float {
