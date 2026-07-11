@@ -69,8 +69,16 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
       {/* === ISLAND ART SLOT ===
           Арт острова. Файл: public/art/software_engineer/island-<chapterId>.png
           Размер: 280×200px, PNG с прозрачным фоном.
-          Если файла нет — автоматически показывается иконка-плейсхолдер. */}
-      <div className="island-art-slot">
+          Если файла нет — автоматически показывается иконка-плейсхолдер.
+          BUGFIX (2026-07-11): key={chapter.id} обязателен. onLoad/onError
+          мутируют DOM через img.style.display/fallback.style.display напрямую
+          (не через React state), поэтому при смене chapter без ремонтирования
+          эти inline-стили от предыдущей главы остаются в DOM — например, если
+          Interviews скрыл placeholder через onLoad, при переходе в Offer
+          placeholder остаётся скрытым, и парящий остров Offer не появляется,
+          даже если файл есть. key={chapter.id} гарантирует, что при каждой
+          смене главы React полностью пересоздаёт весь слот с чистым DOM. */}
+      <div key={chapter.id} className="island-art-slot">
         <div className="island-art-glow" style={{ background: accent }} />
         {artSrc && (
           <img
