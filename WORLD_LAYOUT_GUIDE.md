@@ -1,5 +1,7 @@
 # WORLD LAYOUT GUIDE
 
+> Verified: 2026-07-11 — content matches `src/core/world/world_layout.ts`
+
 This document explains the **World Layout System** (`src/core/world/world_layout.ts`) —
 the spatial language that turns an artist-created world image into a
 navigable game world. It draws nothing itself. It is metadata that

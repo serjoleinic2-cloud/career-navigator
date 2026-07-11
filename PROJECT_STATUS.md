@@ -23,8 +23,8 @@
 > через git напрямую) — правило всё равно действует, просто без автоматической
 > проверки, и агент должен соблюдать его вручную.
 
-**Последнее обновление:** 2026-07-09
-**Обновил:** OpenCode (сессия — глобальная замена эмодзи на SVG-иконки через `<Icon>` компонент, 30 файлов)
+**Последнее обновление:** 2026-07-11
+**Обновил:** OpenCode (сессия — md audit: README, ARCHITECTURE_SNAPSHOT, structura, INTERVIEW_TRAINER, WORLD_LAYOUT_GUIDE, +Window_functional)
 **Последний коммит на момент записи:** будет создан этой сессией (main, до неё см. историю ниже)
 
 ---
@@ -2799,3 +2799,18 @@ Rebuilt per Serj's explicit spec — 7 containers, CSS Grid:
 
 **Проверено:** `npx tsc --noEmit` — чисто. `vite build` не запускался (в этой песочнице нет node_modules — окружение, не связано с кодом); нужно прогнать `npm run build` на вашей стороне перед тем как считать это финально проверенным.
 **Не проверено вживую.**
+
+---
+
+### 2026-07-11 — OpenCode (md audit: README, ARCHITECTURE_SNAPSHOT, structura, INTERVIEW_TRAINER, WORLD_LAYOUT_GUIDE, +Window_functional)
+
+- Переписан `README.md` (описание проекта, стек, структура, команды, ключевые доки)
+- Обновлён `ARCHITECTURE_SNAPSHOT.md` (текущее дерево файлов, экраны, ядро, навигация, event bus, onboarding state)
+- Обновлён `structura.md` (относительные пути, добавлены InterviewTrainerScreen/, core/interview/, core/notifications/, core/voice/)
+- Обновлён `docs/INTERVIEW_TRAINER.md` (текущая архитектура с голосовыми модулями)
+- `WORLD_LAYOUT_GUIDE.md` — проверено на соответствие `world_layout.ts` (<30% расхождение), добавлена дата `2026-07-11`
+- `+Window_functional.md` — проверено на соответствие `BottomNavigation.tsx`, добавлена дата `2026-07-11`
+
+**Файлы:** `README.md`, `ARCHITECTURE_SNAPSHOT.md`, `structura.md`, `docs/INTERVIEW_TRAINER.md`, `WORLD_LAYOUT_GUIDE.md`, `+Window_functional.md`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто. Не проверено вживую.

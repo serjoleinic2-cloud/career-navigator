@@ -1,32 +1,49 @@
-# Interview Trainer — MVP v1.0
+# Interview Trainer
 
 ## Architecture
-- InterviewTrainerScreen — 3 phases: Prepare → Record → Review
-- useVoiceRecorder — MediaRecorder hook
-- interview_store — localStorage persistence
-- system_event_bus — integration with App.tsx
 
-## Files
-- src/screens/InterviewTrainerScreen/
-- src/core/interview/
-- src/professions/software_engineer/interview/questions.ts
+### Screens
+- `src/screens/InterviewTrainerScreen/` — main trainer UI
+  - `RecordPhase.tsx` — question display + voice recording
+  - `ReviewPhase.tsx` — self-assessment after recording
+  - `ResultsScreen.tsx` — session summary with scores
+  - `InterviewResultsScreen.tsx` — detailed metrics + Playbook links
+
+### Core modules
+- `src/core/voice/` — voice engines
+  - `stt_engine.ts` — Speech-to-text (not implemented)
+  - `tts_engine.ts` — Text-to-speech via Web Speech API
+  - `native_tts.ts` — Native TTS wrapper
+  - `answer_analysis_engine.ts` — clarity, STAR, filler words analysis
+  - `confidence_impact_engine.ts` — update confidence from analysis
+  - `feedback_generator.ts` — generate feedback text
+  - `interview_loop.ts` — question cycle: speak → listen → analyze → feedback
+  - `interview_state_machine.ts` — states: start, asking, recording, analyzing, feedback
+  - `stress_simulation.ts` — stress mode: speed up, interruptions
+  - `voice_session_model.ts` — VoiceSession type
+
+- `src/core/interview/` — interview data
+  - `interview_persistence.ts` — save/load sessions
+  - `interview_question_loader.ts` — load questions per profession
+  - `interview_result.ts` — result calculation
+  - `interview_store.ts` — in-memory store
+
+### Data
+- `src/professions/software_engineer/interview/questions.ts` — question bank
 
 ## Flow
-1. User completes Journey → FinalCinematicScreen → JourneyCompleteScreen
-2. Presses "Begin Interview Challenge" → START_INTERVIEW_TRAINER event
-3. App.tsx switches to InterviewTrainerScreen
-4. 10 questions in sequence: Prepare (5s) → Record (60s) → Review (self-assessment)
-5. Finish Session → INTERVIEW_SESSION_COMPLETE → return to Journey
+
+```
+Journey → START_INTERVIEW_TRAINER event
+  → InterviewTrainerScreen (10 questions)
+    → Prepare (5s countdown) → Record (60s) → Review (self-assessment)
+  → Finish Session
+  → INTERVIEW_SESSION_COMPLETE event
+→ Journey
+```
 
 ## Known Limitations
-- TTS (question read-aloud) — not implemented, text only
-- STT (speech recognition) — not implemented
+- TTS — implemented via Web Speech API, not all devices support it
+- STT — not implemented (speech recognition)
 - Audio is not persisted (Blob is not serializable)
 - Waveform — simplified canvas, not real FFT analysis
-
-## Next Steps
-- [ ] TTS via Web Speech API
-- [ ] STT via Web Speech API
-- [ ] Save audio to IndexedDB
-- [ ] Real FFT waveform
-- [ ] AI-powered voice feedback analysis

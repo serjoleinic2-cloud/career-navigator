@@ -1,3 +1,7 @@
+# +Window_functional.md
+
+> Verified: 2026-07-11 — tab structure matches `BottomNavigation.tsx` and `App.tsx`
+
 Нижнее меню
 
 Я бы остановился на 5 вкладках.
