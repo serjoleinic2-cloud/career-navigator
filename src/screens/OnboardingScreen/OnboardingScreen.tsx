@@ -137,7 +137,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               onChange={e => setState(prev => ({ ...prev, privacyAgreed: e.target.checked }))}
             />
             <span className="onboarding-privacy-checkbox">
-              {state.privacyAgreed && <Icon name="check" size={14} color="#0b0e14" />}
+              {state.privacyAgreed && <Icon name="check" size={12} />}
             </span>
             <span className="onboarding-privacy-label">
               I agree to the{' '}

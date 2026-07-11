@@ -152,7 +152,7 @@
   width: 20px;
   height: 20px;
   background: #667eea;
-  border-radius: 50%;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -341,8 +341,8 @@
 }
 
 .onboarding-privacy-agree input[type='checkbox']:checked + .onboarding-privacy-checkbox {
-  background: #5eead4;
-  border-color: #5eead4;
+  background: #667eea;
+  border-color: #667eea;
 }
 
 .onboarding-privacy-label {
