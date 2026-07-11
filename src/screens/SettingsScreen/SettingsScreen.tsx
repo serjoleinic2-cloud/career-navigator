@@ -134,7 +134,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             <div className="settings-premium-card">
               <div className="settings-premium-header">
                 <Icon name="star" size={20} color="#FFD060" />
-                <span>{premium.isUnlocked ? 'Premium' : 'Free'}</span>
+                <span>{premium.isUnlocked ? 'Premium' : 'Career Navigator'}</span>
               </div>
               <p className="settings-premium-desc">
                 Unlock all professions, Interview Trainer, and advanced analytics.
@@ -143,7 +143,6 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <li>Unlock all chapters ({premium.totalChapters} total)</li>
                 <li>Advanced interview simulations</li>
                 <li>Detailed progress analytics</li>
-                <li>Priority support</li>
               </ul>
               {!premium.isUnlocked && (
                 <button className="settings-upgrade-btn" onClick={() => {}}>

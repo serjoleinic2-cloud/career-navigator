@@ -20,31 +20,35 @@
   z-index: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1.15fr 1fr 1fr 1fr;
-  row-gap: 1.5vh;
+  grid-template-rows: 0.9fr 1fr 1fr 1fr;
+  row-gap: 1vh;
   column-gap: 4vw;
-  padding: calc(16px + env(safe-area-inset-top)) 6vw
-    calc(80px + env(safe-area-inset-bottom));
+  padding: calc(8px + env(safe-area-inset-top)) 6vw
+    calc(90px + env(safe-area-inset-bottom));
   box-sizing: border-box;
+  align-items: start;
 }
 
 .world-cell {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   min-height: 0;
   min-width: 0;
+  padding-top: 2vh;
 }
 
 .world-cell--hero {
   grid-column: 1 / -1;
+  padding-top: 1vh;
+  align-items: center;
 }
 
 .world-island {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   position: relative;
   max-height: 100%;
 }
@@ -62,16 +66,16 @@
 }
 
 .world-island-float {
-  width: var(--island-size);
-  height: var(--island-size);
+  width: calc(var(--island-size) * 0.85);
+  height: calc(var(--island-size) * 0.85);
   animation: island-float 3.5s ease-in-out infinite;
   flex-shrink: 1;
   min-height: 0;
 }
 
 .world-cell--hero .world-island-float {
-  width: calc(var(--island-size) * 1.05);
-  height: calc(var(--island-size) * 1.05);
+  width: calc(var(--island-size) * 0.95);
+  height: calc(var(--island-size) * 0.95);
 }
 
 .world-island-float img {
@@ -93,7 +97,7 @@
 }
 
 .world-island-progress {
-  background: rgba(5, 8, 15, 0.85);
+  background: rgba(5, 8, 15, 0.9);
   padding: 2px 8px;
   border-radius: 8px;
   border: 1px solid rgba(240, 240, 245, 0.15);
@@ -103,6 +107,7 @@
   backdrop-filter: blur(8px);
   white-space: nowrap;
   line-height: 1.2;
+  margin-bottom: 4px;
 }
 
 @keyframes island-float {
