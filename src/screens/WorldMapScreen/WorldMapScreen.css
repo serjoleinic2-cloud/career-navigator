@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   overflow: hidden;
-  --island-size: clamp(126px, 30vmin, 200px);
+  --island-size: clamp(100px, 26vmin, 170px);
 }
 
 .world-map-bg {
@@ -23,8 +23,7 @@
   grid-template-rows: 0.9fr 1fr 1fr 1fr;
   row-gap: 1vh;
   column-gap: 4vw;
-  padding: calc(8px + env(safe-area-inset-top)) 6vw
-    calc(90px + env(safe-area-inset-bottom));
+  padding: calc(8px + env(safe-area-inset-top)) 6vw calc(90px + env(safe-area-inset-bottom));
   box-sizing: border-box;
   align-items: start;
 }
@@ -57,9 +56,6 @@
   cursor: pointer;
 }
 
-.world-island--city {
-}
-
 .world-island--locked {
   opacity: 0.35;
   filter: grayscale(0.9);
@@ -84,7 +80,6 @@
   object-fit: contain;
 }
 
-/* Chapter name shown directly above the progress badge */
 .world-island-title {
   font-size: 10px;
   font-weight: 700;

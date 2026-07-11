@@ -2892,3 +2892,31 @@ Rebuilt per Serj's explicit spec — 7 containers, CSS Grid:
 **Файлы:** `README.md`, `ARCHITECTURE_SNAPSHOT.md`, `structura.md`, `docs/INTERVIEW_TRAINER.md`, `WORLD_LAYOUT_GUIDE.md`, `+Window_functional.md`, `PROJECT_STATUS.md`
 
 **Проверено:** `npx tsc --noEmit` — чисто. Не проверено вживую.
+
+---
+
+### 2026-07-11 — Claude (двадцать первая сессия — два бага World экрана)
+
+**Баг 1: подписи и прогресс нижних островов скрыты за BottomNav в World.**
+
+Причина 1 (padding): `.world-grid` имел `padding-bottom: calc(80px + env(safe-area-inset-bottom))`, но BottomNav реально занимает `bottom: 0; pb-6 (24px) + ~56px контент = ~80px от низа экрана` — итого нижние острова попадали ровно под навигацию. Увеличено до `calc(112px + env(safe-area-inset-bottom, 0px))` — 112px = 80px BottomNav + 32px зазор (стандарт проекта из MissionScreen) — с запасом на `translateY(-8px)` float-анимации.
+
+Причина 2 (overflow): `.world-map-screen` имеет `overflow: hidden`. `.world-cell` и `.world-island` не имели `overflow: visible`, из-за чего `island-art-img` (143% от родителя) и float-анимация могли обрезаться границами ячейки грида. Добавлен `overflow: visible` на `.world-cell` и `.world-island`.
+
+**Файлы:** `src/screens/WorldMapScreen/WorldMapScreen.css`
+
+---
+
+**Баг 2: парящий остров не рендерится в главе Offer при навигации через кнопку Next.**
+
+Причина (stale DOM inline styles): `ChapterHub.tsx` мутирует DOM напрямую через `img.style.display = 'none'` и `fallback.style.display = 'flex'` в `onLoad`/`onError` колбэках (не через React state). При смене `chapter` без ремонтирования компонента React сохраняет тот же DOM-элемент `<div className="island-art-slot">` и просто меняет `img.src`. Inline стили от предыдущей главы остаются: например, если Interviews успешно загрузил img (`placeholder.style.display = 'none'`), потом при переходе в Offer `src` меняется, `onLoad`/`onError` срабатывают для нового src — но если DOM-мутация от предыдущей главы вывела `img.style.display = 'none'` (из `onError` Interviews) и `placeholder.style.display = 'flex'`, эти состояния могут не совпадать с ожидаемыми начальными значениями нового `chapter.id`. Итог: пустой слот вместо острова.
+
+Исправлено: добавлен `key={chapter.id}` на `<div className="island-art-slot">`. При каждой смене главы React полностью пересоздаёт слот с чистым DOM — никаких остаточных inline-стилей.
+
+**Файлы:** `src/screens/JourneyScreen/components/ChapterHub.tsx`
+
+---
+
+`npx tsc --noEmit` — предупреждение про устаревший `baseUrl` (существующее, не новое), ошибок нет. `npx vite build` — чисто (630.79 kB gzip 199.87 kB).
+
+**Не проверено вживую на телефоне.** Проверить: (1) открыть World → прокрутить вниз — подписи и прогресс нижних островов должны быть видны над BottomNav. (2) Journey → глава Interviews → пройти все узлы → кнопка Next → Next → дойти до Offer — парящий остров Offer должен отрисоваться.
