@@ -2,6 +2,15 @@ import { Icon } from '@/components/Icon/Icon';
 import type { IslandPosition } from '../hooks/useIslandPositions';
 import { ProgressBadge } from './ProgressBadge';
 
+const CHAPTER_TITLES: Record<string, string> = {
+  resume: 'Resume',
+  linkedin: 'LinkedIn',
+  applications: 'Applications',
+  interviews: 'Interviews',
+  offer_preparation: 'Offer Prep',
+  offer: 'Offer',
+};
+
 interface WorldMapIslandProps {
   chapterId: string;
   position: IslandPosition;
@@ -29,11 +38,8 @@ export function WorldMapIsland({
   onClick,
   onImgError,
 }: WorldMapIslandProps) {
-  // Positioning itself now lives entirely in the parent `.world-cell`
-  // (a CSS grid cell that centers its one child) — this component just
-  // decides which side its progress badge leans toward, and whether
-  // it's tappable.
   const className = `world-island world-island--${position.side} ${unlocked ? 'world-island--unlocked' : 'world-island--locked'}${isCity ? ' world-island--city' : ''}`;
+  const title = isCity ? null : (CHAPTER_TITLES[chapterId] ?? chapterId);
 
   return (
     <div
@@ -52,6 +58,12 @@ export function WorldMapIsland({
           <Icon name="island" size={48} color={accent} />
         )}
       </div>
+
+      {title && (
+        <div className="world-island-title" style={{ color: accent }}>
+          {title}
+        </div>
+      )}
 
       <ProgressBadge completed={completed} total={total} isCity={isCity} />
     </div>
