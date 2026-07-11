@@ -10,6 +10,7 @@ import { getActiveProfessionId, getActiveChapters } from '../../core/profession_
 import { getNextChapter } from '../../core/chapter_engine';
 import { TaskCompleteScreen, type TaskCompleteNextTask } from './TaskCompleteScreen';
 import { Icon } from '../../components/Icon/Icon';
+import { markMissionCompletedToday } from '../../core/notifications/notification_service';
 
 interface MissionScreenProps {
   runtimeState: JourneyRuntimeState;
@@ -117,6 +118,9 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         confidenceDelta: payload.confidenceDelta,
         skillProgressPercent: payload.skillProgressPercent,
       });
+      if (payload.advanced) {
+        markMissionCompletedToday();
+      }
       setTaskView(payload.advanced ? 'completed' : 'retry');
     });
     return unsub;
