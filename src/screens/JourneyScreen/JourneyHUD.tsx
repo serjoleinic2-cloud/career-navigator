@@ -293,7 +293,15 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
 
   const handleGoToNextChapter = useCallback(() => {
     if (!nextChapter) return;
-    advanceChapter();
+    // BUGFIX (2026-07-11): advanceChapter() resolves the current chapter
+    // from runtimeState.activeNodeId, NOT from the chapter card the user
+    // is viewing. After devCompleteAllExceptLastTask, activeNodeId points
+    // to the last task of the final chapter (Offer), so advanceChapter()
+    // would throw "No next chapter available" while the user is viewing
+    // any earlier chapter. Use setActiveChapter instead — it just switches
+    // the view without mutating progression, which is exactly what the
+    // Back/Next navigation controls are for (review, not advance).
+    setActiveChapter(nextChapter.id);
     refresh();
   }, [nextChapter, refresh]);
 
