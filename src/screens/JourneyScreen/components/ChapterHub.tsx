@@ -50,7 +50,7 @@ const CHAPTER_ART_FILENAME: Record<string, string> = {
   applications: 'island-applications.png',
   interviews: 'island-interview.png',
   offer: 'island-offer.png',
-  offer_preparation: 'offer-preparation.png',
+  offer_preparation: 'island-offer-preparation.png',
 };
 
 export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubProps) {

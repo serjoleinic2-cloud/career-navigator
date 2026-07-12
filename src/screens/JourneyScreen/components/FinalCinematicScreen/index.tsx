@@ -24,7 +24,7 @@ const CHAPTER_ART: Record<string, string> = {
   linkedin:         'island-linkedin.png',
   applications:     'island-applications.png',
   interviews:       'island-interview.png',
-  offer_preparation:'offer-preparation.png',
+  offer_preparation:'island-offer-preparation.png',
   offer:            'island-offer.png',
 };
 

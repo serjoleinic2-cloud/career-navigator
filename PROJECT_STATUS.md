@@ -2920,3 +2920,20 @@ Rebuilt per Serj's explicit spec — 7 containers, CSS Grid:
 `npx tsc --noEmit` — предупреждение про устаревший `baseUrl` (существующее, не новое), ошибок нет. `npx vite build` — чисто (630.79 kB gzip 199.87 kB).
 
 **Не проверено вживую на телефоне.** Проверить: (1) открыть World → прокрутить вниз — подписи и прогресс нижних островов должны быть видны над BottomNav. (2) Journey → глава Interviews → пройти все узлы → кнопка Next → Next → дойти до Offer — парящий остров Offer должен отрисоваться.
+
+---
+
+### 2026-07-12 — Claude (баг: остров не отображается в главе Offer Preparation)
+
+**Баг: заходишь в Journey, глава Offer Preparation — парящий остров (`island-offer-preparation.png`) не показывается, вместо него плейсхолдер-иконка.**
+
+Причина: опечатка в маппинге имени файла арта на chapter.id — ключ `offer_preparation` указывал на `'offer-preparation.png'` (без префикса `island-`), в то время как реальный файл в `public/art/software_engineer/` называется `island-offer-preparation.png` (как и у всех остальных глав, все они имеют префикс `island-`). `<img src>` уходил в 404, срабатывал `onError`, картинка скрывалась и показывался плейсхолдер. Это не тот же баг, что в предыдущей записи (там про stale DOM/key remount) — файл 404 существовал всегда независимо от remount-фикса.
+
+Исправлено в двух местах, где был один и тот же неверный маппинг:
+- `src/screens/JourneyScreen/components/ChapterHub.tsx` — `CHAPTER_ART_FILENAME['offer_preparation']` → `'island-offer-preparation.png'`
+- `src/screens/JourneyScreen/components/FinalCinematicScreen/index.tsx` — `CHAPTER_ART['offer_preparation']` → `'island-offer-preparation.png'` (тот же паттерн бага, на будущее, не проверялся вживую отдельно)
+
+**Файлы:** `src/screens/JourneyScreen/components/ChapterHub.tsx`, `src/screens/JourneyScreen/components/FinalCinematicScreen/index.tsx`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — только предсуществующая ошибка `notification_service.ts:190` (unused `chapterId`, не связана с этим фиксом). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.**
