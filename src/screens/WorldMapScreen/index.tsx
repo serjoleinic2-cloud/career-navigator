@@ -39,7 +39,7 @@ export function WorldMapScreen({ style, onChapterSelect }: WorldMapScreenProps) 
     <div className="world-map-screen" style={style}>
       <img
         className="world-map-bg"
-        src={`/art/${professionId}/world.png`}
+        src={`/art/${professionId}/world.jpg`}
         alt=""
         onError={(e) => { e.currentTarget.style.display = 'none'; }}
       />

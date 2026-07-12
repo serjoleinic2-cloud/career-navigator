@@ -371,7 +371,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
     <div
       className="fc-root"
       style={{
-        background: `url('/art/${professionId}/world.png') center center / cover no-repeat, #05080f`,
+        background: `url('/art/${professionId}/world.jpg') center center / cover no-repeat, #05080f`,
       }}
     >
       {phase === 'hud-fade' && (

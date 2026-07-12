@@ -2937,3 +2937,19 @@ Rebuilt per Serj's explicit spec — 7 containers, CSS Grid:
 
 **Проверено:** `npx tsc --noEmit` — только предсуществующая ошибка `notification_service.ts:190` (unused `chapterId`, не связана с этим фиксом). `npx vite build` — чисто.
 **Не проверено вживую на телефоне.**
+
+---
+
+### 2026-07-12 — Claude (оптимизация фонов world.jpg / journey.jpg)
+
+Serj заменил `world.png`/`journey.png` (PNG, 887×1774 и 941×1672, ~2.1 МБ каждый) на новые `world.jpg`/`journey.jpg`, сохранённые почти без сжатия (world.jpg — 1074 КБ, journey.jpg — 464 КБ на 941×1672). Код при этом всё ещё ссылался на старые `.png`-пути — новые файлы не были подключены нигде.
+
+Сделано:
+- Пересжаты `world.jpg` (1074 КБ → **199 КБ**) и `journey.jpg` (464 КБ → **210 КБ**) через Pillow, quality=80, optimize=True — на глаз разница на фоновом изображении (затемнено градиентами в CSS сверху) не заметна.
+- Удалены старые `world.png` / `journey.png`.
+- Обновлены все ссылки `.png` → `.jpg` в коде: `src/world/world_renderer.tsx`, `src/professions/software_engineer/world/art.ts`, `src/professions/software_engineer/world_art.ts`, `src/screens/WorldMapScreen/index.tsx`, `src/screens/JourneyScreen/components/FinalCinematicScreen/index.tsx`.
+
+**Файлы:** `public/art/software_engineer/world.jpg`, `public/art/software_engineer/journey.jpg` (пересжаты), `public/art/software_engineer/world.png` (удалён), `public/art/software_engineer/journey.png` (удалён), `src/world/world_renderer.tsx`, `src/professions/software_engineer/world/art.ts`, `src/professions/software_engineer/world_art.ts`, `src/screens/WorldMapScreen/index.tsx`, `src/screens/JourneyScreen/components/FinalCinematicScreen/index.tsx`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — только предсуществующая ошибка `notification_service.ts:190` (не связана). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: World экран и Journey — фоны должны отображаться (не битая картинка), визуально без заметной потери качества.
