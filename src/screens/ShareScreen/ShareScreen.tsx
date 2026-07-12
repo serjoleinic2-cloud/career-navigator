@@ -128,7 +128,7 @@ export function ShareScreen({ style, onClose }: { style?: CSSProperties; onClose
         </button>
       </div>
 
-      {onClose && <button className="share-back-btn" onClick={onClose}>← Назад</button>}
+      {onClose && <button className="share-back-btn" onClick={onClose}>← Back</button>}
     </div>
   );
 }

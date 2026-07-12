@@ -449,7 +449,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         )}
 
         {taskView === 'active' && onClose && (
-          <button className="mission-back-btn" onClick={onClose}>← Назад</button>
+          <button className="mission-back-btn" onClick={onClose}>← Back</button>
         )}
 
         {taskView === 'completing' && (
