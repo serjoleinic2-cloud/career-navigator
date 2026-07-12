@@ -1,9 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Icon } from '../../components/Icon/Icon';
 import { PrivacyPolicyScreen } from '../PrivacyPolicyScreen/PrivacyPolicyScreen';
+import { getAvailableProfessions } from '@/professions/profession_auto_loader';
+import { getProfessionCatalog } from '@/core/profession_metadata';
 import './OnboardingScreen.css';
 
-type Profession = 'software_engineer' | 'data_scientist' | 'product_manager';
+type Profession = string;
 
 export interface OnboardingState {
   profession: Profession;
@@ -11,11 +13,38 @@ export interface OnboardingState {
   privacyAgreed: boolean;
 }
 
-const professions: { id: Profession; label: string; icon: string; status: 'available' | 'coming_soon' }[] = [
-  { id: 'software_engineer', label: 'Software Engineer', icon: '💻', status: 'available' },
-  { id: 'data_scientist', label: 'Data Scientist', icon: '📊', status: 'coming_soon' },
-  { id: 'product_manager', label: 'Product Manager', icon: '🎯', status: 'coming_soon' },
-];
+/**
+ * Profession list is built, not hardcoded, so a new profession module
+ * (see src/professions/profession_auto_loader.ts) appears here automatically
+ * as "available", with no edits needed in this file. Professions in the
+ * catalog (src/core/profession_metadata.ts) that aren't registered yet show
+ * as "coming soon".
+ */
+function useProfessionOptions() {
+  return useMemo(() => {
+    const registered = getAvailableProfessions();
+    const registeredIds = new Set(registered.map(p => p.id));
+    const catalog = getProfessionCatalog();
+
+    const available = registered.map(p => ({
+      id: p.id,
+      label: p.title,
+      icon: p.icon ?? '💼',
+      status: 'available' as const,
+    }));
+
+    const comingSoon = catalog
+      .filter(p => !registeredIds.has(p.id))
+      .map(p => ({
+        id: p.id,
+        label: p.title,
+        icon: p.icon,
+        status: 'coming_soon' as const,
+      }));
+
+    return [...available, ...comingSoon];
+  }, []);
+}
 
 const biggestFears: { id: string; label: string; icon: string }[] = [
   { id: 'rejection', label: 'Rejection', icon: '😰' },
@@ -32,11 +61,12 @@ interface OnboardingScreenProps {
 }
 
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
+  const professions = useProfessionOptions();
   const [screen, setScreen] = useState(0);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [state, setState] = useState<OnboardingState>({
-    profession: 'software_engineer',
+    profession: professions.find(p => p.status === 'available')?.id ?? 'software_engineer',
     biggestFear: [],
     privacyAgreed: false,
   });

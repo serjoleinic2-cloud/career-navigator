@@ -15,6 +15,7 @@ import './world/layout'; // side effect: registers this profession's WorldLayout
 export const SoftwareEngineerModule: ProfessionModule = {
   id: 'software_engineer',
   title: 'Software Engineer',
+  icon: '💻',
   chapters: SOFTWARE_ENGINEER_CHAPTERS,
   skillGraph: [
     ...RESUME_SKILL_NODES,

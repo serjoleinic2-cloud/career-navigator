@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getPlaybookByCategory } from '@/core/playbook/playbook_data';
+import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { getActiveProfessionId } from '@/core/profession_loader';
 import type { PlaybookEntry, PlaybookCategory } from '@/core/playbook/playbook_types';
 import type { CSSProperties } from 'react';
 import { Icon } from '@/components/Icon/Icon';
@@ -113,7 +115,8 @@ export function PlaybookScreen({ style, onClose, initialCategory, onConsumeIniti
   }
 
   if (view === 'entries' && selectedCategory) {
-    const entries = getPlaybookByCategory(selectedCategory);
+    const professionId = getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'software_engineer';
+    const entries = getPlaybookByCategory(selectedCategory, professionId);
     return (
       <div className="playbook-screen" style={style}>
         <button className="playbook-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>

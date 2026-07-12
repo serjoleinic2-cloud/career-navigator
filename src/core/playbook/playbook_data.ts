@@ -5,6 +5,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'resume/summary-formulas',
     title: 'Resume Summary Formulas',
     category: 'resume',
+    professionId: 'software_engineer',
     overview: 'A resume summary is not a biography — it is a positioning statement answering who you are, what you do, and what you want. Recruiters scan summaries in under 5 seconds.',
     guides: [
       'Identify your target role and key differentiators',
@@ -36,6 +37,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'interview/star-method-guide',
     title: 'STAR Method Mastery',
     category: 'interviews',
+    professionId: 'software_engineer',
     overview: 'The STAR method is the industry standard for behavioral interview questions. Recruiters listen for Situation, Task, Action, and Result — missing any component weakens your answer.',
     guides: [
       'Set the context briefly — Situation in 1-2 sentences',
@@ -65,6 +67,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'offer/salary-negotiation',
     title: 'Salary Negotiation Scripts',
     category: 'offer',
+    professionId: 'software_engineer',
     overview: 'Negotiation is information exchange, not confrontation. Most companies expect it and build flexibility into offers. Anchor high, justify with data, and frame for mutual gain.',
     guides: [
       'Research market rates on Levels.fyi and Glassdoor before the conversation',
@@ -96,6 +99,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'linkedin/headline-seo',
     title: 'LinkedIn Headline SEO Guide',
     category: 'linkedin',
+    professionId: 'software_engineer',
     overview: 'Your LinkedIn headline is the #1 searchable field. Recruiters search for "React Developer" or "Node.js Engineer" — keywords in your headline determine whether you appear in results.',
     guides: [
       'Include 3-5 core technologies in your headline',
@@ -127,6 +131,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'communication/networking-messages',
     title: 'Networking Message Templates',
     category: 'communication',
+    professionId: 'software_engineer',
     overview: 'Cold messages fail because they ask for jobs. Warm messages succeed because they start conversations. The goal is a reply, not a referral.',
     guides: [
       'Find a genuine connection point — shared conference, alumni, or mutual contact',
@@ -157,6 +162,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'interview/technical-junior',
     title: 'Technical Interview Guide (Junior)',
     category: 'interviews',
+    professionId: 'software_engineer',
     overview: 'Junior technical interviews focus on fundamentals — clean code, basic data structures, and clear thinking. Interviewers want to see your problem-solving process, not perfect answers.',
     guides: [
       'Ask clarifying questions before you start coding',
@@ -186,6 +192,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'resume/ats-optimization',
     title: 'ATS Optimization Checklist',
     category: 'resume',
+    professionId: 'software_engineer',
     overview: '75% of resumes are rejected by Applicant Tracking Systems before a human sees them. The right formatting and keywords make the difference between screened out and shortlisted.',
     guides: [
       'Copy 10+ keywords from the job description — use exact spelling',
@@ -216,6 +223,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'interview/behavioral-prep',
     title: 'Behavioral Interview Preparation',
     category: 'interviews',
+    professionId: 'software_engineer',
     overview: 'Behavioral questions predict future performance based on past behaviour. Every major tech company uses them. Preparation beats improvisation every time.',
     guides: [
       'List 5-7 stories from your experience that show different skills',
@@ -245,6 +253,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'linkedin/about-section',
     title: 'LinkedIn About Section Guide',
     category: 'linkedin',
+    professionId: 'software_engineer',
     overview: 'Your LinkedIn About section is your elevator pitch in writing. A strong About section converts profile views into interview requests.',
     guides: [
       'Paragraph 1: State your current role, stack, and focus area',
@@ -275,6 +284,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'offer/total-compensation',
     title: 'Total Compensation Breakdown',
     category: 'offer',
+    professionId: 'software_engineer',
     overview: 'Base salary is only 60-70% of total compensation in tech. Understanding equity, bonuses, and benefits prevents costly mistakes — junior engineers often leave 20-30% of value on the table.',
     guides: [
       'Calculate base salary first — it affects 401k match and bonus percentages',
@@ -305,6 +315,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'communication/strong-weak-phrases',
     title: 'Strong vs Weak Phrases',
     category: 'communication',
+    professionId: 'software_engineer',
     overview: 'The words you choose in an interview signal confidence and competence. Weak phrases introduce doubt. Strong phrases demonstrate ownership and directness.',
     guides: [
       'Replace "I think" and "maybe" with direct statements',
@@ -333,6 +344,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'body_language/interview-presence',
     title: 'Body Language in Interviews',
     category: 'body_language',
+    professionId: 'software_engineer',
     overview: 'Interviewers form first impressions in under 7 seconds — mostly from non-verbal signals. Your posture, eye contact, and gestures communicate confidence before you say a word.',
     guides: [
       'Sit upright with feet flat — leaning forward 5-10° shows engagement',
@@ -363,6 +375,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'confidence/anxiety-management',
     title: 'Managing Interview Anxiety',
     category: 'confidence',
+    professionId: 'software_engineer',
     overview: 'Interview anxiety is normal — the goal is not to eliminate it but to use it. Adrenaline improves focus when channeled correctly through breathing, reframing, and preparation.',
     guides: [
       'Do box breathing 30 minutes before: inhale 4s → hold 4s → exhale 4s → hold 4s',
@@ -393,6 +406,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'interview/remote-interview',
     title: 'Remote Interview Guide',
     category: 'interviews',
+    professionId: 'software_engineer',
     overview: 'Remote interviews have unique failure modes that in-person ones don\'t. Technical problems are the #1 avoidable reason candidates lose remote offers.',
     guides: [
       'Test your internet speed (10+ Mbps minimum) — use ethernet if possible',
@@ -423,6 +437,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'interview/common-mistakes',
     title: 'Common Interview Mistakes',
     category: 'interviews',
+    professionId: 'software_engineer',
     overview: 'Most interview failures are preventable — the same mistakes appear across thousands of interviews. Knowing them in advance removes them as risks.',
     guides: [
       'Keep answers under 2 minutes — use STAR and stop',
@@ -453,6 +468,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'applications/tracking-system',
     title: 'Application Tracking System Guide',
     category: 'applications',
+    professionId: 'software_engineer',
     overview: 'Keep track of every application you submit — roles, companies, statuses, and follow-ups. A system prevents missed opportunities and shows recruiters you\'re organised.',
     guides: [
       'Create a spreadsheet with columns: Company, Role, Date Applied, Status, Follow-up Date',
@@ -483,6 +499,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'applications/cover-letter',
     title: 'Cover Letter Templates',
     category: 'applications',
+    professionId: 'software_engineer',
     overview: 'A strong cover letter connects your experience to the company\'s needs. It should be concise, specific, and show that you understand the role and the business.',
     guides: [
       'Open with the specific role and why you\'re excited about it',
@@ -511,6 +528,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'applications/follow-up',
     title: 'Follow-up Email Templates',
     category: 'applications',
+    professionId: 'software_engineer',
     overview: 'A timely follow-up email keeps you top-of-mind without being pushy. Most candidates don\'t follow up — doing so sets you apart.',
     guides: [
       'Send the first follow-up 7 days after applying if you haven\'t heard back',
@@ -540,6 +558,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'offer/evaluation-checklist',
     title: 'Job Offer Evaluation Checklist',
     category: 'offer',
+    professionId: 'software_engineer',
     overview: 'A job offer is a decision that affects your career trajectory, finances, and daily happiness. Evaluate systematically — don\'t let excitement or pressure rush your choice.',
     guides: [
       'Compare base salary, equity, signing bonus, and benefits across offers',
@@ -569,6 +588,7 @@ export const PLAYBOOK: PlaybookEntry[] = [
     id: 'offer/benefits-guide',
     title: 'Tech Benefits Guide for Juniors',
     category: 'offer',
+    professionId: 'software_engineer',
     overview: 'Benefits can be worth 20-40% of your base salary. Health insurance, retirement plans, learning budgets, and perks vary widely — knowing what to look for prevents bad surprises.',
     guides: [
       'Check health insurance — monthly premium, deductible, out-of-pocket max',
@@ -599,15 +619,16 @@ export function getPlaybookEntry(id: string): PlaybookEntry | undefined {
   return PLAYBOOK.find(entry => entry.id === id);
 }
 
-export function getPlaybookByCategory(category: PlaybookCategory): PlaybookEntry[] {
-  return PLAYBOOK.filter(entry => entry.category === category);
+export function getPlaybookByCategory(category: PlaybookCategory, professionId?: string): PlaybookEntry[] {
+  return PLAYBOOK.filter(entry => entry.category === category && (!professionId || entry.professionId === professionId));
 }
 
-export function searchPlaybook(query: string): PlaybookEntry[] {
+export function searchPlaybook(query: string, professionId?: string): PlaybookEntry[] {
   const lower = query.toLowerCase();
   return PLAYBOOK.filter(entry =>
-    entry.title.toLowerCase().includes(lower) ||
+    (!professionId || entry.professionId === professionId) &&
+    (entry.title.toLowerCase().includes(lower) ||
     entry.tags.some(tag => tag.toLowerCase().includes(lower)) ||
-    entry.overview.toLowerCase().includes(lower)
+    entry.overview.toLowerCase().includes(lower))
   );
 }

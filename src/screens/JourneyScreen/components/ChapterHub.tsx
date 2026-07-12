@@ -15,6 +15,9 @@ interface ChapterData {
   isActive: boolean;
   isLocked: boolean;
   isCompleted: boolean;
+  /** Filename of the island art (e.g. 'island-resume.png'), sourced from
+   * the profession's chapters.ts — single source of truth, see chapter_model.ts. */
+  artFilename?: string;
 }
 
 interface ChapterHubProps {
@@ -35,31 +38,13 @@ function getNodeCardState(node: SkillNode, activeNodeId: string | null): NodeCar
   return 'locked';
 }
 
-/**
- * Явный маппинг chapter.id -> имя файла острова.
- * НЕ полагаемся на `island-${chapter.id}.png`: id главы и имя файла арта
- * не всегда совпадают один в один (пример реального бага: глава
- * "interviews" (мн.ч.) искала island-interviews.png, а файл художника
- * называется island-interview.png (ед.ч.) — картинка никогда не грузилась).
- * Главы без готового арта (файл ещё не добавлен в public/art/) не ломаются:
- * onError ниже штатно откатывается на иконку-плейсхолдер.
- */
-const CHAPTER_ART_FILENAME: Record<string, string> = {
-  resume: 'island-resume.png',
-  linkedin: 'island-linkedin.png',
-  applications: 'island-applications.png',
-  interviews: 'island-interview.png',
-  offer: 'island-offer.png',
-  offer_preparation: 'island-offer-preparation.png',
-};
-
 export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubProps) {
   if (!chapter) return null;
 
-  const worldTheme = getWorldThemeOrDefault(getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'default');
+  const professionId = getRuntimeState()?.professionId ?? getActiveProfessionId() ?? 'software_engineer';
+  const worldTheme = getWorldThemeOrDefault(professionId);
   const accent = getChapterAccent(worldTheme, chapter.id);
-  const artFilename = CHAPTER_ART_FILENAME[chapter.id.toLowerCase()];
-  const artSrc = artFilename ? `art/software_engineer/${artFilename}` : '';
+  const artSrc = chapter.artFilename ? `art/${professionId}/${chapter.artFilename}` : '';
 
   return (
     <div
@@ -67,7 +52,10 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
       style={{ '--island-accent': accent } as React.CSSProperties}
     >
       {/* === ISLAND ART SLOT ===
-          Арт острова. Файл: public/art/software_engineer/island-<chapterId>.png
+          Арт острова. Файл: public/art/<professionId>/<artFilename>.
+          artFilename задаётся в chapters.ts профессии (единственный источник
+          правды — раньше дублировался в ChapterHub и FinalCinematicScreen
+          отдельными хардкод-мапами, что и вызывало баги с несовпадением имён).
           Размер: 280×200px, PNG с прозрачным фоном.
           Если файла нет — автоматически показывается иконка-плейсхолдер.
           BUGFIX (2026-07-11): key={chapter.id} обязателен. onLoad/onError

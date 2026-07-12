@@ -2953,3 +2953,31 @@ Serj заменил `world.png`/`journey.png` (PNG, 887×1774 и 941×1672, ~2.1
 
 **Проверено:** `npx tsc --noEmit` — только предсуществующая ошибка `notification_service.ts:190` (не связана). `npx vite build` — чисто.
 **Не проверено вживую на телефоне.** Проверить: World экран и Journey — фоны должны отображаться (не битая картинка), визуально без заметной потери качества.
+
+---
+
+### 2026-07-12 — Claude (рефакторинг: подготовка к мультипрофессиональности)
+
+Serj спросил: если добавить новую профессию как папку с фото/текстами, подхватится ли она в интерфейсе (острова, финальная анимация, playbook, notes) без разбрасывания правок по всему приложению. Аудит показал, что система была модульной лишь частично:
+
+**Уже было ОК (не трогал):**
+- Регистрация профессии через `profession_auto_loader.ts` (module.ts → граф навыков, тема, layout).
+- Фон `world.jpg`/`journey.jpg` в `WorldMapScreen` и `FinalCinematicScreen` — уже строился динамически как `/art/${professionId}/...`.
+- Notes — уже хранят `professionId` у каждой заметки и фильтруются `getNotesByProfession()`.
+
+**Было сломано, исправлено:**
+
+1. **Острова в Journey (`ChapterHub.tsx`) — путь к арту был захардкожен на `art/software_engineer/...`** независимо от активной профессии. Плюс маппинг chapter.id→имя файла дублировался отдельными хардкод-объектами в `ChapterHub.tsx` И в `FinalCinematicScreen/index.tsx` (два источника правды, легко рассинхронизировать — как и случилось с багом Offer Preparation ранее). Исправлено: добавлено поле `artFilename?` в тип `Chapter` (`core/chapter_model.ts`) — теперь это часть данных профессии (`chapters.ts`), а не UI. `ChapterHub` и `FinalCinematicScreen` берут `professionId` из runtime и `artFilename` из данных главы, маппинг убран из обоих компонентов.
+
+2. **`OnboardingScreen.tsx`** — список профессий был захардкожен как union из 3 строк (`software_engineer | data_scientist | product_manager`), при этом реально зарегистрирована только одна. Комментарий в `profession_auto_loader.ts` обещает "no other files need to change" при добавлении профессии — не соответствовало действительности. Исправлено: список строится из `getAvailableProfessions()` (реально зарегистрированные — статус "available") + `getProfessionCatalog()` (остальные — "coming soon"), дедуп по id. Добавлено поле `icon?` в `ProfessionModule` (`profession_registry.ts`) и `icon` в `ProfessionMeta` (`profession_metadata.ts`).
+
+3. **`profession_metadata.ts` (`getProfessionCatalog`) был вообще не подключён нигде в приложении** и расходился по id с хардкодом в `OnboardingScreen` (`data_analyst` vs `data_scientist`, `cybersecurity`/`digital_marketing`/`customer_support` vs `product_manager`). Синхронизировано, подключено как единственный источник "будущих" профессий для онбординга.
+
+4. **Playbook (`src/core/playbook/`) — контент вообще не был привязан к профессии.** Все 20 записей (шаблоны резюме, STAR-примеры) — software-engineer-специфичный контент в одном глобальном массиве `PLAYBOOK`, `PlaybookScreen` показывал их все без фильтрации. При добавлении новой профессии пользователь видел бы неуместные шаблоны про React/TypeScript. Исправлено: добавлено обязательное поле `professionId` в `PlaybookEntry` (проставлено `'software_engineer'` всем существующим 20 записям), `getPlaybookByCategory()` и `searchPlaybook()` принимают опциональный `professionId` для фильтрации, `PlaybookScreen` передаёт активный `professionId` из runtime.
+
+**Итог:** добавление новой профессии теперь требует правок только внутри `src/professions/<id>/` (module.ts, chapters.ts с `artFilename`, свои Playbook-записи с `professionId: '<id>'`) + регистрации в `profession_auto_loader.ts` и `profession_metadata.ts`. Ни `ChapterHub`, ни `FinalCinematicScreen`, ни `OnboardingScreen`, ни `PlaybookScreen` больше не требуют правок.
+
+**Файлы:** `src/core/chapter_model.ts`, `src/professions/software_engineer/chapters.ts`, `src/professions/software_engineer/module.ts`, `src/professions/profession_registry.ts`, `src/core/profession_metadata.ts`, `src/screens/JourneyScreen/components/ChapterHub.tsx`, `src/screens/JourneyScreen/components/FinalCinematicScreen/index.tsx`, `src/screens/JourneyScreen/JourneyHUD.tsx`, `src/screens/OnboardingScreen/OnboardingScreen.tsx`, `src/core/playbook/playbook_types.ts`, `src/core/playbook/playbook_data.ts`, `src/screens/PlaybookScreen/index.tsx`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — только предсуществующая ошибка `notification_service.ts:190` (не связана). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) Journey → острова по-прежнему отображаются для software_engineer (регрессия). (2) Onboarding → экран выбора профессии выглядит так же (Software Engineer доступен, остальные — coming soon). (3) Playbook → все текущие разделы/записи видны как раньше.

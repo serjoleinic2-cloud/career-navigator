@@ -11,6 +11,8 @@ export interface CinematicChapter {
   id: string;
   title: string;
   completed: boolean;
+  /** Sourced from the profession's chapters.ts (single source of truth). */
+  artFilename?: string;
 }
 
 interface FinalCinematicScreenProps {
@@ -18,15 +20,6 @@ interface FinalCinematicScreenProps {
   chapters: CinematicChapter[];
   onComplete: () => void;
 }
-
-const CHAPTER_ART: Record<string, string> = {
-  resume:           'island-resume.png',
-  linkedin:         'island-linkedin.png',
-  applications:     'island-applications.png',
-  interviews:       'island-interview.png',
-  offer_preparation:'island-offer-preparation.png',
-  offer:            'island-offer.png',
-};
 
 const ISLAND_SPACING = 420;
 const ISLAND_H       = 280;
@@ -49,12 +42,11 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   const theme = useMemo(() => getWorldThemeOrDefault(professionId), [professionId]);
 
   const islands = useMemo(() => chapters.map((ch) => {
-    const id   = ch.id.toLowerCase();
-    const file = CHAPTER_ART[id];
+    const id = ch.id.toLowerCase();
     return {
       id:     ch.id,
       title:  ch.title,
-      artSrc: file ? `/art/${professionId}/${file}` : '',
+      artSrc: ch.artFilename ? `/art/${professionId}/${ch.artFilename}` : '',
       accent: getChapterAccent(theme, id),
     };
   }), [chapters, professionId, theme]);

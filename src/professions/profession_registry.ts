@@ -13,6 +13,8 @@ export type ProfessionModule = {
   skillGraph: SkillNode[];
   entryNodeId: string;
   premiumConfig: PremiumConfig;
+  /** Emoji/icon shown in onboarding. Falls back to a generic icon if omitted. */
+  icon?: string;
 };
 
 const registry = new Map<string, ProfessionModule>();

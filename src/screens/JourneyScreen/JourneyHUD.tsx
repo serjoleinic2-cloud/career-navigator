@@ -133,6 +133,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
         id: def.id,
         title: def.title,
         icon: CHAPTER_ICONS[def.id.toLowerCase()] || DEFAULT_ICON,
+        artFilename: def.artFilename,
         nodes,
         completedCount: nodes.filter(n => n.state === 'confidence' || n.state === 'execution').length,
         totalCount: nodes.length,
@@ -388,7 +389,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
         {phase === 'cinematic' && (
           <FinalCinematicScreen
             professionId={runtime?.professionId ?? 'default'}
-            chapters={chapters.map(c => ({ id: c.id, title: c.title, completed: c.isCompleted }))}
+            chapters={chapters.map(c => ({ id: c.id, title: c.title, completed: c.isCompleted, artFilename: c.artFilename }))}
             onComplete={() => {
               finishCinematic();
               refresh();

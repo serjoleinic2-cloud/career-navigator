@@ -14,4 +14,12 @@ export type Chapter = {
   title: string;
   description: string;
   nodeIds: string[];
+  /**
+   * Filename of the floating island art for this chapter, resolved as
+   * `/art/${professionId}/${artFilename}`. Single source of truth —
+   * do NOT duplicate chapter->filename maps in UI components
+   * (see ChapterHub.tsx / FinalCinematicScreen history for why that broke).
+   * Omit if art isn't ready yet; UI falls back to a placeholder icon.
+   */
+  artFilename?: string;
 };
