@@ -52,7 +52,11 @@ export function WorldMapIsland({
           <img
             src={artSrc}
             alt={chapterId}
-            onError={onImgError}
+            onError={() => {
+              console.warn(`[WorldMap] Failed to load island image: ${artSrc}`);
+              onImgError?.();
+            }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
         ) : (
           <Icon name="island" size={48} color={accent} />
