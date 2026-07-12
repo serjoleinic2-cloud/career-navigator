@@ -187,7 +187,7 @@ async function scheduleComeBack(settings: NotificationSettings): Promise<void> {
 }
 
 // ─── Milestone Reminder (immediate) ───────────────────────────────────
-async function scheduleMilestoneImmediate(chapterId: string): Promise<void> {
+async function scheduleMilestoneImmediate(_chapterId: string): Promise<void> {
   const settings = getNotificationSettings();
   if (!settings.enabled) return;
   const granted = await ensurePermission();
