@@ -3,159 +3,158 @@ import type { TaskContent } from '@/core/task_content';
 export const LINKEDIN_TASKS: Record<string, TaskContent[]> = {
   'headline-authority': [
     {
-      id: 'cy-ha-variants',
-      title: 'Write Security Headline Variants',
-      objective: 'Create 5 alternative headlines for your LinkedIn profile.',
+      id: 'cyber-hl-write-headline',
+      title: 'Write Your Security Headline',
+      objective: 'Create a keyword-rich LinkedIn headline that attracts security recruiters.',
       instructions: [
-        'Write 5 headlines combining: role + tools + value proposition.',
-        'Ensure each fits within 220 characters.',
-        'Include at least one certification or tool keyword.',
-        'Remove "seeking", "open to work", and emojis.',
-        'Ask a security professional which is clearest.',
+        'Search "SOC Analyst" or "Penetration Tester" on LinkedIn. Note top headline patterns.',
+        'Draft: "[Role] | [Specialization] | [Certification] | [Clearance if applicable]"',
+        'Keep under 120 characters.',
+        'Remove emojis, "seeking", and "open to work".'
       ],
       completionCriteria: [
-        '5 headlines written',
-        'Each fits LinkedIn character limit',
-        'At least 3 contain security-specific keywords',
+        'Headline contains specific role: SOC Analyst, Security Engineer, or Penetration Tester.',
+        'At least one certification or clearance mentioned.',
+        'Under 120 characters.'
       ],
-      estimatedMinutes: 20,
+      estimatedMinutes: 15,
       difficulty: 1,
       tips: [
-        'Example: "SOC Analyst | Splunk, Wireshark, Python | CompTIA Security+"',
-        'Example: "Threat Hunter | MITRE ATT&CK | SIEM Detection Engineering"',
-        'Avoid generic phrases like "Passionate about cybersecurity".',
+        'Mirror the exact job title from your target postings.',
+        'Include clearance if held: "TS/SCI eligible" or "Secret cleared".',
+        'Update monthly to stay active in search results.'
       ],
-      expectedOutcome: 'A keyword-rich headline ready for your profile.',
+      expectedOutcome: 'A headline that appears in recruiter searches for security roles.',
     },
   ],
   'about-section': [
     {
-      id: 'cy-as-narrative',
-      title: 'Write Your Security Narrative',
-      objective: 'Create a compelling About section that showcases your security journey.',
+      id: 'cyber-as-write-about',
+      title: 'Write Your Security About Section',
+      objective: 'Create a compelling LinkedIn About section for cybersecurity roles.',
       instructions: [
-        'Write 200 words about your security focus.',
-        'Mention specific tools and certifications.',
-        'Include one concrete incident or discovery.',
-        'End with clearance status and what you are looking for.',
+        'Paragraph 1: Who you are and what you defend (2 sentences).',
+        'Paragraph 2: One specific incident or discovery with metric (3 sentences).',
+        'Paragraph 3: What you are looking for and clearance status (2 sentences).',
+        'Keep total under 300 words.'
       ],
       completionCriteria: [
-        'About section is 150-200 words',
-        'Mentions at least 3 security tools',
-        'Includes one specific security achievement',
+        'Three clear paragraphs.',
+        'At least one security metric included.',
+        'Ends with clearance status and call to action.'
       ],
-      estimatedMinutes: 30,
+      estimatedMinutes: 25,
       difficulty: 2,
       tips: [
-        'Start with a hook: "I hunt threats before they become breaches."',
-        'Include clearance status: "TS/SCI eligible" or "Secret clearance".',
-        'End with a call to action.',
+        'Use first person: "I defend networks..." not "[Name] is a..."',
+        'Include a specific incident: "I detected and contained a phishing campaign targeting 200 users."',
+        'Mention target clearance or domain: "Seeking TS/SCI eligible roles in threat intelligence."'
       ],
-      expectedOutcome: 'A compelling About section ready for your profile.',
+      expectedOutcome: 'An About section that converts profile views into connection requests from CISOs.',
     },
   ],
   'network-connections': [
     {
-      id: 'cy-nc-build',
-      title: 'Build Security Network',
-      objective: 'Connect with 20 security professionals this week.',
+      id: 'cyber-nc-send-requests',
+      title: 'Send 5 Security Connection Requests',
+      objective: 'Build your cybersecurity network with personalized connection requests.',
       instructions: [
-        'Find 10 SOC analysts or security engineers.',
-        'Find 5 security recruiters.',
-        'Find 5 CISOs or security managers.',
-        'Send personalized connection requests to each.',
+        'Find 5 SOC managers, threat hunters, or security recruiters at target companies.',
+        'Write a personalized note: "I enjoyed your post on [breach analysis/CTF/tool]. Would love to connect."',
+        'Send requests. Track responses in a spreadsheet.',
+        'Follow up with a thank-you message if accepted.'
       ],
       completionCriteria: [
-        '20 connection requests sent',
-        'Each request is personalized',
-        'Requests target relevant security roles',
-      ],
-      estimatedMinutes: 35,
-      difficulty: 1,
-      tips: [
-        'Mention shared interests, CTFs, or conferences.',
-        'Comment on their posts before connecting.',
-        'Attend BSides, DEF CON, or local security meetups.',
-      ],
-      expectedOutcome: 'A growing network of security professionals.',
-    },
-  ],
-  'ctf-writeups': [
-    {
-      id: 'cy-cw-write',
-      title: 'Publish CTF Write-ups',
-      objective: 'Create and publish 3 CTF challenge write-ups.',
-      instructions: [
-        'Choose 3 CTF challenges where you performed well.',
-        'Write detailed write-ups for each.',
-        'Include tools used, methodology, and lessons learned.',
-        'Publish on LinkedIn, Medium, or a personal blog.',
-      ],
-      completionCriteria: [
-        '3 CTF write-ups published',
-        'Each includes tools and methodology',
-        'Published and linkable from profile',
-      ],
-      estimatedMinutes: 90,
-      difficulty: 3,
-      tips: [
-        'Include screenshots, code snippets, and MITRE ATT&CK mappings.',
-        'Tag with #CTF #Cybersecurity for visibility.',
-        'Show both offensive and defensive perspectives.',
-      ],
-      expectedOutcome: 'Published CTF write-ups ready for LinkedIn.',
-    },
-  ],
-  'security-blog': [
-    {
-      id: 'cy-sb-article',
-      title: 'Write First Security Article',
-      objective: 'Publish a security analysis article on LinkedIn or Medium.',
-      instructions: [
-        'Choose a recent breach or vulnerability.',
-        'Write 500-800 words analyzing the incident.',
-        'Include IOCs, MITRE ATT&CK mappings, and remediation steps.',
-        'Publish and share in security groups.',
-      ],
-      completionCriteria: [
-        'Article is published',
-        '500-800 words',
-        'Includes technical analysis and IOCs',
-      ],
-      estimatedMinutes: 60,
-      difficulty: 2,
-      tips: [
-        'Use CVE numbers for credibility.',
-        'Share your post in security communities.',
-        'Keep it under 800 words for readability.',
-      ],
-      expectedOutcome: 'A published security article demonstrating expertise.',
-    },
-  ],
-  'certifications-display': [
-    {
-      id: 'cy-cd-add',
-      title: 'Display All Certifications',
-      objective: 'Add all security certifications to your LinkedIn profile.',
-      instructions: [
-        'List all certifications you hold.',
-        'Add credential IDs and verification URLs.',
-        'Request skill endorsements for key security skills.',
-        'Update your headline to include key certifications.',
-      ],
-      completionCriteria: [
-        'All certifications listed with credential IDs',
-        'At least 5 skill endorsements',
-        'Headline includes certification acronym',
+        '5 personalized requests sent.',
+        'Notes reference specific security posts or shared interests.',
+        'At least 2 accepted within 1 week.'
       ],
       estimatedMinutes: 20,
       difficulty: 1,
       tips: [
-        'Security+ is the entry standard for blue team.',
-        'CEH is valued for offensive roles.',
-        'OSCP is highly respected for penetration testing.',
+        'Do not ask for a job in the first message. Build rapport first.',
+        'Comment on breach analyses or CTF writeups before connecting.',
+        'Target cleared defense contractors if you hold clearance.'
       ],
-      expectedOutcome: 'A verified certifications section on your LinkedIn profile.',
+      expectedOutcome: '5 new connections in cybersecurity who can provide referrals or insights.',
+    },
+  ],
+  'ctf-writeups': [
+    {
+      id: 'cyber-cw-write-ctf',
+      title: 'Write Your First CTF Writeup',
+      objective: 'Publish a CTF writeup that showcases your offensive and defensive skills.',
+      instructions: [
+        'Pick one CTF challenge you solved: TryHackMe, HackTheBox, VulnHub.',
+        'Outline: Challenge, Reconnaissance, Exploitation, Privilege Escalation, Lessons Learned.',
+        'Include screenshots, code snippets, and mitigation advice.',
+        'Publish on LinkedIn, Medium, or GitHub.'
+      ],
+      completionCriteria: [
+        'Writeup published on public platform.',
+        'All stages documented: recon, exploit, privesc, lessons.',
+        'Mitigation advice included: how to prevent this attack.'
+      ],
+      estimatedMinutes: 60,
+      difficulty: 3,
+      tips: [
+        'Start with an easy box: TryHackMe "Blue" or "Kenobi".',
+        'Include both offensive (how I broke in) and defensive (how to block).',
+        'Tag #CTF #Cybersecurity #TryHackMe for visibility.'
+      ],
+      expectedOutcome: 'A CTF writeup that serves as a portfolio piece and attracts recruiter attention.',
+    },
+  ],
+  'security-blog': [
+    {
+      id: 'cyber-sb-write-article',
+      title: 'Write Your First Security Article',
+      objective: 'Publish a security analysis article that demonstrates thought leadership.',
+      instructions: [
+        'Pick a recent breach or vulnerability: CVE analysis, ransomware attack, supply chain compromise.',
+        'Outline: What happened, technical analysis, impact, mitigation, lessons for defenders.',
+        'Write 600-800 words. Include IOCs and MITRE ATT&CK mappings.',
+        'Publish on LinkedIn or Medium.'
+      ],
+      completionCriteria: [
+        'Article published on public platform.',
+        '600-800 words with technical depth.',
+        'MITRE ATT&CK technique IDs included.'
+      ],
+      estimatedMinutes: 90,
+      difficulty: 3,
+      tips: [
+        'Use resources: CISA alerts, BleepingComputer, Krebs on Security.',
+        'Map to MITRE ATT&CK: "Initial Access: T1566 (Phishing), Persistence: T1053 (Scheduled Task)."',
+        'End with actionable advice: "Defenders should monitor for..."'
+      ],
+      expectedOutcome: 'A security article that proves you can analyze threats and communicate findings.',
+    },
+  ],
+  'certifications-display': [
+    {
+      id: 'cyber-cd-add-certs',
+      title: 'Add Security Certifications to LinkedIn',
+      objective: 'Display your cybersecurity certifications prominently on LinkedIn.',
+      instructions: [
+        'Add Security+, CEH, CISSP, or equivalent to Licenses & Certifications.',
+        'Include credential ID and verification URL.',
+        'Complete LinkedIn Skills Assessments for Cybersecurity and Python.',
+        'Request endorsements for SIEM, Incident Response, and Vulnerability Assessment.'
+      ],
+      completionCriteria: [
+        'At least 2 certifications added with URLs.',
+        'Skills assessments completed for Cybersecurity.',
+        '3+ endorsements requested.'
+      ],
+      estimatedMinutes: 20,
+      difficulty: 1,
+      tips: [
+        'If no certifications yet, add "In Progress" with expected completion date.',
+        'CISSP requires 5 years experience. Security+ is entry-level. CEH is offensive-focused.',
+        'Endorse colleagues first — reciprocity increases response rates.'
+      ],
+      expectedOutcome: 'A certifications section that validates your security skills to employers.',
     },
   ],
 };

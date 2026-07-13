@@ -3,266 +3,236 @@ import type { TaskContent } from '@/core/task_content';
 export const OFFER_TASKS: Record<string, TaskContent[]> = {
   'certification-prep': [
     {
-      id: 'cy-cp-plan',
-      title: 'Plan Certification Path',
-      objective: 'Choose and plan your first security certification.',
+      id: 'cyber-cp-study-plan',
+      title: 'Create Security Certification Study Plan',
+      objective: 'Build a structured plan to earn a relevant security certification.',
       instructions: [
-        'Research: CompTIA Security+, CEH, OSCP, CISSP.',
-        'Choose one that matches your career goals.',
-        'Create a study plan with weekly milestones.',
-        'Schedule your exam date.',
+        'Pick one certification: Security+, CEH, CISSP, or OSCP.',
+        'Download exam objectives. List all domains and weights.',
+        'Create a 4-week schedule: 1 hour daily, 5 days per week.',
+        'Schedule exam date and pay fee.'
       ],
       completionCriteria: [
-        'Certification chosen',
-        'Study plan created',
-        'Exam scheduled',
+        'Certification chosen with objectives downloaded.',
+        '4-week schedule created with daily topics.',
+        'Exam date scheduled and paid.'
       ],
       estimatedMinutes: 30,
-      difficulty: 1,
+      difficulty: 2,
       tips: [
-        'CompTIA Security+ is best for entry-level blue team.',
-        'CEH is valued for offensive roles.',
-        'OSCP is the gold standard for penetration testing.',
+        'Security+: entry-level, 2 weeks study. OSCP: advanced, 3+ months.',
+        'Use Boson practice exams for Security+. HackTheBox for OSCP.',
+        'Join study groups on Discord or Reddit.'
       ],
-      expectedOutcome: 'A clear certification roadmap with scheduled exam.',
+      expectedOutcome: 'A certification roadmap that signals commitment to security employers.',
     },
   ],
   'clearance-process': [
     {
-      id: 'cy-cle-proc',
-      title: 'Prepare for Clearance Investigation',
-      objective: 'Gather all documents needed for a security clearance application.',
+      id: 'cyber-cp-complete-sf86',
+      title: 'Complete SF-86 Draft',
+      objective: 'Prepare security clearance application without surprises.',
       instructions: [
-        'Research SF-86 form requirements.',
-        'Gather: employment history, addresses, foreign contacts.',
-        'Document your financial history.',
-        'Prepare references who can vouch for your character.',
+        'Gather 10 years of history: residences, employers, schools, foreign contacts.',
+        'Complete SF-86 draft online.',
+        'Review with cleared friend or security clearance attorney.',
+        'Prepare explanations for any potential issues.'
       ],
       completionCriteria: [
-        'SF-86 requirements understood',
-        'Employment history documented',
-        'Financial history reviewed',
-        '3+ references identified',
+        '10 years of history gathered.',
+        'SF-86 draft completed.',
+        'Reviewed by cleared professional.'
       ],
-      estimatedMinutes: 60,
-      difficulty: 2,
+      estimatedMinutes: 180,
+      difficulty: 3,
       tips: [
-        'Be completely honest — omissions are worse than disclosures.',
-        'Clearance investigations can take 6-18 months.',
-        'Start the process early if targeting government roles.',
+        'Be thorough. Omissions are worse than issues.',
+        'Foreign contacts: list all, even if not close.',
+        'Financial issues: show resolution plan, not just problems.'
       ],
-      expectedOutcome: 'Documents ready for a security clearance application.',
+      expectedOutcome: 'SF-86 readiness that speeds clearance processing.',
     },
   ],
   'resignation-letter': [
     {
-      id: 'cy-rl-draft',
-      title: 'Draft Resignation Letter',
-      objective: 'Create a professional resignation letter template.',
+      id: 'cyber-rl-draft-letter',
+      title: 'Draft Security Resignation Letter',
+      objective: 'Write a professional resignation that preserves clearance and references.',
       instructions: [
-        'Write a resignation letter under 150 words.',
-        'Keep it professional and positive.',
-        'Include proper notice period.',
-        'Practice delivering it verbally.',
+        'Keep under 150 words.',
+        'Express gratitude for security opportunities and clearance sponsorship.',
+        'State last day clearly. Offer transition help.',
+        'No complaints, no demands, no mention of new employer.'
       ],
       completionCriteria: [
-        'Resignation letter written',
-        'Letter is under 150 words',
-        'Verbal delivery practiced',
+        'Letter under 150 words.',
+        'Gratitude expressed for clearance sponsorship.',
+        'Last day specified. Transition offered.'
       ],
       estimatedMinutes: 20,
       difficulty: 1,
       tips: [
-        'Do not include reasons for leaving.',
-        'Offer to help with transition.',
-        'The security world is smaller than it looks.',
+        'Clearance sponsorship is valuable. Express appreciation.',
+        'Offer to help with knowledge transfer.',
+        'Maintain relationships for future cleared opportunities.'
       ],
-      expectedOutcome: 'A professional resignation letter ready to deliver.',
-    },
-  ],
-  'salary-research': [
-    {
-      id: 'cy-sr-market',
-      title: 'Research Security Salary Market',
-      objective: 'Gather salary data for your target security role.',
-      instructions: [
-        'Check: Glassdoor, Levels.fyi, Payscale, LinkedIn Salary.',
-        'Research by role, level, location, and company size.',
-        'Document the salary range for your market.',
-        'Identify your target salary and walk-away number.',
-      ],
-      completionCriteria: [
-        '3+ salary sources checked',
-        'Salary range documented',
-        'Target and walk-away numbers set',
-      ],
-      estimatedMinutes: 30,
-      difficulty: 1,
-      tips: [
-        'Security roles pay more in high-cost areas.',
-        'Clearance holders earn 15-25% more.',
-        'Total compensation includes: base, bonus, equity, benefits.',
-      ],
-      expectedOutcome: 'Salary data ready for negotiation.',
+      expectedOutcome: 'A resignation letter that protects clearance and professional reputation.',
     },
   ],
   'offer-evaluation': [
     {
-      id: 'cy-oe-scorecard',
-      title: 'Create Offer Scorecard',
-      objective: 'Build a weighted scoring system for comparing offers.',
+      id: 'cyber-oe-scorecard',
+      title: 'Create Security Offer Scorecard',
+      objective: 'Evaluate cleared offers holistically.',
       instructions: [
-        'List criteria: salary, learning, tools, team, location, remote, clearance.',
-        'Assign weights to each criterion.',
-        'Score each offer against each criterion.',
-        'Calculate weighted scores.',
+        'List factors: base, bonus, clearance sponsorship, training budget, tool access, mission.',
+        'Weight each 1-5 based on priority.',
+        'Score each offer. Multiply weight × score. Sum.',
+        'Rank offers.'
       ],
       completionCriteria: [
-        'Scorecard created with 7+ criteria',
-        'Weights assigned',
-        'Each offer scored',
-        'Final scores calculated',
+        '7 factors listed and weighted.',
+        'All offers scored.',
+        'Top choice clear and defensible.'
       ],
       estimatedMinutes: 30,
       difficulty: 2,
       tips: [
-        'Learning opportunities often outweigh salary differences early in career.',
-        'Clearance eligibility has long-term value.',
-        'Tool exposure matters for future career moves.',
+        'Clearance sponsorship is valuable: costs $5K-$15K to sponsor.',
+        'Training budget: conferences, certifications, lab access.',
+        'Mission impact: defending critical infrastructure vs commercial data.'
       ],
-      expectedOutcome: 'A data-driven comparison of all offers.',
+      expectedOutcome: 'A rational framework for comparing cleared security offers.',
     },
   ],
   'salary-negotiation': [
     {
-      id: 'cy-sn-script',
-      title: 'Script Your Negotiation',
-      objective: 'Prepare and practice your salary negotiation script.',
+      id: 'cyber-sn-negotiate',
+      title: 'Negotiate Security Salary',
+      objective: 'Maximize total compensation for cleared roles.',
       instructions: [
-        'Write your opening: gratitude + market data + specific ask.',
-        'Prepare responses to common pushbacks.',
-        'Practice with a friend or record yourself.',
-        'Negotiate total compensation, not just base salary.',
+        'Research cleared salaries: ClearanceJobs, Glassdoor, Levels.fyi.',
+        'Prepare script: "Based on my research and clearance, I was hoping for $X."',
+        'Practice 10 times without apologizing.',
+        'Role-play with friend.'
       ],
       completionCriteria: [
-        'Negotiation script written',
-        '3+ pushback responses prepared',
-        'Practice session completed',
+        'Script written and practiced 10 times.',
+        'Cleared salary data gathered.',
+        'Role-play completed with feedback.'
       ],
-      estimatedMinutes: 30,
-      difficulty: 2,
+      estimatedMinutes: 45,
+      difficulty: 3,
       tips: [
-        'Companies expect negotiation. Asking does not make you difficult.',
-        'Negotiate base, bonus, equity, signing bonus, PTO, remote work.',
-        'Always get the final offer in writing.',
+        'Cleared roles often pay 15-30% premium. Factor that in.',
+        'Negotiate: base, bonus, training budget, conference attendance.',
+        'Clearance sponsorship is a bargaining chip.'
       ],
-      expectedOutcome: 'A confident negotiation approach ready for any offer.',
+      expectedOutcome: 'A negotiation that adds $10K-$30K to cleared compensation.',
     },
   ],
   'decision-framework': [
     {
-      id: 'cy-df-priorities',
-      title: 'Apply Decision Framework',
-      objective: 'Use a structured framework to compare and choose between offers.',
+      id: 'cyber-df-decide',
+      title: 'Set Decision Deadline',
+      objective: 'Avoid paralysis when choosing between cleared offers.',
       instructions: [
-        'List your top 5 career priorities.',
-        'Score each offer against each priority.',
-        'Discuss with a mentor or trusted advisor.',
-        'Make your decision and commit.',
+        'Give yourself 48-72 hours.',
+        'Gather input: scorecard, mentor advice, family discussion.',
+        'Sleep on it. Decide fresh.',
+        'Commit. No second-guessing.'
       ],
       completionCriteria: [
-        'Priorities listed and ranked',
-        'Each offer scored',
-        'Mentor input gathered',
-        'Decision made and documented',
-      ],
-      estimatedMinutes: 20,
-        difficulty: 1,
-      tips: [
-        'Do not compare offers after the deadline.',
-        'Once you decide, stop second-guessing.',
-        'Your priorities change over time — a framework adapts.',
-      ],
-      expectedOutcome: 'A confident decision backed by clear criteria.',
-    },
-  ],
-  'offer-acceptance': [
-    {
-      id: 'cy-oa-confirm',
-      title: 'Accept Offer Professionally',
-      objective: 'Send written acceptance and confirm all offer details.',
-      instructions: [
-        'Send written acceptance email.',
-        'Confirm start date and onboarding process.',
-        'Ask about first-week expectations.',
-        'Document all confirmed details.',
-      ],
-      completionCriteria: [
-        'Written acceptance sent',
-        'Start date confirmed',
-        'Onboarding details documented',
+        'Deadline set.',
+        'Input gathered.',
+        'Decision made and communicated.'
       ],
       estimatedMinutes: 15,
       difficulty: 1,
       tips: [
-        'Get everything in writing.',
-        'Confirm benefits and start date before resigning.',
-        'Ask about equipment and access provisioning.',
+        'Cleared roles often have long onboarding. Do not delay unnecessarily.',
+        'Trust your scorecard. Emotions fade; data endures.',
+        'Communicate decision professionally to all parties.'
       ],
-      expectedOutcome: 'A professionally accepted offer with all details confirmed.',
+      expectedOutcome: 'A confident, timely decision with no regrets.',
     },
   ],
-  'toolkit-setup': [
+  'offer-acceptance': [
     {
-      id: 'cy-ts-prepare',
-      title: 'Prepare Security Toolkit',
-      objective: 'Set up your primary security tools before starting your new role.',
+      id: 'cyber-oa-accept',
+      title: 'Accept Offer in Writing',
+      objective: 'Secure your cleared role with written confirmation.',
       instructions: [
-        'Research the company security stack from the job posting.',
-        'Install and configure essential tools: Wireshark, Nmap, Burp Suite.',
-        'Set up a clean lab environment.',
-        'Practice with tools you will use on the job.',
+        'Review offer letter: role, start date, salary, clearance sponsorship, benefits.',
+        'Ask for clarification on ambiguous terms.',
+        'Sign and return. Keep copy.',
+        'Confirm start date and clearance initiation with HR.'
       ],
       completionCriteria: [
-        'Essential tools installed',
-        'Lab environment configured',
-        'Tools tested and working',
-      ],
-      estimatedMinutes: 60,
-      difficulty: 2,
-      tips: [
-        'Most security tools have free community editions.',
-        'Practice with sample data before day one.',
-        'Document your setup for quick recovery.',
-      ],
-      expectedOutcome: 'A ready-to-use security toolkit for your first day.',
-    },
-  ],
-  'start-transition': [
-    {
-      id: 'cy-st-plan',
-      title: 'Create 90-Day Plan',
-      objective: 'Develop a structured plan for your first 90 days.',
-      instructions: [
-        'Week 1: Learn tools, meet team, understand processes.',
-        'Month 1: Take on first assignments, build relationships.',
-        'Month 2: Contribute independently, identify improvements.',
-        'Month 3: Propose and implement improvements.',
-        'Document your goals for each phase.',
-      ],
-      completionCriteria: [
-        '30-60-90 day plan written',
-        'Goals are specific and measurable',
-        'Plan ready to share with manager',
+        'All terms reviewed.',
+        'Ambiguous terms clarified.',
+        'Signed copy returned.'
       ],
       estimatedMinutes: 30,
       difficulty: 1,
       tips: [
-        'Start with listening and learning.',
-        'Build relationships before proposing changes.',
-        'Document everything you learn.',
+        'Clearance initiation timeline: confirm when process starts.',
+        'Training budget: get specifics on conferences and certifications.',
+        'Benefits: health, 401K, PTO, remote policy.'
       ],
-      expectedOutcome: 'A clear 90-day plan ready for your new role.',
+      expectedOutcome: 'A signed offer that starts your cleared security career.',
+    },
+  ],
+  'toolkit-setup': [
+    {
+      id: 'cyber-ts-install-tools',
+      title: 'Install Security Toolkit',
+      objective: 'Prepare your environment before day 1.',
+      instructions: [
+        'Install: SIEM client, EDR console, vulnerability scanner, Python, Git.',
+        'Set up VMs: Kali, Windows, vulnerable machines.',
+        'Configure VPN and test access.',
+        'Bookmark internal docs and playbooks.'
+      ],
+      completionCriteria: [
+        'All tools installed.',
+        'VMs configured.',
+        'VPN tested.'
+      ],
+      estimatedMinutes: 120,
+      difficulty: 3,
+      tips: [
+        'Ask for tool list before start date.',
+        'Practice with public datasets: Splunk Boss of the SOC, Blue Team Labs Online.',
+        'Create a personal cheat sheet for common queries.'
+      ],
+      expectedOutcome: 'A ready toolkit that lets you contribute on day 1.',
+    },
+  ],
+  'start-transition': [
+    {
+      id: 'cyber-st-30-60-90',
+      title: 'Write Security 30-60-90 Day Plan',
+      objective: 'Create a roadmap for your first 90 days in a cleared role.',
+      instructions: [
+        'Days 1-30: Learn. Meet team. Understand tools. Complete onboarding.',
+        'Days 31-60: Contribute. Close tickets. Tune alerts. Complete first hunt.',
+        'Days 61-90: Optimize. Propose improvements. Take ownership. Present findings.',
+        'Share with manager on day 1.'
+      ],
+      completionCriteria: [
+        'Plan covers 90 days with specific goals.',
+        'One quick win identified per month.',
+        'Shared with manager and agreed upon.'
+      ],
+      estimatedMinutes: 45,
+      difficulty: 2,
+      tips: [
+        'Listen more than speak in month 1. Build trust.',
+        'First win: close a ticket, tune an alert, find a false positive.',
+        'Document everything. Create team wiki for your learnings.'
+      ],
+      expectedOutcome: 'A 30-60-90 plan that builds credibility in your cleared security role.',
     },
   ],
 };

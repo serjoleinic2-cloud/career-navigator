@@ -3,263 +3,263 @@ import type { TaskContent } from '@/core/task_content';
 export const INTERVIEW_TASKS: Record<string, TaskContent[]> = {
   'interview-prep': [
     {
-      id: 'cy-ip-stories',
-      title: 'Build Interview Story Bank',
-      objective: 'Prepare 6-8 security stories using STAR format.',
+      id: 'cyber-ip-pitch-practice',
+      title: 'Practice Security Elevator Pitch',
+      objective: 'Deliver a compelling 30-second introduction for cybersecurity roles.',
       instructions: [
-        'Write stories covering: incident response, vulnerability discovery, tool implementation, team collaboration.',
-        'Each story follows STAR: Situation, Task, Action, Result.',
-        'Include specific tools and metrics.',
-        'Practice telling each story in under 2 minutes.',
+        'Write your pitch: who you are, what you defend, what you want.',
+        'Include one metric: incidents contained, vulnerabilities found, CTF rank.',
+        'Practice aloud 10 times. Record yourself.',
+        'Get feedback from a security professional.'
       ],
       completionCriteria: [
-        '6-8 stories documented',
-        'Each follows STAR format',
-        'Stories are under 2 minutes each',
+        'Pitch is under 30 seconds.',
+        'Includes one security metric.',
+        'Delivered confidently without notes.'
       ],
-      estimatedMinutes: 60,
-      difficulty: 3,
+      estimatedMinutes: 30,
+      difficulty: 2,
       tips: [
-        'Include at least one story about a mistake you learned from.',
-        'Practice with a friend or record yourself.',
-        'Use action verbs: detected, contained, eradicated, recovered.',
+        'Start with hook: "I defend networks from advanced persistent threats."',
+        'End with ask: "I am seeking a SOC Analyst role with TS/SCI clearance."',
+        'Practice in front of mirror. Energy matters.'
       ],
-      expectedOutcome: 'A story bank ready for any security interview.',
+      expectedOutcome: 'A polished pitch that opens every security interview strong.',
     },
   ],
   'networking-deep-dive': [
     {
-      id: 'cy-nd-fundamentals',
-      title: 'Master Networking Fundamentals',
-      objective: 'Review and practice core networking concepts for security interviews.',
+      id: 'cyber-nd-networking-lab',
+      title: 'Build Networking Lab',
+      objective: 'Master TCP/IP and packet analysis for technical interviews.',
       instructions: [
-        'Review OSI model layers and their functions.',
-        'Understand TCP vs UDP, HTTP vs HTTPS, DNS resolution.',
-        'Practice explaining packet flow from client to server.',
-        'Document common network attacks and defenses.',
+        'Set up 3 VMs: attacker, target, and sniffer.',
+        'Capture traffic with Wireshark and tcpdump.',
+        'Analyze: TCP handshake, DNS query, HTTP request, suspicious port scan.',
+        'Document findings with screenshots.'
       ],
       completionCriteria: [
-        'OSI model fully understood',
-        'TCP/IP, DNS, HTTP explained clearly',
-        'Common attacks and defenses documented',
-      ],
-      estimatedMinutes: 45,
-      difficulty: 2,
-      tips: [
-        'Use Wireshark to capture and analyze real traffic.',
-        'Practice explaining concepts without jargon.',
-        'Know common ports: 80, 443, 22, 53, 3389.',
-      ],
-      expectedOutcome: 'Solid networking fundamentals ready for interviews.',
-    },
-  ],
-  'linux-administration': [
-    {
-      id: 'cy-la-practice',
-      title: 'Practice Linux Security Tasks',
-      objective: 'Master essential Linux commands for security work.',
-      instructions: [
-        'Practice: grep, awk, sed, find, ps, top, netstat, ss.',
-        'Learn log analysis with journalctl and /var/log.',
-        'Understand file permissions and user management.',
-        'Write basic Bash scripts for automation.',
-      ],
-      completionCriteria: [
-        'Common commands used from memory',
-        'Log files can be parsed and analyzed',
-        'Basic Bash scripts written',
-      ],
-      estimatedMinutes: 60,
-      difficulty: 2,
-      tips: [
-        'Use OverTheWire Bandit for practice.',
-        'Set up a Linux VM and use it daily.',
-        'Practice parsing /var/log/auth.log for failed SSH attempts.',
-      ],
-      expectedOutcome: 'Linux proficiency ready for security interviews.',
-    },
-  ],
-  'python-security': [
-    {
-      id: 'cy-ps-scripts',
-      title: 'Build Security Python Scripts',
-      objective: 'Create 3 Python scripts for common security tasks.',
-      instructions: [
-        'Write a log parser that extracts suspicious IPs.',
-        'Create a port scanner using sockets.',
-        'Build an API client for a threat intelligence feed.',
-        'Document each script with usage examples.',
-      ],
-      completionCriteria: [
-        '3 Python scripts functional',
-        'Each solves a real security problem',
-        'Scripts are documented and shareable',
+        '3 VMs configured and communicating.',
+        '4 packet captures analyzed.',
+        'Screenshots documented.'
       ],
       estimatedMinutes: 90,
       difficulty: 3,
       tips: [
-        'Start with log parsing — it is the most common task.',
-        'Use requests library for API interaction.',
-        'Include error handling and logging.',
+        'Use VirtualBox or VMware. Create isolated network.',
+        'Practice identifying anomalies: unusual ports, large packets, beaconing.',
+        'Learn to read hex dumps for manual analysis.'
       ],
-      expectedOutcome: 'Python scripts ready for your portfolio and interviews.',
+      expectedOutcome: 'Networking fluency that proves you understand what you defend.',
+    },
+  ],
+  'linux-administration': [
+    {
+      id: 'cyber-la-harden-server',
+      title: 'Harden a Linux Server',
+      objective: 'Practice Linux hardening for defensive interview questions.',
+      instructions: [
+        'Install Ubuntu Server VM.',
+        'Configure iptables: allow SSH, HTTP, HTTPS. Deny all else.',
+        'Set up SELinux or AppArmor.',
+        'Configure auditd logging and log rotation.'
+      ],
+      completionCriteria: [
+        'Firewall configured with explicit rules.',
+        'MAC (SELinux/AppArmor) enabled and tested.',
+        'Audit logging configured and verified.'
+      ],
+      estimatedMinutes: 90,
+      difficulty: 3,
+      tips: [
+        'Document every change. Interviewers ask: "Why this rule?"',
+        'Test from attacker VM: can you bypass your own defenses?',
+        'Practice common commands: ps, netstat, lsof, find, grep.'
+      ],
+      expectedOutcome: 'Linux hardening skills that impress defensive interviewers.',
+    },
+  ],
+  'python-security': [
+    {
+      id: 'cyber-ps-write-scanner',
+      title: 'Write a Port Scanner',
+      objective: 'Build a Python tool for offensive interview scenarios.',
+      instructions: [
+        'Write a TCP connect scanner: input IP range and port range.',
+        'Add SYN stealth scan option using scapy.',
+        'Add banner grabbing for open ports.',
+        'Add output to CSV for reporting.'
+      ],
+      completionCriteria: [
+        'Scanner detects open ports on target VM.',
+        'SYN scan works without full TCP handshake.',
+        'Banner grabbing extracts service versions.',
+        'CSV output is readable and sortable.'
+      ],
+      estimatedMinutes: 120,
+      difficulty: 4,
+      tips: [
+        'Start simple: socket.connect(). Add features incrementally.',
+        'Handle exceptions: timeouts, refused connections, host down.',
+        'Add threading for speed. Interviewers love performance optimization.'
+      ],
+      expectedOutcome: 'A Python port scanner that proves scripting ability.',
     },
   ],
   'siem-analysis': [
     {
-      id: 'cy-sa-practice',
-      title: 'Practice SIEM Operations',
-      objective: 'Gain hands-on experience with SIEM platforms.',
+      id: 'cyber-sa-siem-lab',
+      title: 'Build SIEM Detection Lab',
+      objective: 'Master SIEM query writing and alert tuning.',
       instructions: [
-        'Set up Splunk Free or ELK Stack in your lab.',
-        'Ingest sample logs: Windows Event, Sysmon, firewall.',
-        'Write 5 detection rules for common attacks.',
-        'Practice triaging alerts and creating reports.',
+        'Install Splunk Free or ELK Stack.',
+        'Ingest logs: Windows Event, firewall, web server.',
+        'Create 3 detection rules: brute force, malware beacon, privilege escalation.',
+        'Tune false positives. Document detection logic.'
       ],
       completionCriteria: [
-        'SIEM deployed and operational',
-        'Logs being ingested',
-        '5 detection rules written and tested',
+        'SIEM installed with 3 log sources.',
+        '3 detection rules created and tested.',
+        'False positives identified and tuned.'
       ],
-      estimatedMinutes: 120,
-      difficulty: 3,
+      estimatedMinutes: 180,
+      difficulty: 4,
       tips: [
-        'Splunk has free training and a free tier (500MB/day).',
-        'ELK Stack is open source and highly customizable.',
-        'Focus on: brute force, lateral movement, data exfiltration.',
+        'Use Splunk SPL or KQL. Practice daily.',
+        'Test rules against known bad traffic.',
+        'Document: what this detects, why it matters, how to respond.'
       ],
-      expectedOutcome: 'Practical SIEM experience ready for interviews.',
+      expectedOutcome: 'SIEM fluency that proves detection engineering skills.',
     },
   ],
   'incident-response-scenario': [
     {
-      id: 'cy-irscenarios',
-      title: 'Practice IR Scenarios',
-      objective: 'Master 5 common incident response scenarios.',
+      id: 'cyber-ir-tabletop-exercise',
+      title: 'Lead a Tabletop Exercise',
+      objective: 'Practice incident response under interview conditions.',
       instructions: [
-        'Practice: phishing, malware, data exfiltration, insider threat, ransomware.',
-        'For each, follow: Detection, Containment, Eradication, Recovery, Lessons Learned.',
-        'Explain your thought process out loud.',
-        'Document your approach for each scenario.',
+        'Pick a scenario: ransomware, insider threat, or APT compromise.',
+        'Assign roles: SOC analyst, IR lead, management, legal.',
+        'Walk through: detection, containment, eradication, recovery, lessons learned.',
+        'Document decisions and timeline.'
       ],
       completionCriteria: [
-        '5 scenarios practiced',
-        'Each follows the IR lifecycle',
-        'Thought process documented',
+        'Scenario selected and roles assigned.',
+        'Full IR lifecycle walked through.',
+        'Decisions and timeline documented.'
       ],
-      estimatedMinutes: 75,
+      estimatedMinutes: 90,
       difficulty: 3,
       tips: [
-        'Always start with: "What is the scope of the incident?"',
-        'Communication is as important as technical skills.',
-        'Mention escalation procedures and stakeholder notification.',
+        'Use NIST SP 800-61 as framework.',
+        'Focus on communication: who do you notify and when?',
+        'Practice explaining technical decisions to non-technical stakeholders.'
       ],
-      expectedOutcome: 'IR scenario responses ready for any security interview.',
+      expectedOutcome: 'IR scenario fluency that proves leadership under pressure.',
     },
   ],
   'threat-hunting-basics': [
     {
-      id: 'cy-th-fundamentals',
-      title: 'Learn Threat Hunting Fundamentals',
-      objective: 'Understand MITRE ATT&CK and hypothesis-driven hunting.',
+      id: 'cyber-th-hypothesis-hunt',
+      title: 'Perform a Hypothesis-Driven Hunt',
+      objective: 'Practice proactive threat hunting in your lab.',
       instructions: [
-        'Study the MITRE ATT&CK framework.',
-        'Learn common detection techniques.',
-        'Practice writing hunt hypotheses.',
-        'Use public datasets for practice.',
+        'Pick a MITRE ATT&CK technique: T1053 Scheduled Task.',
+        'Form hypothesis: "Adversary is using scheduled tasks for persistence."',
+        'Search logs for evidence: task creation, modification, execution.',
+        'Validate or disprove. Document findings.'
       ],
       completionCriteria: [
-        'MITRE ATT&CK framework understood',
-        '3 hunt hypotheses written',
-        'Practice with at least one dataset',
+        'Hypothesis clearly stated.',
+        'Search queries executed.',
+        'Findings documented with evidence.'
       ],
-      estimatedMinutes: 60,
-      difficulty: 3,
+      estimatedMinutes: 90,
+      difficulty: 4,
       tips: [
-        'Start with common techniques: T1059 (Command Execution), T1053 (Scheduled Tasks).',
-        'Security Onion has built-in hunt capabilities.',
-        'Write hypotheses as: "If [technique], then [evidence] in [log source]".',
+        'Start with known bad: create a malicious scheduled task yourself.',
+        'Use Sigma rules or YARA for detection.',
+        'Document false positives: what looks suspicious but is legitimate?'
       ],
-      expectedOutcome: 'Threat hunting fundamentals ready for interviews.',
+      expectedOutcome: 'Threat hunting skills that elevate you from alert responder to proactive defender.',
     },
   ],
   'on-site-prep': [
     {
-      id: 'cy-os-prepare',
-      title: 'Prepare for On-Site Interview',
-      objective: 'Prepare materials and questions for your on-site interview.',
+      id: 'cyber-os-polygraph-prep',
+      title: 'Prepare for Polygraph and Technical Rounds',
+      objective: 'Plan for the unique challenges of cleared security interviews.',
       instructions: [
-        'Research each interviewer on LinkedIn.',
-        'Prepare 1-2 questions for each interviewer.',
-        'Review the job description and company security stack.',
-        'Prepare your elevator pitch and IR stories.',
+        'Research polygraph process: CI, lifestyle, full scope.',
+        'Prepare honest, consistent answers for all questions.',
+        'Practice technical whiteboarding: network diagrams, attack chains.',
+        'Plan energy management: sleep, nutrition, breaks.'
       ],
       completionCriteria: [
-        'Interviewers researched',
-        'Questions prepared for each',
-        'Elevator pitch polished',
-        'IR stories practiced',
+        'Polygraph types researched.',
+        'Technical whiteboard topics practiced.',
+        'Logistics planned: transport, parking, arrival time.'
       ],
-      estimatedMinutes: 45,
-      difficulty: 1,
+      estimatedMinutes: 60,
+      difficulty: 2,
       tips: [
-        'Ask about their security tools and processes.',
-        'Show genuine interest in their challenges.',
-        'Bring a notebook and take notes.',
+        'Polygraph: be honest, consistent, and calm. No surprises.',
+        'Technical: practice drawing network diagrams from memory.',
+        'Energy: cleared interviews can last 6+ hours. Pace yourself.'
       ],
-      expectedOutcome: 'A well-prepared on-site interview strategy.',
+      expectedOutcome: 'A calm, prepared performance across all cleared interview rounds.',
     },
   ],
   'red-team-blue-team': [
     {
-      id: 'cy-rbbt-direction',
-      title: 'Define Your Security Direction',
-      objective: 'Clarify whether you prefer Red Team or Blue Team work.',
+      id: 'cyber-rtbt-lab-both-sides',
+      title: 'Practice Both Red and Blue',
+      objective: 'Demonstrate understanding of offensive and defensive perspectives.',
       instructions: [
-        'Research Red Team roles: pen testing, exploit dev, vulnerability research.',
-        'Research Blue Team roles: SOC, IR, threat hunting, detection engineering.',
-        'Assess your interests and strengths.',
-        'Write a statement explaining your preference.',
+        'Red team: attack a vulnerable machine. Document exploit chain.',
+        'Blue team: detect the same attack in SIEM. Write detection rule.',
+        'Purple team: explain how red and blue collaborate.',
+        'Present both perspectives in 5 minutes.'
       ],
       completionCriteria: [
-        'Red and Blue roles understood',
-        'Personal preference identified',
-        'Preference statement written',
+        'Attack executed and documented.',
+        'Detection rule created and tested.',
+        'Both perspectives presented clearly.'
       ],
-      estimatedMinutes: 30,
-      difficulty: 1,
+      estimatedMinutes: 180,
+      difficulty: 5,
       tips: [
-        'Both directions are equally valuable.',
-        'Purple Team combines both — consider it too.',
-        'Your preference should align with your resume positioning.',
+        'Start with simple attack: brute force, then escalate.',
+        'Detection: focus on behavioral indicators, not just IOCs.',
+        'Purple team: communication is key. Red informs blue, blue improves defenses.'
       ],
-      expectedOutcome: 'A clear career direction statement for interviews.',
+      expectedOutcome: 'Purple team mindset that makes you rare and valuable.',
     },
   ],
   'interview-followup': [
     {
-      id: 'cy-fu-templates',
-      title: 'Create Follow-Up Templates',
-      objective: 'Prepare thank-you email templates for different interview scenarios.',
+      id: 'cyber-if-send-thanks',
+      title: 'Send Security Thank-You Emails',
+      objective: 'Write thoughtful follow-ups that reinforce your candidacy.',
       instructions: [
-        'Write a template for phone screen follow-up.',
-        'Write a template for technical interview follow-up.',
-        'Write a template for on-site follow-up.',
-        'Personalize each with specific details.',
+        'Draft template thank-you email for security interviews.',
+        'Personalize for each interviewer: reference specific technical discussion.',
+        'Reiterate clearance status and interest.',
+        'Send within 4 hours.'
       ],
       completionCriteria: [
-        '3 follow-up templates created',
-        'Each personalized with interview details',
-        'Templates ready to send',
+        'Template drafted.',
+        'Personalized for each interviewer.',
+        'Sent within 4 hours.'
       ],
       estimatedMinutes: 20,
       difficulty: 1,
       tips: [
-        'Send within 24 hours.',
-        'Reference a specific technical discussion.',
-        'Reiterate your interest and value proposition.',
+        'Reference specific topic: "I enjoyed discussing the SIEM migration..."',
+        'Reiterate interest: "I am excited about the opportunity to defend..."',
+        'Mention clearance: "I am TS/SCI eligible and ready to begin clearance process."'
       ],
-      expectedOutcome: 'Professional follow-up templates ready for any interview.',
+      expectedOutcome: 'Follow-up emails that keep you top of mind during deliberation.',
     },
   ],
 };

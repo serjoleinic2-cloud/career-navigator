@@ -3,185 +3,184 @@ import type { TaskContent } from '@/core/task_content';
 export const APPLICATION_TASKS: Record<string, TaskContent[]> = {
   'application-tracking': [
     {
-      id: 'cy-at-tracker',
-      title: 'Build Application Tracker',
-      objective: 'Create a tracking system for all security job applications.',
+      id: 'cyber-at-create-tracker',
+      title: 'Create Security Application Tracker',
+      objective: 'Build a system to track your cybersecurity job applications.',
       instructions: [
-        'Choose a tool: Notion, Google Sheets, or similar.',
-        'Create columns: Company, Role, Date, Clearance?, Status, Next Action.',
-        'Add all current applications.',
-        'Set up follow-up reminders.',
+        'Create a spreadsheet with columns: Company, Role, Clearance, Date Applied, Status, Follow-up, Notes.',
+        'Enter 5 applications you have already submitted.',
+        'Set a weekly review reminder.',
+        'Add a "Response Rate" formula: (Responses / Applications) * 100.'
       ],
       completionCriteria: [
-        'Tracker created with all required columns',
-        'All current applications logged',
-        'Follow-up reminders set',
+        'Tracker has 7+ columns including Clearance.',
+        '5+ applications entered.',
+        'Response rate formula works.'
       ],
-      estimatedMinutes: 25,
+      estimatedMinutes: 20,
       difficulty: 1,
       tips: [
-        'Security roles often require clearance — track this separately.',
-        'Update daily for consistency.',
-        'Track application-to-interview conversion rate.',
+        'Use Google Sheets for mobile access.',
+        'Color-code by status: green = offer, yellow = interview, red = rejected, blue = clearance pending.',
+        'Track which channels work: ClearanceJobs, LinkedIn, referrals, company sites.'
       ],
-      expectedOutcome: 'A functional application tracker for your job search.',
+      expectedOutcome: 'A tracking system that reveals patterns in your security job search.',
     },
   ],
   'portfolio-home-lab': [
     {
-      id: 'cy-ph-portfolio',
-      title: 'Create Lab Portfolio Page',
-      objective: 'Build a portfolio page showcasing your home lab.',
+      id: 'cyber-phl-document-lab',
+      title: 'Document Home Lab for Portfolio',
+      objective: 'Create a recruiter-friendly document of your home lab.',
       instructions: [
-        'Create a page on GitHub Pages or similar.',
-        'Add lab architecture diagram.',
-        'Document 3 attack/defense scenarios.',
-        'Include screenshots and tool outputs.',
+        'Draw network topology: firewall, SIEM, vulnerable machines, attacker machine.',
+        'List all tools and versions.',
+        'Document one complete attack chain with detection.',
+        'Include screenshots and mitigation advice.'
       ],
       completionCriteria: [
-        'Portfolio page is live',
-        'Architecture diagram included',
-        '3 scenarios documented with screenshots',
-      ],
-      estimatedMinutes: 60,
-      difficulty: 3,
-      tips: [
-        'Use GitHub Pages for free hosting.',
-        'Include both successful and failed detections.',
-        'Add network topology diagrams.',
-      ],
-      expectedOutcome: 'A portfolio page ready to share with recruiters.',
-    },
-  ],
-  'ctf-scores': [
-    {
-      id: 'cy-cs-document',
-      title: 'Document CTF Performance',
-      objective: 'Create a record of your CTF participation and results.',
-      instructions: [
-        'List all CTFs you have participated in.',
-        'Record your ranking and score.',
-        'Document your best challenge write-ups.',
-        'Create a CTF profile on CTFtime.',
-      ],
-      completionCriteria: [
-        'All CTFs documented',
-        'Rankings recorded',
-        'At least 2 write-ups available',
-      ],
-      estimatedMinutes: 30,
-      difficulty: 2,
-      tips: [
-        'CTFtime.org tracks team and individual rankings.',
-        'Include both team and solo competitions.',
-        'Rankings provide objective proof of skills.',
-      ],
-      expectedOutcome: 'A documented CTF record for your portfolio.',
-    },
-  ],
-  'clearance-prep': [
-    {
-      id: 'cy-cp-research',
-      title: 'Research Clearance Requirements',
-      objective: 'Understand security clearance requirements for your target roles.',
-      instructions: [
-        'Research clearance levels: Confidential, Secret, Top Secret.',
-        'Check if your target companies require clearance.',
-        'Understand the investigation process and timeline.',
-        'Assess your eligibility for clearance.',
-      ],
-      completionCriteria: [
-        'Clearance levels understood',
-        'Target company requirements documented',
-        'Investigation timeline known',
-        'Personal eligibility assessed',
-      ],
-      estimatedMinutes: 30,
-      difficulty: 1,
-      tips: [
-        'Clearance investigations can take 6-18 months.',
-        'Clean financial history and no foreign contacts help.',
-        'Being clearance-ready gives you an edge.',
-      ],
-      expectedOutcome: 'A clear understanding of clearance requirements and your eligibility.',
-    },
-  ],
-  'company-research': [
-    {
-      id: 'cy-cr-profiles',
-      title: 'Research Target Companies',
-      objective: 'Create profiles for 5 target companies.',
-      instructions: [
-        'Research each company security stack.',
-        'Identify their compliance requirements.',
-        'Find recent security news or breaches.',
-        'Document their security team size and structure.',
-      ],
-      completionCriteria: [
-        '5 company profiles created',
-        'Security stacks documented',
-        'Recent security news noted',
-      ],
-      estimatedMinutes: 40,
-      difficulty: 2,
-      tips: [
-        'Check their security blog or engineering blog.',
-        'Look for security job postings to understand their stack.',
-        'Note compliance: SOC 2, PCI DSS, HIPAA, FedRAMP.',
-      ],
-      expectedOutcome: 'Detailed company profiles for targeted applications.',
-    },
-  ],
-  'application-tailoring': [
-    {
-      id: 'cy-at-resumes',
-      title: 'Create Role-Specific Resumes',
-      objective: 'Build 3 resume versions for different security roles.',
-      instructions: [
-        'Create versions for: SOC Analyst, Security Engineer, Penetration Tester.',
-        'Customize keywords for each role.',
-        'Adjust experience bullets to match each role.',
-        'Ensure ATS compatibility for each version.',
-      ],
-      completionCriteria: [
-        '3 resume versions created',
-        'Each has role-specific keywords',
-        'Experience tailored for each role',
+        'Network diagram created.',
+        'One attack chain documented.',
+        'Screenshots of detection and response included.'
       ],
       estimatedMinutes: 45,
       difficulty: 3,
       tips: [
-        'SOC: emphasize monitoring, SIEM, incident response.',
-        'Security Engineer: emphasize automation, tools, architecture.',
-        'Pen Tester: emphasize offensive tools, vulnerabilities, exploits.',
+        'Use draw.io for diagrams. Export as PNG.',
+        'Show both offense and defense: how you broke in and how you blocked it.',
+        'Include detection logic: "Splunk alert fires when..."'
       ],
-      expectedOutcome: 'Role-specific resumes ready for targeted applications.',
+      expectedOutcome: 'A home lab document that proves hands-on security experience.',
+    },
+  ],
+  'ctf-scores': [
+    {
+      id: 'cyber-cs-complete-boxes',
+      title: 'Complete 3 CTF Boxes',
+      objective: 'Build your CTF profile with completed challenges.',
+      instructions: [
+        'Sign up for TryHackMe or HackTheBox.',
+        'Complete 3 boxes: 1 easy, 1 medium, 1 hard.',
+        'Document your methodology for each.',
+        'Update your resume and LinkedIn with profile links.'
+      ],
+      completionCriteria: [
+        '3 boxes completed.',
+        'Methodology documented for each.',
+        'Profile links added to resume and LinkedIn.'
+      ],
+      estimatedMinutes: 180,
+      difficulty: 4,
+      tips: [
+        'Start with TryHackMe "Blue", "Kenobi", "Steel Mountain".',
+        'Document every step: recon, exploit, privesc, lessons.',
+        'Take screenshots of proof flags.'
+      ],
+      expectedOutcome: 'A CTF profile that proves offensive and defensive skills.',
+    },
+  ],
+  'clearance-prep': [
+    {
+      id: 'cyber-cp-review-sf86',
+      title: 'Review SF-86 Form',
+      objective: 'Prepare for security clearance application.',
+      instructions: [
+        'Download SF-86 from OPM website.',
+        'Review all sections: personal info, residence, employment, foreign contacts, finances.',
+        'Gather 10 years of history: addresses, employers, foreign travel.',
+        'Identify potential issues and prepare explanations.'
+      ],
+      completionCriteria: [
+        'SF-86 reviewed section by section.',
+        '10 years of history gathered.',
+        'Potential issues identified with explanations prepared.'
+      ],
+      estimatedMinutes: 120,
+      difficulty: 3,
+      tips: [
+        'Be honest. Investigators value transparency.',
+        'Foreign contacts are not disqualifying. Undisclosed contacts are.',
+        'Financial issues: show resolution plan, not just problems.'
+      ],
+      expectedOutcome: 'SF-86 readiness that speeds up clearance processing.',
+    },
+  ],
+  'company-research': [
+    {
+      id: 'cyber-cr-research-three',
+      title: 'Research 3 Security Companies',
+      objective: 'Build company-specific knowledge for tailored applications.',
+      instructions: [
+        'Pick 3 target companies: defense contractor, tech company, government agency.',
+        'Find their security stack, recent breaches, and compliance requirements.',
+        'Identify 2 security team members on LinkedIn.',
+        'Write one paragraph per company: why your skills fit.'
+      ],
+      completionCriteria: [
+        'Security stack identified for all 3 companies.',
+        'Recent breaches or threats documented.',
+        '2+ team members found per company.'
+      ],
+      estimatedMinutes: 45,
+      difficulty: 2,
+      tips: [
+        'Read company security blogs and vulnerability disclosures.',
+        'Check CISA alerts for company-specific threats.',
+        'Use LinkedIn to find SOC managers and CISOs.'
+      ],
+      expectedOutcome: 'Company-specific knowledge that turns generic applications into tailored ones.',
+    },
+  ],
+  'application-tailoring': [
+    {
+      id: 'cyber-at-tailor-resume',
+      title: 'Tailor Resume for Security Role',
+      objective: 'Practice rapid customization for a specific cybersecurity job.',
+      instructions: [
+        'Pick one security job description. Highlight required tools and clearance.',
+        'Reorder your resume bullets to match the JD priority.',
+        'Mirror JD language: SIEM, incident response, vulnerability assessment.',
+        'Write a cover letter referencing a company-specific threat.'
+      ],
+      completionCriteria: [
+        'Resume bullets reordered to match JD.',
+        'JD keywords appear in summary and bullets.',
+        'Cover letter references company-specific context.'
+      ],
+      estimatedMinutes: 30,
+      difficulty: 2,
+      tips: [
+        'Keep a master resume. Copy and customize for each application.',
+        'Emphasize clearance if required. Mention certifications upfront.',
+        'Reference recent company breach or security initiative.'
+      ],
+      expectedOutcome: 'A tailored security application with 3x higher response rate.',
     },
   ],
   'referral-strategy': [
     {
-      id: 'cy-rs-pipeline',
-      title: 'Build Referral Pipeline',
-      objective: 'Identify referral opportunities at 5 target companies.',
+      id: 'cyber-rs-request-info',
+      title: 'Request 2 Informational Interviews',
+      objective: 'Build warm connections in cleared security community.',
       instructions: [
-        'Find 2-3 contacts at each target company.',
-        'Check LinkedIn for shared connections or interests.',
-        'Send personalized messages to build rapport.',
-        'Ask for advice before asking for referrals.',
+        'Find 2 cleared security professionals at target companies.',
+        'Send personalized message: "I admire your work on X. Would you share advice on breaking into Y?"',
+        'Prepare 5 questions about clearance, tools, and culture.',
+        'Send thank-you note within 24 hours.'
       ],
       completionCriteria: [
-        '5 companies have referral contacts identified',
-        '10+ personalized messages sent',
-        'At least 3 conversations started',
+        '2 personalized requests sent.',
+        'At least 1 call scheduled.',
+        'Thank-you note sent after call.'
       ],
-      estimatedMinutes: 40,
+      estimatedMinutes: 30,
       difficulty: 2,
       tips: [
-        'Attend BSides, DEF CON, or local security meetups.',
-        'Join security Discord servers and Slack channels.',
-        'Build relationships first, referrals follow naturally.',
+        'Ask for advice, not a job. People love giving advice.',
+        'Prepare questions about clearance process and team structure.',
+        'After call: "Would you be comfortable referring me if a role opens up?"'
       ],
-      expectedOutcome: 'A pipeline of potential referrals at target companies.',
+      expectedOutcome: 'Warm connections that bypass ATS and lead to cleared interviews.',
     },
   ],
 };
