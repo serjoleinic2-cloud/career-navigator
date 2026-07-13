@@ -102,17 +102,41 @@ export function setActiveChapter(chapterId: string): JourneyRuntimeState {
   }
   const chapters = getActiveChapters();
   const chapter = chapters.find(c => c.id === chapterId);
-  const firstNodeId = chapter?.nodeIds?.[0];
+
+  // BUGFIX (2026-07-13): this used to always jump to chapter.nodeIds[0],
+  // regardless of actual progress in that chapter. That's correct the
+  // *first* time a chapter becomes active (its first node starts 'locked'
+  // and advanceChapter() explicitly unlocks it), but setActiveChapter() is
+  // also what World-map island taps and the Journey "Next"/"Back" buttons
+  // use to re-enter a chapter you've already been in. Landing back on
+  // node[0] there clobbers activeNodeId away from whatever node was
+  // actually in progress — e.g. after the Settings "Test" button
+  // (devCompleteAllExceptLastTask) leaves every node but the last at
+  // 'confidence' and the last node as the active one: going World -> pick
+  // any island -> Next...Next back to Offer reset activeNodeId to Offer's
+  // first (already-completed) node, and the real last node — now no
+  // longer equal to activeNodeId and not in a 'confidence'/'execution'
+  // state — rendered as locked in ChapterHub's getNodeCardState(), with
+  // no way to complete it. Now this resolves to the first node that isn't
+  // already completed, falling back to the last node if the chapter is
+  // fully done, or the first node if it has no progress at all.
+  const firstIncompleteNodeId = chapter?.nodeIds?.find(id => {
+    const state = runtimeState!.nodeStates[id]?.state;
+    return state !== 'confidence' && state !== 'execution';
+  });
+  const targetNodeId = firstIncompleteNodeId
+    ?? chapter?.nodeIds?.[chapter.nodeIds.length - 1]
+    ?? chapter?.nodeIds?.[0];
 
   runtimeState = {
     ...runtimeState,
     activeChapterId: chapterId,
-    ...(firstNodeId ? { activeNodeId: firstNodeId } : {}),
+    ...(targetNodeId ? { activeNodeId: targetNodeId } : {}),
   };
   saveRuntime(runtimeState);
   emit('CHAPTER_CHANGED', { chapterId });
-  if (firstNodeId) {
-    emit('NODE_CHANGED', { nodeId: firstNodeId });
+  if (targetNodeId) {
+    emit('NODE_CHANGED', { nodeId: targetNodeId });
   }
   emit('UI_REFRESH', {});
   return runtimeState;
