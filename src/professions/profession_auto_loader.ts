@@ -16,7 +16,7 @@ import SoftwareEngineerModule from './software_engineer/module';
 import DataAnalystModule from './data_analyst/module';
 
 // ─── ADD NEW PROFESSIONS HERE ──────────────────────────────────
-// import CybersecurityModule from './cybersecurity/module';
+import CybersecurityModule from './cybersecurity/module';
 // import DigitalMarketingModule from './digital_marketing/module';
 // import CustomerSupportModule from './customer_support/module';
 // ──────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ import DataAnalystModule from './data_analyst/module';
 const PROFESSION_MODULES: ProfessionModule[] = [
   SoftwareEngineerModule,
   DataAnalystModule,
-  // CybersecurityModule,
+  CybersecurityModule,
   // DigitalMarketingModule,
   // CustomerSupportModule,
 ];
