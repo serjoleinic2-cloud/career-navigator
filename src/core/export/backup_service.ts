@@ -29,9 +29,20 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
+import { ENTITLEMENTS_KEY } from '../premium/entitlements';
 
 const KEY_PREFIX = 'career-navigator.';
 const BACKUP_FORMAT_VERSION = 1;
+
+// BUGFIX/HARDENING (2026-07-13): entitlements (какие профессии куплены)
+// must NEVER travel through a shared progress backup/export file. Serj
+// flagged that loading someone else's save could otherwise "unlock" a
+// profession the local user never bought. entitlements live under the same
+// 'career-navigator.' prefix as everything else (so they persist normally
+// across app restarts), but are explicitly excluded from both the export
+// dump and the restore write-back below. See core/premium/entitlements.ts
+// for the full rationale.
+const EXCLUDED_FROM_BACKUP = new Set<string>([ENTITLEMENTS_KEY]);
 
 interface BackupFile {
   format: 'career-navigator-backup';
@@ -44,7 +55,7 @@ function collectAppData(): Record<string, string> {
   const data: Record<string, string> = {};
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith(KEY_PREFIX)) {
+    if (key && key.startsWith(KEY_PREFIX) && !EXCLUDED_FROM_BACKUP.has(key)) {
       const value = localStorage.getItem(key);
       if (value !== null) data[key] = value;
     }
@@ -175,11 +186,15 @@ export async function restoreBackupFromFile(): Promise<void> {
 
   // Clear existing app keys first so a restore from an older/smaller
   // backup doesn't leave stray keys the backup didn't know about.
-  const existingKeys = Object.keys(localStorage).filter(k => k.startsWith(KEY_PREFIX));
+  // entitlements are deliberately spared: a restore of someone else's
+  // progress must not wipe this device's own purchase record either.
+  const existingKeys = Object.keys(localStorage).filter(
+    k => k.startsWith(KEY_PREFIX) && !EXCLUDED_FROM_BACKUP.has(k)
+  );
   for (const key of existingKeys) localStorage.removeItem(key);
 
   for (const [key, value] of Object.entries(parsed.data)) {
-    if (key.startsWith(KEY_PREFIX)) {
+    if (key.startsWith(KEY_PREFIX) && !EXCLUDED_FROM_BACKUP.has(key)) {
       localStorage.setItem(key, value);
     }
   }

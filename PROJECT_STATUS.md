@@ -3086,3 +3086,75 @@ Serj сообщил: после финальной анимации (по зав
 
 **Проверено:** `npx tsc --noEmit` — 0 ошибок. `npx vite build` — чисто.
 **Не проверено вживую на телефоне.** Проверить: пройти Data Analyst целиком (или через Test-кнопку) до финальной анимации → и hero-экран, и следующий "Journey Complete" экран должны показывать "Data Analyst", не "Software Engineer". Software Engineer — регрессия, должен по-прежнему показывать своё имя.
+
+### 2026-07-13 — Claude (архитектурный фикс: entitlements отделены от прогресса/бэкапа)
+
+Serj заметил проблему: файл сохранения прогресса (export/backup) содержит всё подряд из localStorage. Если бы в будущем "куплено ли X" хранилось там же, загрузка чужого save.json могла бы разблокировать чужую профессию. Обсуждали идею парного ключа "устройство/файл" — отклонена: такой ключ теряется при удалении приложения, даже если покупка честная (правильный источник истины — Google Play Billing, привязан к аккаунту, а не к инсталляции).
+
+**Сделано (пока без реального Billing — Serj: "пока не делаю premium"):**
+- `src/core/premium/entitlements.ts` — новый модуль, разводит понятия "прогресс" и "владение профессией". `isProfessionOwned()` сейчас no-op-заглушка (true для всех), `getOwnedProfessionIds()`, `syncEntitlementsFromBilling()` — точка подключения будущего Billing. Хранится под собственным ключом `career-navigator.entitlements.v1`.
+- `src/core/export/backup_service.ts` — этот ключ явно исключён и из сбора данных для бэкапа (`collectAppData`), и из очистки/записи при `restoreBackupFromFile()`. То есть entitlements физически не путешествуют внутри экспортированного/импортированного файла и не стираются при восстановлении чужого бэкапа.
+- `src/core/runtime/runtime_controller.ts` (`initializeRuntime`) — при загрузке сохранённого рантайма `professionId` из файла теперь проверяется через `isProfessionOwned()`; если профессия не принадлежит устройству — активируется профессия по умолчанию вместо профессии из чужого файла. Сейчас проверка всегда проходит (заглушка = все владеют всем), поведение не меняется, но структура готова: когда появится Billing, здесь автоматически заработает реальная защита.
+
+**Файлы:** `src/core/premium/entitlements.ts` (создан), `src/core/export/backup_service.ts`, `src/core/runtime/runtime_controller.ts`, `PROJECT_STATUS.md`.
+
+**Проверено:** `npx tsc --noEmit` — без новых ошибок (28 старых pre-existing ошибок в `cybersecurity`-модуле, не связаны с этим изменением, подтверждено сравнением с `git stash`). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Поведение сейчас не должно измениться (это подготовка структуры, не включение premium-логики).
+
+### 2026-07-13 — Claude (Playbook: создан для Cybersecurity, дополнен для Data Analyst)
+
+Serj сообщил: в профессии Cybersecurity нет данных в Playbook. Попросил создать по аналогии с Software Engineer, а заодно проверить Data Analyst.
+
+**Cybersecurity — найдена причина пустого Playbook:** старый файл `src/professions/cybersecurity/playbook/index.ts` (a) импортировал несуществующий тип `@/core/playbook/playbook_model` (одна из давних ошибок `tsc --noEmit`), (b) использовал совсем другую форму записи (`category: 'technical'`, `content: string[]`), не совпадающую с `PlaybookEntry` из `playbook_types.ts`, который реально читает `PlaybookScreen`, и (c) вообще не был подключён в `core/playbook/playbook_data.ts` → массив `PLAYBOOK`. Итог — все 8 вкладок категорий (resume/linkedin/applications/interviews/offer/communication/body_language/confidence) были пустыми для любого пользователя Cybersecurity.
+
+**Исправлено:**
+- Старый `src/professions/cybersecurity/playbook/` удалён.
+- Создан `src/professions/cybersecurity/playbook_data.ts` (по образцу `data_analyst/playbook_data.ts`) — 13 записей во всех 8 категориях, с обучающим уклоном под профессию: resume (позиционирование + home-lab как доказательство навыка), linkedin (headline + CTF-портфолио), applications (допуск/clearance-процесс, трекинг CTF/портфолио), interviews (Linux-форензика/SIEM/IR-lifecycle, MITRE ATT&CK для сценарных вопросов, поведенческие вопросы про security mindset — включая полезный контент из старого файла: команды форензики, логика SIEM-детектов, стадии IR, тактики ATT&CK), offer (сертификации/clearance как условие оффера, подготовка toolkit к первому дню), communication (объяснение технических терминов нетехническому интервьюеру), body_language (спокойствие в стрессовых сценарных вопросах), confidence (синдром самозванца при входе в security).
+- Подключено в `src/core/playbook/playbook_data.ts` через спред `CYBERSECURITY_PLAYBOOK`.
+
+**Data Analyst — найден пробел:** в `professions/data_analyst/playbook_data.ts` было 15 записей, но только по 4 категориям (resume, interviews, applications, offer) — категории linkedin, communication, body_language, confidence были полностью пустыми (0 записей), хотя `PlaybookScreen` показывает все 8 вкладок независимо от профессии.
+
+**Исправлено:** добавлены 4 новые записи для data_analyst с обучающим фокусом: linkedin (headline с конкретными инструментами + портфолио-дашборд в Featured), communication (перевод технического финдинга в бизнес-язык для нетехнических стейкхолдеров), body_language (уверенная презентация дашбордов вживую), confidence (реакция на "не знаю" в кейс-интервью аналитика).
+
+**Файлы:** `src/professions/cybersecurity/playbook_data.ts` (создан), `src/professions/cybersecurity/playbook/` (удалена), `src/professions/data_analyst/playbook_data.ts`, `src/core/playbook/playbook_data.ts`, `PROJECT_STATUS.md`.
+
+**Проверено:** `npx tsc --noEmit` — 27 ошибок вместо прежних 28 (удаление битого файла убрало 1 старую ошибку про `playbook_model`; оставшиеся 27 — в незавершённых `cybersecurity/interview/questions.ts` и `cybersecurity/skill_nodes_extended.ts`, не связаны с этой правкой). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) Cybersecurity → Playbook → все 8 категорий открываются и показывают карточки (не пусто). (2) Data Analyst → Playbook → LinkedIn/Communication/Body Language/Confidence теперь тоже не пустые. (3) Software Engineer — регрессия, всё как было.
+
+### 2026-07-13 — Claude (интервью-тренажёр для Cybersecurity + проверка/дозаполнение имён арта во всех профессиях)
+
+Serj: интервью-тренажёр после прохождения всех глав должен задавать новые вопросы по текущей профессии; также попросил проверить имена файлов-заглушек арта во всех профессиях.
+
+**Интервью-тренажёр — найдена причина:** `src/professions/cybersecurity/interview/questions.ts` экспортировал `InterviewQuestion[]` (объекты id/text/category/difficulty/expectedDuration), импортируя несуществующий тип `@/core/interview/interview_question` (одна из старых ошибок `tsc --noEmit`). При этом `interview_question_loader.ts` и `InterviewTrainerScreen` реально читают только `string[]` (см. `SOFTWARE_ENGINEER_INTERVIEW_QUESTIONS` / `DATA_ANALYST_INTERVIEW_QUESTIONS`), а `'cybersecurity'` вообще не было в `QUESTION_MAP` — тренажёр молча откатывался на вопросы Software Engineer для любого пользователя Cybersecurity.
+
+**Исправлено:** старый файл переписан в тот же `string[]`-формат, что и у двух других профессий (10 вопросов: узнавание кандидата, мотивация в security, разбор алерта, OSI/firewall, находка/фикс на лабе или CTF, актуальность знаний об угрозах, IR-процесс по шагам, объяснение риска нетехническому человеку, вопрос про действия вне зоны ответственности, вопросы к интервьюеру). Зарегистрирован в `interview_question_loader.ts` → `QUESTION_MAP['cybersecurity']`.
+
+**Арт — сверка имён файлов по всем профессиям:** пробежался по всем местам, где реально формируется путь к картинке (`WorldMapScreen`, `FinalCinematicScreen`/`HeroPhase`, `ChapterHub`, `InterviewerAvatar`, `world/art.ts`), и вывел полный список ожидаемых файлов на профессию: `world.jpg`, `journey.jpg`, `island_<professionId>.png`, `interview_man.png`, плюс 6 файлов глав (`island-resume.png`, `island-linkedin.png`, `island-applications.png`, `island-interview.png`, `island-offer-preparation.png`, `island-offer.png`) — итого 10.
+
+**Найдены пробелы:**
+- `cybersecurity` — папки `public/art/cybersecurity/` не существовало вообще (0 из 10 файлов). Экраны не падали (везде есть `onError`, картинка просто скрывается), но фон/острова/аватар интервьюера были пустыми.
+- `data_analyst` — не хватало `island_data_analyst.png` (финальная анимация/герой-карта) и `interview_man.png` (аватар интервьюера).
+- `software_engineer` — полный комплект, пробелов нет.
+
+**Исправлено:** сгенерированы недостающие заглушки (программно, градиент в акцентных цветах темы профессии + крупная подпись с названием и словом "placeholder", чтобы не спутать с финальным артом) — 10 файлов для `cybersecurity` (палитра из `world/theme.ts`: тёмно-синий/малиновый/циан) и 2 недостающих для `data_analyst` (тёмный бирюзово-фиолетовый фон + золотой акцент, в тон уже существующей палитре). Размеры файлов подобраны по образцу существующих (`island-*.png` — 400×560, `island_<id>.png` — 1319×975, `interview_man.png` — 1672×941, `world.jpg`/`journey.jpg` — 941×1672), так что при замене на финальный арт Serj просто подставляет файлы с теми же именами и размерами.
+
+**Файлы:** `src/professions/cybersecurity/interview/questions.ts` (переписан), `src/core/interview/interview_question_loader.ts`, `public/art/cybersecurity/*` (10 файлов, создана папка), `public/art/data_analyst/island_data_analyst.png`, `public/art/data_analyst/interview_man.png`, `PROJECT_STATUS.md`.
+
+**Проверено:** `npx tsc --noEmit` — 26 ошибок (было 27; убрана ошибка про несуществующий `interview_question`-тип; оставшиеся 26 — всё ещё только в `cybersecurity/skill_nodes_extended.ts`, не связаны с этой правкой). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) Cybersecurity → пройти интервью-тренажёр → вопросы про security, а не про Software Engineer. (2) Cybersecurity → World/Journey/финальная анимация/аватар интервьюера — везде видны цветные заглушки с подписью вместо пустоты. (3) Data Analyst → финальная анимация и аватар интервьюера тоже показывают заглушку, а не пустое место. (4) Software Engineer — регрессия, всё как было.
+
+### 2026-07-13 — Claude (единая фотография интервьюера + сжатие двух тяжёлых картинок)
+
+Serj подтвердил вопрос: у Data Analyst свой набор вопросов интервью-тренажёра — да, был подключён в `QUESTION_MAP` уже раньше (менялся только Cybersecurity в этой сессии). Также попросил: (1) использовать одну и ту же фотографию интервьюера для всех профессий вместо отдельной на каждую, (2) уменьшить вес `interview_man.png` и `island_software_engineer.png`.
+
+**Единая фотография интервьюера:**
+`InterviewerAvatar.tsx` раньше строил путь как `/art/${professionId}/interview_man.png` — то есть на каждую профессию требовался свой файл (у Data Analyst и Cybersecurity это были просто сгенерированные заглушки-дубликаты одной и той же идеи). Переписано на константу `SHARED_INTERVIEWER_IMAGE = '/art/software_engineer/interview_man.jpg'`, используемую для всех профессий. `professionId`-проп компонента сохранён в сигнатуре (не используется для этого пути, но может использоваться где-то ещё в файле/по контракту), просто помечен как неиспользуемый. Дублирующиеся файлы `public/art/data_analyst/interview_man.png` и `public/art/cybersecurity/interview_man.png` удалены — они больше нигде не читаются.
+
+**Сжатие:**
+- `interview_man.png` (1.67 МБ, PNG без альфа-канала, то есть без прозрачности) переконвертирован в JPEG (`interview_man.jpg`, качество 85) — **164 КБ, в ~10 раз меньше**, видимой потери качества нет. Старый `.png` удалён, единственная ссылка на файл (`InterviewerAvatar.tsx`) обновлена на `.jpg`.
+- `island_software_engineer.png` (1.84 МБ) содержит настоящую прозрачность (остров без фона) — JPEG не подходит, формат оставлен PNG. Сжат через квантизацию до 256 цветов (Fast Octree) с сохранением альфа-канала и полного разрешения — **412 КБ, в ~4.4 раза меньше**, визуально идентичен на глаз (проверено сравнением).
+
+**Файлы:** `src/screens/InterviewTrainerScreen/components/InterviewerAvatar.tsx`, `public/art/software_engineer/interview_man.jpg` (создан, заменяет `.png`), `public/art/software_engineer/interview_man.png` (удалён), `public/art/data_analyst/interview_man.png` (удалён), `public/art/cybersecurity/interview_man.png` (удалён), `public/art/software_engineer/island_software_engineer.png` (сжат на месте), `PROJECT_STATUS.md`.
+
+**Проверено:** `npx tsc --noEmit` — 26 ошибок, без изменений (все в `cybersecurity/skill_nodes_extended.ts`, не связаны). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) интервью-тренажёр в любой профессии показывает ту же самую фотографию интервьюера. (2) Финальная анимация Software Engineer — здание острова выглядит так же чётко, как раньше (регрессия по качеству картинки).

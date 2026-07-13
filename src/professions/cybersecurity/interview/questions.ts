@@ -1,189 +1,24 @@
-import type { InterviewQuestion } from '@/core/interview/interview_question';
-
-export const CYBERSECURITY_INTERVIEW_QUESTIONS: InterviewQuestion[] = [
-  // Networking
-  {
-    id: 'cyber-net-osi',
-    text: 'Explain the OSI model. At which layer does a firewall operate?',
-    category: 'technical',
-    difficulty: 'easy',
-    expectedDuration: 180,
-    hints: ['7 layers: Physical, Data Link, Network, Transport, Session, Presentation, Application.', 'Firewalls operate at Layer 3 (Network) and Layer 4 (Transport). Next-gen firewalls at Layer 7.'],
-  },
-  {
-    id: 'cyber-net-tcp',
-    text: 'Describe the TCP three-way handshake. How can it be exploited?',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 240,
-    hints: ['SYN → SYN-ACK → ACK.', 'Exploits: SYN flood (DoS), TCP hijacking, sequence number prediction.'],
-  },
-  {
-    id: 'cyber-net-dns',
-    text: 'How does DNS work? What are common DNS attacks?',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 240,
-    hints: ['DNS resolution: recursive query → root → TLD → authoritative.', 'Attacks: DNS spoofing, cache poisoning, tunneling, amplification.'],
-  },
-  // Linux
-  {
-    id: 'cyber-linux-privesc',
-    text: 'You have limited shell access on a Linux server. How do you escalate privileges?',
-    category: 'technical',
-    difficulty: 'hard',
-    expectedDuration: 300,
-    hints: ['Check sudo -l, SUID binaries, kernel exploits, cron jobs, writable paths.', 'Use linPEAS or linenum for automation.'],
-  },
-  {
-    id: 'cyber-linux-logs',
-    text: 'Where do you look for signs of compromise on a Linux system?',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 240,
-    hints: ['/var/log/auth.log, /var/log/syslog, bash history, cron jobs, running processes, network connections.'],
-  },
-  {
-    id: 'cyber-linux-harden',
-    text: 'Harden a Linux server for production use. What steps do you take?',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 300,
-    hints: ['Minimize services, configure iptables, enable SELinux/AppArmor, set up auditd, disable root login, use SSH keys, apply updates.'],
-  },
-  // SIEM
-  {
-    id: 'cyber-siem-detection',
-    text: 'Write a Splunk query to detect brute force attacks on RDP.',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 300,
-    hints: ['index=windows EventCode=4625 | stats count by src_ip, dest_computer | where count > 5.', 'Look for multiple failed logins from same source.'],
-  },
-  {
-    id: 'cyber-siem-false',
-    text: 'Your SIEM alert for "malicious PowerShell" fires 500 times a day. 490 are false positives. What do you do?',
-    category: 'technical',
-    difficulty: 'hard',
-    expectedDuration: 300,
-    hints: ['Tune the detection rule: add exclusions for known admin scripts.', 'Implement baseline of normal PowerShell usage.', 'Use command-line arguments and parent process to reduce noise.'],
-  },
-  {
-    id: 'cyber-siem-correlation',
-    text: 'How do you build a correlation rule that detects lateral movement?',
-    category: 'technical',
-    difficulty: 'hard',
-    expectedDuration: 360,
-    hints: ['Combine multiple events: login from new IP + privilege escalation + remote service execution.', 'Use time windows and entity correlation.'],
-  },
-  // Incident Response
-  {
-    id: 'cyber-ir-ransomware',
-    text: 'A user reports ransomware on their workstation. Walk me through your response.',
-    category: 'technical',
-    difficulty: 'hard',
-    expectedDuration: 420,
-    hints: ['Isolate the system (network disconnect, not power off).', 'Identify the ransomware strain.', 'Check backups, determine scope, contain lateral movement.', 'Notify stakeholders and law enforcement if required.'],
-  },
-  {
-    id: 'cyber-ir-apt',
-    text: 'You suspect an APT in your network. Indicators: beaconing to known C2, unusual admin account usage. What are your next steps?',
-    category: 'technical',
-    difficulty: 'hard',
-    expectedDuration: 420,
-    hints: ['Do not alert the attacker. Monitor silently.', 'Collect evidence: memory dump, network captures, logs.', 'Scope the compromise: which systems, what data accessed.', 'Plan eradication: rebuild from known good, rotate credentials.'],
-  },
-  {
-    id: 'cyber-ir-forensics',
-    text: 'What is the difference between dead box and live forensics? When do you use each?',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 240,
-    hints: ['Dead box: system powered off, disk imaged. Preserves evidence but misses volatile data.', 'Live: system running, captures memory, network connections, running processes. Risk of altering evidence.'],
-  },
-  // Threat Hunting
-  {
-    id: 'cyber-th-hunt',
-    text: 'You hypothesize that an adversary is using scheduled tasks for persistence. How do you hunt for this?',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 300,
-    hints: ['Search for new scheduled tasks in Event ID 4698.', 'Look for tasks running unusual executables or scripts.', 'Correlate with user creation events and login anomalies.'],
-  },
-  {
-    id: 'cyber-th-ioc',
-    text: 'What is the difference between IOCs and TTPs? Which is more valuable for hunting?',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 240,
-    hints: ['IOCs: artifacts of compromise (IPs, hashes, domains). Easy to change.', 'TTPs: tactics, techniques, procedures. Harder to change, more valuable for detection.'],
-  },
-  // Red Team / Blue Team
-  {
-    id: 'cyber-rtbt-pivot',
-    text: 'You have compromised one workstation. How do you move laterally in the network?',
-    category: 'technical',
-    difficulty: 'hard',
-    expectedDuration: 300,
-    hints: ['Credential harvesting: Mimikatz, LSASS dump, SAM database.', 'Pass-the-hash, Pass-the-ticket, Kerberoasting.', 'Use legitimate tools (Living Off The Land) to avoid detection.'],
-  },
-  {
-    id: 'cyber-rtbt-lootb',
-    text: 'What is "Living Off The Land"? Give 3 examples.',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 240,
-    hints: ['Using legitimate system tools for malicious purposes.', 'Examples: PowerShell, WMI, PsExec, certutil, mshta.'],
-  },
-  // Malware Analysis
-  {
-    id: 'cyber-malware-static',
-    text: 'What static analysis techniques do you use to analyze a suspicious binary?',
-    category: 'technical',
-    difficulty: 'hard',
-    expectedDuration: 300,
-    hints: ['Hash lookup (VirusTotal), strings analysis, PE header analysis, disassembly (IDA, Ghidra), YARA rules.'],
-  },
-  {
-    id: 'cyber-malware-dynamic',
-    text: 'What dynamic analysis techniques do you use? What are the risks?',
-    category: 'technical',
-    difficulty: 'hard',
-    expectedDuration: 300,
-    hints: ['Sandbox execution (Cuckoo, ANY.RUN), behavior monitoring, network traffic analysis.', 'Risks: sandbox evasion, network propagation, accidental infection.'],
-  },
-  // Cloud Security
-  {
-    id: 'cyber-cloud-misconfig',
-    text: 'What are common AWS S3 bucket misconfigurations and how do you detect them?',
-    category: 'technical',
-    difficulty: 'medium',
-    expectedDuration: 240,
-    hints: ['Public read/write permissions, lack of encryption, no versioning, no logging.', 'Tools: Prowler, ScoutSuite, AWS Config, CloudTrail.'],
-  },
-  // Behavioral
-  {
-    id: 'cyber-bh-pressure',
-    text: 'Tell me about a time you had to make a security decision with incomplete information under pressure.',
-    category: 'behavioral',
-    difficulty: 'medium',
-    expectedDuration: 180,
-    hints: ['Use STAR method.', 'Emphasize risk assessment, stakeholder communication, and documentation.'],
-  },
-  {
-    id: 'cyber-bh-learn',
-    text: 'How do you stay current with evolving threats and security technologies?',
-    category: 'behavioral',
-    difficulty: 'easy',
-    expectedDuration: 120,
-    hints: ['Mention specific sources: SANS, CISA alerts, threat intel feeds, CTFs, conferences.', 'Show hands-on practice, not just reading.'],
-  },
-  {
-    id: 'cyber-bh-fail',
-    text: 'Describe a security incident you handled that did not go well. What would you do differently?',
-    category: 'behavioral',
-    difficulty: 'medium',
-    expectedDuration: 180,
-    hints: ['Be honest about mistakes.', 'Focus on lessons learned and process improvements.'],
-  },
+// BUGFIX (2026-07-13): the previous version of this file exported
+// `InterviewQuestion[]` (id/text/category/difficulty/expectedDuration
+// objects) importing a type — `@/core/interview/interview_question` —
+// that doesn't exist anywhere in the codebase. That broke `tsc --noEmit`,
+// and even if the type had existed, `interview_question_loader.ts` /
+// `InterviewTrainerScreen` only ever read `string[]` (see
+// SOFTWARE_ENGINEER_INTERVIEW_QUESTIONS / DATA_ANALYST_INTERVIEW_QUESTIONS
+// for the shape actually consumed). Because 'cybersecurity' was never
+// registered in `QUESTION_MAP`, the trainer silently fell back to the
+// Software Engineer questions for Cybersecurity users. This file replaces
+// it with the same plain string[] shape, and is now registered in
+// `interview_question_loader.ts`.
+export const CYBERSECURITY_INTERVIEW_QUESTIONS: string[] = [
+  "Tell me about yourself.",
+  "Why do you want to work in cybersecurity?",
+  "Walk me through how you'd investigate a suspicious login alert.",
+  "Explain the OSI model and where a firewall operates in it.",
+  "Tell me about a time you found or fixed a security issue in a lab, CTF, or coursework project.",
+  "How do you stay current with new vulnerabilities and threats?",
+  "Describe your incident response process, step by step.",
+  "Tell me about a time you had to explain a technical risk to a non-technical audience.",
+  "What would you do if you were asked to do something outside your authorization?",
+  "Do you have any questions for us?",
 ];
