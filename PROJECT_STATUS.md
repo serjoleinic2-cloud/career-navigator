@@ -3100,3 +3100,23 @@ Serj заметил проблему: файл сохранения прогре
 
 **Проверено:** `npx tsc --noEmit` — без новых ошибок (28 старых pre-existing ошибок в `cybersecurity`-модуле, не связаны с этим изменением, подтверждено сравнением с `git stash`). `npx vite build` — чисто.
 **Не проверено вживую на телефоне.** Поведение сейчас не должно измениться (это подготовка структуры, не включение premium-логики).
+
+### 2026-07-13 — Claude (Playbook: создан для Cybersecurity, дополнен для Data Analyst)
+
+Serj сообщил: в профессии Cybersecurity нет данных в Playbook. Попросил создать по аналогии с Software Engineer, а заодно проверить Data Analyst.
+
+**Cybersecurity — найдена причина пустого Playbook:** старый файл `src/professions/cybersecurity/playbook/index.ts` (a) импортировал несуществующий тип `@/core/playbook/playbook_model` (одна из давних ошибок `tsc --noEmit`), (b) использовал совсем другую форму записи (`category: 'technical'`, `content: string[]`), не совпадающую с `PlaybookEntry` из `playbook_types.ts`, который реально читает `PlaybookScreen`, и (c) вообще не был подключён в `core/playbook/playbook_data.ts` → массив `PLAYBOOK`. Итог — все 8 вкладок категорий (resume/linkedin/applications/interviews/offer/communication/body_language/confidence) были пустыми для любого пользователя Cybersecurity.
+
+**Исправлено:**
+- Старый `src/professions/cybersecurity/playbook/` удалён.
+- Создан `src/professions/cybersecurity/playbook_data.ts` (по образцу `data_analyst/playbook_data.ts`) — 13 записей во всех 8 категориях, с обучающим уклоном под профессию: resume (позиционирование + home-lab как доказательство навыка), linkedin (headline + CTF-портфолио), applications (допуск/clearance-процесс, трекинг CTF/портфолио), interviews (Linux-форензика/SIEM/IR-lifecycle, MITRE ATT&CK для сценарных вопросов, поведенческие вопросы про security mindset — включая полезный контент из старого файла: команды форензики, логика SIEM-детектов, стадии IR, тактики ATT&CK), offer (сертификации/clearance как условие оффера, подготовка toolkit к первому дню), communication (объяснение технических терминов нетехническому интервьюеру), body_language (спокойствие в стрессовых сценарных вопросах), confidence (синдром самозванца при входе в security).
+- Подключено в `src/core/playbook/playbook_data.ts` через спред `CYBERSECURITY_PLAYBOOK`.
+
+**Data Analyst — найден пробел:** в `professions/data_analyst/playbook_data.ts` было 15 записей, но только по 4 категориям (resume, interviews, applications, offer) — категории linkedin, communication, body_language, confidence были полностью пустыми (0 записей), хотя `PlaybookScreen` показывает все 8 вкладок независимо от профессии.
+
+**Исправлено:** добавлены 4 новые записи для data_analyst с обучающим фокусом: linkedin (headline с конкретными инструментами + портфолио-дашборд в Featured), communication (перевод технического финдинга в бизнес-язык для нетехнических стейкхолдеров), body_language (уверенная презентация дашбордов вживую), confidence (реакция на "не знаю" в кейс-интервью аналитика).
+
+**Файлы:** `src/professions/cybersecurity/playbook_data.ts` (создан), `src/professions/cybersecurity/playbook/` (удалена), `src/professions/data_analyst/playbook_data.ts`, `src/core/playbook/playbook_data.ts`, `PROJECT_STATUS.md`.
+
+**Проверено:** `npx tsc --noEmit` — 27 ошибок вместо прежних 28 (удаление битого файла убрало 1 старую ошибку про `playbook_model`; оставшиеся 27 — в незавершённых `cybersecurity/interview/questions.ts` и `cybersecurity/skill_nodes_extended.ts`, не связаны с этой правкой). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) Cybersecurity → Playbook → все 8 категорий открываются и показывают карточки (не пусто). (2) Data Analyst → Playbook → LinkedIn/Communication/Body Language/Confidence теперь тоже не пустые. (3) Software Engineer — регрессия, всё как было.

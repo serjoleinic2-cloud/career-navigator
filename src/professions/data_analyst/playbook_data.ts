@@ -409,4 +409,127 @@ export const DATA_ANALYST_PLAYBOOK: PlaybookEntry[] = [
     ],
     tags: ['benefits', 'offer', 'negotiation'],
   },
+  // GAP FIX (2026-07-13): data_analyst previously had zero entries for
+  // linkedin, communication, body_language, and confidence — those 4
+  // Playbook tabs rendered empty for every Data Analyst user, even though
+  // PlaybookScreen always shows all 8 category tabs regardless of
+  // profession. Added below so every tab has at least one entry.
+  {
+    id: 'linkedin/data-analyst-headline-and-portfolio',
+    title: 'LinkedIn Headline & Portfolio for Data Analysts',
+    category: 'linkedin',
+    professionId: 'data_analyst',
+    overview:
+      'Recruiters searching for data analysts filter by specific tools (SQL, Python, Tableau, Power BI) more than by job title alone. Your headline and Featured section should surface both your tools and a visible, checkable piece of analysis work.',
+    guides: [
+      'Include your 2-4 core tools in the headline, not just "Data Analyst"',
+      'Name the business domain you focus on (product, marketing, finance) if you have one',
+      'Pin a dashboard, SQL project, or analysis write-up in the Featured section — something a recruiter can actually open',
+      'Avoid generic filler phrases like "data enthusiast" or "passionate about numbers" — they add no searchable value',
+      'Keep the headline under 120 characters so it displays fully in search results',
+    ],
+    templates: [
+      'Data Analyst | SQL | Python | Tableau | Product Analytics',
+      'Junior Data Analyst | Power BI | Excel | E-commerce Metrics',
+      'Aspiring Data Analyst | SQL and Python | A/B Testing | Marketing Analytics',
+    ],
+    examples: [
+      'Before: "Data enthusiast learning analytics" -- low recruiter search visibility. After: "Data Analyst | SQL | Tableau | Retention and Churn Analysis" -- surfaces in recruiter searches for those exact terms.',
+    ],
+    checklist: [
+      'Headline names 2-4 specific tools, not vague descriptors',
+      'A real dashboard, query, or project is pinned in Featured',
+      'Business domain mentioned if applicable',
+      'No filler phrases like "passionate" or "enthusiast" alone',
+      'Under 120 characters',
+    ],
+    tags: ['linkedin', 'headline', 'portfolio', 'visibility'],
+  },
+  {
+    id: 'communication/explaining-analysis-to-non-technical-stakeholders',
+    title: 'Explaining Analysis to Non-Technical Stakeholders',
+    category: 'communication',
+    professionId: 'data_analyst',
+    overview:
+      "The single most common interview and on-the-job test for a data analyst is translating a technical finding into a decision a non-technical stakeholder can act on. Analysts who can't do this get their insights ignored, no matter how correct the SQL was.",
+    guides: [
+      'Lead with the business implication, not the method -- state the outcome before the statistical test',
+      'State your confidence level in plain language ("this is a strong signal" vs. "this is suggestive but the sample is small")',
+      'Use one concrete number or comparison instead of a wall of statistics',
+      'Anticipate the obvious follow-up question ("why?" or "what should we do?") and have an answer ready',
+      'Avoid leading with tool names (SQL, pandas, regression) unless the audience asks how you got there',
+    ],
+    templates: [
+      "Weak opening: \"I ran a multivariate regression controlling for seasonality and found a coefficient of -0.34 with p<0.05.\" Strong opening: \"Signups dropped about 12% after the pricing change, and it doesn't look like seasonality explains it. I'd recommend we look at the checkout flow next.\"",
+    ],
+    examples: [
+      "Interview question: \"How would you explain a correlation you found to a non-technical manager?\" Strong answer: \"I'd say what we observed in plain terms first -- for example, 'users who saw the new onboarding finished setup faster' -- then note the caveat simply, like 'we can't be fully sure it caused it, but it's a strong early signal,' before offering to dig deeper if they want the statistical detail.\"",
+    ],
+    checklist: [
+      'Opens with the business finding, not the method',
+      'States confidence level in plain language',
+      'Uses one clear number instead of a list of statistics',
+      'Has a prepared answer for the likely "why" or "what now" follow-up',
+      'Practiced explaining one real finding out loud in under 60 seconds',
+    ],
+    tags: ['communication', 'stakeholders', 'non-technical', 'storytelling'],
+  },
+  {
+    id: 'body_language/presenting-dashboards-with-confidence',
+    title: 'Presenting Dashboards & Findings With Confidence',
+    category: 'body_language',
+    professionId: 'data_analyst',
+    overview:
+      "Data analysts are frequently asked to walk stakeholders or interviewers through a dashboard or chart live. How you present the visual -- pace, pointing, pausing -- affects whether the finding lands as credible, independent of whether the analysis itself is correct.",
+    guides: [
+      'Orient the viewer before diving in -- say what the chart shows and what the axes mean in one sentence first',
+      'Point to or highlight the specific data point you are discussing rather than describing its location verbally only',
+      'Pause after stating a key number so it has time to register before you move on',
+      'Slow down your speaking pace when presenting numbers -- data is misheard easily when rushed',
+      'For video calls, share the exact chart/dashboard view rather than your whole messy screen',
+    ],
+    templates: [
+      'Presentation opening line: "This chart shows weekly active users over the last 6 months, with the change we shipped marked here in week 14." (then pause, then continue with the finding)',
+    ],
+    examples: [
+      'Weak: rushing through 4 charts in 90 seconds while talking continuously. Strong: showing one chart, stating what it shows, pausing 2 seconds, then stating the one takeaway before moving to the next chart.',
+    ],
+    checklist: [
+      'Orients the audience to axes/scope before stating the finding',
+      'Points to or highlights the specific data referenced',
+      'Pauses briefly after stating a key number',
+      'Speaking pace slows down specifically during numbers',
+      'Shares a clean, focused screen view rather than a cluttered one',
+    ],
+    tags: ['body_language', 'presenting', 'dashboards', 'confidence'],
+  },
+  {
+    id: 'confidence/handling-i-dont-know-in-analytics-interviews',
+    title: "Handling \"I Don't Know\" in Analytics Interviews",
+    category: 'confidence',
+    professionId: 'data_analyst',
+    overview:
+      "Analytics interviews often include an ambiguous business case or an unfamiliar dataset on purpose -- the goal is to see how you reason with incomplete information, not whether you already know the answer. Treating 'I don't know yet' as a normal, confident starting point (not a failure) changes how these interviews go.",
+    guides: [
+      'When faced with an unfamiliar scenario, state your reasoning process out loud instead of guessing silently',
+      'It is fine to say "I would want to check X before answering that precisely" -- this is often exactly what is being tested',
+      'Ask a clarifying question before diving into a case study rather than assuming the goal',
+      'Keep a short list of past wins (a specific analysis you are proud of) to mentally reference before the interview',
+      'Reframe silence/thinking time as normal -- a brief pause before tackling ambiguity reads as rigor, not hesitation',
+    ],
+    templates: [
+      'Reframe script for an unfamiliar case question: "I have not worked with this exact scenario before, but here is how I would approach figuring it out: first I would clarify the goal, then look at the baseline data to understand normal behavior, then check for anything unusual before drawing conclusions."',
+    ],
+    examples: [
+      'Candidate given an unfamiliar dataset froze initially, then recovered by saying: "Let me think through this systematically -- first I would check for missing data, then look at the distribution before drawing conclusions." Interviewer noted this structured response positively despite not reaching a final number in time.',
+    ],
+    checklist: [
+      'Has a scripted, calm response ready for unfamiliar scenario questions',
+      'Practiced asking one clarifying question before starting a case study',
+      'Keeps a short mental list of past analysis wins to reference before interviews',
+      'Treats a brief pause before answering as acceptable, not something to apologize for',
+      'Practiced narrating reasoning out loud on at least one mock case',
+    ],
+    tags: ['confidence', 'mindset', 'case-study', 'ambiguity'],
+  },
 ];
