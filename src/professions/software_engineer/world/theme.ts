@@ -27,14 +27,16 @@ registerWorldTheme({
     resume: '#4f8cff',
     linkedin: '#7b68ee',
     applications: '#f5b25c',
-    interview: '#5b6b82',
+    interviews: '#5b6b82',
+    offer_preparation: '#e07a5f',
     offer: '#3ecf8e',
   },
   chapterBackgrounds: {
     resume: '#101a2c',
     linkedin: '#1a1430',
     applications: '#2a2013',
-    interview: '#12161d',
+    interviews: '#12161d',
+    offer_preparation: '#241610',
     offer: '#0f1f18',
   },
   celebration: {

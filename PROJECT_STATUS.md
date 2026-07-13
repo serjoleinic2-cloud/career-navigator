@@ -3017,3 +3017,25 @@ Serj сообщил, что Kimi уже создал контент для пр�
 
 **Проверено:** `npx tsc --noEmit` — чисто (0 ошибок). `npx vite build` — чисто. Скриптом сверены все 41 nodeId графа навыков data_analyst против ключей заданий — расхождений не осталось.
 **Не проверено вживую на телефоне.** Проверить: Onboarding → Data Analyst теперь активен и выбираем. Journey для Data Analyst → все 6 глав, все узлы имеют задания (особенно ранее сломанные: Offer Preparation → Salary Research/Offer Review, Offer → Benefits Evaluation, Interviews → Behavioral/Mindset/Phone Screen, Applications → Cover Letter/Follow-Up/Volume).
+
+### 2026-07-13 — Claude (баг акцента в software_engineer, Playbook и заглушки арта для Data Analyst)
+
+Serj попросил проверить гипотезу о скрытом баге акцентного цвета в software_engineer (по аналогии с найденной рассинхронизацией ключей у Data Analyst) и обязательно сделать Playbook для Data Analyst.
+
+**Баг подтверждён и исправлен:**
+`src/professions/software_engineer/world/theme.ts` — `chapterAccents`/`chapterBackgrounds` были ключёваны как `resume, linkedin, applications, interview, offer` (5 ключей), а реальные id глав в `chapters.ts` — `resume, linkedin, applications, interviews, offer_preparation, offer` (6 глав, множественное число `interviews`, отдельная глава `offer_preparation`). Функции `getChapterAccent`/`getChapterBackground`/`getWorldCssVars` (`core/world/world_theme.ts`) при непопадании ключа тихо фолбэчатся на `Object.values(...)[0]` либо `theme.palette.primary/backgroundTo` — без ошибок в консоли. Итог: главы Interviews и Offer Preparation у software_engineer показывали чужой/дефолтный акцент вместо своего. Исправлено — добавлены недостающие ключи `interviews`, `offer_preparation` с отдельными цветами.
+
+Заодно найден и удалён orphaned-дубликат `src/professions/software_engineer/world.ts` — не импортировался нигде (единственный реальный импорт темы — `./world/theme`), содержал те же старые баганные ключи; было бы легко случайно отредактировать не тот файл в будущем.
+
+Data_analyst тема проверена — там ключи уже совпадают с id глав, баг не воспроизводится.
+
+**Playbook для Data Analyst — создан:**
+`src/professions/data_analyst/playbook_data.ts` — 15 новых записей с `professionId: 'data_analyst'`, покрывают категории resume (2), interviews (5: sql-technical, case-study, data-visualization, behavioral, phone-screen, mindset — 6 фактически), applications (3: portfolio, cover-letter, follow-up, volume — 4 фактически), offer (3: salary-research, offer-review, benefits-evaluation). Подключено в `src/core/playbook/playbook_data.ts` через спред в общий массив `PLAYBOOK`.
+
+**Заглушки арта для Data Analyst — созданы:**
+`public/art/data_analyst/world.jpg`, `journey.jpg`, `island-resume.png`, `island-linkedin.png`, `island-applications.png`, `island-interview.png`, `island-offer-preparation.png`, `island-offer.png` — сгенерированы программно (градиент в цветах темы Data Analyst: бирюза/золото/фиолет + подпись "DATA ANALYST placeholder"), чтобы явно отличаться от software_engineer-арта и не выглядеть как готовый финальный контент. Подлежат замене на реальный арт позже.
+
+**Файлы:** `src/professions/software_engineer/world/theme.ts` (правка ключей), `src/professions/software_engineer/world.ts` (удалён), `src/professions/data_analyst/playbook_data.ts` (создан), `src/core/playbook/playbook_data.ts` (подключение), `public/art/data_analyst/*` (8 заглушек), `PROJECT_STATUS.md`.
+
+**Проверено:** `npx tsc --noEmit` — 0 ошибок. `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) software_engineer → Interviews и Offer Preparation острова/фон теперь показывают свой акцент, а не цвет Resume. (2) Data Analyst → Playbook больше не пустой, есть записи по всем разделам. (3) Data Analyst → на островах/фоне видны цветные заглушки с подписью вместо старого градиента/чужих картинок.

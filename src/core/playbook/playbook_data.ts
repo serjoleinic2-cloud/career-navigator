@@ -1,6 +1,8 @@
 import type { PlaybookEntry, PlaybookCategory } from './playbook_types';
+import { DATA_ANALYST_PLAYBOOK } from '@/professions/data_analyst/playbook_data';
 
 export const PLAYBOOK: PlaybookEntry[] = [
+  ...DATA_ANALYST_PLAYBOOK,
   {
     id: 'resume/summary-formulas',
     title: 'Resume Summary Formulas',
