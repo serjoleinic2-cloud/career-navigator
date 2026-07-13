@@ -3142,3 +3142,19 @@ Serj: интервью-тренажёр после прохождения все
 
 **Проверено:** `npx tsc --noEmit` — 26 ошибок (было 27; убрана ошибка про несуществующий `interview_question`-тип; оставшиеся 26 — всё ещё только в `cybersecurity/skill_nodes_extended.ts`, не связаны с этой правкой). `npx vite build` — чисто.
 **Не проверено вживую на телефоне.** Проверить: (1) Cybersecurity → пройти интервью-тренажёр → вопросы про security, а не про Software Engineer. (2) Cybersecurity → World/Journey/финальная анимация/аватар интервьюера — везде видны цветные заглушки с подписью вместо пустоты. (3) Data Analyst → финальная анимация и аватар интервьюера тоже показывают заглушку, а не пустое место. (4) Software Engineer — регрессия, всё как было.
+
+### 2026-07-13 — Claude (единая фотография интервьюера + сжатие двух тяжёлых картинок)
+
+Serj подтвердил вопрос: у Data Analyst свой набор вопросов интервью-тренажёра — да, был подключён в `QUESTION_MAP` уже раньше (менялся только Cybersecurity в этой сессии). Также попросил: (1) использовать одну и ту же фотографию интервьюера для всех профессий вместо отдельной на каждую, (2) уменьшить вес `interview_man.png` и `island_software_engineer.png`.
+
+**Единая фотография интервьюера:**
+`InterviewerAvatar.tsx` раньше строил путь как `/art/${professionId}/interview_man.png` — то есть на каждую профессию требовался свой файл (у Data Analyst и Cybersecurity это были просто сгенерированные заглушки-дубликаты одной и той же идеи). Переписано на константу `SHARED_INTERVIEWER_IMAGE = '/art/software_engineer/interview_man.jpg'`, используемую для всех профессий. `professionId`-проп компонента сохранён в сигнатуре (не используется для этого пути, но может использоваться где-то ещё в файле/по контракту), просто помечен как неиспользуемый. Дублирующиеся файлы `public/art/data_analyst/interview_man.png` и `public/art/cybersecurity/interview_man.png` удалены — они больше нигде не читаются.
+
+**Сжатие:**
+- `interview_man.png` (1.67 МБ, PNG без альфа-канала, то есть без прозрачности) переконвертирован в JPEG (`interview_man.jpg`, качество 85) — **164 КБ, в ~10 раз меньше**, видимой потери качества нет. Старый `.png` удалён, единственная ссылка на файл (`InterviewerAvatar.tsx`) обновлена на `.jpg`.
+- `island_software_engineer.png` (1.84 МБ) содержит настоящую прозрачность (остров без фона) — JPEG не подходит, формат оставлен PNG. Сжат через квантизацию до 256 цветов (Fast Octree) с сохранением альфа-канала и полного разрешения — **412 КБ, в ~4.4 раза меньше**, визуально идентичен на глаз (проверено сравнением).
+
+**Файлы:** `src/screens/InterviewTrainerScreen/components/InterviewerAvatar.tsx`, `public/art/software_engineer/interview_man.jpg` (создан, заменяет `.png`), `public/art/software_engineer/interview_man.png` (удалён), `public/art/data_analyst/interview_man.png` (удалён), `public/art/cybersecurity/interview_man.png` (удалён), `public/art/software_engineer/island_software_engineer.png` (сжат на месте), `PROJECT_STATUS.md`.
+
+**Проверено:** `npx tsc --noEmit` — 26 ошибок, без изменений (все в `cybersecurity/skill_nodes_extended.ts`, не связаны). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) интервью-тренажёр в любой профессии показывает ту же самую фотографию интервьюера. (2) Финальная анимация Software Engineer — здание острова выглядит так же чётко, как раньше (регрессия по качеству картинки).
