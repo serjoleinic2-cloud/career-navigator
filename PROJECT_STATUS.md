@@ -3120,3 +3120,25 @@ Serj сообщил: в профессии Cybersecurity нет данных в 
 
 **Проверено:** `npx tsc --noEmit` — 27 ошибок вместо прежних 28 (удаление битого файла убрало 1 старую ошибку про `playbook_model`; оставшиеся 27 — в незавершённых `cybersecurity/interview/questions.ts` и `cybersecurity/skill_nodes_extended.ts`, не связаны с этой правкой). `npx vite build` — чисто.
 **Не проверено вживую на телефоне.** Проверить: (1) Cybersecurity → Playbook → все 8 категорий открываются и показывают карточки (не пусто). (2) Data Analyst → Playbook → LinkedIn/Communication/Body Language/Confidence теперь тоже не пустые. (3) Software Engineer — регрессия, всё как было.
+
+### 2026-07-13 — Claude (интервью-тренажёр для Cybersecurity + проверка/дозаполнение имён арта во всех профессиях)
+
+Serj: интервью-тренажёр после прохождения всех глав должен задавать новые вопросы по текущей профессии; также попросил проверить имена файлов-заглушек арта во всех профессиях.
+
+**Интервью-тренажёр — найдена причина:** `src/professions/cybersecurity/interview/questions.ts` экспортировал `InterviewQuestion[]` (объекты id/text/category/difficulty/expectedDuration), импортируя несуществующий тип `@/core/interview/interview_question` (одна из старых ошибок `tsc --noEmit`). При этом `interview_question_loader.ts` и `InterviewTrainerScreen` реально читают только `string[]` (см. `SOFTWARE_ENGINEER_INTERVIEW_QUESTIONS` / `DATA_ANALYST_INTERVIEW_QUESTIONS`), а `'cybersecurity'` вообще не было в `QUESTION_MAP` — тренажёр молча откатывался на вопросы Software Engineer для любого пользователя Cybersecurity.
+
+**Исправлено:** старый файл переписан в тот же `string[]`-формат, что и у двух других профессий (10 вопросов: узнавание кандидата, мотивация в security, разбор алерта, OSI/firewall, находка/фикс на лабе или CTF, актуальность знаний об угрозах, IR-процесс по шагам, объяснение риска нетехническому человеку, вопрос про действия вне зоны ответственности, вопросы к интервьюеру). Зарегистрирован в `interview_question_loader.ts` → `QUESTION_MAP['cybersecurity']`.
+
+**Арт — сверка имён файлов по всем профессиям:** пробежался по всем местам, где реально формируется путь к картинке (`WorldMapScreen`, `FinalCinematicScreen`/`HeroPhase`, `ChapterHub`, `InterviewerAvatar`, `world/art.ts`), и вывел полный список ожидаемых файлов на профессию: `world.jpg`, `journey.jpg`, `island_<professionId>.png`, `interview_man.png`, плюс 6 файлов глав (`island-resume.png`, `island-linkedin.png`, `island-applications.png`, `island-interview.png`, `island-offer-preparation.png`, `island-offer.png`) — итого 10.
+
+**Найдены пробелы:**
+- `cybersecurity` — папки `public/art/cybersecurity/` не существовало вообще (0 из 10 файлов). Экраны не падали (везде есть `onError`, картинка просто скрывается), но фон/острова/аватар интервьюера были пустыми.
+- `data_analyst` — не хватало `island_data_analyst.png` (финальная анимация/герой-карта) и `interview_man.png` (аватар интервьюера).
+- `software_engineer` — полный комплект, пробелов нет.
+
+**Исправлено:** сгенерированы недостающие заглушки (программно, градиент в акцентных цветах темы профессии + крупная подпись с названием и словом "placeholder", чтобы не спутать с финальным артом) — 10 файлов для `cybersecurity` (палитра из `world/theme.ts`: тёмно-синий/малиновый/циан) и 2 недостающих для `data_analyst` (тёмный бирюзово-фиолетовый фон + золотой акцент, в тон уже существующей палитре). Размеры файлов подобраны по образцу существующих (`island-*.png` — 400×560, `island_<id>.png` — 1319×975, `interview_man.png` — 1672×941, `world.jpg`/`journey.jpg` — 941×1672), так что при замене на финальный арт Serj просто подставляет файлы с теми же именами и размерами.
+
+**Файлы:** `src/professions/cybersecurity/interview/questions.ts` (переписан), `src/core/interview/interview_question_loader.ts`, `public/art/cybersecurity/*` (10 файлов, создана папка), `public/art/data_analyst/island_data_analyst.png`, `public/art/data_analyst/interview_man.png`, `PROJECT_STATUS.md`.
+
+**Проверено:** `npx tsc --noEmit` — 26 ошибок (было 27; убрана ошибка про несуществующий `interview_question`-тип; оставшиеся 26 — всё ещё только в `cybersecurity/skill_nodes_extended.ts`, не связаны с этой правкой). `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) Cybersecurity → пройти интервью-тренажёр → вопросы про security, а не про Software Engineer. (2) Cybersecurity → World/Journey/финальная анимация/аватар интервьюера — везде видны цветные заглушки с подписью вместо пустоты. (3) Data Analyst → финальная анимация и аватар интервьюера тоже показывают заглушку, а не пустое место. (4) Software Engineer — регрессия, всё как было.
