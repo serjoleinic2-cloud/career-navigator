@@ -13,9 +13,9 @@
 import { registerProfession, hasProfession } from './profession_registry';
 import type { ProfessionModule } from './profession_registry';
 import SoftwareEngineerModule from './software_engineer/module';
+import DataAnalystModule from './data_analyst/module';
 
 // ─── ADD NEW PROFESSIONS HERE ──────────────────────────────────
-// import DataAnalystModule from './data_analyst/module';
 // import CybersecurityModule from './cybersecurity/module';
 // import DigitalMarketingModule from './digital_marketing/module';
 // import CustomerSupportModule from './customer_support/module';
@@ -23,7 +23,7 @@ import SoftwareEngineerModule from './software_engineer/module';
 
 const PROFESSION_MODULES: ProfessionModule[] = [
   SoftwareEngineerModule,
-  // DataAnalystModule,
+  DataAnalystModule,
   // CybersecurityModule,
   // DigitalMarketingModule,
   // CustomerSupportModule,

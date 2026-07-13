@@ -27,7 +27,7 @@ export const APPLICATION_TASKS: Record<string, TaskContent[]> = {
       expectedOutcome: 'A tracking system that reveals patterns in your job search.',
     },
   ],
-  'portfolio-kaggle': [
+  'portfolio-submission': [
     {
       id: 'da-pk-polish-readme',
       title: 'Polish One Project README',
@@ -181,6 +181,84 @@ export const APPLICATION_TASKS: Record<string, TaskContent[]> = {
         'After the call, ask: "Would you be comfortable referring me if a role opens up?"'
       ],
       expectedOutcome: 'Warm connections that bypass the ATS and lead to interviews.',
+    },
+  ],
+  'cover-letter': [
+    {
+      id: 'da-cl-template',
+      title: 'Write a Reusable Cover Letter Template',
+      objective: 'Build a cover letter framework you can tailor quickly for each application.',
+      instructions: [
+        'Structure: hook (1-2 sentences), relevant experience (2-3 sentences), why this company (1-2 sentences), close.',
+        'Draft the hook around one concrete analytics result, not a generic opener.',
+        'Write the "why this company" section with a placeholder to customize per application.',
+        'Keep total length under 250 words.'
+      ],
+      completionCriteria: [
+        'Template drafted with all 4 sections.',
+        'Hook references a specific, quantified result.',
+        'Under 250 words.'
+      ],
+      estimatedMinutes: 35,
+      difficulty: 2,
+      tips: [
+        'Avoid restating the resume — the cover letter should add context, not repeat facts.',
+        'Mention a specific product, dataset, or business problem from the company to show research.',
+        'Skip the cover letter entirely for postings that do not request one, unless it adds real value.'
+      ],
+      expectedOutcome: 'A cover letter template that takes 5 minutes to tailor, not 30.',
+    },
+  ],
+  'follow-up-strategy': [
+    {
+      id: 'da-fu-cadence',
+      title: 'Build a Follow-Up Cadence',
+      objective: 'Create a consistent schedule for following up on applications without seeming pushy.',
+      instructions: [
+        'Define a cadence: follow up at day 7 if no response, then day 14.',
+        'Draft a short follow-up email template reaffirming interest and asking for status.',
+        'Set calendar reminders for each application submitted.',
+        'Stop following up after 2 attempts with no response.'
+      ],
+      completionCriteria: [
+        'Cadence defined (e.g. day 7 / day 14).',
+        'Follow-up email template drafted.',
+        'Reminder system in place (calendar or tracker).'
+      ],
+      estimatedMinutes: 20,
+      difficulty: 1,
+      tips: [
+        'Keep follow-ups short — 3-4 sentences, no guilt-tripping tone.',
+        'A follow-up is also a chance to add a new relevant detail (a project you just finished).',
+        'Silence after 2 follow-ups usually means move on — protect your time.'
+      ],
+      expectedOutcome: 'A repeatable follow-up habit that recovers stalled applications.',
+    },
+  ],
+  'application-volume': [
+    {
+      id: 'da-av-weekly-target',
+      title: 'Set a Sustainable Weekly Application Target',
+      objective: 'Balance quality and quantity so applications don\'t stall or burn you out.',
+      instructions: [
+        'Set a weekly target: e.g. 10 tailored applications, not 50 generic ones.',
+        'Split time: 70% on tailored applications, 30% on networking/referrals.',
+        'Track applications sent vs. responses in your tracker weekly.',
+        'Adjust the target after 2 weeks based on response rate.'
+      ],
+      completionCriteria: [
+        'Weekly target set and written down.',
+        'Time split defined between applying and networking.',
+        'First week tracked and reviewed.'
+      ],
+      estimatedMinutes: 15,
+      difficulty: 1,
+      tips: [
+        'Quality beats volume: 10 tailored applications usually outperform 50 generic ones.',
+        'A response rate under 5% after 20+ applications signals a resume or targeting problem — revisit those first.',
+        'Batch applying (2-hour blocks) is more sustainable than trickling one a day.'
+      ],
+      expectedOutcome: 'A steady, sustainable application pace instead of burnout or stalling.',
     },
   ],
 };

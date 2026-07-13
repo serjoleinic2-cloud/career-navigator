@@ -25,3 +25,4 @@ export {
 } from './profession_service';
 
 export { SoftwareEngineerModule } from './software_engineer/module';
+export { DataAnalystModule } from './data_analyst/module';

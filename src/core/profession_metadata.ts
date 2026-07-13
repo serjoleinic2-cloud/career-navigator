@@ -29,7 +29,7 @@ export function getProfessionCatalog(): ProfessionMeta[] {
       title: 'Data Analyst',
       description: 'Turn data into decisions and build a career in analytics.',
       icon: '📊',
-      enabled: false,
+      enabled: true,
       premium: false,
     },
     {

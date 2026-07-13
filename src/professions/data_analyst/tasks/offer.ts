@@ -27,7 +27,7 @@ export const OFFER_TASKS: Record<string, TaskContent[]> = {
       expectedOutcome: 'A certification roadmap that signals commitment to employers.',
     },
   ],
-  'salary-benchmark': [
+  'salary-research': [
     {
       id: 'da-sb-research-salaries',
       title: 'Research Salary Benchmarks',
@@ -233,6 +233,58 @@ export const OFFER_TASKS: Record<string, TaskContent[]> = {
         'Document everything. Create a team wiki page for your learnings.'
       ],
       expectedOutcome: 'A 30-60-90 day plan that builds credibility and accelerates your impact.',
+    },
+  ],
+  'offer-review': [
+    {
+      id: 'da-or-checklist',
+      title: 'Build an Offer Review Checklist',
+      objective: 'Read your offer letter line by line so nothing is missed or assumed.',
+      instructions: [
+        'List every component: base salary, bonus structure, equity/RSUs, benefits, PTO, start date, probation terms.',
+        'Flag anything vague or missing in writing (e.g. a verbal bonus promise not in the letter).',
+        'Check vesting schedule and cliff period if equity is offered.',
+        'Note the deadline to respond and whether it can be extended.'
+      ],
+      completionCriteria: [
+        'Every offer component listed and understood.',
+        'Vague or missing items flagged for clarification.',
+        'Response deadline confirmed.'
+      ],
+      estimatedMinutes: 30,
+      difficulty: 1,
+      tips: [
+        'Read offer letters like you would read a data schema — line by line, nothing assumed.',
+        'Verbal promises ("we usually give a raise after 6 months") are not enforceable — ask to get them in writing.',
+        'It is normal and expected to ask for 3-5 business days before responding.'
+      ],
+      expectedOutcome: 'A fully understood offer with no surprises after you sign.',
+    },
+  ],
+  'benefits-evaluation': [
+    {
+      id: 'da-be-total-comp',
+      title: 'Calculate True Total Compensation',
+      objective: 'Compare offers fairly by accounting for benefits beyond base salary.',
+      instructions: [
+        'List all benefits: health insurance (and premium cost to you), 401k match, PTO days, remote/hybrid flexibility, learning budget.',
+        'Assign a rough dollar value to each benefit where possible (e.g. 401k match = X% of salary).',
+        'Add base + bonus + equity value + benefits value for a true total comp number.',
+        'Compare against other offers or your current job using the same method.'
+      ],
+      completionCriteria: [
+        'All benefits listed with estimated dollar value where possible.',
+        'True total compensation calculated.',
+        'Comparison made against at least one other offer or baseline.'
+      ],
+      estimatedMinutes: 30,
+      difficulty: 2,
+      tips: [
+        'A lower base salary with strong 401k match and cheap health insurance can beat a higher base with poor benefits.',
+        'Unlimited PTO policies sometimes result in less time off taken — check company norms, not just the policy.',
+        'Remote flexibility has real financial value (commute cost, time) even if hard to quantify precisely.'
+      ],
+      expectedOutcome: 'A clear, apples-to-apples total compensation number for decision-making.',
     },
   ],
 };

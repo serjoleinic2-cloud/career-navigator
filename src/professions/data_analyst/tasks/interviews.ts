@@ -27,7 +27,7 @@ export const INTERVIEW_TASKS: Record<string, TaskContent[]> = {
       expectedOutcome: 'A polished pitch that opens every interview strong.',
     },
   ],
-  'sql-whiteboard': [
+  'sql-technical-prep': [
     {
       id: 'da-sw-whiteboard-practice',
       title: 'Whiteboard SQL Practice',
@@ -105,7 +105,7 @@ export const INTERVIEW_TASKS: Record<string, TaskContent[]> = {
       expectedOutcome: 'A complete A/B test design that impresses product analytics interviewers.',
     },
   ],
-  'case-study-framework': [
+  'case-study-prep': [
     {
       id: 'da-cs-practice-case',
       title: 'Practice a Business Case',
@@ -157,7 +157,7 @@ export const INTERVIEW_TASKS: Record<string, TaskContent[]> = {
       expectedOutcome: 'Pandas fluency that handles live coding challenges confidently.',
     },
   ],
-  'data-visualization-pitch': [
+  'data-visualization-prep': [
     {
       id: 'da-dv-chart-selection',
       title: 'Defend Your Chart Choices',
@@ -209,7 +209,7 @@ export const INTERVIEW_TASKS: Record<string, TaskContent[]> = {
       expectedOutcome: 'A calm, prepared on-site performance that spans 4-6 hours.',
     },
   ],
-  'take-home-presentation': [
+  'presentation-prep': [
     {
       id: 'da-thp-practice-deck',
       title: 'Practice Take-Home Presentation',
@@ -259,6 +259,84 @@ export const INTERVIEW_TASKS: Record<string, TaskContent[]> = {
         'Keep it short: 3-4 sentences max.'
       ],
       expectedOutcome: 'Follow-up emails that keep you top of mind during deliberation.',
+    },
+  ],
+  'behavioral-prep': [
+    {
+      id: 'da-bp-star-stories',
+      title: 'Build Your STAR Story Bank',
+      objective: 'Prepare 5-6 STAR stories covering common behavioral themes for data roles.',
+      instructions: [
+        'List themes: conflict with stakeholder, wrong analysis caught, tight deadline, ambiguous request, influencing without authority.',
+        'Write each story in STAR format: Situation, Task, Action, Result (with a number).',
+        'Keep each story to 60-90 seconds when spoken aloud.',
+        'Practice telling 2 stories out loud to a friend or on video.'
+      ],
+      completionCriteria: [
+        '5-6 stories drafted in STAR format.',
+        'Each story includes a quantified result.',
+        'At least 2 stories rehearsed out loud.'
+      ],
+      estimatedMinutes: 45,
+      difficulty: 2,
+      tips: [
+        'Reuse the same story for multiple questions by emphasizing different parts.',
+        'Avoid blaming others in "conflict" stories — focus on your resolution.',
+        'A story without a number ("improved reporting") is weaker than one with ("cut report time from 2 days to 2 hours").'
+      ],
+      expectedOutcome: 'A ready-to-use bank of stories for any behavioral question.',
+    },
+  ],
+  'interview-mindset': [
+    {
+      id: 'da-im-reframe-nerves',
+      title: 'Reframe Interview Anxiety',
+      objective: 'Build a pre-interview routine that turns nervous energy into focus.',
+      instructions: [
+        'Write down your top 3 interview fears.',
+        'For each, write the realistic worst case and how you would recover from it.',
+        'Create a 10-minute pre-interview routine: review notes, breathing, posture check.',
+        'Reframe the interview as a mutual evaluation, not a one-sided test.'
+      ],
+      completionCriteria: [
+        'Top 3 fears identified with a recovery plan for each.',
+        'Pre-interview routine written down.',
+        'Routine tested before a mock interview.'
+      ],
+      estimatedMinutes: 25,
+      difficulty: 1,
+      tips: [
+        'Interviewers expect some nerves — perfection is not the bar, competence is.',
+        'A short walk or stretch before an interview lowers physical tension.',
+        'You are also assessing whether this team and role fit you.'
+      ],
+      expectedOutcome: 'A calmer, more focused mindset walking into interviews.',
+    },
+  ],
+  'phone-screen': [
+    {
+      id: 'da-ps-recruiter-prep',
+      title: 'Prepare for the Recruiter Screen',
+      objective: 'Prepare tight, confident answers for the first-round recruiter call.',
+      instructions: [
+        'Write a 60-second "tell me about yourself" tailored to data analyst roles.',
+        'Prepare your salary range and notice period answers in advance.',
+        'List 3 questions to ask the recruiter about the role and process.',
+        'Do a mock call with a friend focused only on pacing and clarity.'
+      ],
+      completionCriteria: [
+        '60-second intro written and rehearsed.',
+        'Salary range and notice period answers ready.',
+        '3 questions for the recruiter prepared.'
+      ],
+      estimatedMinutes: 30,
+      difficulty: 1,
+      tips: [
+        'Recruiter screens filter for basics — clarity matters more than depth here.',
+        'Never give a single salary number; always give a range.',
+        'Take notes during the call — you will need them for later rounds.'
+      ],
+      expectedOutcome: 'A smooth, confident recruiter call that advances you to technical rounds.',
     },
   ],
 };

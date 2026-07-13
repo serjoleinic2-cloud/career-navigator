@@ -2981,3 +2981,39 @@ Serj спросил: если добавить новую профессию к�
 
 **Проверено:** `npx tsc --noEmit` — только предсуществующая ошибка `notification_service.ts:190` (не связана). `npx vite build` — чисто.
 **Не проверено вживую на телефоне.** Проверить: (1) Journey → острова по-прежнему отображаются для software_engineer (регрессия). (2) Onboarding → экран выбора профессии выглядит так же (Software Engineer доступен, остальные — coming soon). (3) Playbook → все текущие разделы/записи видны как раньше.
+
+---
+
+### 2026-07-13 — Claude (доработка модуля Data Analyst после Kimi)
+
+Serj сообщил, что Kimi уже создал контент для профессии Data Analyst. Аудит показал: контент (главы, узлы навыков, часть заданий) был проделан в большом объёме, но профессия не могла заработать — не хватало регистрационных файлов, и часть заданий была тихо потеряна из-за рассинхронизации ключей.
+
+**Чего не хватало полностью (создано):**
+- `src/professions/data_analyst/module.ts` — без него профессия вообще не регистрируется.
+- `src/professions/data_analyst/world/theme.ts` — своя цветовая палитра (бирюзовый/золотой/фиолетовый, отличная от software_engineer).
+- `src/professions/data_analyst/world/art.ts` — регистрация фона (путь `/art/data_analyst/journey.jpg`, файла пока нет — до его добавления показывается градиент темы, это штатное поведение).
+- `src/professions/data_analyst/world/layout.ts` — позиции островов на карте.
+- `src/professions/data_analyst/tasks/index.ts` — для консистентности с software_engineer.
+- `src/professions/data_analyst/interview/questions.ts` — вопросы для интервью-тренажёра (раньше падал бы на software_engineer-вопросы по фолбэку).
+
+**Баг (тихая потеря заданий) — исправлено:**
+Узлы навыков ссылались на задания как `OFFER_TASKS['salary-research'] || []` — если ключ не находился, тихо подставлялся пустой массив (без ошибки, без предупреждения). Из-за рассинхронизации имён между `skill_nodes.ts` (ids узлов) и `tasks/*.ts` (ключи заданий) **9 узлов из 41 остались бы без единого задания**:
+- `interviews.ts`: `sql-whiteboard`→`sql-technical-prep`, `case-study-framework`→`case-study-prep`, `data-visualization-pitch`→`data-visualization-prep`, `take-home-presentation`→`presentation-prep` (переименованы по совпадению содержания); дописаны с нуля отсутствовавшие `behavioral-prep`, `interview-mindset`, `phone-screen`.
+- `applications.ts`: `portfolio-kaggle`→`portfolio-submission` (переименован); дописаны с нуля `cover-letter`, `follow-up-strategy`, `application-volume`.
+- `offer.ts`: `salary-benchmark`→`salary-research` (переименован); дописаны с нуля `offer-review`, `benefits-evaluation`.
+- Осиротевший неиспользуемый контент оставлен как есть, но не подключён ни к одному узлу: `statistics-fundamentals`, `ab-testing-design`, `python-pandas-prep` (interviews.ts), `sql-test-prep`, `take-home-strategy` (applications.ts), `certification-prep`, `toolkit-setup` (offer.ts) — хорошего качества контент, но не привязан к текущим 41 узлам навыков; можно использовать позже для доп. заданий.
+- `chapters.ts` и `skill_nodes.ts` от Kimi — проверены полностью, все 41 nodeId из глав присутствуют в графе навыков, расхождений нет.
+
+**Регистрация профессии:**
+- `profession_auto_loader.ts` — раскомментирован импорт и добавлен `DataAnalystModule` в `PROFESSION_MODULES`.
+- `profession_metadata.ts` — `data_analyst.enabled` переключён на `true`.
+- `src/professions/index.ts` — добавлен экспорт `DataAnalystModule`.
+
+**Не сделано, требует решения Serj:**
+- **Playbook** — для data_analyst нет ни одной записи (`professionId: 'data_analyst'`). Экран Playbook будет пустым для этой профессии (не покажет чужой контент — так и задумано после прошлого рефакторинга — но и своего пока нет).
+- **Арт** — папка `Доп материалы/` в корне репо содержит `world.jpg/png`, `journey.jpg/png`, но это **изображения software_engineer** (на картинке прямо написано "SOFTWARE ENGINEER"), ошибочно положенные в корень с русским названием папки. Для data_analyst реального арта (фон, острова) пока нет — интерфейс будет использовать цветовой градиент темы вместо картинки, это не крашится, но выглядит проще, чем у software_engineer.
+
+**Файлы:** `src/professions/data_analyst/module.ts`, `world/theme.ts`, `world/art.ts`, `world/layout.ts`, `tasks/index.ts`, `interview/questions.ts` (созданы); `tasks/interviews.ts`, `tasks/applications.ts`, `tasks/offer.ts` (переименованы+дополнены ключи); `src/professions/profession_auto_loader.ts`, `src/core/profession_metadata.ts`, `src/professions/index.ts`, `src/core/interview/interview_question_loader.ts` (регистрация); `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — чисто (0 ошибок). `npx vite build` — чисто. Скриптом сверены все 41 nodeId графа навыков data_analyst против ключей заданий — расхождений не осталось.
+**Не проверено вживую на телефоне.** Проверить: Onboarding → Data Analyst теперь активен и выбираем. Journey для Data Analyst → все 6 глав, все узлы имеют задания (особенно ранее сломанные: Offer Preparation → Salary Research/Offer Review, Offer → Benefits Evaluation, Interviews → Behavioral/Mindset/Phone Screen, Applications → Cover Letter/Follow-Up/Volume).
