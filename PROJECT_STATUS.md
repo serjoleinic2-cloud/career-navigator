@@ -3071,3 +3071,18 @@ Serj сообщил: кнопка Test (Settings) переносит на Offer,
 
 **Проверено:** `npx tsc --noEmit` — 0 ошибок. `npx vite build` — чисто.
 **Не проверено вживую на телефоне.** Проверить: (1) Settings → Test → Offer → пройти последнее задание (регрессия, должно работать как раньше). (2) Settings → Test → World → любой остров → Next...Next до Offer → последнее задание по-прежнему доступно (это и был баг). (3) Обычное линейное прохождение свежей главы с нуля по-прежнему открывает первый узел как раньше (регрессия).
+
+### 2026-07-13 — Claude (баг: финальная анимация писала "Software Engineer" для любой профессии)
+
+Serj сообщил: после финальной анимации (по завершении всех глав) пишет "Software Engineer" вне зависимости от выбранной профессии.
+
+**Найдено 2 места с хардкодом:**
+1. `FinalCinematicScreen/phases/HeroPhase.tsx` — заголовок `<h1>Software Engineer</h1>` был буквальной строкой, хотя компонент уже получает `professionId` пропом (использовался только для пути к арту).
+2. `JourneyScreen/components/JourneyCompleteScreen.tsx` (следующий экран после cinematic, с итоговой статистикой) — подзаголовок `"Software Engineer Journey Complete"` был жёстко зашит, а сам компонент вообще не принимал `professionId` пропом.
+
+**Исправлено:** оба места теперь берут `getProfession(professionId)?.title` из `profession_registry.ts` (тот же паттерн, что уже использован в IntroJourneyScreen). Для `JourneyCompleteScreen` добавлен `professionId` в props и проброшен из `JourneyHUD.tsx` (`runtime?.professionId`), где он уже был под рукой для соседнего `FinalCinematicScreen`.
+
+**Файлы:** `src/screens/JourneyScreen/components/FinalCinematicScreen/phases/HeroPhase.tsx`, `src/screens/JourneyScreen/components/JourneyCompleteScreen.tsx`, `src/screens/JourneyScreen/JourneyHUD.tsx`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — 0 ошибок. `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: пройти Data Analyst целиком (или через Test-кнопку) до финальной анимации → и hero-экран, и следующий "Journey Complete" экран должны показывать "Data Analyst", не "Software Engineer". Software Engineer — регрессия, должен по-прежнему показывать своё имя.

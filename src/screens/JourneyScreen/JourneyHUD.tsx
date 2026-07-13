@@ -399,6 +399,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
         {phase === 'complete' && (
           <div className="journey-screen journey-hud">
             <JourneyCompleteScreen
+              professionId={runtime?.professionId ?? 'default'}
               totalSkills={professionNodes.length}
               tasksCompleted={chapters.reduce((sum, c) => sum + c.completedCount, 0)}
               hoursInvested={Math.round((runtime?.totalMinutesInvested ?? 0) / 60)}

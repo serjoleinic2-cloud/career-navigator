@@ -1,6 +1,7 @@
 import { Icon } from '@/components/Icon/Icon';
 import { emit } from '@/core/events/system_event_bus';
 import { FinalParticles } from '../components/Particles';
+import { getProfession } from '@/professions/profession_registry';
 
 interface HeroPhaseProps {
   professionId: string;
@@ -13,6 +14,11 @@ interface HeroPhaseProps {
 
 export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onHeroLoad, onHeroError }: HeroPhaseProps) {
   const heroSrc = `/art/${professionId}/island_${professionId}.png`;
+  // BUGFIX (2026-07-13): title was hardcoded as "Software Engineer" here,
+  // so the final "Journey Complete" screen showed the wrong profession name
+  // for every other profession (e.g. Data Analyst). Read the real title
+  // from the registered profession module instead.
+  const professionTitle = getProfession(professionId)?.title || professionId;
 
   return (
     <div className="fc-hero">
@@ -42,7 +48,7 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onH
         }}
       >
         <p className="fc-hero-sub">Journey Complete</p>
-        <h1 className="fc-hero-title">Software Engineer</h1>
+        <h1 className="fc-hero-title">{professionTitle}</h1>
 
         <div className="fc-hero-actions">
           <button

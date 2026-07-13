@@ -1,8 +1,10 @@
 import { emit } from '@/core/events/system_event_bus';
 import { Icon } from '../../../components/Icon/Icon';
+import { getProfession } from '@/professions/profession_registry';
 import './JourneyCompleteScreen.css';
 
 interface JourneyCompleteScreenProps {
+  professionId: string;
   totalSkills: number;
   tasksCompleted: number;
   hoursInvested: number;
@@ -14,6 +16,7 @@ interface JourneyCompleteScreenProps {
 }
 
 export function JourneyCompleteScreen({
+  professionId,
   totalSkills,
   tasksCompleted,
   hoursInvested,
@@ -23,6 +26,10 @@ export function JourneyCompleteScreen({
   onStartInterview,
   onNewJourney,
 }: JourneyCompleteScreenProps) {
+  // BUGFIX (2026-07-13): "Software Engineer Journey Complete" was hardcoded
+  // here, so every other profession's final screen showed the wrong name.
+  const professionTitle = getProfession(professionId)?.title || professionId;
+
   return (
     <div className="journey-complete-screen-root">
       <div className="journey-complete-light" />
@@ -36,7 +43,7 @@ export function JourneyCompleteScreen({
           </div>
 
           <h1 className="journey-complete-title">You Did It!</h1>
-          <p className="journey-complete-subtitle">Software Engineer Journey Complete</p>
+          <p className="journey-complete-subtitle">{professionTitle} Journey Complete</p>
 
           <div className="journey-complete-stats-grid">
             <div className="jc-stat">
