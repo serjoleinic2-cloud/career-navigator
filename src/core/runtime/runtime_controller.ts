@@ -5,6 +5,8 @@ import type { UserAction } from '../skill_engine';
 import type { SkillNode } from '../skill_state';
 import { STATE_FLOW } from '../skill_state';
 import { getActiveChapters, getActiveProfession, setActiveProfession } from '../profession_loader';
+import { isProfessionOwned } from '../premium/entitlements';
+import { getDefaultProfession } from '../../professions/profession_registry';
 import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
@@ -767,10 +769,27 @@ export function initializeRuntime(saved: JourneyRuntimeState): void {
   // (e.g. handleMissionComplete, advanceChapter, buildFallbackTaskDefinition)
   // would throw 'No active profession set' the moment the user tapped a
   // mission node — making the Journey tab non-interactive on reload.
+  //
+  // HARDENING (2026-07-13): a loaded runtime file (imported save / restored
+  // backup) is untrusted input about *progress*, but must not be trusted
+  // for *entitlement* — professionId in the file is only honoured if this
+  // device actually owns that profession. Otherwise a save exported by one
+  // user (who owns profession X) could let another user who never bought X
+  // jump straight into it just by loading the file. See
+  // core/premium/entitlements.ts for why this check is currently a no-op
+  // (monetization not implemented yet) and how it plugs in later.
+  let professionIdToActivate = saved.professionId;
+  if (!isProfessionOwned(saved.professionId)) {
+    console.warn(
+      `[initializeRuntime] Loaded save references profession "${saved.professionId}", ` +
+      'which this device does not own. Falling back to default profession.'
+    );
+    professionIdToActivate = getDefaultProfession()?.id ?? saved.professionId;
+  }
   try {
-    setActiveProfession(saved.professionId);
+    setActiveProfession(professionIdToActivate);
   } catch (err) {
     console.error('[initializeRuntime] setActiveProfession failed:', err);
   }
-  runtimeState = saved;
+  runtimeState = { ...saved, professionId: professionIdToActivate };
 }
