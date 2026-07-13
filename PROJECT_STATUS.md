@@ -3039,3 +3039,22 @@ Data_analyst тема проверена — там ключи уже совпа
 
 **Проверено:** `npx tsc --noEmit` — 0 ошибок. `npx vite build` — чисто.
 **Не проверено вживую на телефоне.** Проверить: (1) software_engineer → Interviews и Offer Preparation острова/фон теперь показывают свой акцент, а не цвет Resume. (2) Data Analyst → Playbook больше не пустой, есть записи по всем разделам. (3) Data Analyst → на островах/фоне видны цветные заглушки с подписью вместо старого градиента/чужих картинок.
+
+### 2026-07-13 — Claude (баг: анимация первого запуска игнорировала выбранную профессию)
+
+Serj сообщил: при первом запуске анимации после выбора профессии показывались название и цифры не из выбранной профессии.
+
+**Баг подтверждён:** `src/screens/IntroJourneyScreen/IntroJourneyScreen.tsx` полностью хардкодил контент под software_engineer — название профессии ("Software Engineer"), статистику ("41 Skills, 98 Missions, 1 Career") и список из 5 островов (Resume/LinkedIn/Applications/Interview/Offer, без Offer Preparation). Экран показывается один раз сразу после онбординга (`App.tsx`, `showIntro`) независимо от того, какая профессия была выбрана — поэтому Data Analyst (и любая будущая профессия) видела чужие данные.
+
+**Исправлено:** экран теперь читает активную профессию через `getRuntimeState().professionId` → `getProfession(id)` (`profession_registry.ts`) и берёт:
+- `professionTitle` — из `module.title`;
+- `skillCount` — из `module.skillGraph.length`;
+- `missionCount` — суммой `tasks.length` по всем узлам `skillGraph` (было захардкожено `98`, теперь считается динамически, так что число всегда актуально при добавлении/удалении заданий);
+- список островов — рендерится из `module.chapters` (все 6 глав, включая ранее отсутствовавшую Offer Preparation), с иконкой по `chapter.id` через локальную `CHAPTER_ICON` мапу и названием из `chapter.title`.
+
+Первый остров в списке (обычно Resume) получает эффект свечения/зума, как и раньше — по индексу, а не по хардкоду.
+
+**Файлы:** `src/screens/IntroJourneyScreen/IntroJourneyScreen.tsx`, `PROJECT_STATUS.md`
+
+**Проверено:** `npx tsc --noEmit` — 0 ошибок. `npx vite build` — чисто.
+**Не проверено вживую на телефоне.** Проверить: (1) Выбрать Data Analyst при онбординге → анимация показывает "Data Analyst" и его реальные цифры/острова (все 6, включая Offer Preparation). (2) Software Engineer по-прежнему показывает свои верные данные (регрессия). (3) Первый остров по-прежнему светится и получает zoom-эффект при нажатии "Begin your journey".

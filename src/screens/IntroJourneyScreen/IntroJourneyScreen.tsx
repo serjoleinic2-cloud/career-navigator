@@ -1,26 +1,61 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useWorldCssStyle } from '@/core/world/useWorldCssStyle';
 import { Icon } from '@/components/Icon/Icon';
+import type { IconName } from '@/components/Icon/Icon';
+import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { getProfession } from '@/professions/profession_registry';
 import './IntroJourneyScreen.css';
 
 interface IntroJourneyScreenProps {
   onComplete: () => void;
 }
 
+// Fallback icon per chapter id when a chapter's own icon isn't known.
+// Kept intentionally small/generic — this is just for the intro animation,
+// not the source of truth for chapter art (see Chapter.artFilename for that).
+const CHAPTER_ICON: Record<string, IconName> = {
+  resume: 'resume',
+  linkedin: 'linkedin',
+  applications: 'applications',
+  interviews: 'interviews',
+  interview_prep: 'interviews',
+  interview_practice: 'interviews',
+  offer_preparation: 'target',
+  offer_prep: 'target',
+  offer: 'trophy',
+};
+
 export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComplete }) => {
   const [phase, setPhase] = useState(0);
   const [canSkip, setCanSkip] = useState(false);
   const worldStyle = useWorldCssStyle();
 
+  // BUGFIX (2026-07-13): this screen used to hardcode "Software Engineer",
+  // the skill/mission counts, and a fixed 5-island list — so every profession's
+  // very first animation showed Software Engineer's name and numbers
+  // regardless of what was actually selected during onboarding. Now it reads
+  // the active profession from runtime and its registered module.
+  const professionId = getRuntimeState()?.professionId || 'software_engineer';
+  const profession = getProfession(professionId);
+
+  const professionTitle = profession?.title || 'Career Navigator';
+  const skillCount = profession?.skillGraph.length ?? 0;
+  const missionCount = useMemo(
+    () => profession?.skillGraph.reduce((sum, node) => sum + (node.tasks?.length || 0), 0) ?? 0,
+    [profession]
+  );
+  const chapters = profession?.chapters || [];
+  const firstChapter = chapters[0];
+
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
 
     timers.push(setTimeout(() => setPhase(1), 1500));   // "Your journey begins"
-    timers.push(setTimeout(() => setPhase(2), 3000));   // "Software Engineer"
-    timers.push(setTimeout(() => setPhase(3), 4500));   // "38 Skills, 142 Missions, 1 Career"
+    timers.push(setTimeout(() => setPhase(2), 3000));   // Profession name
+    timers.push(setTimeout(() => setPhase(3), 4500));   // Stats
     timers.push(setTimeout(() => setPhase(4), 6000));   // Map appears
     timers.push(setTimeout(() => setPhase(5), 8000));   // Islands visible
-    timers.push(setTimeout(() => setPhase(6), 10000));  // Resume glows
+    timers.push(setTimeout(() => setPhase(6), 10000));  // First island glows
     timers.push(setTimeout(() => setPhase(7), 12000));  // "Your first destination"
     timers.push(setTimeout(() => setCanSkip(true), 3000)); // Can skip after 3s
 
@@ -28,7 +63,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
   }, []);
 
   const handleBegin = useCallback(() => {
-    setPhase(8); // Camera zoom to Resume, overlay fades out (WorldRenderer stays mounted beneath)
+    setPhase(8); // Camera zoom to first island, overlay fades out (WorldRenderer stays mounted beneath)
     setTimeout(onComplete, 1500);
   }, [onComplete]);
 
@@ -71,18 +106,18 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
 
       {/* Phase 2: Profession */}
       <div className={`intro-text intro-profession ${phase >= 2 && phase < 4 ? 'visible' : ''}`}>
-        Software Engineer
+        {professionTitle}
       </div>
 
       {/* Phase 3: Stats — fade out as soon as the map starts appearing so the
           numbers never sit on top of the islands (was: stayed forever). */}
       <div className={`intro-stats ${phase >= 3 && phase < 4 ? 'visible' : ''}`}>
         <div className="stat-item">
-          <span className="stat-number">41</span>
+          <span className="stat-number">{skillCount}</span>
           <span className="stat-label">Skills</span>
         </div>
         <div className="stat-item">
-          <span className="stat-number">98</span>
+          <span className="stat-number">{missionCount}</span>
           <span className="stat-label">Missions</span>
         </div>
         <div className="stat-item">
@@ -94,61 +129,35 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
       {/* Phase 4-7: Map with islands — camera "rises" into view */}
       <div className={`intro-map ${phase >= 4 ? 'visible' : ''} ${phase >= 5 ? 'camera-risen' : ''}`}>
         <div className="map-container">
-          {/* Resume Island */}
-          <div className={`island resume-island ${phase >= 5 ? 'revealed' : ''} ${phase >= 6 ? 'glowing' : ''} ${phase >= 8 ? 'zoomed' : ''}`}>
-            <div className="island-body">
-              <span className="island-icon"><Icon name="resume" /></span>
-              <span className="island-name">Resume</span>
-            </div>
-          </div>
-
-          {/* Path line — lights up as the bridge "grows" */}
-          <div className={`path-line ${phase >= 6 ? 'lit' : ''}`} />
-
-          {/* LinkedIn Island */}
-          <div className="island linkedin-island">
-            <div className="island-body">
-              <span className="island-icon"><Icon name="briefcase" /></span>
-              <span className="island-name">LinkedIn</span>
-            </div>
-          </div>
-
-          <div className="path-line" />
-
-          {/* Applications Island */}
-          <div className="island applications-island">
-            <div className="island-body">
-              <span className="island-icon"><Icon name="mail" /></span>
-              <span className="island-name">Applications</span>
-            </div>
-          </div>
-
-          <div className="path-line" />
-
-          {/* Interview Island */}
-          <div className="island interview-island">
-            <div className="island-body">
-              <span className="island-icon"><Icon name="microphone" /></span>
-              <span className="island-name">Interview</span>
-            </div>
-          </div>
-
-          <div className="path-line" />
-
-          {/* Offer Island */}
-          <div className="island offer-island">
-            <div className="island-body">
-              <span className="island-icon"><Icon name="trophy" /></span>
-              <span className="island-name">Offer</span>
-            </div>
-          </div>
+          {chapters.map((chapter, index) => (
+            <React.Fragment key={chapter.id}>
+              {index === 0 ? (
+                <div className={`island resume-island ${phase >= 5 ? 'revealed' : ''} ${phase >= 6 ? 'glowing' : ''} ${phase >= 8 ? 'zoomed' : ''}`}>
+                  <div className="island-body">
+                    <span className="island-icon"><Icon name={CHAPTER_ICON[chapter.id] || 'island'} /></span>
+                    <span className="island-name">{chapter.title}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="island">
+                  <div className="island-body">
+                    <span className="island-icon"><Icon name={CHAPTER_ICON[chapter.id] || 'island'} /></span>
+                    <span className="island-name">{chapter.title}</span>
+                  </div>
+                </div>
+              )}
+              {index < chapters.length - 1 && (
+                <div className={`path-line ${index === 0 && phase >= 6 ? 'lit' : ''}`} />
+              )}
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
       {/* Phase 7: Destination label + Begin button */}
       <div className={`intro-destination ${phase >= 7 ? 'visible' : ''}`}>
         <div className="destination-label">Your first destination</div>
-        <div className="destination-name">Resume</div>
+        <div className="destination-name">{firstChapter?.title || 'Resume'}</div>
         <button className="intro-begin-btn" onClick={(e) => { e.stopPropagation(); handleBegin(); }}>
           Begin your journey
         </button>
