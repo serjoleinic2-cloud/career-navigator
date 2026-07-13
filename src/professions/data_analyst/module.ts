@@ -8,9 +8,9 @@ import {
   OFFER_SKILL_NODES,
 } from './skill_nodes';
 import { DATA_ANALYST_CHAPTERS } from './chapters';
-import './world/theme'; // side effect: registers this profession's WorldTheme
-import './world/art'; // side effect: registers this profession's WorldArtConfig
-import './world/layout'; // side effect: registers this profession's WorldLayout
+import './world/theme';
+import './world/art';
+import './world/layout';
 
 export const DataAnalystModule: ProfessionModule = {
   id: 'data_analyst',
