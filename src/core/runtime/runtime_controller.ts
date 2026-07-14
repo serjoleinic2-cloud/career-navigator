@@ -47,8 +47,6 @@ export function startJourney(onboardingState: OnboardingState): JourneyRuntimeSt
   }
 
   runtimeState = initializeJourneyRuntime(onboardingState);
-  console.log('runtimeState keys:', Object.keys(runtimeState));
-  console.log('can stringify:', JSON.stringify(runtimeState) !== undefined);
   saveRuntime(runtimeState);
   emit('SYSTEM_BOOTED', { professionId: runtimeState.professionId });
   emit('UI_REFRESH', {});
@@ -753,12 +751,20 @@ export function devCompleteAllExceptLastTask(): void {
     ...runtimeState,
     nodeStates: updatedNodeStates,
     chapterProgress: updatedChapterProgress,
-    activeChapterId: lastChapter.id,
-    activeNodeId: lastNodeId ?? runtimeState.activeNodeId,
   };
 
-  saveRuntime(runtimeState);
-  emit('UI_REFRESH', {});
+  // HARDENING (2026-07-13): landing on `lastNodeId` used to be computed
+  // here a SECOND time, independently of setActiveChapter()'s own "first
+  // not-yet-completed node in this chapter" logic (see the BUGFIX comment
+  // on setActiveChapter below — that was the exact bug Serj reported:
+  // World -> island -> Next...Next back to Offer re-locking this same
+  // last task). Two independent implementations of "which node should be
+  // active" is exactly the kind of duplication that let them drift apart
+  // once before. Delegating to setActiveChapter() here means there is now
+  // only ONE place that ever decides this, so the very first render right
+  // after pressing Test and every later re-entry into this chapter are
+  // guaranteed to agree.
+  setActiveChapter(lastChapter.id);
 }
 
 export function initializeRuntime(saved: JourneyRuntimeState): void {

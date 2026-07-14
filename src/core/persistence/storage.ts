@@ -41,10 +41,19 @@ export function save<T>({ key, version }: StorageOptions, data: T): void {
 }
 
 export function remove(key: string): void {
-  localStorage.removeItem(key);
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.warn('[storage] localStorage removeItem failed:', e);
+  }
   delete memoryStore[key];
 }
 
 export function exists(key: string): boolean {
-  return localStorage.getItem(key) !== null || key in memoryStore;
+  try {
+    if (localStorage.getItem(key) !== null) return true;
+  } catch (e) {
+    console.warn('[storage] localStorage getItem failed:', e);
+  }
+  return key in memoryStore;
 }
