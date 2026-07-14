@@ -120,20 +120,14 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             Your gamified path to the job you deserve.
           </p>
 
-          <div className="welcome-stats-row">
-            <div className="welcome-stat">
-              <span className="welcome-stat-num">6</span>
-              <span className="welcome-stat-label">Chapters</span>
-            </div>
-            <div className="welcome-stat-divider" />
-            <div className="welcome-stat">
-              <span className="welcome-stat-num">41</span>
-              <span className="welcome-stat-label">Missions</span>
-            </div>
-            <div className="welcome-stat-divider" />
-            <div className="welcome-stat">
-              <span className="welcome-stat-num">1</span>
-              <span className="welcome-stat-label">Offer</span>
+          <div className="welcome-premium-teaser">
+            <p className="welcome-premium-text">
+              Unlock all professions, advanced interview simulations, and detailed analytics.
+            </p>
+            <div className="welcome-premium-features">
+              <span className="welcome-premium-feature">✓ All Professions</span>
+              <span className="welcome-premium-feature">✓ Interview Trainer</span>
+              <span className="welcome-premium-feature">✓ Progress Analytics</span>
             </div>
           </div>
 
