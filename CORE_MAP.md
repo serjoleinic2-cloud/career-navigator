@@ -62,7 +62,7 @@
 
 | Файл | Назначение |
 |---|---|
-| `export_service.ts` | exports function `exportJSON` |
+| `export_service.ts` | exports `createBackup`, `exportJSON`, `saveBackupToStorage`, `loadBackupFromStorage` |
 
 ## `src/core/interaction/`
 
