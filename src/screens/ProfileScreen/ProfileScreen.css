@@ -431,3 +431,90 @@
   min-height: 44px;
   margin-top: 24px;
 }
+
+/* === MY PROFESSIONS (profession switcher) === */
+.profile-professions {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(240, 240, 245, 0.04);
+  border: 1px solid rgba(240, 240, 245, 0.08);
+}
+
+.profile-professions-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(240, 240, 245, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.profile-profession-row {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(240, 240, 245, 0.03);
+  color: #f0f0f5;
+  cursor: pointer;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.profile-profession-row:last-child { margin-bottom: 0; }
+
+.profile-profession-row:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.profile-profession-row.active {
+  background: rgba(0, 229, 224, 0.08);
+  border: 1px solid rgba(0, 229, 224, 0.25);
+}
+
+.profile-profession-row-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-profession-row-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-profession-row-status {
+  font-size: 12px;
+  color: rgba(240, 240, 245, 0.5);
+}
+
+.profile-profession-row-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(240, 240, 245, 0.08);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+.profile-profession-row-fill {
+  height: 100%;
+  background: rgba(0, 229, 224, 0.6);
+}
+
+.profile-profession-row-arrow {
+  flex-shrink: 0;
+  color: rgba(240, 240, 245, 0.35);
+  font-size: 16px;
+}

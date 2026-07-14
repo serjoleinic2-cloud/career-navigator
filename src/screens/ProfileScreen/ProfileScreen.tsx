@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'react';
-import { getRuntimeState } from '@/core/runtime/runtime_controller';
+import { getRuntimeState, switchProfession } from '@/core/runtime/runtime_controller';
 import { getActiveChapters, getActiveProfession } from '@/core/profession_loader';
 import { calculateCareerScore } from '@/core/scoring/career_score';
+import { getOwnedProfessionsSummary } from '@/core/premium/profession_progress_summary';
 import { Icon } from '@/components/Icon/Icon';
 import './ProfileScreen.css';
 
@@ -64,6 +65,17 @@ export function ProfileScreen({ style, onClose, onOpenSettings }: ProfileScreenP
     { icon: 'trophy', label: 'Offer Secured', earned: (runtime.chapterProgress['offer'] ?? 0) >= 100 },
   ];
 
+  // Only worth showing as a switcher once the user actually owns more
+  // than one profession — with a single owned profession this would just
+  // be a redundant card repeating what the passport above already shows.
+  const ownedProfessions = getOwnedProfessionsSummary(runtime.professionId);
+  const showProfessionSwitcher = ownedProfessions.length > 1;
+
+  const handleSwitchProfession = (professionId: string) => {
+    if (professionId === runtime.professionId) return;
+    switchProfession(professionId);
+  };
+
   return (
     <div className="profile-screen" style={style}>
       {onClose && <button className="profile-close-btn" onClick={onClose}><Icon name="close" size={16} /></button>}
@@ -117,6 +129,31 @@ export function ProfileScreen({ style, onClose, onOpenSettings }: ProfileScreenP
             ))}
           </div>
         </div>
+
+        {showProfessionSwitcher && (
+          <div className="profile-professions">
+            <div className="profile-professions-title">My Professions</div>
+            {ownedProfessions.map(p => (
+              <button
+                key={p.professionId}
+                className={`profile-profession-row ${p.isActive ? 'active' : ''}`}
+                onClick={() => handleSwitchProfession(p.professionId)}
+                disabled={p.isActive}
+              >
+                <div className="profile-profession-row-info">
+                  <span className="profile-profession-row-title">{p.title}</span>
+                  <span className="profile-profession-row-status">
+                    {p.isActive ? 'Currently active' : p.started ? `${p.percent}% complete` : 'Not started'}
+                  </span>
+                </div>
+                <div className="profile-profession-row-track">
+                  <div className="profile-profession-row-fill" style={{ width: `${p.percent}%` }} />
+                </div>
+                {!p.isActive && <span className="profile-profession-row-arrow">→</span>}
+              </button>
+            ))}
+          </div>
+        )}
 
         {onClose && (
           <button className="profile-back-btn" onClick={onClose}>

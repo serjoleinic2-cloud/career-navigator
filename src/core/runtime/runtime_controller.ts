@@ -6,14 +6,14 @@ import type { SkillNode } from '../skill_state';
 import { STATE_FLOW } from '../skill_state';
 import { getActiveChapters, getActiveProfession, setActiveProfession } from '../profession_loader';
 import { isProfessionOwned } from '../premium/entitlements';
-import { getDefaultProfession } from '../../professions/profession_registry';
+import { getAllProfessions, getDefaultProfession } from '../../professions/profession_registry';
 import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
 import { emit } from '../events/system_event_bus';
 import { markMissionCompletedToday, markChapterCompleted } from '../notifications/notification_service';
-import { saveRuntime as persistRuntime, clearRuntime } from '../persistence/runtime_persistence';
+import { saveRuntime as persistRuntime, clearRuntime, loadRuntimeForProfession } from '../persistence/runtime_persistence';
 import { clearNotes } from '../user_data/notes/notes_persistence';
 import {
   beginTask,
@@ -591,14 +591,52 @@ export function resetJourney(): void {
   emit('UI_REFRESH', {});
 }
 
+// HARDENING (2026-07-13): this used to unconditionally wipe the runtime
+// (`createEmptyRuntime()`) whenever switching profession, discarding
+// whatever progress existed — fine for a single-profession app, but wrong
+// the moment a user can own 2+ professions and expects to make progress in
+// each independently. `saveRuntime`/`loadRuntime` (runtime_persistence.ts)
+// are now keyed per profession, so switching no longer has to destroy
+// anything: the CURRENT profession's progress is already safely under its
+// own key (every mutator in this file calls saveRuntime() already), and
+// this function just needs to load the TARGET profession's own saved
+// progress if it has any, or start it fresh (same shape a first-time
+// onboarding produces) if this is the first time the user is opening it.
 export function switchProfession(professionId: string): void {
-  runtimeState = createEmptyRuntime();
-  runtimeState.professionId = professionId;
-  saveRuntime(runtimeState);
+  const existing = loadRuntimeForProfession(professionId);
+  if (existing) {
+    initializeRuntime(existing);
+  } else {
+    setActiveProfession(professionId);
+    startJourney({
+      professionId,
+      fears: [],
+      experienceLevel: null,
+      goals: [],
+      confidenceLevel: null,
+      timeline: null,
+      preferences: [],
+      situation: null,
+      emotion: null,
+      applicationsCount: null,
+      interviewsCount: null,
+      step: 3,
+      isComplete: true,
+    } as OnboardingState);
+  }
   window.location.reload();
 }
 
 export function clearAllPersistence(): void {
+  // HARDENING (2026-07-13): with runtime storage now keyed per profession
+  // (career-navigator.runtime.<professionId>.v1 — see runtime_persistence.ts),
+  // this used to only clear the single old global key and would silently
+  // leave every profession's saved progress behind. Clear all registered
+  // professions' keys plus the "last active profession" pointer.
+  for (const profession of getAllProfessions()) {
+    localStorage.removeItem(`career-navigator.runtime.${profession.id}.v1`);
+  }
+  localStorage.removeItem('career-navigator.activeProfessionId.v1');
   localStorage.removeItem('career-navigator.runtime.v1');
   localStorage.removeItem('career-navigator.notes.v1');
   localStorage.removeItem('career-navigator.interview.v1');
