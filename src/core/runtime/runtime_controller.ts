@@ -605,7 +605,14 @@ export function resetJourney(): void {
 export function switchProfession(professionId: string): void {
   const existing = loadRuntimeForProfession(professionId);
   if (existing) {
+    // BUGFIX (2026-07-14): initializeRuntime() only sets runtimeState in
+    // memory but never calls saveRuntime(), so ACTIVE_PROFESSION_KEY in
+    // localStorage still pointed at the old profession. After reload,
+    // loadRuntime() read the old key and landed back on the wrong profession
+    // — making the switcher appear to do nothing. Persisting here before
+    // reload ensures the next cold start loads the correct profession.
     initializeRuntime(existing);
+    saveRuntime(existing);
   } else {
     setActiveProfession(professionId);
     startJourney({
@@ -837,3 +844,4 @@ export function initializeRuntime(saved: JourneyRuntimeState): void {
   }
   runtimeState = { ...saved, professionId: professionIdToActivate };
 }
+
