@@ -443,10 +443,11 @@
 
 .profile-professions-title {
   font-size: 13px;
-  font-weight: 600;
-  color: rgba(240, 240, 245, 0.5);
+  font-weight: 700;
+  color: #c084fc;
+  text-shadow: 0 0 8px rgba(192, 132, 252, 0.7), 0 0 20px rgba(192, 132, 252, 0.35);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   margin-bottom: 12px;
 }
 
@@ -518,3 +519,4 @@
   color: rgba(240, 240, 245, 0.35);
   font-size: 16px;
 }
+
