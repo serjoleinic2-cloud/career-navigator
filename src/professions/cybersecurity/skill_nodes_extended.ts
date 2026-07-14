@@ -25,6 +25,8 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
       confidence: 'A tracked pipeline turns chaos into a security job search strategy.'
     },
     tasks: APPLICATION_TASKS['application-tracking'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'portfolio-home-lab',
@@ -46,6 +48,8 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
       confidence: 'A home lab portfolio answers technical questions before the interview starts.'
     },
     tasks: APPLICATION_TASKS['portfolio-home-lab'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'ctf-scores',
@@ -67,6 +71,8 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
       confidence: 'CTF scores turn "interested in security" into "proven security skills."'
     },
     tasks: APPLICATION_TASKS['ctf-scores'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'clearance-prep',
@@ -88,6 +94,8 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
       confidence: 'Clearance eligibility opens doors to defense contractors and government agencies.'
     },
     tasks: APPLICATION_TASKS['clearance-prep'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'company-research',
@@ -109,6 +117,8 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
       confidence: 'Research turns "I need a job" into "I can defend your cloud infrastructure."'
     },
     tasks: APPLICATION_TASKS['company-research'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'application-tailoring',
@@ -130,6 +140,8 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
       confidence: 'Tailored applications feel personal. Personal gets security interviews.'
     },
     tasks: APPLICATION_TASKS['application-tailoring'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'referral-strategy',
@@ -151,6 +163,8 @@ export const APPLICATION_SKILL_NODES: SkillNode[] = [
       confidence: 'Referrals turn cold applications into warm conversations at cleared facilities.'
     },
     tasks: APPLICATION_TASKS['referral-strategy'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
 ];
 
@@ -176,6 +190,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'Preparation turns interview anxiety into interview confidence.'
     },
     tasks: INTERVIEW_TASKS['interview-prep'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'networking-deep-dive',
@@ -197,6 +213,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'Networking fluency proves you understand what you are defending.'
     },
     tasks: INTERVIEW_TASKS['networking-deep-dive'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'linux-administration',
@@ -218,6 +236,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'Linux fluency is non-negotiable for blue team and red team roles.'
     },
     tasks: INTERVIEW_TASKS['linux-administration'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'python-security',
@@ -239,6 +259,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'Python skills open doors to automation, threat hunting, and red team roles.'
     },
     tasks: INTERVIEW_TASKS['python-security'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'siem-analysis',
@@ -260,6 +282,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'SIEM fluency proves you can detect and respond to real threats.'
     },
     tasks: INTERVIEW_TASKS['siem-analysis'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'incident-response-scenario',
@@ -281,6 +305,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'IR scenario fluency proves you can protect assets when it matters most.'
     },
     tasks: INTERVIEW_TASKS['incident-response-scenario'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'threat-hunting-basics',
@@ -302,6 +328,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'Threat hunting skills elevate you from alert responder to proactive defender.'
     },
     tasks: INTERVIEW_TASKS['threat-hunting-basics'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'on-site-prep',
@@ -323,6 +351,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'A well-prepared on-site feels like a series of conversations, not interrogations.'
     },
     tasks: INTERVIEW_TASKS['on-site-prep'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'red-team-blue-team',
@@ -344,6 +374,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'Understanding both sides makes you a purple team candidate — rare and valuable.'
     },
     tasks: INTERVIEW_TASKS['red-team-blue-team'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'interview-followup',
@@ -365,6 +397,8 @@ export const INTERVIEW_SKILL_NODES: SkillNode[] = [
       confidence: 'Follow-ups keep you top of mind while the hiring committee deliberates.'
     },
     tasks: INTERVIEW_TASKS['interview-followup'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
 ];
 
@@ -390,6 +424,8 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
       confidence: 'A certification in progress signals commitment to employers.'
     },
     tasks: OFFER_TASKS['certification-prep'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'clearance-process',
@@ -411,6 +447,8 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
       confidence: 'Clearance eligibility opens doors to defense, intelligence, and critical infrastructure roles.'
     },
     tasks: OFFER_TASKS['clearance-process'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'resignation-letter',
@@ -432,6 +470,8 @@ export const OFFER_PREPARATION_SKILL_NODES: SkillNode[] = [
       confidence: 'A professional exit leaves doors open for future cleared opportunities.'
     },
     tasks: OFFER_TASKS['resignation-letter'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
 ];
 
@@ -457,6 +497,8 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
       confidence: 'A thorough evaluation ensures you accept the right cleared role.'
     },
     tasks: OFFER_TASKS['offer-evaluation'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'salary-negotiation',
@@ -478,6 +520,8 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
       confidence: 'A successful negotiation can add $10K-$30K to your first-year compensation.'
     },
     tasks: OFFER_TASKS['salary-negotiation'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'decision-framework',
@@ -499,6 +543,8 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
       confidence: 'A framework turns emotional decisions into rational ones.'
     },
     tasks: OFFER_TASKS['decision-framework'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'offer-acceptance',
@@ -520,6 +566,8 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
       confidence: 'A signed offer is the culmination of your security journey. Celebrate, then prepare to excel.'
     },
     tasks: OFFER_TASKS['offer-acceptance'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'toolkit-setup',
@@ -541,6 +589,8 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
       confidence: 'A prepared toolkit turns a nervous first day into a confident first week.'
     },
     tasks: OFFER_TASKS['toolkit-setup'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
   {
     id: 'start-transition',
@@ -562,5 +612,7 @@ export const OFFER_SKILL_NODES: SkillNode[] = [
       confidence: 'A strong start builds credibility that compounds over your entire security tenure.'
     },
     tasks: OFFER_TASKS['start-transition'] || [],
+    estimatedMinutes: 30,
+    difficulty: 2,
   },
 ];
