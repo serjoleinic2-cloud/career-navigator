@@ -23,8 +23,8 @@
 > через git напрямую) — правило всё равно действует, просто без автоматической
 > проверки, и агент должен соблюдать его вручную.
 
-**Последнее обновление:** 2026-07-11
-**Обновил:** OpenCode (сессия — md audit: README, ARCHITECTURE_SNAPSHOT, structura, INTERVIEW_TRAINER, WORLD_LAYOUT_GUIDE, +Window_functional)
+**Последнее обновление:** 2026-07-15
+**Обновил:** Claude (4-я профессия: AI / Machine Learning Engineer)
 **Последний коммит на момент записи:** будет создан этой сессией (main, до неё см. историю ниже)
 
 ---
@@ -78,6 +78,19 @@
 ---
 
 ## История изменений (снизу — новее)
+
+### 2026-07-15 — Claude (добавлена 4-я профессия: AI / Machine Learning Engineer)
+
+Serj попросил создать 4-ю профессию (AI/ML Engineer) по аналогии с уже существующими, объём 1:1 с Cybersecurity. Реализовано полностью: `src/professions/ai_ml_engineer/` — 6 глав (Resume/LinkedIn/Applications/Interviews/Offer Preparation/Offer), 38 skill-нод (`skill_nodes.ts` + `skill_nodes_extended.ts`), таски на каждую ноду (`tasks/resume|linkedin|applications|interviews|offer.ts`), Playbook (`playbook_data.ts`), свои вопросы для интервью-тренажёра (`interview/questions.ts`, зарегистрированы в `QUESTION_MAP` в `interview_question_loader.ts`), мир/тема/арт/layout (`world/theme.ts`, `world/art.ts`, `world/layout.ts` — тема "The Neural Frontier"). Профессия подключена в `profession_auto_loader.ts`, `src/professions/index.ts`, `loader/profession_manifest.ts` и добавлена в каталог `profession_metadata.ts` (по аналогии с Cybersecurity — авторегистрация делает её "available" в онбординге, запись в каталоге просто держит id в синхроне на будущее). Сгенерированы плейсхолдер-арты (PIL, градиенты в цветах темы) в `public/art/ai_ml_engineer/` (journey.jpg + 6 island-*.png) — на момент записи для профессии нет ни одного реального арт-ассета, всё градиентные заглушки, как раньше было для Cybersecurity до того, как под неё дозаполнили арт.
+
+**Важный инцидент — параллельная работа двух сессий над одной профессией:** пока эта сессия обрывалась (конец контекста), Serj независимо продолжил работу над той же самой AI/ML Engineer через OpenCode и запушил в main 3 коммита (`a0a044a`, `ae0f0f5`, `196d162`) с ДРУГОЙ реализацией той же профессии (другие nodeId, другая тема "The Neural Nexus"). Та версия при пуле оказалась **нерабочей**: `skill_nodes.ts` обрывается на середине (нет экспорта `ALL_SKILL_NODES`, который импортирует `module.ts` — `tsc` не прошёл бы), не хватало 7 skill-нод для главы Interviews (`interview-prep`, `ml-theory-deep-dive`, `coding-ml-pipelines`, `system-design-ml`, `mlops-cicd`, `model-evaluation`, `behavioral-ml-scenarios`), а `world/art.ts` и `world/layout.ts` использовали несуществующую схему полей (`landmarks`, `particleEffects`, `chapterClusters`, `islandSpacing` — не совпадает с реальными типами `WorldArtConfig`/`registerWorldLayout`). Та версия нигде не была подключена (не в `profession_auto_loader.ts`, не в `index.ts`, не в `profession_metadata.ts`, не в `interview_question_loader.ts`) — то есть мёртвый, незавершённый черновик без эффекта на приложение. Принял решение: удалил ту версию (`git rm -r src/professions/ai_ml_engineer`), заменил своей полной и уже проверенной. **Урок на будущее:** если несколько ИИ-сессий (Claude/OpenCode/ChatGPT) работают над одной и той же новой профессией параллельно без синхронизации — велик риск получить на выходе два несовместимых набора nodeId для одних и тех же глав. Перед началом работы над уже начатой другим агентом профессией — сначала `git pull`, чтобы увидеть, не ушёл ли кто-то вперёд.
+
+**Проверено:** `npx tsc --noEmit` — чисто, без ошибок. `npx vite build` — чисто, собралось (`dist/assets/index-*.js` ~930 kB, есть предупреждение о размере чанка — не блокирующее, как и у остальных профессий). Node id между `chapters.ts` ↔ `skill_nodes.ts`/`skill_nodes_extended.ts` ↔ всеми файлами `tasks/*.ts` сверены скриптом — 100% совпадение, ни одной "молчащей" пустой задачи (баг такого рода уже был раньше на Data Analyst — специально проверил, чтобы не повторить).
+**Не проверено вживую на телефоне/в браузере.** Проверить: (1) Онбординг → AI / Machine Learning Engineer выбирается и открывается. (2) Каждая глава на World Map кликабельна, картинки (пусть и градиентные заглушки) подгружаются без 404. (3) Interview Trainer на этой профессии показывает именно AI/ML-вопросы, а не откат на Software Engineer. (4) Playbook показывает контент, привязанный к `ai_ml_engineer`, без утечки контента других профессий.
+
+**Файлы:** весь `src/professions/ai_ml_engineer/**`, `public/art/ai_ml_engineer/**` (создано), `src/core/interview/interview_question_loader.ts`, `src/core/profession_metadata.ts`, `src/professions/index.ts`, `src/professions/loader/profession_manifest.ts`, `src/professions/profession_auto_loader.ts`, `PROJECT_STATUS.md`.
+
+Следующий шаг (по договорённости с Serj): после подтверждения, что всё работает — 5-я профессия, Product Manager, по той же схеме.
 
 ### 2026-07-11 — Claude (5 задач: Offer island, World titles, portrait lock, notifications, onboarding design)
 

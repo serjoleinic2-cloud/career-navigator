@@ -26,3 +26,4 @@ export {
 
 export { SoftwareEngineerModule } from './software_engineer/module';
 export { DataAnalystModule } from './data_analyst/module';
+export { AiMlEngineerModule } from './ai_ml_engineer/module';

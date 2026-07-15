@@ -41,6 +41,14 @@ export function getProfessionCatalog(): ProfessionMeta[] {
       premium: true,
     },
     {
+      id: 'ai_ml_engineer',
+      title: 'AI / Machine Learning Engineer',
+      description: 'Build and ship ML models, from experiment to production.',
+      icon: '🤖',
+      enabled: false,
+      premium: true,
+    },
+    {
       id: 'digital_marketing',
       title: 'Digital Marketing',
       description: 'Drive growth through digital channels and campaigns.',

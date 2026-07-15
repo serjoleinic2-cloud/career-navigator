@@ -1,193 +1,159 @@
-'network-connections': [
-  {
-    id: 'aiml-nc-connect-recruiters',
-    title: 'Connect with AI Recruiters',
-    objective: 'Build a targeted network of 50 AI/ML recruiters and hiring managers.',
-    instructions: [
-      'Search LinkedIn for "AI recruiter", "ML hiring manager", "talent acquisition AI".',
-      'Filter by your target companies and locations.',
-      'Send 10 personalized connection requests daily mentioning shared interest in AI/ML.',
-      'Track acceptance rate and follow up with accepted connections.',
-    ],
-    completionCriteria: [
-      '50 connections sent',
-      'Acceptance rate >30%',
-      '5 meaningful conversations started',
-    ],
-    estimatedMinutes: 30,
-    difficulty: 2,
-    tips: [
-      'Personalize every request: mention a specific company, project, or article they shared.',
-      'Avoid generic "I would like to add you to my network".',
-    ],
-    expectedOutcome: 'A warm network of AI recruiters who recognize your name.',
-  },
-  {
-    id: 'aiml-nc-join-communities',
-    title: 'Join AI Communities',
-    objective: 'Become active in 3 AI/ML LinkedIn groups or communities.',
-    instructions: [
-      'Search LinkedIn groups: "Machine Learning", "MLOps Community", "LLM Engineers".',
-      'Join 3 groups with 10K+ members.',
-      'Post one insightful comment or question per week.',
-      'Share one original post about your AI project per month.',
-    ],
-    completionCriteria: [
-      '3 groups joined',
-      '4 comments posted',
-      '1 original post shared',
-    ],
-    estimatedMinutes: 20,
-    difficulty: 1,
-    tips: [
-      'Quality over quantity: thoughtful comments get more visibility than likes.',
-      'Tag relevant people to start conversations.',
-    ],
-    expectedOutcome: 'Visibility in AI communities and inbound connection requests.',
-  },
-],
-'kaggle-showcase': [
-  {
-    id: 'aiml-ks-link-profile',
-    title: 'Link Kaggle Profile',
-    objective: 'Add Kaggle profile to LinkedIn and feature competitions.',
-    instructions: [
-      'Copy your Kaggle profile URL.',
-      'Add it to LinkedIn Featured section or About section.',
-      'Write one post about your best competition result with metric and ranking.',
-      'Pin the post to your profile.',
-    ],
-    completionCriteria: [
-      'Kaggle link visible on LinkedIn',
-      'Competition post published',
-      'Post pinned to profile',
-    ],
-    estimatedMinutes: 15,
-    difficulty: 1,
-    tips: [
-      'Include percentile ranking: "Top 5% out of 2,000 teams" is more impressive than rank number.',
-      'Mention techniques used: ensemble, feature engineering, neural architecture.',
-    ],
-    expectedOutcome: 'Recruiters see your competitive ML skills immediately.',
-  },
-  {
-    id: 'aiml-ks-document-datasets',
-    title: 'Document Datasets',
-    objective: 'Create public dataset contributions to showcase data skills.',
-    instructions: [
-      'Upload one cleaned dataset to Kaggle Datasets with thorough documentation.',
-      'Include EDA notebook with visualizations.',
-      'Link the dataset in your LinkedIn Featured section.',
-      'Share a post explaining the dataset and potential use cases.',
-    ],
-    completionCriteria: [
-      '1 dataset published on Kaggle',
-      'EDA notebook included',
-      'LinkedIn post shared',
-    ],
-    estimatedMinutes: 45,
-    difficulty: 2,
-    tips: [
-      'Choose a niche dataset: medical imaging, financial time series, NLP corpus.',
-      'Good documentation signals you can prepare data for production pipelines.',
-    ],
-    expectedOutcome: 'Proof of end-to-end data preparation and domain expertise.',
-  },
-],
-'research-publications': [
-  {
-    id: 'aiml-rp-list-papers',
-    title: 'List Publications',
-    objective: 'Add all research papers, preprints, and technical blog posts to LinkedIn.',
-    instructions: [
-      'Collect all papers, arXiv preprints, Medium articles, and blog posts.',
-      'Add each to LinkedIn Featured section with one-sentence summary.',
-      'For papers: include venue, year, and key contribution.',
-      'For blogs: include read count or engagement metric if available.',
-    ],
-    completionCriteria: [
-      'All publications listed on LinkedIn',
-      'Each has one-sentence summary',
-      'At least 3 items in Featured section',
-    ],
-    estimatedMinutes: 20,
-    difficulty: 1,
-    tips: [
-      'Prioritize papers with citations or blog posts with high engagement.',
-      'Link to PDF or GitHub repo for reproducibility.',
-    ],
-    expectedOutcome: 'Academic credibility visible to research-oriented employers.',
-  },
-  {
-    id: 'aiml-rp-write-blog',
-    title: 'Write Technical Blog',
-    objective: 'Publish one technical blog post explaining an AI concept you mastered.',
-    instructions: [
-      'Pick a topic: transformer architecture, LLM fine-tuning, diffusion models, or MLOps pipeline.',
-      'Write 800-1200 words with code snippets and diagrams.',
-      'Publish on Medium, Towards Data Science, or your personal blog.',
-      'Share on LinkedIn with a hook and tag relevant communities.',
-    ],
-    completionCriteria: [
-      'Blog post published',
-      '800-1200 words',
-      'Code snippets included',
-      'LinkedIn post shared',
-    ],
-    estimatedMinutes: 90,
-    difficulty: 3,
-    tips: [
-      'Teaching is the best way to learn: explaining forces clarity.',
-      'Use visuals: architecture diagrams, training curves, confusion matrices.',
-    ],
-    expectedOutcome: 'A portfolio piece that demonstrates communication depth and technical authority.',
-  },
-],
-'certifications-display': [
-  {
-    id: 'aiml-cd-add-certs',
-    title: 'Add Certifications',
-    objective: 'Add all relevant AI/ML certifications to LinkedIn Licenses & Certifications.',
-    instructions: [
-      'List all certifications: Coursera Deep Learning Specialization, AWS ML Specialty, TensorFlow Developer, etc.',
-      'Add each with completion date and credential ID.',
-      'For each, write one bullet on what you built or learned.',
-      'Reorder by relevance: most recent and most prestigious first.',
-    ],
-    completionCriteria: [
-      'All relevant certifications added',
-      'Each has credential ID',
-      'Each has one impact bullet',
-    ],
-    estimatedMinutes: 15,
-    difficulty: 1,
-    tips: [
-      'Remove outdated or irrelevant certifications to keep section focused.',
-      'Link to credential verification page for credibility.',
-    ],
-    expectedOutcome: 'A certifications section that validates your self-taught skills.',
-  },
-  {
-    id: 'aiml-cd-feature-projects',
-    title: 'Feature Cert Projects',
-    objective: 'Showcase capstone projects from certification programs.',
-    instructions: [
-      'For each major certification, identify the capstone or final project.',
-      'Create a GitHub repo with clean README, code, and results.',
-      'Add project to LinkedIn Featured section with certification name.',
-      'Write one post per project explaining the challenge and solution.',
-    ],
-    completionCriteria: [
-      '3+ capstone projects featured',
-      'GitHub repos with READMEs',
-      'LinkedIn posts published',
-    ],
-    estimatedMinutes: 40,
-    difficulty: 2,
-    tips: [
-      'Capstone projects are proof you can apply course knowledge to real problems.',
-      'Include dataset source, model architecture, and evaluation metrics.',
-    ],
-    expectedOutcome: 'Certifications backed by demonstrated project work.',
-  },
-],
+import type { TaskContent } from '@/core/task_content';
+
+export const LINKEDIN_TASKS: Record<string, TaskContent[]> = {
+  'headline-authority': [
+    {
+      id: 'aiml-ha-write-variants',
+      title: 'Write Headline Variants',
+      objective: 'Craft a LinkedIn headline that signals ML specialization and seniority.',
+      instructions: [
+        'Write 5 headline variants under 120 characters.',
+        'Include: role, domain (NLP/CV/recommenders/MLOps), and one standout signal (metric, competition rank, publication).',
+        'Remove "seeking opportunities" and generic buzzwords like "AI enthusiast".',
+        'Test variants with a peer or mentor in ML.',
+      ],
+      completionCriteria: [
+        'Headline names a specific role: ML Engineer, Applied Scientist, MLOps Engineer.',
+        'Headline includes a domain or standout signal.',
+        'Under 120 characters.',
+      ],
+      estimatedMinutes: 15,
+      difficulty: 1,
+      tips: [
+        'LinkedIn search weights headline heavily. ML keywords matter more than creativity.',
+        'If you have a Kaggle rank or paper, put it in the headline.',
+        'Avoid emoji overload — one is enough if any.',
+      ],
+      expectedOutcome: 'A headline that attracts inbound messages from ML recruiters.',
+    },
+  ],
+  'about-section': [
+    {
+      id: 'aiml-as-write-about',
+      title: 'Write Your About Section',
+      objective: 'Craft an About section that tells your ML career story.',
+      instructions: [
+        'Write 3 paragraphs: background, a key project or competition result, what you are looking for.',
+        'Include one specific metric or outcome from a real project.',
+        'End with a clear call to action: what roles/domains you are open to.',
+      ],
+      completionCriteria: [
+        'About section tells a story, not just a skills list.',
+        'Includes one specific project outcome.',
+        'Ends with a clear call to action.',
+      ],
+      estimatedMinutes: 25,
+      difficulty: 2,
+      tips: [
+        'Use first person. Keep paragraphs short.',
+        'Mention your specialization clearly so search and recruiters can match you.',
+        'Read it aloud — if it takes over 30 seconds, trim it.',
+      ],
+      expectedOutcome: 'A compelling About section that turns profile views into recruiter outreach.',
+    },
+  ],
+  'network-connections': [
+    {
+      id: 'aiml-nc-outreach-plan',
+      title: 'Build Your ML Network Outreach Plan',
+      objective: 'Grow a targeted network of ML practitioners and hiring managers.',
+      instructions: [
+        'Identify 10 ML engineers, applied scientists, or hiring managers at target companies.',
+        'Send 5 personalized connection requests this week, referencing shared interests (a paper, a competition, an OSS project).',
+        'Engage weekly with posts from ML leaders you follow.',
+        'Request 1-2 informational interviews with people in roles you want.',
+      ],
+      completionCriteria: [
+        'At least 5 personalized connection requests sent.',
+        'At least 1 informational interview requested.',
+        'A weekly engagement habit started (comments, shares).',
+      ],
+      estimatedMinutes: 30,
+      difficulty: 2,
+      tips: [
+        'Quality over quantity — target people at companies and in roles you actually want.',
+        'Comment thoughtfully on technical posts, not just "Great post!".',
+        'A warm connection is worth more than ten cold applications.',
+      ],
+      expectedOutcome: 'A growing network that surfaces referrals and hidden ML opportunities.',
+    },
+  ],
+  'kaggle-writeups': [
+    {
+      id: 'aiml-kw-publish-writeup',
+      title: 'Publish a Competition or Project Writeup',
+      objective: 'Turn a Kaggle competition or personal project into a public writeup.',
+      instructions: [
+        'Pick one Kaggle competition or personal ML project you completed.',
+        'Write it up: problem, data, approach, what worked, what did not, final result/leaderboard position.',
+        'Include code snippets and one or two key plots (feature importance, learning curves, confusion matrix).',
+        'Publish on LinkedIn or Medium and link it from your profile.',
+      ],
+      completionCriteria: [
+        'Writeup includes problem, approach, and final result.',
+        'At least one plot or visualization included.',
+        'Published and linked from your profile.',
+      ],
+      estimatedMinutes: 40,
+      difficulty: 3,
+      tips: [
+        'A well-written writeup proves technical depth and communication ability.',
+        'Include what you tried that failed — it shows real experimentation, not just a lucky submission.',
+        'Tag #MachineLearning #Kaggle for reach.',
+      ],
+      expectedOutcome: 'A public writeup that turns your profile into a portfolio recruiters can verify.',
+    },
+  ],
+  'ml-blog': [
+    {
+      id: 'aiml-mb-write-article',
+      title: 'Write Your First ML Article',
+      objective: 'Publish a technical article that demonstrates ML depth and clear communication.',
+      instructions: [
+        'Pick a topic: explain a technique (e.g. attention mechanisms), analyze a paper, or review a tool.',
+        'Structure: motivation, explanation with an example, practical takeaway.',
+        'Keep it under 900 words with at least one diagram or code snippet.',
+        'Publish and share with your network.',
+      ],
+      completionCriteria: [
+        'Article has clear structure: motivation, explanation, takeaway.',
+        'Includes a diagram, plot, or code snippet.',
+        'Published and shared.',
+      ],
+      estimatedMinutes: 45,
+      difficulty: 3,
+      tips: [
+        'Explaining a concept clearly is itself evidence of understanding it deeply.',
+        'Link to the paper or docs you are referencing.',
+        'Consistency matters more than length — a short clear article beats a rambling long one.',
+      ],
+      expectedOutcome: 'An article that positions you as a thoughtful ML practitioner, not just a model-runner.',
+    },
+  ],
+  'certifications-display': [
+    {
+      id: 'aiml-cd-add-certifications',
+      title: 'Add Certifications and Assessments',
+      objective: 'Make your ML credentials visible and verifiable on LinkedIn.',
+      instructions: [
+        'Add relevant certifications: DeepLearning.AI, AWS ML Specialty, Google ML Engineer, TensorFlow Developer.',
+        'Include credential IDs and verification links where available.',
+        'Complete LinkedIn Skills Assessments for Python and Machine Learning.',
+        'Order certifications by relevance to your target role.',
+      ],
+      completionCriteria: [
+        'At least one certification listed with a verification link.',
+        'Skills Assessments completed for at least 2 relevant skills.',
+        'Certifications ordered by relevance.',
+      ],
+      estimatedMinutes: 20,
+      difficulty: 1,
+      tips: [
+        'Certifications matter more for career-changers than for people with strong project portfolios.',
+        'A completed specialization signals structured learning, not just tutorial-hopping.',
+        'Pair certifications with a project that applies what you learned.',
+      ],
+      expectedOutcome: 'Certifications and assessments that add social proof to your profile.',
+    },
+  ],
+};

@@ -5,9 +5,9 @@ import './world/theme';
 import './world/art';
 import './world/layout';
 
-export const AIMLEngineerModule: ProfessionModule = {
+export const AiMlEngineerModule: ProfessionModule = {
   id: 'ai_ml_engineer',
-  title: 'AI / ML Engineer',
+  title: 'AI / Machine Learning Engineer',
   icon: '🤖',
   chapters: AI_ML_ENGINEER_CHAPTERS,
   skillGraph: ALL_SKILL_NODES,
@@ -18,4 +18,4 @@ export const AIMLEngineerModule: ProfessionModule = {
   },
 };
 
-export default AIMLEngineerModule;
+export default AiMlEngineerModule;
