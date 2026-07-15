@@ -18,8 +18,7 @@ import DataAnalystModule from './data_analyst/module';
 // ─── ADD NEW PROFESSIONS HERE ──────────────────────────────────
 import CybersecurityModule from './cybersecurity/module';
 import AiMlEngineerModule from './ai_ml_engineer/module';
-// import DigitalMarketingModule from './digital_marketing/module';
-// import CustomerSupportModule from './customer_support/module';
+import ProductManagerModule from './product_manager/module';
 // ──────────────────────────────────────────────────────────────
 
 const PROFESSION_MODULES: ProfessionModule[] = [
@@ -27,8 +26,7 @@ const PROFESSION_MODULES: ProfessionModule[] = [
   DataAnalystModule,
   CybersecurityModule,
   AiMlEngineerModule,
-  // DigitalMarketingModule,
-  // CustomerSupportModule,
+  ProductManagerModule,
 ];
 
 export function registerAllProfessions(): void {
