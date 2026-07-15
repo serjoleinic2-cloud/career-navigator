@@ -1,81 +1,193 @@
-import type { TaskContent } from '@/core/task_content';
-
-export const LINKEDIN_TASKS: Record<string, TaskContent[]> = {
-  'headline-authority': [
-    {
-      id: 'aiml-ha-write-headlines',
-      title: 'Write AI/ML Headlines',
-      objective: 'Create 5 headline variants that attract AI recruiters.',
-      instructions: [
-        'Write 5 headlines combining: role + domain + framework + value.',
-        'Example: "ML Engineer | NLP & LLMs | PyTorch | Building production-ready language models"',
-        'Keep each under 120 characters.',
-        'Test searchability: search each headline on LinkedIn, do similar profiles appear?',
-      ],
-      completionCriteria: [
-        '5 headlines written',
-        'Each under 120 characters',
-        'Each contains role + domain + framework',
-      ],
-      estimatedMinutes: 20,
-      difficulty: 1,
-      tips: [
-        'Avoid: "Passionate about AI", "Open to opportunities", "Seeking new challenges".',
-        'Include: "LLM", "PyTorch", "MLOps", "Computer Vision", "NLP".',
-      ],
-      expectedOutcome: 'A headline that appears in recruiter searches for your target role.',
-    },
-    {
-      id: 'aiml-ha-select-best',
-      title: 'Select Best Headline',
-      objective: 'Choose the highest-impact headline through testing.',
-      instructions: [
-        'Show all 5 headlines to 3 AI professionals or recruiters.',
-        'Ask: which would make you click the profile?',
-        'Note feedback on clarity, specificity, and credibility.',
-        'Pick the winner and update LinkedIn.',
-      ],
-      completionCriteria: [
-        'Feedback from 3 people collected',
-        'Winner selected with rationale',
-        'LinkedIn updated',
-      ],
-      estimatedMinutes: 15,
-      difficulty: 1,
-      tips: [
-        'Recruiters prefer specificity over creativity in AI roles.',
-        'A/B test by changing weekly and tracking profile views.',
-      ],
-      expectedOutcome: 'An optimized LinkedIn headline with validated appeal.',
-    },
-  ],
-  'about-section': [
-    {
-      id: 'aiml-as-draft',
-      title: 'Draft AI/ML About Section',
-      objective: 'Write a compelling narrative that showcases ML depth.',
-      instructions: [
-        'Paragraph 1: Background and what drew you to AI/ML.',
-        'Paragraph 2: Key project or model with metric and business impact.',
-        'Paragraph 3: Research interests and what you are looking for.',
-        'Keep to 200-250 words. Use first person.',
-      ],
-      completionCriteria: [
-        '3 paragraphs drafted',
-        '200-250 words total',
-        'One specific model metric included',
-      ],
-      estimatedMinutes: 25,
-      difficulty: 2,
-      tips: [
-        'Start with a hook: "I build models that..." not "I am a motivated..."',
-        'Include: framework names, model architectures, dataset sizes, evaluation metrics.',
-      ],
-      expectedOutcome: 'An About section that converts profile views to connection requests.',
-    },
-    {
-      id: 'aiml-as-optimize',
-      title: 'Optimize About for Search',
-      objective: 'Ensure AI recruiters find your profile through keywords.',
-      instructions: [
-        'Identify 10 keywords from AI/ML job postings: PyTorch, LLM,
+'network-connections': [
+  {
+    id: 'aiml-nc-connect-recruiters',
+    title: 'Connect with AI Recruiters',
+    objective: 'Build a targeted network of 50 AI/ML recruiters and hiring managers.',
+    instructions: [
+      'Search LinkedIn for "AI recruiter", "ML hiring manager", "talent acquisition AI".',
+      'Filter by your target companies and locations.',
+      'Send 10 personalized connection requests daily mentioning shared interest in AI/ML.',
+      'Track acceptance rate and follow up with accepted connections.',
+    ],
+    completionCriteria: [
+      '50 connections sent',
+      'Acceptance rate >30%',
+      '5 meaningful conversations started',
+    ],
+    estimatedMinutes: 30,
+    difficulty: 2,
+    tips: [
+      'Personalize every request: mention a specific company, project, or article they shared.',
+      'Avoid generic "I would like to add you to my network".',
+    ],
+    expectedOutcome: 'A warm network of AI recruiters who recognize your name.',
+  },
+  {
+    id: 'aiml-nc-join-communities',
+    title: 'Join AI Communities',
+    objective: 'Become active in 3 AI/ML LinkedIn groups or communities.',
+    instructions: [
+      'Search LinkedIn groups: "Machine Learning", "MLOps Community", "LLM Engineers".',
+      'Join 3 groups with 10K+ members.',
+      'Post one insightful comment or question per week.',
+      'Share one original post about your AI project per month.',
+    ],
+    completionCriteria: [
+      '3 groups joined',
+      '4 comments posted',
+      '1 original post shared',
+    ],
+    estimatedMinutes: 20,
+    difficulty: 1,
+    tips: [
+      'Quality over quantity: thoughtful comments get more visibility than likes.',
+      'Tag relevant people to start conversations.',
+    ],
+    expectedOutcome: 'Visibility in AI communities and inbound connection requests.',
+  },
+],
+'kaggle-showcase': [
+  {
+    id: 'aiml-ks-link-profile',
+    title: 'Link Kaggle Profile',
+    objective: 'Add Kaggle profile to LinkedIn and feature competitions.',
+    instructions: [
+      'Copy your Kaggle profile URL.',
+      'Add it to LinkedIn Featured section or About section.',
+      'Write one post about your best competition result with metric and ranking.',
+      'Pin the post to your profile.',
+    ],
+    completionCriteria: [
+      'Kaggle link visible on LinkedIn',
+      'Competition post published',
+      'Post pinned to profile',
+    ],
+    estimatedMinutes: 15,
+    difficulty: 1,
+    tips: [
+      'Include percentile ranking: "Top 5% out of 2,000 teams" is more impressive than rank number.',
+      'Mention techniques used: ensemble, feature engineering, neural architecture.',
+    ],
+    expectedOutcome: 'Recruiters see your competitive ML skills immediately.',
+  },
+  {
+    id: 'aiml-ks-document-datasets',
+    title: 'Document Datasets',
+    objective: 'Create public dataset contributions to showcase data skills.',
+    instructions: [
+      'Upload one cleaned dataset to Kaggle Datasets with thorough documentation.',
+      'Include EDA notebook with visualizations.',
+      'Link the dataset in your LinkedIn Featured section.',
+      'Share a post explaining the dataset and potential use cases.',
+    ],
+    completionCriteria: [
+      '1 dataset published on Kaggle',
+      'EDA notebook included',
+      'LinkedIn post shared',
+    ],
+    estimatedMinutes: 45,
+    difficulty: 2,
+    tips: [
+      'Choose a niche dataset: medical imaging, financial time series, NLP corpus.',
+      'Good documentation signals you can prepare data for production pipelines.',
+    ],
+    expectedOutcome: 'Proof of end-to-end data preparation and domain expertise.',
+  },
+],
+'research-publications': [
+  {
+    id: 'aiml-rp-list-papers',
+    title: 'List Publications',
+    objective: 'Add all research papers, preprints, and technical blog posts to LinkedIn.',
+    instructions: [
+      'Collect all papers, arXiv preprints, Medium articles, and blog posts.',
+      'Add each to LinkedIn Featured section with one-sentence summary.',
+      'For papers: include venue, year, and key contribution.',
+      'For blogs: include read count or engagement metric if available.',
+    ],
+    completionCriteria: [
+      'All publications listed on LinkedIn',
+      'Each has one-sentence summary',
+      'At least 3 items in Featured section',
+    ],
+    estimatedMinutes: 20,
+    difficulty: 1,
+    tips: [
+      'Prioritize papers with citations or blog posts with high engagement.',
+      'Link to PDF or GitHub repo for reproducibility.',
+    ],
+    expectedOutcome: 'Academic credibility visible to research-oriented employers.',
+  },
+  {
+    id: 'aiml-rp-write-blog',
+    title: 'Write Technical Blog',
+    objective: 'Publish one technical blog post explaining an AI concept you mastered.',
+    instructions: [
+      'Pick a topic: transformer architecture, LLM fine-tuning, diffusion models, or MLOps pipeline.',
+      'Write 800-1200 words with code snippets and diagrams.',
+      'Publish on Medium, Towards Data Science, or your personal blog.',
+      'Share on LinkedIn with a hook and tag relevant communities.',
+    ],
+    completionCriteria: [
+      'Blog post published',
+      '800-1200 words',
+      'Code snippets included',
+      'LinkedIn post shared',
+    ],
+    estimatedMinutes: 90,
+    difficulty: 3,
+    tips: [
+      'Teaching is the best way to learn: explaining forces clarity.',
+      'Use visuals: architecture diagrams, training curves, confusion matrices.',
+    ],
+    expectedOutcome: 'A portfolio piece that demonstrates communication depth and technical authority.',
+  },
+],
+'certifications-display': [
+  {
+    id: 'aiml-cd-add-certs',
+    title: 'Add Certifications',
+    objective: 'Add all relevant AI/ML certifications to LinkedIn Licenses & Certifications.',
+    instructions: [
+      'List all certifications: Coursera Deep Learning Specialization, AWS ML Specialty, TensorFlow Developer, etc.',
+      'Add each with completion date and credential ID.',
+      'For each, write one bullet on what you built or learned.',
+      'Reorder by relevance: most recent and most prestigious first.',
+    ],
+    completionCriteria: [
+      'All relevant certifications added',
+      'Each has credential ID',
+      'Each has one impact bullet',
+    ],
+    estimatedMinutes: 15,
+    difficulty: 1,
+    tips: [
+      'Remove outdated or irrelevant certifications to keep section focused.',
+      'Link to credential verification page for credibility.',
+    ],
+    expectedOutcome: 'A certifications section that validates your self-taught skills.',
+  },
+  {
+    id: 'aiml-cd-feature-projects',
+    title: 'Feature Cert Projects',
+    objective: 'Showcase capstone projects from certification programs.',
+    instructions: [
+      'For each major certification, identify the capstone or final project.',
+      'Create a GitHub repo with clean README, code, and results.',
+      'Add project to LinkedIn Featured section with certification name.',
+      'Write one post per project explaining the challenge and solution.',
+    ],
+    completionCriteria: [
+      '3+ capstone projects featured',
+      'GitHub repos with READMEs',
+      'LinkedIn posts published',
+    ],
+    estimatedMinutes: 40,
+    difficulty: 2,
+    tips: [
+      'Capstone projects are proof you can apply course knowledge to real problems.',
+      'Include dataset source, model architecture, and evaluation metrics.',
+    ],
+    expectedOutcome: 'Certifications backed by demonstrated project work.',
+  },
+],
