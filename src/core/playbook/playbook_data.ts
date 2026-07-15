@@ -2,11 +2,13 @@ import type { PlaybookEntry, PlaybookCategory } from './playbook_types';
 import { DATA_ANALYST_PLAYBOOK } from '@/professions/data_analyst/playbook_data';
 import { CYBERSECURITY_PLAYBOOK } from '@/professions/cybersecurity/playbook_data';
 import { AI_ML_ENGINEER_PLAYBOOK } from '@/professions/ai_ml_engineer/playbook_data';
+import { PRODUCT_MANAGER_PLAYBOOK } from '@/professions/product_manager/playbook_data';
 
 export const PLAYBOOK: PlaybookEntry[] = [
   ...DATA_ANALYST_PLAYBOOK,
   ...CYBERSECURITY_PLAYBOOK,
   ...AI_ML_ENGINEER_PLAYBOOK,
+  ...PRODUCT_MANAGER_PLAYBOOK,
   {
     id: 'resume/summary-formulas',
     title: 'Resume Summary Formulas',
