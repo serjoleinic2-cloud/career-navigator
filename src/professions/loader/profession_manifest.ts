@@ -30,6 +30,12 @@ export const PROFESSION_MANIFEST: ProfessionManifestEntry[] = [
     title: 'AI / Machine Learning Engineer',
     description: 'Break into AI/ML engineering with a portfolio-first, project-driven path.',
   },
+  {
+    id: 'product_manager',
+    path: './product_manager',
+    title: 'Product Manager',
+    description: 'Land your first or next PM role — from resume to signed offer.',
+  },
 ];
 
 export function getManifestEntry(id: string): ProfessionManifestEntry | undefined {
