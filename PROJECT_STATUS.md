@@ -92,6 +92,16 @@ Serj попросил создать 4-ю профессию (AI/ML Engineer) п
 
 Следующий шаг (по договорённости с Serj): после подтверждения, что всё работает — 5-я профессия, Product Manager, по той же схеме.
 
+### 2026-07-15 — Claude (докрутка: AI/ML Engineer Playbook не попадал в общий список)
+
+Serj спросил "там что-то дополнять надо?" — перепроверил по тому же чек-листу, что раньше ловил баги на Data Analyst/Cybersecurity (захардкоженные списки профессий по экранам). Нашёл: центральный агрегатор `src/core/playbook/playbook_data.ts` импортирует `DATA_ANALYST_PLAYBOOK` и `CYBERSECURITY_PLAYBOOK` и раскладывает их в общий массив `PLAYBOOK`, но **не импортировал `AI_ML_ENGINEER_PLAYBOOK`** — значит весь Playbook-контент для AI/ML Engineer (созданный в прошлой записи) существовал в файле, но был недостижим из экрана Playbook. Добавлен импорт и spread в `PLAYBOOK`.
+
+Также проверены (и признаны в порядке, без правок): все `|| 'software_engineer'` фоллбэки по экранам (`WorldMapScreen`, `InterviewTrainerScreen`, `IntroJourneyScreen`, `ChapterHub`, `SettingsScreen`, `OnboardingScreen`, `runtime_controller.ts`) — это дефолты на случай отсутствия рантайма, не branching-по-профессии, ai_ml_engineer их не требует; общее фото интервьюера — намеренно централизовано на все профессии; `export_service.ts` и `profession_progress_summary.ts` работают через `getAllProfessions()`/regex по ключам, а не захардкоженные id — новая профессия подхватывается автоматически.
+
+**Файлы:** `src/core/playbook/playbook_data.ts`, `PROJECT_STATUS.md`.
+**Проверено:** `npx tsc --noEmit` — чисто. `npx vite build` — чисто.
+**Не проверено вживую:** Playbook → фильтр по AI/ML Engineer теперь должен показывать свои карточки, а не пустой список/чужой контент.
+
 ### 2026-07-11 — Claude (5 задач: Offer island, World titles, portrait lock, notifications, onboarding design)
 
 **1. Баг: через Next кнопку на главе Offer нет острова (картинки)**
