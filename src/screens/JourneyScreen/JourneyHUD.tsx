@@ -443,13 +443,30 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
             >
               ← Back
             </button>
-            <button
-              className="journey-chapter-nav-btn primary"
-              onClick={handleGoToNextChapter}
-              disabled={!nextChapter}
-            >
-              Next →
-            </button>
+            {nextChapter ? (
+              <button
+                className="journey-chapter-nav-btn primary"
+                onClick={handleGoToNextChapter}
+              >
+                Next →
+              </button>
+            ) : reviewMode ? (
+              // Last chapter in review mode — show final actions instead of disabled Next
+              <div className="journey-review-end">
+                <button
+                  className="journey-chapter-nav-btn primary"
+                  onClick={() => { emit('START_INTERVIEW_TRAINER', {}); }}
+                >
+                  Go to Interview
+                </button>
+                <button
+                  className="journey-chapter-nav-btn"
+                  onClick={() => { exitReview(); emit('RESET_JOURNEY', {}); }}
+                >
+                  New Profession
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
       </div>
