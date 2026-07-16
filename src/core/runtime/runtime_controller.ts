@@ -647,6 +647,8 @@ export function resetJourney(): void {
   runtimeState.professionId = professionId;
   saveRuntime(runtimeState);
   clearNotes();
+  // Clear chapter flow phase and review mode so the next journey starts clean.
+  try { sessionStorage.removeItem('cn.chapterFlowPhase'); sessionStorage.removeItem('cn.reviewMode'); } catch { /* private browsing */ }
   // BUGFIX (2026-07-08): clearAll() removed here — see resetRuntime() comment above.
   // clearAll() would wipe every event-bus subscriber, including module-singleton
   // listeners (skill_engine MISSION_SUBMIT) that never re-subscribe, causing
