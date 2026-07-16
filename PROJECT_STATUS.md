@@ -79,6 +79,23 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-16 — OpenCode (фикс: Restart Journey показывал пустой экран)
+
+**Диагноз:** `setActiveChapter('resume')` не сбрасывает nodeStates, поэтому `allNodesCompleted` остаётся `true` (все ноды ещё в состоянии `confidence`). `JourneyHUD` видит `allNodesCompleted` и рендерит пустой блок (`<></>`), потому что `phase !== 'cinematic'`.
+
+**Новая функция:** `restartFromChapter(chapterId)` в `runtime_controller.ts`:
+- Сбрасывает nodeStates для всех глав начиная с `chapterId` в `locked`
+- Первую ноду сбрасываемой главы ставит в `awareness`
+- Сбрасывает `chapterProgress` для этих глав в 0
+- Устанавливает `activeChapterId` и `activeNodeId`
+- Сохраняет и эмитит события `CHAPTER_CHANGED`, `NODE_CHANGED`, `UI_REFRESH`
+
+**Изменения:**
+- `runtime_controller.ts`: добавлена новая экспортируемая функция `restartFromChapter`
+- `HeroPhase.tsx`: импорт и вызов `setActiveChapter` заменены на `restartFromChapter`
+
+**Проверено:** `npx tsc --noEmit` — чисто. `npx vite build` — чисто.
+
 ### 2026-07-16 — OpenCode (удалён JourneyCompleteScreen, HeroPhase теперь терминальный)
 
 Удалён `JourneyCompleteScreen` — устаревший дублирующий экран, который показывался ПОСЛЕ HeroPhase как промежуточный. Flow теперь: cinematic → HeroPhase (остров + 3 кнопки) → терминальное действие (Go to Interview / Restart Journey / Choose New Profession) → напрямую без промежуточных экранов.

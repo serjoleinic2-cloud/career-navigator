@@ -561,6 +561,69 @@ export function advanceChapter(): JourneyRuntimeState {
   return runtimeState;
 }
 
+/**
+ * Сбрасывает все главы начиная с указанной обратно в начальное состояние,
+ * чтобы пользователь мог перепройти путь с выбранной точки.
+ * Используется кнопкой «Restart Journey» в HeroPhase.
+ *
+ * Ноды глав ДО chapterId остаются нетронутыми (confidence).
+ * Ноды глав начиная с chapterId сбрасываются в 'locked',
+ * кроме первой ноды целевой главы — она ставится в 'awareness'.
+ */
+export function restartFromChapter(chapterId: string): JourneyRuntimeState {
+  if (!runtimeState) throw new Error('Runtime not initialized');
+
+  const chapters = getActiveChapters();
+  const targetIndex = chapters.findIndex(c => c.id === chapterId);
+  if (targetIndex === -1) throw new Error(`Chapter ${chapterId} not found`);
+
+  const chaptersToReset = chapters.slice(targetIndex);
+  const updatedNodeStates = { ...runtimeState.nodeStates };
+
+  for (const ch of chaptersToReset) {
+    for (const nodeId of ch.nodeIds) {
+      if (updatedNodeStates[nodeId]) {
+        updatedNodeStates[nodeId] = {
+          ...updatedNodeStates[nodeId],
+          state: 'locked' as const,
+          nextState: 'confidence' as const,
+        };
+      }
+    }
+  }
+
+  // Разблокировать первую ноду целевой главы
+  const firstNodeId = chapters[targetIndex].nodeIds[0];
+  if (firstNodeId && updatedNodeStates[firstNodeId]) {
+    updatedNodeStates[firstNodeId] = {
+      ...updatedNodeStates[firstNodeId],
+      state: 'awareness' as const,
+      nextState: 'confidence' as const,
+    };
+  }
+
+  // Пересчитать chapterProgress для сброшенных глав
+  const updatedChapterProgress = { ...runtimeState.chapterProgress };
+  for (const ch of chaptersToReset) {
+    updatedChapterProgress[ch.id] = 0;
+  }
+
+  runtimeState = {
+    ...runtimeState,
+    activeChapterId: chapterId,
+    activeNodeId: firstNodeId ?? runtimeState.activeNodeId,
+    nodeStates: updatedNodeStates,
+    chapterProgress: updatedChapterProgress,
+  };
+
+  saveRuntime(runtimeState);
+  emit('CHAPTER_CHANGED', { chapterId });
+  if (firstNodeId) emit('NODE_CHANGED', { nodeId: firstNodeId });
+  emit('UI_REFRESH', {});
+
+  return runtimeState;
+}
+
 export function resetRuntime(): void {
   runtimeState = null;
   activeTask = null;

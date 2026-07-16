@@ -1,6 +1,6 @@
 import { Icon } from '@/components/Icon/Icon';
 import { emit } from '@/core/events/system_event_bus';
-import { setActiveChapter } from '@/core/runtime/runtime_controller';
+import { restartFromChapter } from '@/core/runtime/runtime_controller';
 import { FinalParticles } from '../components/Particles';
 import { getProfession } from '@/professions/profession_registry';
 
@@ -61,7 +61,7 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onH
           <button
             className="fc-btn fc-btn--ghost"
             onClick={() => {
-              setActiveChapter('resume');
+              restartFromChapter('resume');
               onComplete();
             }}
           >
