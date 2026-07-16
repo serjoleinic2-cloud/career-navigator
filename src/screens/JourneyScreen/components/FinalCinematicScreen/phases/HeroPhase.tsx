@@ -9,11 +9,15 @@ interface HeroPhaseProps {
   heroLoaded: boolean;
   heroError: boolean;
   onComplete: () => void;
+  /** Called when user chooses "Choose New Profession" — signals JourneyHUD
+   * to exitReview() and tear down reviewMode before the journey resets,
+   * so the next journey starts from a clean phase='active' state. */
+  onReset: () => void;
   onHeroLoad: () => void;
   onHeroError: () => void;
 }
 
-export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onHeroLoad, onHeroError }: HeroPhaseProps) {
+export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onReset, onHeroLoad, onHeroError }: HeroPhaseProps) {
   const heroSrc = `/art/${professionId}/island_${professionId}.png`;
   // BUGFIX (2026-07-13): title was hardcoded as "Software Engineer" here,
   // so the final "Journey Complete" screen showed the wrong profession name
@@ -61,6 +65,11 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onH
           <button
             className="fc-btn fc-btn--ghost"
             onClick={() => {
+              // Navigate to first chapter for review — no progress reset.
+              // enterReview() is called automatically in handleGoToPrevChapter /
+              // handleGoToNextChapter when phase === 'complete', but setActiveChapter
+              // here bypasses those handlers, so we call onComplete() which triggers
+              // finishCinematic() -> reviewMode = true in useChapterHub.
               setActiveChapter('resume');
               onComplete();
             }}
@@ -69,7 +78,12 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onH
           </button>
           <button
             className="fc-btn fc-btn--ghost"
-            onClick={() => { onComplete(); emit('RESET_JOURNEY', {}); }}
+            onClick={() => {
+              // Full reset: exitReview() first so phase/reviewMode are clean,
+              // then RESET_JOURNEY tears down the runtime and returns to onboarding.
+              onReset();
+              emit('RESET_JOURNEY', {});
+            }}
           >
             Choose New Profession
           </button>
@@ -78,4 +92,3 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onH
     </div>
   );
 }
-
