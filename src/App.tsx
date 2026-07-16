@@ -15,7 +15,7 @@ import { JourneyHUD } from './screens/JourneyScreen';
 import { InterviewTrainerScreen } from './screens/InterviewTrainerScreen';
 import { BottomNav } from './components/BottomNav/BottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
-import { subscribe } from './core/events/system_event_bus';
+import { subscribe, emit } from './core/events/system_event_bus';
 import { initNotifications } from './core/notifications/notification_service';
 import type { PlaybookCategory } from './core/playbook/playbook_types';
 import './App.css';
@@ -213,6 +213,7 @@ function AppInner() {
             }}
             onCitySelect={() => {
               setCurrentScreen('journey');
+              emit('CITY_SELECTED', {});
             }}
           />
         );

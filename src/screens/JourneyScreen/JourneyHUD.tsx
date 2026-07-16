@@ -230,6 +230,17 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
     }
   }, [allNodesCompleted, phase, reviewMode, startCinematic]);
 
+  useEffect(() => {
+    return subscribe('CITY_SELECTED', () => {
+      const rt = getRuntimeState();
+      if (!rt) return;
+      const done = Object.values(rt.nodeStates).every(n => n.state === 'confidence');
+      if (done) {
+        startCinematic();
+      }
+    });
+  }, [startCinematic]);
+
   const handleNodeSelect = useCallback((nodeId: string) => {
     const clickedRuntime = getRuntimeState();
     if (!clickedRuntime?.nodeStates[nodeId]) {
