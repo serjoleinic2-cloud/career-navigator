@@ -19,6 +19,8 @@ interface FinalCinematicScreenProps {
   professionId: string;
   chapters: CinematicChapter[];
   onComplete: () => void;
+  /** Passed through to HeroPhase for the "Choose New Profession" button. */
+  onReset: () => void;
 }
 
 const ISLAND_SPACING = 420;
@@ -38,7 +40,7 @@ interface BridgeState {
   done: boolean;
 }
 
-export function FinalCinematicScreen({ professionId, chapters, onComplete }: FinalCinematicScreenProps) {
+export function FinalCinematicScreen({ professionId, chapters, onComplete, onReset }: FinalCinematicScreenProps) {
   const theme = useMemo(() => getWorldThemeOrDefault(professionId), [professionId]);
 
   const islands = useMemo(() => chapters.map((ch) => {
@@ -436,6 +438,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
           heroLoaded={heroLoaded}
           heroError={heroError}
           onComplete={onComplete}
+          onReset={onReset}
           onHeroLoad={() => setHeroLoaded(true)}
           onHeroError={() => setHeroError(true)}
         />
