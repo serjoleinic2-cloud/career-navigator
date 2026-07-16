@@ -14,7 +14,6 @@ import type { ChapterData } from './components/ChapterHub';
 import { Icon } from '@/components/Icon/Icon';
 import { BridgeRestoreScreen } from './components/BridgeRestoreScreen';
 import { FinalCinematicScreen } from './components/FinalCinematicScreen';
-import { JourneyCompleteScreen } from './components/JourneyCompleteScreen';
 import { useCamera } from './hooks/useCamera';
 import { useChapterHub } from './hooks/useChapterHub';
 import './JourneyScreen.css';
@@ -219,7 +218,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
         startBridge();
       }
       // If there's no next chapter, allNodesCompleted (below) already
-      // takes over and shows JourneyCompleteScreen instead.
+      // takes over and shows the terminal state instead.
     }
   }, [activeChapter, phase, showMission, nextChapter, startBridge, isReviewingPastChapter]);
 
@@ -390,7 +389,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
     );
   }
 
-  if (allNodesCompleted || phase === 'cinematic' || phase === 'complete') {
+  if (allNodesCompleted || phase === 'cinematic') {
     return (
       <>
         {phase === 'cinematic' && (
@@ -402,21 +401,6 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
               refresh();
             }}
           />
-        )}
-        {phase === 'complete' && (
-          <div className="journey-screen journey-hud">
-            <JourneyCompleteScreen
-              professionId={runtime?.professionId ?? 'default'}
-              totalSkills={professionNodes.length}
-              tasksCompleted={chapters.reduce((sum, c) => sum + c.completedCount, 0)}
-              hoursInvested={Math.round((runtime?.totalMinutesInvested ?? 0) / 60)}
-              readinessScore={runtime?.readinessScore ?? 0}
-              confidenceScore={runtime?.confidenceScore ?? 0}
-              chapters={chapters.map(c => ({ title: c.title, completed: c.isCompleted }))}
-              onStartInterview={() => emit('START_INTERVIEW_TRAINER', {})}
-              onNewJourney={() => emit('RESET_JOURNEY', {})}
-            />
-          </div>
         )}
       </>
     );

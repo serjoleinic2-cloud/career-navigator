@@ -79,6 +79,17 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-16 — OpenCode (удалён JourneyCompleteScreen, HeroPhase теперь терминальный)
+
+Удалён `JourneyCompleteScreen` — устаревший дублирующий экран, который показывался ПОСЛЕ HeroPhase как промежуточный. Flow теперь: cinematic → HeroPhase (остров + 3 кнопки) → терминальное действие (Go to Interview / Restart Journey / Choose New Profession) → напрямую без промежуточных экранов.
+
+**Изменения:**
+- `JourneyHUD.tsx`: удалён импорт и рендер `JourneyCompleteScreen`. Блок `if (allNodesCompleted || phase === 'cinematic' || phase === 'complete')` изменён на `if (allNodesCompleted || phase === 'cinematic')` — при `phase === 'complete'` компонент проваливается в обычный рендер (RESET_JOURNEY/START_INTERVIEW_TRAINER уже вызваны).
+- `useChapterHub.ts`: обновлён комментарий к фазе 'complete'.
+- Файлы удалены через `git rm`: `JourneyCompleteScreen.tsx`, `JourneyCompleteScreen.css`.
+
+**Проверено:** `npx tsc --noEmit` — чисто (pre-existing только). `npx vite build` — чисто.
+
 ### 2026-07-16 — OpenCode (4 задачи: skip cinematic, restart journey btn, task progress %, playbook tap hint)
 
 **TASK 1 — Кнопка «Tap to Skip» на анимации**

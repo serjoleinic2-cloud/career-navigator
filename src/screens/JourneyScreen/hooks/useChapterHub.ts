@@ -10,7 +10,9 @@ import { useState, useCallback } from 'react';
  * 'bridge'     — BridgeRestoreScreen plays (short animation: the bridge to
  *                the next chapter "restores"), then the HUD camera rises.
  * 'cinematic'  — FinalCinematicScreen plays after ALL chapters completed.
- * 'complete'   — JourneyCompleteScreen shown after cinematic ends.
+ * 'complete'   — terminal state after cinematic; HeroPhase buttons fire
+ *                their actions (interview/restart/reset) and JourneyHUD
+ *                falls through to normal render.
  */
 export type ChapterFlowPhase = 'active' | 'celebrate' | 'bridge' | 'cinematic' | 'complete';
 
