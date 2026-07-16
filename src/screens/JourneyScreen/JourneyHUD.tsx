@@ -62,6 +62,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
   const [isReadonlyMission, setIsReadonlyMission] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
+  const [showReviewHero, setShowReviewHero] = useState(false);
   const { phase, reviewMode, startBridge, finishBridge, startCinematic, finishCinematic, enterReview, exitReview } = useChapterHub();
   const { cameraStyle, moveUp, zoomOut } = useCamera();
   const prevChapterCompletedRef = useRef<string | null>(null);
@@ -301,13 +302,14 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
   }, [prevChapter, phase, enterReview, refresh]);
 
   const handleGoToNextChapter = useCallback(() => {
-    if (!nextChapter) return;
+    if (!nextChapter) {
+      if (reviewMode) setShowReviewHero(true);
+      return;
+    }
     if (phase === 'complete') enterReview();
-    // Only switch view. Never mutate progression — the Next button is
-    // navigation, not chapter completion.
     setActiveChapter(nextChapter.id);
     refresh();
-  }, [nextChapter, phase, enterReview, refresh]);
+  }, [nextChapter, phase, reviewMode, enterReview, refresh]);
 
   const handleMissionComplete = useCallback(() => {
     setShowMission(false);
@@ -393,6 +395,18 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
     );
   }
 
+  if (showReviewHero) {
+    return (
+      <FinalCinematicScreen
+        professionId={runtime?.professionId ?? 'default'}
+        chapters={chapters.map(c => ({ id: c.id, title: c.title, completed: c.isCompleted, artFilename: c.artFilename }))}
+        onComplete={() => { setShowReviewHero(false); }}
+        onReset={() => { setShowReviewHero(false); exitReview(); }}
+        skipAnimation
+      />
+    );
+  }
+
   // BUGFIX (2026-07-16): allNodesCompleted removed from this gate — it blocked
   // post-cinematic review navigation. phase === 'cinematic' is the only correct
   // trigger; 'complete' phase falls through to normal HUD where setActiveChapter
@@ -443,30 +457,13 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
             >
               ← Back
             </button>
-            {nextChapter ? (
-              <button
-                className="journey-chapter-nav-btn primary"
-                onClick={handleGoToNextChapter}
-              >
-                Next →
-              </button>
-            ) : reviewMode ? (
-              // Last chapter in review mode — show final actions instead of disabled Next
-              <div className="journey-review-end">
-                <button
-                  className="journey-chapter-nav-btn primary"
-                  onClick={() => { emit('START_INTERVIEW_TRAINER', {}); }}
-                >
-                  Go to Interview
-                </button>
-                <button
-                  className="journey-chapter-nav-btn"
-                  onClick={() => { exitReview(); emit('RESET_JOURNEY', {}); }}
-                >
-                  New Profession
-                </button>
-              </div>
-            ) : null}
+            <button
+              className="journey-chapter-nav-btn primary"
+              onClick={handleGoToNextChapter}
+              disabled={!nextChapter && !reviewMode}
+            >
+              Next →
+            </button>
           </div>
         )}
       </div>
