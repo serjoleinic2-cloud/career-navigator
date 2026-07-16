@@ -409,6 +409,9 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
               finishCinematic();
               refresh();
             }}
+            onReset={() => {
+              exitReview();
+            }}
           />
         )}
       </>
