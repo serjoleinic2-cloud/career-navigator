@@ -62,7 +62,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
   const [isReadonlyMission, setIsReadonlyMission] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
-  const { phase, startBridge, finishBridge, startCinematic, finishCinematic } = useChapterHub();
+  const { phase, reviewMode, startBridge, finishBridge, startCinematic, finishCinematic, enterReview, exitReview } = useChapterHub();
   const { cameraStyle, moveUp, zoomOut } = useCamera();
   const prevChapterCompletedRef = useRef<string | null>(null);
 
@@ -210,6 +210,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
       phase === 'active' &&
       !showMission &&
       !isReviewingPastChapter &&
+      !reviewMode &&
       prevChapterCompletedRef.current !== activeChapter.id
     ) {
       prevChapterCompletedRef.current = activeChapter.id;
@@ -223,10 +224,11 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
   }, [activeChapter, phase, showMission, nextChapter, startBridge, isReviewingPastChapter]);
 
   useEffect(() => {
-    if (allNodesCompleted && phase === 'active') {
+    // reviewMode: journey already complete, user is browsing — never re-trigger cinematic.
+    if (allNodesCompleted && phase === 'active' && !reviewMode) {
       startCinematic();
     }
-  }, [allNodesCompleted, phase, startCinematic]);
+  }, [allNodesCompleted, phase, reviewMode, startCinematic]);
 
   const handleNodeSelect = useCallback((nodeId: string) => {
     const clickedRuntime = getRuntimeState();
@@ -293,17 +295,19 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
   // taps use), so no new state-mutation logic was introduced.
   const handleGoToPrevChapter = useCallback(() => {
     if (!prevChapter) return;
+    if (phase === 'complete') enterReview();
     setActiveChapter(prevChapter.id);
     refresh();
-  }, [prevChapter, refresh]);
+  }, [prevChapter, phase, enterReview, refresh]);
 
   const handleGoToNextChapter = useCallback(() => {
     if (!nextChapter) return;
+    if (phase === 'complete') enterReview();
     // Only switch view. Never mutate progression — the Next button is
     // navigation, not chapter completion.
     setActiveChapter(nextChapter.id);
     refresh();
-  }, [nextChapter, refresh]);
+  }, [nextChapter, phase, enterReview, refresh]);
 
   const handleMissionComplete = useCallback(() => {
     setShowMission(false);
@@ -427,7 +431,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
           onNodeSelect={handleNodeSelect}
         />
 
-        {activeChapter?.isCompleted && phase === 'active' && (
+        {activeChapter?.isCompleted && (phase === 'active' || reviewMode) && (
           <div className="journey-chapter-nav">
             <button
               className="journey-chapter-nav-btn"
