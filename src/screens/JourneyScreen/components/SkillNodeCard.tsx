@@ -71,7 +71,14 @@ export function SkillNodeCard({ node, state, index: _index, progress, onSelect }
       {state !== 'locked' && (
         <div className="mission-row-action">
           {state === 'completed'
-            ? <span className="mission-row-done">Done</span>
+            ? (
+              <span className="mission-row-done">
+                Done
+                {progress > 0 && (
+                  <span className="mission-row-pct"> · {Math.round(progress)}%</span>
+                )}
+              </span>
+            )
             : <span className="mission-row-go" style={{ color: accentColor }}>Start ›</span>
           }
         </div>

@@ -46,6 +46,10 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
   const accent = getChapterAccent(worldTheme, chapter.id);
   const artSrc = chapter.artFilename ? `art/${professionId}/${chapter.artFilename}` : '';
 
+  const runtimeState = getRuntimeState();
+  const chapterProgressMap = runtimeState?.chapterProgress ?? {};
+  const chapterPct = chapterProgressMap[chapter.id] ?? 0;
+
   return (
     <div
       className="chapter-hub chapter-hub-single"
@@ -105,7 +109,7 @@ export function ChapterHub({ chapter, activeNodeId, onNodeSelect }: ChapterHubPr
             node={skillNode}
             state={getNodeCardState(skillNode, activeNodeId)}
             index={idx}
-            progress={0}
+            progress={chapterPct}
             onSelect={onNodeSelect}
           />
         ))}

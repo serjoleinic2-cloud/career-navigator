@@ -23,8 +23,8 @@
 > через git напрямую) — правило всё равно действует, просто без автоматической
 > проверки, и агент должен соблюдать его вручную.
 
-**Последнее обновление:** 2026-07-15
-**Обновил:** Claude (4-я профессия: AI / Machine Learning Engineer)
+**Последнее обновление:** 2026-07-16
+**Обновил:** OpenCode (skip cinematic, restart journey, task progress %, playbook tap hint)
 **Последний коммит на момент записи:** будет создан этой сессией (main, до неё см. историю ниже)
 
 ---
@@ -78,6 +78,30 @@
 ---
 
 ## История изменений (снизу — новее)
+
+### 2026-07-16 — OpenCode (4 задачи: skip cinematic, restart journey btn, task progress %, playbook tap hint)
+
+**TASK 1 — Кнопка «Tap to Skip» на анимации**
+
+В `FinalCinematicScreen/index.tsx` добавлена кнопка «Tap to Skip», видимая на всех фазах кроме `'hero'`. Нажатие сразу вызывает `onComplete()`. CSS: `.fc-skip-btn` — absolute, bottom: 36px, полупрозрачный glass-стиль.
+
+**TASK 2 — Третья кнопка «Restart Journey» на экране HeroPhase**
+
+В `HeroPhase.tsx` между "Go to Interview" и "Choose New Profession" добавлена кнопка "Restart Journey" (ghost-стиль). Импортирован `setActiveChapter` из `runtime_controller`. Нажатие: `setActiveChapter('resume')` + `onComplete()` — возвращает к первой главе без сброса профессии.
+
+**TASK 3 — Процент прохождения на кнопках задач в ChapterHub**
+
+`ChapterHub.tsx`: из `getRuntimeState()?.chapterProgress` извлекается `chapterPct` для текущей главы и передаётся в `SkillNodeCard` вместо захардкоженного `0`.
+`SkillNodeCard.tsx`: для `state === 'completed'` рядом с «Done» показывается `· {progress}%` (если > 0).
+CSS: `.mission-row-pct` добавлен в `JourneyScreen.css`.
+
+**TASK 4 — Playbook: убраны хэштеги, добавлена подсказка «tap to open»**
+
+`EntryCard.tsx`: хэштеги (`entry.tags`) полностью убраны. Добавлен `<span className="playbook-entry-tap-hint">Tap to open ›</span>` справа от заголовка в новом flex-контейнере `.playbook-entry-card-header`.
+CSS: `.playbook-entry-card-header`, `.playbook-entry-tap-hint` добавлены в `PlaybookScreen.css`.
+
+**Проверено:** `npx tsc --noEmit` — 2 предупреждения (pre-existing, `product_manager/world/theme.ts`). `npx vite build` — чисто.
+**Не проверено вживую:** все 4 задачи — проверить на устройстве.
 
 ### 2026-07-15 — Claude (добавлена 4-я профессия: AI / Machine Learning Engineer)
 

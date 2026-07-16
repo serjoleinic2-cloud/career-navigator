@@ -439,6 +439,16 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
           onHeroError={() => setHeroError(true)}
         />
       )}
+
+      {phase !== 'hero' && (
+        <button
+          className="fc-skip-btn"
+          onClick={onComplete}
+          aria-label="Skip cinematic"
+        >
+          Tap to Skip
+        </button>
+      )}
     </div>,
     document.body
   );
