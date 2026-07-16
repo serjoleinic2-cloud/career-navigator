@@ -17,6 +17,7 @@ interface MissionScreenProps {
   chapterTitle?: string;
   onComplete: () => void;
   onClose?: () => void;
+  isReadonly?: boolean;
 }
 
 type TaskView = 'active' | 'completing' | 'completed' | 'retry';
@@ -43,7 +44,7 @@ interface MissionOutcome {
   skillProgressPercent?: number;
 }
 
-export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chapterTitle, onComplete, onClose }) => {
+export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chapterTitle, onComplete, onClose, isReadonly = false }) => {
   const [taskView, setTaskView] = useState<TaskView>('active');
   const [textInput, setTextInput] = useState('');
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
@@ -78,6 +79,15 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
     setErrorMessage(null);
     setOutcome(null);
   }, [activeNodeId]);
+
+  useEffect(() => {
+    if (isReadonly && activeTask) {
+      const existing = getNotesByTask(activeTask.id);
+      if (existing.length > 0) {
+        setTextInput(existing[0].content);
+      }
+    }
+  }, [isReadonly, activeTask?.id]);
 
 
 
@@ -368,6 +378,11 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
         )}
 
         <div className="task-content">
+          {isReadonly && (
+            <div className="mission-readonly-banner">
+              <span>✓ Completed — read only</span>
+            </div>
+          )}
           {activeTask.completionCriteria.length > 0 && (
             <div className="task-section">
               <div className="task-section-label">Completion Checklist</div>
@@ -394,14 +409,18 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
               className="task-textarea"
               placeholder="Write your thoughts, answers, or reflection here..."
               value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
+              onChange={(e) => !isReadonly && setTextInput(e.target.value)}
               rows={4}
+              readOnly={isReadonly}
+              style={isReadonly ? { opacity: 0.7, cursor: 'default' } : {}}
             />
-            <div className={`text-quality-hint ${textInput.trim().length >= 40 ? 'text-quality-hint-ready' : ''}`}>
-              {textInput.trim().length >= 40
-                ? <><Icon name="check" size={14} /> Detailed enough for full credit on this mission.</>
-                : `Write at least 2–3 full sentences (${textInput.trim().length}/40 characters) for full credit. Checklist and star rating below are for your own reflection and don't affect whether this mission counts as a full pass.`}
-            </div>
+            {!isReadonly && (
+              <div className={`text-quality-hint ${textInput.trim().length >= 40 ? 'text-quality-hint-ready' : ''}`}>
+                {textInput.trim().length >= 40
+                  ? <><Icon name="check" size={14} /> Detailed enough for full credit on this mission.</>
+                  : `Write at least 2–3 full sentences (${textInput.trim().length}/40 characters) for full credit. Checklist and star rating below are for your own reflection and don't affect whether this mission counts as a full pass.`}
+              </div>
+            )}
           </div>
 
           <div className="task-section">
@@ -438,7 +457,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
       )}
 
       <div className="mission-bottom">
-        {taskView === 'active' && (
+        {taskView === 'active' && !isReadonly && (
           <button
             className="mission-primary-btn"
             onClick={handleSubmit}
@@ -448,7 +467,11 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ runtimeState, chap
           </button>
         )}
 
-        {taskView === 'active' && onClose && (
+        {taskView === 'active' && isReadonly && (
+          <button className="mission-back-btn" onClick={onClose}>← Back</button>
+        )}
+
+        {taskView === 'active' && !isReadonly && onClose && (
           <button className="mission-back-btn" onClick={onClose}>← Back</button>
         )}
 

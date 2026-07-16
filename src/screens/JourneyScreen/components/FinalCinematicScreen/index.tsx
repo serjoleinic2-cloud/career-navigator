@@ -68,6 +68,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
   const [worldOpacity, setWorldOpacity] = useState(1);
   const [heroLoaded,   setHeroLoaded]   = useState(false);
   const [heroError,    setHeroError]    = useState(false);
+  const [skipped,      setSkipped]      = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -440,10 +441,14 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete }: Fin
         />
       )}
 
-      {phase !== 'hero' && (
+      {phase !== 'hero' && !skipped && (
         <button
           className="fc-skip-btn"
-          onClick={onComplete}
+          onClick={() => {
+            cancelAnimationFrame(bridgeRafRef.current);
+            setSkipped(true);
+            setPhase('hero');
+          }}
           aria-label="Skip cinematic"
         >
           Tap to Skip

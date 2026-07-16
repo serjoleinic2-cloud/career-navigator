@@ -385,6 +385,19 @@
   font-weight: 500;
 }
 
+/* Readonly banner */
+.mission-readonly-banner {
+  background: rgba(0, 229, 160, 0.08);
+  border: 1px solid rgba(0, 229, 160, 0.2);
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 229, 160, 0.7);
+  letter-spacing: 0.03em;
+}
+
 /* Bottom */
 .mission-bottom {
   /* MissionScreen fills 100vh in normal flow, but the floating BottomNav

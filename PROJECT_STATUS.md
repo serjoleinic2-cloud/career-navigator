@@ -103,6 +103,28 @@ CSS: `.playbook-entry-card-header`, `.playbook-entry-tap-hint` добавлен�
 **Проверено:** `npx tsc --noEmit` — 2 предупреждения (pre-existing, `product_manager/world/theme.ts`). `npx vite build` — чисто.
 **Не проверено вживую:** все 4 задачи — проверить на устройстве.
 
+### 2026-07-16 — OpenCode (фикс skip cinematic + read-only режим для выполненных заданий)
+
+**TASK 1 — Баг: Tap to Skip показывал старый JourneyCompleteScreen вместо HeroPhase**
+
+`FinalCinematicScreen/index.tsx`: добавлен state `skipped`. Кнопка «Tap to Skip» теперь вместо `onComplete()` делает `cancelAnimationFrame(bridgeRafRef.current)` + `setSkipped(true)` + `setPhase('hero')` — перепрыгивает сразу на HeroPhase (остров + 3 кнопки), минуя все промежуточные фазы. Кнопка скрывается после нажатия (`!skipped`). `onComplete()` по-прежнему вызывается только кнопками внутри HeroPhase.
+
+**TASK 2 — Read-only режим для выполненных заданий**
+
+`JourneyHUD.tsx`: добавлен state `isReadonlyMission`. `handleNodeSelect` для нод в состоянии `confidence`/`execution` теперь открывает MissionScreen в read-only вместо показа тоста "This step is already complete.". При открытии обычных заданий `isReadonlyMission` сбрасывается в `false`. Проп `isReadonly` передаётся в MissionScreen; при закрытии `isReadonlyMission` сбрасывается.
+
+`MissionScreen.tsx`: добавлен проп `isReadonly?: boolean`. При `isReadonly=true`:
+- Загружается предыдущий ответ из notes через `getNotesByTask()`
+- Показывается зелёный баннер «✓ Completed — read only»
+- Textarea блокируется (`readOnly`, `opacity: 0.7`)
+- Кнопка «Complete Mission» скрыта, вместо неё только «← Back»
+- Quality hint скрыт
+
+CSS: `.mission-readonly-banner` добавлен в `MissionScreen.css`.
+
+**Проверено:** `npx tsc --noEmit` — чисто (pre-existing errors только). `npx vite build` — чисто.
+**Не проверено вживую:** (1) Skip на любой фазе до hero — должен появиться HeroPhase. (2) Открыть Done-ноду — read-only с баннером и старым ответом.
+
 ### 2026-07-15 — Claude (добавлена 4-я профессия: AI / Machine Learning Engineer)
 
 Serj попросил создать 4-ю профессию (AI/ML Engineer) по аналогии с уже существующими, объём 1:1 с Cybersecurity. Реализовано полностью: `src/professions/ai_ml_engineer/` — 6 глав (Resume/LinkedIn/Applications/Interviews/Offer Preparation/Offer), 38 skill-нод (`skill_nodes.ts` + `skill_nodes_extended.ts`), таски на каждую ноду (`tasks/resume|linkedin|applications|interviews|offer.ts`), Playbook (`playbook_data.ts`), свои вопросы для интервью-тренажёра (`interview/questions.ts`, зарегистрированы в `QUESTION_MAP` в `interview_question_loader.ts`), мир/тема/арт/layout (`world/theme.ts`, `world/art.ts`, `world/layout.ts` — тема "The Neural Frontier"). Профессия подключена в `profession_auto_loader.ts`, `src/professions/index.ts`, `loader/profession_manifest.ts` и добавлена в каталог `profession_metadata.ts` (по аналогии с Cybersecurity — авторегистрация делает её "available" в онбординге, запись в каталоге просто держит id в синхроне на будущее). Сгенерированы плейсхолдер-арты (PIL, градиенты в цветах темы) в `public/art/ai_ml_engineer/` (journey.jpg + 6 island-*.png) — на момент записи для профессии нет ни одного реального арт-ассета, всё градиентные заглушки, как раньше было для Cybersecurity до того, как под неё дозаполнили арт.

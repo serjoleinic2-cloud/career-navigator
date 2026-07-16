@@ -60,6 +60,7 @@ const DEFAULT_ICON = '📄';
 export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) {
   const [, setTick] = useState(0);
   const [showMission, setShowMission] = useState(false);
+  const [isReadonlyMission, setIsReadonlyMission] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
   const { phase, startBridge, finishBridge, startCinematic, finishCinematic } = useChapterHub();
@@ -248,10 +249,15 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
     // which read as "the next node never activates". Completed nodes are
     // now shown as done instead of reopening their mission.
     if (clickedNodeState === 'confidence' || clickedNodeState === 'execution') {
-      setLockedToast('This step is already complete.');
+      setIsReadonlyMission(true);
+      if (nodeId !== ui.activeNodeId) {
+        setActiveNode(nodeId);
+      }
+      setShowMission(true);
       return;
     }
     if (nodeId === ui.activeNodeId) {
+      setIsReadonlyMission(false);
       setShowMission(true);
       return;
     }
@@ -367,7 +373,8 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
         runtimeState={runtime}
         chapterTitle={ui.currentChapterTitle}
         onComplete={handleMissionComplete}
-        onClose={() => setShowMission(false)}
+        onClose={() => { setShowMission(false); setIsReadonlyMission(false); }}
+        isReadonly={isReadonlyMission}
       />
     );
   }
