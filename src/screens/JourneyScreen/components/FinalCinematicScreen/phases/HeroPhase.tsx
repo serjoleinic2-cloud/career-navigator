@@ -1,6 +1,5 @@
 import { Icon } from '@/components/Icon/Icon';
 import { emit } from '@/core/events/system_event_bus';
-import { restartFromChapter } from '@/core/runtime/runtime_controller';
 import { FinalParticles } from '../components/Particles';
 import { getProfession } from '@/professions/profession_registry';
 
@@ -65,11 +64,21 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onR
           <button
             className="fc-btn fc-btn--ghost"
             onClick={() => {
-              restartFromChapter('resume');
+              // BUGFIX (2026-07-16): this used to call restartFromChapter('resume'),
+              // which wipes ALL chapters back to 'locked' — 'resume' is chapters[0]
+              // in CHAPTER_ORDER (chapters.ts), so restartFromChapter('resume')
+              // resets the entire journey to 0%, duplicating "Choose New Profession"
+              // below but without letting the user pick a new profession first.
+              // What this button is actually meant to do (per the label and the
+              // product intent — revisit finished chapters, see what wasn't done
+              // well) is already implemented as reviewMode: onComplete() calls
+              // finishCinematic(), which sets phase='complete' and reviewMode=true,
+              // letting the user browse back through already-completed chapters
+              // via the Back/Next nav in JourneyHUD — with zero progress lost.
               onComplete();
             }}
           >
-            Restart Journey
+            Review Journey
           </button>
           <button
             className="fc-btn fc-btn--ghost"
