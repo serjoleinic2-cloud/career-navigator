@@ -1,6 +1,6 @@
 import { Icon } from '@/components/Icon/Icon';
 import { emit } from '@/core/events/system_event_bus';
-import { setActiveChapter } from '@/core/runtime/runtime_controller';
+import { restartFromChapter } from '@/core/runtime/runtime_controller';
 import { FinalParticles } from '../components/Particles';
 import { getProfession } from '@/professions/profession_registry';
 
@@ -65,16 +65,11 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onR
           <button
             className="fc-btn fc-btn--ghost"
             onClick={() => {
-              // Navigate to first chapter for review — no progress reset.
-              // enterReview() is called automatically in handleGoToPrevChapter /
-              // handleGoToNextChapter when phase === 'complete', but setActiveChapter
-              // here bypasses those handlers, so we call onComplete() which triggers
-              // finishCinematic() -> reviewMode = true in useChapterHub.
-              setActiveChapter('resume');
+              restartFromChapter('resume');
               onComplete();
             }}
           >
-            Review Journey
+            Restart Journey
           </button>
           <button
             className="fc-btn fc-btn--ghost"

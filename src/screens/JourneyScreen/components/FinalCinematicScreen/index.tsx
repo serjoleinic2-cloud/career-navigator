@@ -21,8 +21,6 @@ interface FinalCinematicScreenProps {
   onComplete: () => void;
   /** Passed through to HeroPhase for the "Choose New Profession" button. */
   onReset: () => void;
-  /** Skip the full cinematic and jump straight to HeroPhase (used in review mode). */
-  skipAnimation?: boolean;
 }
 
 const ISLAND_SPACING = 420;
@@ -42,7 +40,7 @@ interface BridgeState {
   done: boolean;
 }
 
-export function FinalCinematicScreen({ professionId, chapters, onComplete, onReset, skipAnimation }: FinalCinematicScreenProps) {
+export function FinalCinematicScreen({ professionId, chapters, onComplete, onReset }: FinalCinematicScreenProps) {
   const theme = useMemo(() => getWorldThemeOrDefault(professionId), [professionId]);
 
   const islands = useMemo(() => chapters.map((ch) => {
@@ -62,7 +60,7 @@ export function FinalCinematicScreen({ professionId, chapters, onComplete, onRes
   const camYRef = useRef(0);
   const camScaleRef = useRef(1);
 
-  const [phase,        setPhase]        = useState<Phase>(skipAnimation ? 'hero' : 'hud-fade');
+  const [phase,        setPhase]        = useState<Phase>('hud-fade');
   const [bridges,      setBridges]      = useState<BridgeState[]>(() =>
     Array(Math.max(N - 1, 0)).fill(null).map(() => ({ progress: 0, done: false }))
   );

@@ -62,7 +62,6 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
   const [isReadonlyMission, setIsReadonlyMission] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [nextChapterTitle, setNextChapterTitle] = useState<string>('');
-  const [showReviewHero, setShowReviewHero] = useState(false);
   const { phase, reviewMode, startBridge, finishBridge, startCinematic, finishCinematic, enterReview, exitReview } = useChapterHub();
   const { cameraStyle, moveUp, zoomOut } = useCamera();
   const prevChapterCompletedRef = useRef<string | null>(null);
@@ -303,13 +302,12 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
 
   const handleGoToNextChapter = useCallback(() => {
     if (!nextChapter) {
-      if (reviewMode) setShowReviewHero(true);
+      startCinematic();
       return;
     }
-    if (phase === 'complete') enterReview();
     setActiveChapter(nextChapter.id);
     refresh();
-  }, [nextChapter, phase, reviewMode, enterReview, refresh]);
+  }, [nextChapter, startCinematic, refresh]);
 
   const handleMissionComplete = useCallback(() => {
     setShowMission(false);
@@ -395,17 +393,7 @@ export function JourneyHUD({ onOpenSettings }: { onOpenSettings?: () => void }) 
     );
   }
 
-  if (showReviewHero) {
-    return (
-      <FinalCinematicScreen
-        professionId={runtime?.professionId ?? 'default'}
-        chapters={chapters.map(c => ({ id: c.id, title: c.title, completed: c.isCompleted, artFilename: c.artFilename }))}
-        onComplete={() => { setShowReviewHero(false); }}
-        onReset={() => { setShowReviewHero(false); exitReview(); }}
-        skipAnimation
-      />
-    );
-  }
+
 
   // BUGFIX (2026-07-16): allNodesCompleted removed from this gate — it blocked
   // post-cinematic review navigation. phase === 'cinematic' is the only correct

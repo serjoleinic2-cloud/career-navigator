@@ -79,6 +79,26 @@
 
 ## История изменений (снизу — новее)
 
+### 2026-07-16 — OpenCode (WorldMap city island cinematic, Next → cinematic, clean-up skipAnimation)
+
+**1. WorldMapScreen — city island `onClick` больше не пустой**
+- Добавлен проп `onCitySelect?: () => void` в `WorldMapScreenProps`.
+- Городской остров (city) теперь вызывает `onCitySelect` вместо пустого `() => {}`.
+- В `App.tsx` добавлен `onCitySelect={() => setCurrentScreen('journey')}` — нажатие переключает на Journey таб, где `JourneyHUD` (если все главы пройдены) запустит cinematic.
+
+**2. JourneyHUD — кнопка «Next» на последней главе запускает cinematic**
+- `handleGoToNextChapter`: если `!nextChapter`, теперь вызывает `startCinematic()` вместо `setShowReviewHero(true)`.
+- Удалён state `showReviewHero` и весь блок `if (showReviewHero) { return <FinalCinematicScreen skipAnimation /> }`.
+
+**3. FinalCinematicScreen — удалён проп `skipAnimation`**
+- Удалены `skipAnimation?: boolean` из `interface`, `skipAnimation` из деструктуризации, и `useState<Phase>(skipAnimation ? 'hero' : 'hud-fade')`.
+- Анимация cinematic теперь всегда проигрывается целиком (начинается с `hud-fade`).
+
+**4. HeroPhase — исправлена кнопка Restart Journey**
+- Заменён `setActiveChapter('resume')` на `restartFromChapter('resume')` (сбрасывает nodeStates, чтобы `allNodesCompleted` стал `false`).
+
+**Проверено:** `npx tsc --noEmit` — чисто. `npx vite build` — чисто.
+
 ### 2026-07-16 — OpenCode (фикс: Restart Journey показывал пустой экран)
 
 **Диагноз:** `setActiveChapter('resume')` не сбрасывает nodeStates, поэтому `allNodesCompleted` остаётся `true` (все ноды ещё в состоянии `confidence`). `JourneyHUD` видит `allNodesCompleted` и рендерит пустой блок (`<></>`), потому что `phase !== 'cinematic'`.

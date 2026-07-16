@@ -211,6 +211,9 @@ function AppInner() {
               }
               setCurrentScreen('journey');
             }}
+            onCitySelect={() => {
+              setCurrentScreen('journey');
+            }}
           />
         );
       case 'profile':

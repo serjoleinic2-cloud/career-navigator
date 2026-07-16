@@ -21,9 +21,10 @@ const CHAPTER_ART: Record<string, string> = {
 interface WorldMapScreenProps {
   style?: any;
   onChapterSelect?: (chapterId: string) => void;
+  onCitySelect?: () => void;
 }
 
-export function WorldMapScreen({ style, onChapterSelect }: WorldMapScreenProps) {
+export function WorldMapScreen({ style, onChapterSelect, onCitySelect }: WorldMapScreenProps) {
   const [imgError, setImgError] = useState<Record<string, boolean>>({});
   const runtimeState = getRuntimeState();
   const professionId = runtimeState?.professionId || 'software_engineer';
@@ -61,7 +62,7 @@ export function WorldMapScreen({ style, onChapterSelect }: WorldMapScreenProps) 
             total={0}
             isCity={true}
             imgError={false}
-            onClick={() => {}}
+            onClick={onCitySelect ?? (() => {})}
             onImgError={() => {}}
           />
         </div>
