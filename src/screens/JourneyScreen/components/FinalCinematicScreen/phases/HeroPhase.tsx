@@ -74,7 +74,7 @@ export function HeroPhase({ professionId, heroLoaded, heroError, onComplete, onR
               onComplete();
             }}
           >
-            Restart Journey
+            Review Journey
           </button>
           <button
             className="fc-btn fc-btn--ghost"
