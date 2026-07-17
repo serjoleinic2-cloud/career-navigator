@@ -46,4 +46,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Reschedule notifications after reboot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Required for Google Play Billing (capacitor-plugin-cdv-purchase);
+         app is rejected/purchases silently fail without this. -->
+    <uses-permission android:name="com.android.vending.BILLING" />
 </manifest>

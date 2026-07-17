@@ -120,11 +120,19 @@ export async function initBilling(): Promise<void> {
   store.when()
     .approved((transaction: any) => {
       // approved = Google подтвердил покупку.
-      syncEntitlementsFromStore();
+      try {
+        syncEntitlementsFromStore();
+      } catch (e) {
+        console.error('[billing] syncEntitlementsFromStore failed in approved():', e);
+      }
       transaction.finish(); // ОБЯЗАТЕЛЬНО — иначе approved будет срабатывать снова.
     })
     .verified((receipt: any) => {
-      syncEntitlementsFromStore();
+      try {
+        syncEntitlementsFromStore();
+      } catch (e) {
+        console.error('[billing] syncEntitlementsFromStore failed in verified():', e);
+      }
       receipt.finish();
     });
 

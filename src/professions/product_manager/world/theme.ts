@@ -19,8 +19,8 @@ registerWorldTheme({
     danger: '#ef4444',
   },
   geometry: {
-    islandShape: 'angular',
-    platformStyle: 'crystal',
+    islandShape: 'crystalline',
+    platformStyle: 'glass',
     pathStyle: 'bridge',
   },
   chapterAccents: {
