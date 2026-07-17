@@ -8,23 +8,23 @@
  * Смешивание этих двух вещей в одном файле сохранения — то, из-за чего
  * загрузка чужого save.json могла бы "разблокировать" чужую профессию.
  *
- * СТАТУС (2026-07-13): монетизация ещё не реализована (Serj: "пока не делаю
- * premium"). Поэтому сейчас isProfessionOwned() возвращает true для всех
- * зарегистрированных профессий — эффективно ничего не меняется в поведении
- * приложения. Это специально сделано так, чтобы:
- *   1) структура была готова заранее и не пришлось переделывать формат
- *      сохранений/бэкапов позже;
- *   2) backup_service.ts уже сейчас физически не включает ключ entitlements
- *      в экспортируемый файл (см. ENTITLEMENTS_KEY ниже и комментарий там).
+ * СТАТУС (2026-07-16): монетизация подключена (Google Play Billing через
+ * capacitor-plugin-cdv-purchase, см. billing_service.ts). Источник истины —
+ * Billing Library; ключ ниже (ENTITLEMENTS_KEY) — ТОЛЬКО оффлайн-кэш
+ * последнего известного результата Billing-проверки, обновляемый при каждом
+ * старте с сетью через store.update()/restorePurchases() (см.
+ * billing_service.ts::syncEntitlementsFromStore). Это специально устроено
+ * так, чтобы:
+ *   1) юзер с уже купленной профессией видел её разблокированной сразу при
+ *      холодном старте офлайн, ещё до ответа Google Play;
+ *   2) backup_service.ts физически не включает ключ entitlements в
+ *      экспортируемый файл (см. ENTITLEMENTS_KEY ниже и комментарий там) —
+ *      save-файл, перенесённый на другое устройство/аккаунт, не может
+ *      "разблокировать" чужую покупку.
  *
- * КОГДА БУДЕТ ВНЕДРЯТЬСЯ ПОКУПКА (Google Play Billing):
- *   - Источником истины должен быть Billing Library (queryPurchases /
- *     восстановление покупок по Google-аккаунту), НЕ самодельный ключ,
- *     привязанный к инсталляции — такой ключ пропадает при удалении
- *     приложения, даже если покупка совершена честно.
- *   - Локальный ключ ниже (ENTITLEMENTS_KEY) в этом случае становится
- *     ТОЛЬКО оффлайн-кэшем результата Billing-проверки, а не истиной самой
- *     по себе. При каждом старте с сетью — кэш должен обновляться из Billing.
+ * Первые 3 главы (FREE_CHAPTER_LIMIT, см. premium_state.ts) любой профессии
+ * всегда доступны бесплатно независимо от entitlements — см. checkAccess()
+ * в premium_gate.ts.
  */
 
 const ENTITLEMENTS_KEY = 'career-navigator.entitlements.v1';
@@ -57,20 +57,29 @@ function writeCache(snapshot: EntitlementsSnapshot): void {
 }
 
 /**
- * Возвращает true, если профессия доступна пользователю.
- *
- * TEMP (пока нет premium/Billing): всегда true для любой зарегистрированной
- * профессии — намеренная no-op заглушка, см. комментарий в шапке файла.
+ * Возвращает true, если профессия доступна пользователю (полностью, все
+ * главы). Первые FREE_CHAPTER_LIMIT глав любой профессии доступны всегда —
+ * это НЕ проверяется здесь, см. checkAccess()/createPremiumState() в
+ * premium_engine.ts/premium_state.ts, которые используют этот флаг только
+ * для решения "открывать ли главы после бесплатного лимита".
  */
-export function isProfessionOwned(_professionId: string): boolean {
-  return true;
+export function isProfessionOwned(professionId: string): boolean {
+  const cached = readCache();
+  if (!cached) return false;
+  return cached.ownedProfessionIds.includes(professionId);
 }
 
-/** Список доступных профессий. Заглушка: всё, что зарегистрировано. */
-export function getOwnedProfessionIds(allRegisteredIds: string[]): string[] {
+/**
+ * Список купленных профессий. Если передан allRegisteredIds и кэша ещё нет
+ * (первый холодный запуск до первой синхронизации с Billing) — ничего не
+ * считается купленным, чтобы не выдавать бесплатный премиум до реального
+ * ответа Google Play.
+ */
+export function getOwnedProfessionIds(allRegisteredIds?: string[]): string[] {
   const cached = readCache();
   if (cached) return cached.ownedProfessionIds;
-  return allRegisteredIds;
+  void allRegisteredIds;
+  return [];
 }
 
 /**

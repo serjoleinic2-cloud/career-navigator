@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getActiveProfession } from '@/core/profession_loader';
 import { Icon } from '@/components/Icon/Icon';
-import { createPremiumState } from '@/core/premium/premium_state';
+import { getCurrentPremiumState } from '@/core/premium/premium_state';
 import { shareApp } from '@/core/share/app_share';
 import { APP_ABOUT } from '@/content/legal_content';
 import { PrivacyPolicyScreen } from '@/screens/PrivacyPolicyScreen/PrivacyPolicyScreen';
+import { PaywallScreen } from '@/screens/PaywallScreen/PaywallScreen';
 import type { PremiumState } from '@/core/premium/premium_state';
 import { getNotificationSettings, setNotificationsEnabled as persistNotificationsEnabled, setReminderTime as setReminderTimePersist } from '@/core/notifications/notification_service';
 import { createBackup, restoreBackupFromFile } from '@/core/export/backup_service';
-import { devCompleteAllExceptLastTask } from '@/core/runtime/runtime_controller';
+import { restorePurchases as restorePurchasesFromStore } from '@/core/premium/billing_service';
+import { subscribe } from '@/core/events/system_event_bus';
 import './SettingsScreen.css';
 
 const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0';
@@ -27,10 +29,23 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
   );
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
-  const [premium] = useState<PremiumState>(() => {
-    const prof = getActiveProfession();
-    return createPremiumState(prof?.id || 'software_engineer', prof?.chapters?.length || 8, 'free');
-  });
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [restoreStatus, setRestoreStatus] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState(false);
+  const [, setTick] = useState(0);
+
+  const prof = getActiveProfession();
+  const premium: PremiumState = getCurrentPremiumState(
+    prof?.id || 'software_engineer',
+    prof?.chapters?.length || 8
+  );
+
+  useEffect(() => {
+    // billing_service emits STATE_UPDATED after a purchase/restore is
+    // confirmed by Google Play — re-render so the Premium card reflects
+    // the fresh entitlement without requiring the user to reopen Settings.
+    return subscribe('STATE_UPDATED', () => setTick(t => t + 1));
+  }, []);
 
   const handleShareApp = async () => {
     try {
@@ -75,14 +90,15 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
     }
   };
 
-  const handleTest = () => {
+  const handleRestorePurchases = async () => {
+    setRestoreStatus(null);
+    setRestoring(true);
     try {
-      devCompleteAllExceptLastTask();
-    } catch (e) {
-      console.warn('[settings] Test failed:', e);
-      return;
+      const result = await restorePurchasesFromStore();
+      setRestoreStatus(result.ok ? 'Purchases restored.' : (result.error ?? 'Restore failed.'));
+    } finally {
+      setRestoring(false);
     }
-    window.location.reload();
   };
 
   return (
@@ -134,10 +150,12 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             <div className="settings-premium-card">
               <div className="settings-premium-header">
                 <Icon name="star" size={20} color="#FFD060" />
-                <span>{premium.isUnlocked ? 'Premium' : 'Career Navigator'}</span>
+                <span>{premium.isUnlocked ? `${prof?.title ?? 'This profession'} — Unlocked` : 'Career Navigator'}</span>
               </div>
               <p className="settings-premium-desc">
-                Unlock all professions, Interview Trainer, and advanced analytics.
+                {premium.isUnlocked
+                  ? 'You have full access to this profession — all chapters, Interview Trainer, and Playbook.'
+                  : 'The first 3 chapters of every profession are free. Unlock the rest, or get all 5 professions for less per profession.'}
               </p>
               <ul className="settings-premium-features">
                 <li>Unlock all chapters ({premium.totalChapters} total)</li>
@@ -145,10 +163,18 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <li>Detailed progress analytics</li>
               </ul>
               {!premium.isUnlocked && (
-                <button className="settings-upgrade-btn" onClick={() => {}}>
+                <button className="settings-upgrade-btn" onClick={() => setShowPaywall(true)}>
                   Upgrade to Premium
                 </button>
               )}
+              <button
+                className="settings-action-btn"
+                onClick={handleRestorePurchases}
+                disabled={restoring}
+              >
+                <Icon name="refresh" size={16} /> {restoring ? 'Restoring…' : 'Restore Purchases'}
+              </button>
+              {restoreStatus && <p className="settings-privacy-text">{restoreStatus}</p>}
             </div>
           </section>
 
@@ -202,17 +228,6 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
               <Icon name="share" size={16} /> Share App
             </button>
           </section>
-
-          <section className="settings-section">
-            <h3 className="settings-section-title">Test</h3>
-            <p className="settings-privacy-text">
-              Completes every chapter except the very last task, so you can
-              finish that one yourself and see what happens next.
-            </p>
-            <button className="settings-action-btn" onClick={handleTest}>
-              <Icon name="refresh" size={16} /> Test
-            </button>
-          </section>
         </div>
       </div>
 
@@ -220,6 +235,13 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
       {showPrivacyPolicy && (
         <PrivacyPolicyScreen onClose={() => setShowPrivacyPolicy(false)} />
+      )}
+      {showPaywall && (
+        <PaywallScreen
+          professionId={prof?.id || 'software_engineer'}
+          onClose={() => setShowPaywall(false)}
+          onPurchased={() => setShowPaywall(false)}
+        />
       )}
     </div>
   );

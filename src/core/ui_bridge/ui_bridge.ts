@@ -1,6 +1,8 @@
 import { getRuntimeState } from '../runtime/runtime_controller';
 import { mapRuntimeToUI } from './ui_state_mapper';
 import { getNavigationState } from './ui_navigation';
+import { getCurrentPremiumState } from '../premium/premium_state';
+import { getProfession } from '../../professions/profession_registry';
 import type { PremiumState } from '../premium/premium_state';
 import type { UI_State, UI_NavigationState } from './ui_render_contract';
 
@@ -21,7 +23,15 @@ export function getUIState(premiumState?: PremiumState): UI_State {
       worldZone: 'plains',
     };
   }
-  return mapRuntimeToUI(runtime, premiumState);
+  // Если вызывающий код не передал явный PremiumState (это большинство мест
+  // в приложении — ShareScreen, JourneyHUD и т.д.), строим его сами из
+  // реального billing-состояния, а не молча считаем всё бесплатным/открытым.
+  const resolvedPremiumState = premiumState ?? (() => {
+    const profession = getProfession(runtime.professionId);
+    if (!profession) return undefined;
+    return getCurrentPremiumState(runtime.professionId, profession.chapters.length);
+  })();
+  return mapRuntimeToUI(runtime, resolvedPremiumState);
 }
 
 export function getVisibleNodes(): UI_State['nodes'] {

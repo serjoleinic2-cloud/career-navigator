@@ -32,7 +32,8 @@ export type SystemEventType =
   | 'RESET_JOURNEY'
   | 'INTERVIEW_SESSION_COMPLETE'
   | 'CLOSE_INTERVIEW_TRAINER'
-  | 'CITY_SELECTED';
+  | 'CITY_SELECTED'
+  | 'SHOW_PAYWALL';
 
 export type SystemEvent = {
   type: SystemEventType;

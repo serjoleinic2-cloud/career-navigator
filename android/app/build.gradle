@@ -36,6 +36,11 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
+    // Google Play Billing Library — used by capacitor-plugin-cdv-purchase
+    // (see src/core/premium/billing_service.ts) for one-time profession
+    // unlock purchases. Version pin: keep in sync with what
+    // capacitor-plugin-cdv-purchase's own Android module expects.
+    implementation 'com.android.billingclient:billing:7.+'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"

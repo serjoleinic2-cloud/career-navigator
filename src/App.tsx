@@ -11,12 +11,14 @@ import { NotesScreen } from './screens/NotesScreen/NotesScreen';
 import { WorldMapScreen } from './screens/WorldMapScreen';
 import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { SettingsScreen } from './screens/SettingsScreen/SettingsScreen';
+import { PaywallScreen } from './screens/PaywallScreen/PaywallScreen';
 import { JourneyHUD } from './screens/JourneyScreen';
 import { InterviewTrainerScreen } from './screens/InterviewTrainerScreen';
 import { BottomNav } from './components/BottomNav/BottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { subscribe, emit } from './core/events/system_event_bus';
 import { initNotifications } from './core/notifications/notification_service';
+import { initBilling } from './core/premium/billing_service';
 import type { PlaybookCategory } from './core/playbook/playbook_types';
 import './App.css';
 
@@ -38,6 +40,7 @@ function AppInner() {
   const [prevScreen, setPrevScreen] = useState<Screen | null>(null);
   const [transitioning, setTransitioning] = useState(false);
   const [showSettingsOverlay, setShowSettingsOverlay] = useState(false);
+  const [paywallProfessionId, setPaywallProfessionId] = useState<string | null>(null);
   // Deep-link target set by a mission's "Learn more" button (see
   // MissionScreen.tsx) via the OPEN_PLAYBOOK event — lets a task jump
   // straight to its matching Playbook category instead of the user
@@ -61,6 +64,7 @@ function AppInner() {
     }
     setIsReady(true);
     void initNotifications();
+    void initBilling();
   }, []);
 
   useEffect(() => {
@@ -74,6 +78,13 @@ function AppInner() {
   useEffect(() => {
     return subscribe('START_INTERVIEW_TRAINER', () => {
       setCurrentScreen('interview');
+    });
+  }, []);
+
+  useEffect(() => {
+    return subscribe('SHOW_PAYWALL', (event) => {
+      const professionId = event.payload.professionId as string | undefined;
+      if (professionId) setPaywallProfessionId(professionId);
     });
   }, []);
 
@@ -243,6 +254,13 @@ function AppInner() {
       </div>
       <BottomNav currentTab={currentScreen as 'journey' | 'playbook' | 'notes' | 'world' | 'profile'} onTabChange={handleTabChange} />
       {showSettingsOverlay && <SettingsScreen onClose={() => setShowSettingsOverlay(false)} />}
+      {paywallProfessionId && (
+        <PaywallScreen
+          professionId={paywallProfessionId}
+          onClose={() => setPaywallProfessionId(null)}
+          onPurchased={() => setPaywallProfessionId(null)}
+        />
+      )}
     </div>
   );
 }

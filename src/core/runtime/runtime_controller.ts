@@ -11,6 +11,7 @@ import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
+import { getCurrentPremiumState } from '../premium/premium_state';
 import { emit } from '../events/system_event_bus';
 import { markMissionCompletedToday, markChapterCompleted } from '../notifications/notification_service';
 import { saveRuntime as persistRuntime, clearRuntime, loadRuntimeForProfession } from '../persistence/runtime_persistence';
@@ -534,6 +535,21 @@ export function advanceChapter(): JourneyRuntimeState {
   if (!next) {
     throw new Error('No next chapter available');
   }
+
+  // Premium gate: первые FREE_CHAPTER_LIMIT (3) глав любой профессии
+  // бесплатны; переход в главу за пределами лимита требует покупки этой
+  // профессии (или бандла всех 5). Вместо того чтобы молча разблокировать
+  // главу или бросать ошибку (advanceChapter вызывается один раз, из HUD,
+  // как обычное продолжение прогресса), при блокировке эмитим SHOW_PAYWALL —
+  // App.tsx показывает экран оплаты, а прогресс остаётся на текущей главе.
+  const nextIndex = chapters.findIndex(c => c.id === next.id);
+  const premiumState = getCurrentPremiumState(runtimeState.professionId, chapters.length);
+  const access = checkNodeAccess(premiumState, nextIndex);
+  if (!access.allowed) {
+    emit('SHOW_PAYWALL', { professionId: runtimeState.professionId });
+    return runtimeState;
+  }
+
   const nextNodeId = next.nodeIds[0];
   if (!nextNodeId) {
     throw new Error('Next chapter has no nodes');
@@ -815,66 +831,6 @@ export function devCompleteAllChaptersExceptLast(): void {
 
   saveRuntime(runtimeState);
   emit('UI_REFRESH', {});
-}
-
-// ─── DEV TOOL: complete everything except the very last task ─────────────────
-// Marks every chapter/node as done EXCEPT the last node of the last chapter,
-// which is left unlocked ('awareness' → 'confidence') so the user can walk
-// through that one remaining task themselves and see what happens after it
-// (chapter completion, journey completion, final cinematic, etc.).
-// Used by Settings > Test.
-export function devCompleteAllExceptLastTask(): void {
-  if (!runtimeState) throw new Error('Runtime not initialized');
-
-  const chapters = getActiveChapters();
-  if (chapters.length === 0) return;
-
-  const lastChapter = chapters[chapters.length - 1];
-  const lastNodeId = lastChapter.nodeIds[lastChapter.nodeIds.length - 1];
-
-  const updatedNodeStates = { ...runtimeState.nodeStates };
-  for (const ch of chapters) {
-    for (const nodeId of ch.nodeIds) {
-      const node = updatedNodeStates[nodeId];
-      if (!node) continue;
-      if (nodeId === lastNodeId) {
-        updatedNodeStates[nodeId] = { ...node, state: 'awareness', nextState: 'confidence' };
-      } else {
-        updatedNodeStates[nodeId] = { ...node, state: 'confidence', nextState: null };
-      }
-    }
-  }
-
-  // Recompute each chapter's stored progress % from the node states above,
-  // same formula as chapter_engine.getChapterProgress, so ProfileScreen /
-  // WorldMapScreen island-unlock logic stay consistent with what's shown.
-  const updatedChapterProgress: Record<string, number> = { ...runtimeState.chapterProgress };
-  for (const ch of chapters) {
-    const chapterNodes = ch.nodeIds.map(id => updatedNodeStates[id]).filter(Boolean);
-    const completed = chapterNodes.filter(n => n.state === 'confidence').length;
-    updatedChapterProgress[ch.id] = chapterNodes.length > 0
-      ? Math.round((completed / chapterNodes.length) * 100)
-      : 0;
-  }
-
-  runtimeState = {
-    ...runtimeState,
-    nodeStates: updatedNodeStates,
-    chapterProgress: updatedChapterProgress,
-  };
-
-  // HARDENING (2026-07-13): landing on `lastNodeId` used to be computed
-  // here a SECOND time, independently of setActiveChapter()'s own "first
-  // not-yet-completed node in this chapter" logic (see the BUGFIX comment
-  // on setActiveChapter below — that was the exact bug Serj reported:
-  // World -> island -> Next...Next back to Offer re-locking this same
-  // last task). Two independent implementations of "which node should be
-  // active" is exactly the kind of duplication that let them drift apart
-  // once before. Delegating to setActiveChapter() here means there is now
-  // only ONE place that ever decides this, so the very first render right
-  // after pressing Test and every later re-entry into this chapter are
-  // guaranteed to agree.
-  setActiveChapter(lastChapter.id);
 }
 
 export function initializeRuntime(saved: JourneyRuntimeState): void {
