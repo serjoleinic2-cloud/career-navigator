@@ -104,6 +104,29 @@ export function setActiveChapter(chapterId: string): JourneyRuntimeState {
   const chapters = getActiveChapters();
   const chapter = chapters.find(c => c.id === chapterId);
 
+  // SECURITY FIX (2026-07-19): setActiveChapter() is the same mutator used
+  // by World-map island taps (WorldMapScreen -> onChapterSelect) AND the
+  // Journey "Next" review button (handleGoToNextChapter) — NEITHER of
+  // which went through advanceChapter(), the only place that previously
+  // checked the premium gate. A free-tier user who finished their free
+  // FREE_CHAPTER_LIMIT chapters could tap the next island directly on the
+  // World map (islands unlock purely by "previous chapter completed",
+  // with no entitlement check — see useIslandPositions.ts) and land
+  // straight in a paywalled chapter's UI, seeing its title/node list/
+  // skill descriptions without buying it. Apply the exact same
+  // checkNodeAccess() gate advanceChapter() already uses, so every path
+  // that can change activeChapterId is covered, not just the automatic
+  // post-bridge one.
+  const chapterIndex = chapters.findIndex(c => c.id === chapterId);
+  if (chapterIndex !== -1) {
+    const premiumState = getCurrentPremiumState(runtimeState.professionId, chapters.length);
+    const access = checkNodeAccess(premiumState, chapterIndex);
+    if (!access.allowed) {
+      emit('SHOW_PAYWALL', { professionId: runtimeState.professionId });
+      return runtimeState;
+    }
+  }
+
   // BUGFIX (2026-07-13): this used to always jump to chapter.nodeIds[0],
   // regardless of actual progress in that chapter. That's correct the
   // *first* time a chapter becomes active (its first node starts 'locked'
