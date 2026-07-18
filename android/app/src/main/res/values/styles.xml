@@ -7,6 +7,26 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <!-- HARDFIX (2026-07-19): targetSdk 35 (required for Google Play
+             submission) makes Android 15+ enforce edge-to-edge display —
+             the WebView now draws behind the system nav/status bars
+             instead of being padded above them, which is what caused the
+             bottom nav to render underneath the system navigation bar.
+             Capacitor 6.x (this project's version) has a documented bug
+             where env(safe-area-inset-*) CSS variables return incorrect
+             values (often 0) under Android's enforced edge-to-edge mode —
+             fixed only in Capacitor 8.3.2+ — so padding via CSS alone
+             cannot reliably fix this on this Capacitor version. Opting out
+             of the enforcement restores the pre-Android-15 behavior
+             (system reserves space for its own bars, WebView is correctly
+             padded, safe-area env() vars work as before). This opt-out
+             attribute is valid through Android 15 (API 35); Android 16
+             removes it entirely and edge-to-edge becomes unconditional —
+             at that point this project should upgrade Capacitor to 8.3.2+
+             (which fixes the CSS variables) or add a dedicated edge-to-edge
+             plugin (e.g. @capawesome/capacitor-android-edge-to-edge-support)
+             instead of relying on this opt-out. -->
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
