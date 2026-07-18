@@ -23,7 +23,8 @@ interface BottomNavProps {
 export function BottomNav({ currentTab, onTabChange }: BottomNavProps) {
   return (
     <motion.nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-4 pb-6 pointer-events-none"
+      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
+      style={{ paddingBottom: 'calc(24px + env(safe-area-inset-bottom))' }}
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', damping: 25, stiffness: 200, delay: 0.5 }}
