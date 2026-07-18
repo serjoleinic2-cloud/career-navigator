@@ -65,11 +65,13 @@ export function ProfileScreen({ style, onClose, onOpenSettings }: ProfileScreenP
     { icon: 'trophy', label: 'Offer Secured', earned: (runtime.chapterProgress['offer'] ?? 0) >= 100 },
   ];
 
-  // Only worth showing as a switcher once the user actually owns more
-  // than one profession — with a single owned profession this would just
-  // be a redundant card repeating what the passport above already shows.
-  const ownedProfessions = getOwnedProfessionsSummary(runtime.professionId);
-  const showProfessionSwitcher = ownedProfessions.length > 1;
+  // Show the switcher whenever more than one profession EXISTS in the app
+  // — not just ones already bought. Free chapters are accessible for every
+  // profession regardless of purchase, so this is how users discover and
+  // sample a profession before buying it. See getOwnedProfessionsSummary()
+  // for why this used to only include purchased professions (a bug).
+  const professionsList = getOwnedProfessionsSummary(runtime.professionId);
+  const showProfessionSwitcher = professionsList.length > 1;
 
   const handleSwitchProfession = (professionId: string) => {
     if (professionId === runtime.professionId) return;
@@ -132,8 +134,8 @@ export function ProfileScreen({ style, onClose, onOpenSettings }: ProfileScreenP
 
         {showProfessionSwitcher && (
           <div className="profile-professions">
-            <div className="profile-professions-title">My Professions</div>
-            {ownedProfessions.map(p => (
+            <div className="profile-professions-title">Professions</div>
+            {professionsList.map(p => (
               <button
                 key={p.professionId}
                 className={`profile-profession-row ${p.isActive ? 'active' : ''}`}
@@ -141,9 +143,18 @@ export function ProfileScreen({ style, onClose, onOpenSettings }: ProfileScreenP
                 disabled={p.isActive}
               >
                 <div className="profile-profession-row-info">
-                  <span className="profile-profession-row-title">{p.title}</span>
+                  <span className="profile-profession-row-title">
+                    {p.title}
+                    {!p.owned && <Icon name="lock" size={12} />}
+                  </span>
                   <span className="profile-profession-row-status">
-                    {p.isActive ? 'Currently active' : p.started ? `${p.percent}% complete` : 'Not started'}
+                    {p.isActive
+                      ? 'Currently active'
+                      : p.started
+                      ? `${p.percent}% complete`
+                      : p.owned
+                      ? 'Not started'
+                      : 'Free preview — first chapters free'}
                   </span>
                 </div>
                 <div className="profile-profession-row-track">
