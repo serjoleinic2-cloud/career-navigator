@@ -168,7 +168,10 @@ export function getDisplayPrice(productId: BillingProductId): string {
 
 async function order(productId: BillingProductId): Promise<{ ok: boolean; error?: string }> {
   if (!store || !storeReady) {
-    return { ok: false, error: 'Платёжная система загружается. Попробуйте через несколько секунд.' };
+    const error = storeLoadFailed
+      ? 'Не удалось подключиться к Google Play. Проверьте подключение к интернету и попробуйте снова.'
+      : 'Платёжная система загружается. Попробуйте через несколько секунд.';
+    return { ok: false, error };
   }
   const product = store.get(productId, Platform.GOOGLE_PLAY);
   const offer = product?.getOffer?.();
@@ -198,7 +201,10 @@ export async function buyAllProfessionsBundle(): Promise<{ ok: boolean; error?: 
 /** Кнопка "Восстановить покупки" в настройках — обязательна по правилам Google Play. */
 export async function restorePurchases(): Promise<{ ok: boolean; error?: string }> {
   if (!store || !storeReady) {
-    return { ok: false, error: 'Платёжная система ещё загружается.' };
+    const error = storeLoadFailed
+      ? 'Не удалось подключиться к Google Play. Проверьте подключение к интернету.'
+      : 'Платёжная система ещё загружается. Попробуйте через несколько секунд.';
+    return { ok: false, error };
   }
   try {
     await store.restorePurchases();

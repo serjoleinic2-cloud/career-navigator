@@ -6,12 +6,12 @@ import type { SkillNode } from '../skill_state';
 import { STATE_FLOW } from '../skill_state';
 import { getActiveChapters, getActiveProfession, setActiveProfession } from '../profession_loader';
 import { isProfessionOwned } from '../premium/entitlements';
-import { getAllProfessions, getDefaultProfession } from '../../professions/profession_registry';
+import { getAllProfessions, getDefaultProfession, getProfession as getProfessionModule } from '../../professions/profession_registry';
 import type { Chapter } from '../chapter_model';
 import { getNextChapter, getCurrentChapter } from '../chapter_engine';
 import { checkNodeAccess } from '../premium/premium_gate';
 import type { PremiumState } from '../premium/premium_state';
-import { getCurrentPremiumState } from '../premium/premium_state';
+import { getCurrentPremiumState, FREE_CHAPTER_LIMIT } from '../premium/premium_state';
 import { emit } from '../events/system_event_bus';
 import { markMissionCompletedToday, markChapterCompleted } from '../notifications/notification_service';
 import { saveRuntime as persistRuntime, clearRuntime, loadRuntimeForProfession } from '../persistence/runtime_persistence';
@@ -845,16 +845,32 @@ export function initializeRuntime(saved: JourneyRuntimeState): void {
   // HARDENING (2026-07-13): a loaded runtime file (imported save / restored
   // backup) is untrusted input about *progress*, but must not be trusted
   // for *entitlement* — professionId in the file is only honoured if this
-  // device actually owns that profession. Otherwise a save exported by one
-  // user (who owns profession X) could let another user who never bought X
-  // jump straight into it just by loading the file. See
-  // core/premium/entitlements.ts for why this check is currently a no-op
-  // (monetization not implemented yet) and how it plugs in later.
+  // device actually owns that profession OR the saved progress never went
+  // past the free-chapter limit for that profession.
+  //
+  // CRITICAL BUGFIX (2026-07-18): the ownership check above used to be
+  // unconditional — any profession not present in entitlements' owned list
+  // got bounced to the default profession, EVERY cold start, even for
+  // someone who never bought anything and is legitimately still within
+  // their free FREE_CHAPTER_LIMIT chapters. Since real billing replaced the
+  // old "everything is owned" stub, this was actively firing for every
+  // non-default profession a user had only tried for free: close the app,
+  // reopen it, and the whole runtime silently got reassigned to the default
+  // profession while nodeStates/chapterProgress/activeChapterId stayed from
+  // the original profession — the Journey screen then rendered a mismatched
+  // (and often broken/empty) state, and from the user's perspective their
+  // free-tier progress just vanished on every restart.
+  //
+  // Fix: only fall back to the default profession when the saved progress
+  // has actually gone PAST the free limit for a profession this device
+  // doesn't own — i.e. only for saves that could only exist by having paid
+  // (or by tampering with an imported/shared save file), never for a
+  // legitimate free-tier user.
   let professionIdToActivate = saved.professionId;
-  if (!isProfessionOwned(saved.professionId)) {
+  if (!isProfessionOwned(saved.professionId) && exceedsFreeChapterLimit(saved)) {
     console.warn(
-      `[initializeRuntime] Loaded save references profession "${saved.professionId}", ` +
-      'which this device does not own. Falling back to default profession.'
+      `[initializeRuntime] Loaded save references profession "${saved.professionId}" ` +
+      'past the free chapter limit, which this device does not own. Falling back to default profession.'
     );
     professionIdToActivate = getDefaultProfession()?.id ?? saved.professionId;
   }
@@ -864,5 +880,20 @@ export function initializeRuntime(saved: JourneyRuntimeState): void {
     console.error('[initializeRuntime] setActiveProfession failed:', err);
   }
   runtimeState = { ...saved, professionId: professionIdToActivate };
+}
+
+/**
+ * True only if `saved`'s progress reaches into a chapter beyond the free
+ * limit for its own profession — i.e. progress that could only legitimately
+ * exist if the profession had been purchased. Looks up the profession's own
+ * chapter list directly from the registry (not getActiveChapters(), which
+ * depends on a profession already being active — this runs BEFORE that).
+ */
+function exceedsFreeChapterLimit(saved: JourneyRuntimeState): boolean {
+  const profession = getProfessionModule(saved.professionId);
+  if (!profession) return false; // unknown profession id — not a premium-bypass case, handled elsewhere
+  const chapterIndex = profession.chapters.findIndex(c => c.id === saved.activeChapterId);
+  if (chapterIndex === -1) return false; // no recognizable chapter progress — treat as free-tier safe
+  return chapterIndex >= FREE_CHAPTER_LIMIT;
 }
 

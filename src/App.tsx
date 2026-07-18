@@ -19,6 +19,7 @@ import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { subscribe, emit } from './core/events/system_event_bus';
 import { initNotifications } from './core/notifications/notification_service';
 import { initBilling } from './core/premium/billing_service';
+import { App as CapacitorApp } from '@capacitor/app';
 import type { PlaybookCategory } from './core/playbook/playbook_types';
 import './App.css';
 
@@ -107,6 +108,36 @@ function AppInner() {
       setCurrentScreen('journey');
     });
   }, []);
+
+  // Hardware back button (Android): without this, Capacitor's default
+  // behavior is to exit/background the whole app from ANY screen, since
+  // none of these overlays (Settings, Paywall, InterviewTrainer tab,
+  // PrivacyPolicy nested inside Settings) are real browser-history entries
+  // — they're just conditional React state. Restore the expected priority:
+  // close the topmost overlay first, then return non-'journey' tabs to
+  // 'journey', and only let the OS handle back (exit app) from the true
+  // root (Journey tab, no overlay open, onboarding/intro not active).
+  useEffect(() => {
+    const listenerPromise = CapacitorApp.addListener('backButton', () => {
+      if (paywallProfessionId) {
+        setPaywallProfessionId(null);
+        return;
+      }
+      if (showSettingsOverlay) {
+        setShowSettingsOverlay(false);
+        return;
+      }
+      if (currentScreen !== 'journey') {
+        navigateTo('journey');
+        return;
+      }
+      CapacitorApp.exitApp();
+    });
+    return () => {
+      void listenerPromise.then(handle => handle.remove());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paywallProfessionId, showSettingsOverlay, currentScreen]);
 
   const navigateTo = (screen: Screen) => {
     if (screen === currentScreen || transitioning) return;
