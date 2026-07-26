@@ -110,7 +110,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           <div className="welcome-island-wrap">
             <div className="welcome-island-glow" />
             <div className="welcome-island-icon">
-              <Icon name="map" size={72} color="#00e5e0" />
+              <img src="/logo.png" alt="SkillTrue" className="welcome-logo-img" />
             </div>
             <div className="welcome-island-ring" />
           </div>
