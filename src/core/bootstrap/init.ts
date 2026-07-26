@@ -7,7 +7,7 @@ import type { SkillState } from '../skill_state';
 import { CareerState } from '../state_engine/career_state';
 import { createDefaultReadinessVector } from '../readiness_engine';
 
-export function initCareerNavigator(): UnifiedRuntimeState {
+export function initSkillTrue(): UnifiedRuntimeState {
   registerProfession(SoftwareEngineerModule);
   setActiveProfession('software_engineer');
 

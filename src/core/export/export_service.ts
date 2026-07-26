@@ -108,7 +108,7 @@ export function exportJSON(): void {
   };
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  downloadBlob(blob, `career-navigator-export-${Date.now()}.json`);
+  downloadBlob(blob, `skilltrue-export-${Date.now()}.json`);
 }
 
 /** Экспортирует прогресс всех профессий в CSV. Одна строка = одна профессия. */

@@ -38,7 +38,7 @@ export const IntroJourneyScreen: React.FC<IntroJourneyScreenProps> = ({ onComple
   const professionId = getRuntimeState()?.professionId || 'software_engineer';
   const profession = getProfession(professionId);
 
-  const professionTitle = profession?.title || 'Career Navigator';
+  const professionTitle = profession?.title || 'SkillTrue';
   const skillCount = profession?.skillGraph.length ?? 0;
   const missionCount = useMemo(
     () => profession?.skillGraph.reduce((sum, node) => sum + (node.tasks?.length || 0), 0) ?? 0,

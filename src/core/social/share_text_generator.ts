@@ -19,7 +19,7 @@ const TEMPLATES: ShareTextTemplate[] = [
     requires: ['completedChapters'],
   },
   {
-    template: 'Career Navigator Score: {readinessScore}/100',
+    template: 'SkillTrue Score: {readinessScore}/100',
     requires: ['readinessScore'],
   },
   {

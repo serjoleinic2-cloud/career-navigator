@@ -28,7 +28,7 @@ export function AppEntry() {
   if (!started) {
     return (
       <div>
-        <h1>Career Navigator</h1>
+        <h1>SkillTrue</h1>
         <input
           value={goal}
           onChange={(e) => setGoal(e.target.value)}

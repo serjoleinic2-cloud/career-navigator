@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { registerAllProfessions } from './professions/profession_auto_loader';
-import { startCareerNavigator } from './core/bootstrap/system_entry';
+import { startSkillTrue } from './core/bootstrap/system_entry';
 
 // Step 1: Register all profession modules (plug-ins)
 registerAllProfessions();
 
 // Step 2: Boot system
 try {
-  startCareerNavigator();
+  startSkillTrue();
 } catch {
   // Already initialised — safe on HMR
 }

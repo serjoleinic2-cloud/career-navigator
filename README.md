@@ -1,4 +1,4 @@
-# Career Navigator
+# SkillTrue
 
 Offline-first mobile career guidance app. React 18 + TypeScript + Vite + Capacitor.
 

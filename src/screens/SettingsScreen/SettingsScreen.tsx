@@ -150,7 +150,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             <div className="settings-premium-card">
               <div className="settings-premium-header">
                 <Icon name="star" size={20} color="#FFD060" />
-                <span>{premium.isUnlocked ? `${prof?.title ?? 'This profession'} — Unlocked` : 'Career Navigator'}</span>
+                <span>{premium.isUnlocked ? `${prof?.title ?? 'This profession'} — Unlocked` : 'SkillTrue'}</span>
               </div>
               <p className="settings-premium-desc">
                 {premium.isUnlocked

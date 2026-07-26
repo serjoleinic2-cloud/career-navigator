@@ -11,10 +11,10 @@ import { APP_SHARE_TEXT, APP_SHARE_URL } from '@/content/legal_content';
 // share sheet, no custom dialog or clipboard screen).
 export async function shareApp(): Promise<void> {
   await Share.share({
-    title: 'Career Navigator',
+    title: 'SkillTrue',
     text: APP_SHARE_TEXT,
     url: APP_SHARE_URL,
-    dialogTitle: 'Share Career Navigator',
+    dialogTitle: 'Share SkillTrue',
   });
 }
 

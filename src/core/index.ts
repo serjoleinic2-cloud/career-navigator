@@ -128,8 +128,8 @@ export type { InterviewResult } from './voice/interview_loop';
 export { runInterviewQuestion } from './voice/interview_loop';
 
 /* ── Bootstrap ── */
-export { initCareerNavigator } from './bootstrap/init';
-export { startCareerNavigator, restartCareerNavigator } from './bootstrap/system_entry';
+export { initSkillTrue } from './bootstrap/init';
+export { startSkillTrue, restartSkillTrue } from './bootstrap/system_entry';
 
 /* ── Social / Share ── */
 export { generateShareText } from './social/share_text_generator';

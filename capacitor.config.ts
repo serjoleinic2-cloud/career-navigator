@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.careernavigator.app',
-  appName: 'CareerNavigator',
+  appId: 'com.skilltrue.app',
+  appName: 'SkillTrue',
   webDir: 'dist'
 };
 

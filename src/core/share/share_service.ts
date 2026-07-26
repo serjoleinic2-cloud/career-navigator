@@ -19,7 +19,7 @@ export function shareText(model: ShareModel, options?: ShareOptions): string {
     parts.push(`"${model.quote}"`);
   }
 
-  parts.push('#CareerNavigator #TechCareers');
+  parts.push('#SkillTrue #TechCareers');
 
   return parts.join('\n\n');
 }

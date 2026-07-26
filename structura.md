@@ -1,4 +1,4 @@
-# Career Navigator — Structure
+# SkillTrue — Structure
 
 ```
 /

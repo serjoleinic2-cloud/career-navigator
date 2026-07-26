@@ -7,7 +7,7 @@ export const APP_ABOUT = {
   description:
     'Build confidence, complete practical missions, prepare for interviews, and track your progress — all in one private, offline-first app.',
   footer:
-    'Career Navigator helps you stay focused on what matters most: becoming ready for your next opportunity.',
+    'SkillTrue helps you stay focused on what matters most: becoming ready for your next opportunity.',
 };
 
 export interface PrivacyPolicySection {
@@ -24,12 +24,12 @@ export const PRIVACY_POLICY_SECTIONS: PrivacyPolicySection[] = [
   {
     heading: '1. Introduction',
     body: [
-      'Career Navigator ("we", "our", or "the App") is an offline career preparation and interview training application. This Privacy Policy explains how we handle your information.',
+      'SkillTrue ("we", "our", or "the App") is an offline career preparation and interview training application. This Privacy Policy explains how we handle your information.',
     ],
   },
   {
     heading: '2. Information We Do Not Collect',
-    body: ['Career Navigator is designed with privacy as a core principle. We do not collect:'],
+    body: ['SkillTrue is designed with privacy as a core principle. We do not collect:'],
     bullets: [
       'Personal identification information (name, email, address)',
       'Account credentials',
@@ -65,7 +65,7 @@ export const PRIVACY_POLICY_SECTIONS: PrivacyPolicySection[] = [
   },
   {
     heading: '5. Third-Party Services',
-    body: ['Career Navigator does not integrate with:'],
+    body: ['SkillTrue does not integrate with:'],
     bullets: [
       'Analytics platforms (Google Analytics, Firebase, etc.)',
       'Advertising networks',
@@ -86,7 +86,7 @@ export const PRIVACY_POLICY_SECTIONS: PrivacyPolicySection[] = [
   {
     heading: "7. Children's Privacy",
     body: [
-      'Career Navigator is not intended for users under 16 years of age. We do not knowingly collect any information from children.',
+      'SkillTrue is not intended for users under 16 years of age. We do not knowingly collect any information from children.',
     ],
   },
   {
@@ -112,13 +112,13 @@ export const PRIVACY_POLICY_SECTIONS: PrivacyPolicySection[] = [
 ];
 
 export const PRIVACY_POLICY_CLOSING =
-  'By using Career Navigator, you acknowledge that you understand and agree to this Privacy Policy.';
+  'By using SkillTrue, you acknowledge that you understand and agree to this Privacy Policy.';
 
 // Share App — recommend the app to other people. Per spec: fixed promotional
 // text only, never progress/JSON/CSV/debug data.
 export const APP_SHARE_URL =
-  'https://play.google.com/store/apps/details?id=com.careernavigator.app';
+  'https://play.google.com/store/apps/details?id=com.skilltrue.app';
 
 export const APP_SHARE_TEXT =
-  "I'm using Career Navigator to prepare for job interviews and build my career with step-by-step missions.\n\n" +
+  "I'm using SkillTrue to prepare for job interviews and build my career with step-by-step missions.\n\n" +
   `Download it on Google Play:\n${APP_SHARE_URL}`;

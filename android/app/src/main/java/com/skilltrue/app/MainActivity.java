@@ -1,4 +1,4 @@
-package com.careernavigator.app;
+package com.skilltrue.app;
 
 import com.getcapacitor.BridgeActivity;
 

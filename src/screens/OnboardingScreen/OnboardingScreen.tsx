@@ -115,7 +115,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             <div className="welcome-island-ring" />
           </div>
 
-          <h1 className="welcome-title">Career Navigator</h1>
+          <h1 className="welcome-title">SkillTrue</h1>
           <p className="welcome-subtitle">
             Your gamified path to the job you deserve.
           </p>

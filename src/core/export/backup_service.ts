@@ -94,8 +94,8 @@ export async function createBackup(): Promise<void> {
       encoding: Encoding.UTF8,
     });
     await Share.share({
-      title: 'Career Navigator Backup',
-      text: 'Career Navigator progress backup',
+      title: 'SkillTrue Backup',
+      text: 'SkillTrue progress backup',
       files: [written.uri],
       dialogTitle: 'Save backup to…',
     });
@@ -107,7 +107,7 @@ export async function createBackup(): Promise<void> {
     try {
       const handle = await w.showSaveFilePicker({
         suggestedName: filename,
-        types: [{ description: 'Career Navigator Backup', accept: { 'application/json': ['.json'] } }],
+        types: [{ description: 'SkillTrue Backup', accept: { 'application/json': ['.json'] } }],
       });
       const writable = await handle.createWritable();
       await writable.write(json);
@@ -140,7 +140,7 @@ async function readFileAsText(): Promise<string> {
   const w = window as any;
   if (typeof w.showOpenFilePicker === 'function') {
     const [handle] = await w.showOpenFilePicker({
-      types: [{ description: 'Career Navigator Backup', accept: { 'application/json': ['.json'] } }],
+      types: [{ description: 'SkillTrue Backup', accept: { 'application/json': ['.json'] } }],
       multiple: false,
     });
     const file = await handle.getFile();
@@ -181,7 +181,7 @@ export async function restoreBackupFromFile(): Promise<void> {
     throw new Error('Selected file is not valid JSON.');
   }
   if (!isBackupFile(parsed)) {
-    throw new Error('Selected file is not a Career Navigator backup.');
+    throw new Error('Selected file is not a SkillTrue backup.');
   }
 
   // Clear existing app keys first so a restore from an older/smaller
