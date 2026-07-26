@@ -36,7 +36,17 @@
     </style>
 
 
+    <!-- Uses the AndroidX SplashScreen compat library (works uniformly on API 24+,
+         not just Android 12's native SplashScreen). This replaces the legacy
+         android:background=@drawable/splash approach, which Android 12+ silently
+         ignores in favor of its own default splash (launcher icon + app label) —
+         that mismatch was the "emoji icon + SkillTrue text instead of the logo"
+         bug. windowSplashScreenAnimatedIcon points at our logo-with-glow artwork;
+         postSplashScreenTheme is applied once the splash is dismissed. -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/splash_background</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>
