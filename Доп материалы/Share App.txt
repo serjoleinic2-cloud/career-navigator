@@ -18,13 +18,13 @@ Share the following text:
 I'm using SkillTrue to prepare for job interviews and build my career with step-by-step missions.
 
 Download it on Google Play:
-https://play.google.com/store/apps/details?id=com.skilltrue.app
+https://play.google.com/store/apps/details?id=com.skilltrue.it
 
 If the Play Store URL is not available yet, create a constant (APP_SHARE_URL) with a placeholder so it can be replaced before release.
 
 Example:
 
-const APP_SHARE_URL = "https://play.google.com/store/apps/details?id=com.skilltrue.app";
+const APP_SHARE_URL = "https://play.google.com/store/apps/details?id=com.skilltrue.it";
 UI
 
 Title

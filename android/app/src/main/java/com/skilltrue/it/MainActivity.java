@@ -1,4 +1,4 @@
-package com.skilltrue.app;
+package com.skilltrue.it;
 
 import android.os.Bundle;
 import androidx.core.splashscreen.SplashScreen;

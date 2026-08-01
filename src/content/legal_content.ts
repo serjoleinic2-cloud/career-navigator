@@ -117,7 +117,7 @@ export const PRIVACY_POLICY_CLOSING =
 // Share App — recommend the app to other people. Per spec: fixed promotional
 // text only, never progress/JSON/CSV/debug data.
 export const APP_SHARE_URL =
-  'https://play.google.com/store/apps/details?id=com.skilltrue.app';
+  'https://play.google.com/store/apps/details?id=com.skilltrue.it';
 
 export const APP_SHARE_TEXT =
   "I'm using SkillTrue to prepare for job interviews and build my career with step-by-step missions.\n\n" +
