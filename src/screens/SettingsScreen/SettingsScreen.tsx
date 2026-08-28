@@ -13,8 +13,13 @@ import { restorePurchases as restorePurchasesFromStore } from '@/core/premium/bi
 import { subscribe } from '@/core/events/system_event_bus';
 import './SettingsScreen.css';
 
+<<<<<<< HEAD
 const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0';
 const APP_BUILD = import.meta.env.VITE_APP_BUILD || '9';
+=======
+const APP_VERSION = '3.1';
+const APP_BUILD = '7';
+>>>>>>> aa5fca6c0bfa404ecf7b20366e1d44b50331182e
 
 interface SettingsScreenProps {
   onClose: () => void;
